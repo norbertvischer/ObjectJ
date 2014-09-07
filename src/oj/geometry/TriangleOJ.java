@@ -1,7 +1,7 @@
 package oj.geometry;
 
 import oj.project.LocationOJ;
-
+//Hello
 /**
  * Handles calculations in a triangle
  * 
