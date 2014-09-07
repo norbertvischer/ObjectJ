@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Perspective Stack View</title>
+        <meta name="generator" content="BBEdit 10.1" />
+
+
+
+        <style>
+            body {
+                margin-left: 15px;
+                margin-top: 15px;
+                max-width: 44em;
+                color: #222222;
+            }
+
+            h1 {
+                background-color: #dddddd;
+                color: #224488;
+                font-family: sans-serif;
+                font-size: 150%;
+                margin-bottom: 0;
+                margin-top: 0px;
+            }
+            h2 {
+                color: #222222;
+                font-family: sans-serif;
+                font-size: 135%;
+                margin-bottom: 2px;
+            }
+            h3 {
+                color: #222222;
+                font-family: sans-serif;
+                font-size: 110%;
+                margin-bottom: 2px;
+            }
+            h4 {
+                color: #222222;
+                font-family: sans-serif;
+                font-size: 100%;
+                margin-bottom: 2px;
+            }
+            h5 {
+                color: #aa3333;
+                font-size: 110%;
+                margin-top: 10px;
+                margin-bottom: 0px;
+                font-style: italic; 
+                font-family:  times;
+
+            }
+
+            i { font-size: 100%;
+                margin-left: 0px;
+                color: #aa3333;
+            }
+            small {
+                color: #404040;
+            }
+            p{
+                margin-top: 2px;
+                margin-bottom: 4px;
+                margin-left: 28px;
+            }
+            a:link {
+                color: #0055ee;
+                text-decoration: none;
+            }
+            a:visited {
+                color: #8844AA;
+                text-decoration: none;
+            }
+            a:hover {
+                color: #003377;
+                text-decoration: underline;
+            }
+            a:active {
+                color: red;
+                text-decoration: underline;
+            }
+
+        </style>
+
+    </head>
+    <body>
+        <a href="http://simon.bio.uva.nl/objectj/examples/">Back to ObjectJ examples</a> 
+        <br/>
+        <br/>
+
+        <h1>
+            PeakFinder
+        </h1>
+
+        <p>
+
+        </p>
+
+        <table cellspacing="5" width="480">
+
+
+            <tbody><tr valign="top"><td><b>Author:</b></td><td>
+
+                        Norbert Vischer (vischer at uva.nl)
+
+                    </td></tr><tr valign="top"><td><b>History:</b></td><td>
+                        2013-Nov-09: First version<br>
+                    </td></tr>
+
+                <tr valign="top"><td><b>Source:</b></td><td>
+                        <a href="http://simon.bio.uva.nl/objectj/examples/PeakFinder/PeakFinder.txt">
+                            PeakFinder.txt</a>
+                    </td></tr>
+
+                <tr valign="top"><td><b>Description:</b></td><td>
+                        Detects peaks along a straight line, indicating peak positions as 'handles' 
+
+                <tr valign="top">
+                    <td><b>Features:</b></td><td>
+                        <ul >
+                            <li> Live peak indication while dragging a line  
+                            </li><li>Suppress neighbor peaks closer than minDistance
+                            </li><li> Adjustable dominance when suppressing neighbors 
+                            </li><li> Add or delete peaks manually
+                            </li><li> Profile plot with peak markers
+                            </li><li> Numerical output
+
+
+                               
+
+                            </li><li> 
+                            </li><li> 
+
+                            </li></ul>
+                    <td></tr>
+
+            </tbody></table>
+
+        
+         This is done by suppressing neighbor peaks where necessary. The user can set 
+                                the dominance string to "A" (=highest amplitude), "L" (=Left) or "R" (=Right),  and 
+                                thus control which of the neighbors will survive.
+                                Terms 'left' and 'right' refer to the position in the profile plot.
+                                For example, if periodic objects appear with double contour borders, you 
+                                could consistently pick only the first one by choosing dominance = "L". 
+                                
+                                
+                                
+        There is an option to guarantee a minimum spatial distance between any two peaks.
+        This is done by suppressing neighbor peaks where necessary. The user can set 
+        the dominance string to "A" (=highest amplitude), "L" (=Left) or "R" (=Right),  and 
+        thus control which of the neighbors will survive.
+        Terms 'left' and 'right' refer to the position in the profile plot.
+        For example, if periodic objects appear with double contour borders, you 
+        could consistently pick only the first one by choosing dominance = "L". 
+
+
+        <hr/>
+        <b>Macro Commands:</b><br/>
+
+
+        <h5>Create Demo Stack [1]</h5>
+
+        <p>Creates a hyperstack to test perspective view of circular objects
+        </p>
+
+        <h5>Make Perspective [2]</h5>
+        <p>Uses current (hyper)stack (or selection) to create perspective montage.
+            You can double-click the eyedropper tool to adjust foreground color (used for border) 
+            and background color before issuing this command.</p>
+
+
+        <h5>Save As PNG with Transparent Background [3]</h5>
+        <p>Image is converted to 8-bit color, with the background 
+            declared as transparent. Programs like PowerPoint will honor transparency.   
+            For adding shadow  as shown in Fig 2, 
+            choose in PowerPoint Format&gt;Picture&gt;Shadow</p>
+
+        <h5>Save Animation as AVI [4]</h5>
+        <p>Saves expanding stack as .avi movie. You may need to convert 
+            to other codecs when importing the movie elsewhere.</p>
+
+
+
+        <h5></h5>
+        <p></p>
+
+
+        <h5></h5>
+
+        <p></p>
+        <h5></h5>
+
+        <p></p>
+        <h5></h5>
+
+        <p></p>
+        <h5></h5>
+
+        <p></p>
+
+
+
+
+        <br/>
+
+        <img width="600" src="http://simon.bio.uva.nl/objectj/examples/PerspectiveStackView/PerspectiveStackView_files/NeuronPPTscreenshot.png">
+        <br/>
+        Fig 1: Neuron (IJ sample image) shown in PowerPoint with soft shadow
+        <br/><br/>   
+
+
+        <embed  width="600" height="450" src="http://simon.bio.uva.nl/objectj/examples/PerspectiveStackView/PerspectiveStackView_files/Coli_Wi-Fi.m4v" Pluginspage="http://www.apple.com/quicktime/">
+        <br/>
+        Fig 2: Animation of an expanding perspective stack.
+        <br/><br/>
+        <br/>
+
+        <br/>
+        <img width="320" src="http://simon.bio.uva.nl/objectj/examples/PerspectiveStackView/PerspectiveStackView_files/PerspectiveWithArrows.png">
+        <br/>
+        Fig 3: Demo stack and geometric properties
+        <br/>
+        <br/>
+        <br/>
+
+
+
+        <a href="http://simon.bio.uva.nl/objectj/examples/">Back to ObjectJ examples</a> 
+
+
+        <!-- begin google analytics  -->
+        <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+        </script>
+        <script type="text/javascript">
+            try {
+                var pageTracker = _gat._getTracker("UA-10085222-2");
+                pageTracker._trackPageview();
+            } catch (err) {
+            }</script>
+
+        <!-- end google analytics  -->
+
+
+    </body>
+</html>

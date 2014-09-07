@@ -1,0 +1,20 @@
+
+23. feb 2010: palm experiment
+Exception in thread "AWT-EventQueue-0" java.lang.ArrayIndexOutOfBoundsException: 0 >= 0
+        at java.util.Vector.elementAt(Vector.java:427)
+        at ij.text.TextCanvas.getChars(TextCanvas.java:129)
+        at ij.text.TextCanvas.calcAutoWidth(TextCanvas.java:192)
+        at ij.text.TextCanvas.paint(TextCanvas.java:47)
+        at ij.text.TextCanvas.update(TextCanvas.java:31)
+        at sun.awt.RepaintArea.updateComponent(RepaintArea.java:267)
+        at sun.awt.RepaintArea.paint(RepaintArea.java:233)
+        at apple.awt.ComponentModel.handleEvent(ComponentModel.java:263)
+        at java.awt.Component.dispatchEventImpl(Component.java:4790)
+        at java.awt.Component.dispatchEvent(Component.java:4544)
+        at java.awt.EventQueue.dispatchEvent(EventQueue.java:635)
+        at java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:296)
+        at java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:211)
+        at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:201)
+        at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:196)
+        at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:188)
+        at java.awt.EventDispatchThread.run(EventDispatchThread.java:122)

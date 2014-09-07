@@ -1,0 +1,242 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Align Fluorescence Channels</title>
+        <meta name="generator" content="BBEdit 10.1" />
+
+
+
+        <style>
+            body {
+                margin-left: 15px;
+                margin-top: 15px;
+                max-width: 44em;
+                color: #222222;
+            }
+
+            h1 {
+                background-color: #dddddd;
+                color: #224488;
+                font-family: sans-serif;
+                font-size: 150%;
+                margin-bottom: 0;
+                margin-top: 0px;
+            }
+            h2 {
+                color: #222222;
+                font-family: sans-serif;
+                font-size: 135%;
+                margin-bottom: 2px;
+            }
+            h3 {
+                color: #222222;
+                font-family: sans-serif;
+                font-size: 110%;
+                margin-bottom: 2px;
+            }
+            h4 {
+                color: #222222;
+                font-family: sans-serif;
+                font-size: 100%;
+                margin-bottom: 2px;
+            }
+            h5 {
+                color: #aa3333;
+                font-size: 110%;
+                margin-top: 10px;
+                margin-bottom: 0px;
+                font-style: italic; 
+                font-family:  times;
+
+            }
+
+            i { font-size: 100%;
+                margin-left: 0px;
+                color: #aa3333;
+            }
+            small {
+                color: #404040;
+            }
+            p{
+                margin-top: 2px;
+                margin-bottom: 4px;
+                margin-left: 28px;
+            }
+            a:link {
+                color: #0055ee;
+                text-decoration: none;
+            }
+            a:visited {
+                color: #8844AA;
+                text-decoration: none;
+            }
+            a:hover {
+                color: #003377;
+                text-decoration: underline;
+            }
+            a:active {
+                color: red;
+                text-decoration: underline;
+            }
+
+        </style>
+
+    </head>
+    <body>
+        <a href="http://simon.bio.uva.nl/objectj/examples/">Back to ObjectJ examples</a> 
+
+        <br/>
+        <br/>
+
+
+
+        <h1>
+            <b>Align Fluorescence Channels</b>
+        </h1>
+
+
+
+        <table cellspacing="8" width="650">
+
+            <tbody><tr valign="top"><td><b>Author:</b></td><td>
+
+                        Norbert Vischer (vischer -at- science.uva.nl)
+
+                    </td></tr><tr valign="top"><td><b>History:</b></td><td>
+                        2014-02-03: Version 14<br>
+                        2012-11-22: First version<br>
+                    </td></tr>
+
+                <tr valign="top"><td><b>Source:</b></td><td>
+                        <a href="http://simon.bio.uva.nl/objectj/examples/AlignFluorChannels/AlignFluorChannels_14.txt">
+                            AlignFluorChannels_14.txt</a><br/>
+                        A  <a href="http://simon.bio.uva.nl/objectj/examples/AlignFluorChannels/MisAligned.tif.zip"> demo stack </a> is available.
+                    </td></tr>
+
+                <tr valign="top"><td><b>Description:</b></td><td>
+                        Repairs displacement of fluorescence channels in bacterial images.<br/>
+                        Channel #1 (phase contrast) is used as reference.
+                <tr valign="top">
+                    <td><b>Features</b></td><td>
+                        <ul>
+                            <li> Manual operation: drag cell outlines to match fluorescence pattern
+                            </li><li> Automatic operation via FFT correlation
+                            </li><li> Supports multi-frame hyperstacks
+                            </li><li> Batch proceccing: process all hyperstacks in a folder
+                            </li><li> Displacements are recorded in a table
+
+                            </li></ul>
+                </tr>
+            </tbody></table>
+
+        <img width="135" height="266" src="http://simon.bio.uva.nl/objectj/examples/AlignFluorChannels/AlignFluorChannels_files/image002.png" >
+        <img width="135" height="266" src="http://simon.bio.uva.nl/objectj/examples/AlignFluorChannels/AlignFluorChannels_files/image004.png" >
+        <img width="135" height="266" src="http://simon.bio.uva.nl/objectj/examples/AlignFluorChannels/AlignFluorChannels_files/image006.png" >
+
+        <br/>
+        Fig 1: before alignment    <br/>
+
+
+        <img width="135" height="266" src="http://simon.bio.uva.nl/objectj/examples/AlignFluorChannels/AlignFluorChannels_files/image008.png" >
+        <img width="135" height="266" src="http://simon.bio.uva.nl/objectj/examples/AlignFluorChannels/AlignFluorChannels_files/image010.png" >
+        <img width="135" height="266" src="http://simon.bio.uva.nl/objectj/examples/AlignFluorChannels/AlignFluorChannels_files/image012.png" >
+
+        <br/>
+        Fig 2: after alignment    <br/>
+
+
+        <hr/>
+
+        <b>Macro Commands:</b><br/>
+
+
+        <h5>Show PhC Outlines [1]</h5>
+
+        <p>Displays cell outlines derived from phase contrast in channel 1. This selection can manually be dragged 
+            so it matches the fluorescence pattern. Use <i>Edit> Select None</i> (shift-A) to remove selection.
+        </p>
+
+        <h5>Align Manually [2]</h5>
+        <p>Shifts (translates) content of current channel by the amount the user has dragged the cell outlines </p>
+
+        <h5>Align Automatically [4]</h5>
+        <p>Aligns all fluorescence channels in current hyperstack using FFT correlation.
+            You can observe the result by selecting <i>Show PhC Outlines</i>. Old table Offset.txt will be replaced by a new one. 
+        </p>
+
+        <h5>Align All Stacks in Folder... [5]</h5>
+
+        <p>Performs automatic alignment to all tiff hyperstacks in chosen folder. 
+            Note that the files will be overwritten, so make sure you have a back-up in case
+            the result is not satisfactory.
+        </p>
+
+        <h5></h5>
+
+        <p></p>
+
+
+
+        <br/>
+
+
+
+
+        <h4>Notes for hyperstacks:</h4>
+        Either multiple slices or multiple frames are allowed, not both (i.e. no 5D stack)
+        If stack has multiple slices, they are converted to multiple frames.
+        First channel must be used for phase contrast,
+        followed by one or more fluorescent channels. If in doubt, choose:
+        <i>Image>Color>Arrange Channels...</i>
+        If required absolute shift is > 30 pixels, user is asked for confirmation.
+        <br/>
+
+
+        <h4>Notes for automatic FFT alignment:</h4>
+
+        Phase contrast channel is converted to a mask, so objects have intensity = 1 
+        and background has intensity 0. This mask is multiplied with the underlying 
+        fluorescence channel, and the total fluorescence of the product is measured. 
+        By shifting the mask in x and y direction, this value will change. 
+        Those offsets that yield the maximum result will be used for alignment. 
+        Using FFT correlation, this process can be done in a single step.<br/><br/>
+
+        Alignment is performed via a 1024 * 1024 FFT image. This
+        also defines precision of alignment, independent of
+        the image size. Increasing fftSize=1024 by factors of 2 will improve resolution
+        but process slower.
+
+
+        <h4>Limitations:   </h4>
+        The automatic method works best if there is statistically enough material, 
+        i.e. if there are many cells, and if fluorescence is evenly distributed inside 
+        the cell (which is the case in the demo file). Conversely, it may fail in other cases.
+
+        <br/>
+        <br/>
+
+
+        <a href="http://simon.bio.uva.nl/objectj/examples/">Back to ObjectJ examples</a> 
+
+        <br/>
+
+
+
+        <!-- begin google analytics  -->
+        <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+        </script>
+        <script type="text/javascript">
+            try {
+                var pageTracker = _gat._getTracker("UA-10085222-2");
+                pageTracker._trackPageview();
+            } catch(err) {}</script>
+
+        <!-- end google analytics  -->
+
+
+    </body>
+</html>

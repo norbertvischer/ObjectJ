@@ -1,0 +1,4 @@
+cr and lf:
+---------
+BBedit's choice for cr, cr+lf, lf only has effect when saving. For example,
+if a file with cr+lf is loaded,

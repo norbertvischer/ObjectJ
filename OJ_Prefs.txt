@@ -1,0 +1,4 @@
+# ObjectJ 0.8 Preferences
+# Sat Dec 15 23:00:32 CEST 2007
+
+file.output.format=binary

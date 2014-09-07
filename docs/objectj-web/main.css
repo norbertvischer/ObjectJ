@@ -1,0 +1,152 @@
+
+body {
+  font-family: 'Lucida grande', Trebuchet,'Trebuchet ms', Verdana, Helvetica, Arial, sans-serif;
+  font-size: small;
+  background: #EEEEEE;
+  margin: 0;
+  padding: 0;
+  }
+ 
+ 
+  
+
+.clear_noline {
+  clear: both;
+  }
+
+
+#container {	/*total white area*/
+  position: relative;
+  margin: 0;
+  width: 900px;
+  text-align: left;
+ background: white;
+  }
+
+#bondi {	/*last piece of bar*/
+ background: #006080;
+  }
+ 
+#id_images div {
+	margin-left: 80px;
+	background: purple;
+	font-size: 210%;
+}
+
+#buzz li {
+  font-size: 110%;
+  padding: 20px 250px 0px 30px;
+  }
+
+#subbuzz li {
+  font-size: 100%;
+  padding: 10px 75px 4px 30px;
+  }
+
+#manuallinks a { /*general anchors*/
+  color: #0000bb;
+  text-decoration: none;
+  }
+  
+a:hover {
+  color: blue;
+  text-decoration: underline;
+  background-color: #FFFF55;
+  }
+
+#Home H3,
+#Concept H3,
+#News H3,
+#Tutorial H3,
+#Manual H3,
+#Macros H3,
+#Download H3,
+#Examples H3
+
+{font: normal 12pt "Times"; margin-left: 6px; margin-bottom: -1em; }/*background: #eaeafa;}*/
+
+
+#Home H4,
+#Concept H4,
+#News H4,
+#Tutorial H4,
+#Manual H4,
+#Macros H4,
+#Examples H4,
+#Download H4
+{font: normal 10pt "Geneva"; margin-left: 3em; margin-right: 8em}
+
+
+body#Home #Home a,
+body#Concept #Concept a,
+body#News #News a,
+body#Tutorial #Tutorial a,
+body#Manual #Manual a,
+body#Macros #Macros a,
+body#Examples #Examples a,
+body#Download #Download a {
+  background: white;
+  color: black;
+  padding: 4px 10px;
+  border-bottom-color: white;
+  }
+
+
+/********************************************/
+/************** NAVIGATION-BAR **************/
+/********************************************/
+
+
+#bar {
+  width: 900px;
+  
+}
+
+#bar ul {
+ background: #006080;
+margin: 0 0 0 0;
+ list-style: none;
+
+  float: left;
+}
+
+
+#bar ul li  {
+margin-left: 6px;
+margin-right: 10px;
+float: left; 
+}
+
+#bar a {
+  padding: 0px 15px;
+  text-decoration: none;
+  background: #006080;
+  color: white;
+  }
+
+  
+#bar a:hover {
+  color: orange;
+  /*color: #81ff00;*/
+  }
+
+
+#manuallinks a:hover {
+  color: purple;
+  /*color: #81ff00;*/
+  }
+ 
+
+
+
+
+#hoi li{
+color: purple;
+padding: 9 9 9 9;
+margin-bottom: 6px;
+margin-top: 10px;
+}
+
+
+
+

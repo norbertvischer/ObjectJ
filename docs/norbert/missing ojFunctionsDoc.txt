@@ -1,0 +1,121 @@
+ ojActiveItemName() {
+ ojAdvance() {
+ ojClose(String pattern) {
+ ojCloseImages(String conditions) {//not used
+ ojCloseItem() {
+ ojCloseObject() {
+ -• ojCloseResults() {
+ ojColumnNumber(String columnName) {
+ ojDeleteAllObjects() {
+ ojDeleteColumn(String columnName) {
+ ojDeleteItem(String itemType, String itemIndex) {
+ -•ojDeleteMap(String pattern) {
+ ojDeleteObject(String objectIndex) {
+ -•ojDisposeImage(String imageName) {
+ ojExtendVisibilityDepth(String visRangeLow, String visRangeHigh) {
+ ojFirstObject(String imageIndex) {
+ ojFlatten() {
+ ojGetColumnTitle(String columnIndex) {
+ ojGetGlassDimensions() {
+ ojGetImageName(String imageIndex) {
+ ojGetImageValue(String n, String key) {
+ ojGetItemLength() {
+ ojGetItemName() {
+ ojGetItemNames() {
+ ojGetItemTypes() {
+ ojGetOpenObject() {
+ ojGetProjectName() {
+ ojGetProjectPath() {
+ ojGetStatistics(String columnName, String statisticsOperation) {
+ ojGetTarget() {
+-•ojGetValue(String columnName, String rowIndex) {
+ ojGetVoxelSize(String imageIndex, String xyz) {
+ ojGlassWindow(String properties) {
+ ojHideResults() {
+ ojIdToIndex(String objectId) {
+ ojImageLink() {
+ ojIndexToId(String objectIndex) {
+ ojIndexToRank(String index) {
+ ojIndexToRow(String index) {//obsolete
+ ojInitColumn(String columnName) {
+ ojInitTextColumn(String columnName) {
+-•ojIntArray() {
+ ojItemToRoi() {
+ ojLastObject(String imageIndex) {
+ ojLastRow(String columnName) {
+ ojLinkImage() {
+-•ojMakeBoundingRoi(String param) {
+ ojMatches(String str, String pattern) {
+ ojMovePoint(String pointIndex, String xPos, String yPos, String zPos) {
+ ojNColumns() {
++•ojNewestObject() {
+ ojNImages() {
+ ojNItems(String itemName) {
+ ojNObjects() {
+ ojNPoints() {
+-•ojObjectID(String objectIndex) {//obsolete
+ ojOpenObject(String objectIndex) {
+ +•ojOrderObjectsInZ(String imageIndex) {
+ ojOwnerIndex(String objectIndex) {
+ ojOwnerName(String objectIndex) {
+ ojPutAlgorithm(String algorithm) {
+ ojPutOperand(String itemType, String clone, String point) {
+ ojQualified(String objectIndex) {
+ ojQualify(String objectIndex, String flag) {
+ ojRankToIndex(String rank) {
+ ojRecalculate() {
+ +•ojRepositionItem(String fromIndex, String toIndex) {
+ +•ojRequires(String neededVersion) {
+ ojResult(String columnName, String rowIndex) {
+ ojResultString(String columnName, String rowIndex) {
+ ojRoiToItem() {
+ ojRowToIndex(String row) {//obsolete
+ ojSaveProject() {
+ ojSelectClosestItem(String x, String y, String tolerance) {
+ ojSelectedItemName() {
+ ojSelectedObject() {
+ ojSelectItem(String itemName, String itemIndex) {
+ ojSelectObject(String objectIndex) {
+ ojSet3D(String d3) {
+ ojSetColumnProperty(String colTitle, String property, String value) {
+ ojSetComposite(String mode) {
+ ojSetItemVisible(String itemtype, String visible) {
+ -•ojSetLocation(String xpos, String ypos, String width, String height) {
+ ojSetMarker(String xpos, String ypos) {
+ -•ojSetPlotProperties(String title, String properties) {//17.9.2011
+ ojSetResult(String column, String index, String value) {
+ •ojSetStatisticValue(String columnName, String statisticName, String value) {
+ ojSetTarget(String s) {
+ ojSetTool(String tool) {
+ •ojSetUnchanged() {
+ •ojSetValue(String column, String index, String value) {
+ ojShowImage(String imageIndex) {
+ •ojShowMap(String pattern) {
+ ojShowObject(String objectIndex) {
+ •ojShowProject() {
+ ojShowResults() {
+ ojShowTools() {
+ •ojStoreMap(String keepFlag) {
+ •ojStringArray() {
+ •ojSwapSlices(String sliceA, String sliceB) {
+ ojSwitchToItem(String itemName) {
+ •ojTest() {
+ •ojTmpFunction(String arg) {
+ ojUpdateMarkers(String flagString) {
+ ojvCalculate(String str) {
+ •ojvGetResult(String str) {
+ •ojvGetStackSize() {
+ •ojvGetVertexX(String index) {
+ •ojvGetVertexY(String index) {
+ •ojvGetVertexZ(String index) {
+ ojvInitStack(String dim) {
+ ojvPushItem() {
+ ojvPushPoint(String index) {
+ •ojvPushRoi() {
+ ojvPushVertex(String vertex) {
+ ojXPos(String index) {
+ ojXYZPos(String n) {
+ ojYPos(String index) {
+ ojZoom(String factor, String xhook, String yhook) {
+ ojZPos(String index) {
+    String floatArrayToString(double[] fa) {

@@ -1,0 +1,784 @@
+<!-- #bbinclude "Head.incl" -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+
+
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+        <meta name="generator" content="BBEdit 8.7" />
+        <meta name="author" content="Norbert Vischer" />
+        <meta name="keywords" content="Non-destructive marking, ImageJ, Object-Image, ObjectJ, Image analysis "/>
+        <title>
+            Homepage of ObjectJ
+        </title>
+        <style type="text/css">
+            @import url("main.css");
+        </style>
+    </head>
+    <!-- end bbinclude -->
+    <body id="News">
+        <div id="container">
+            <!-- #bbinclude "NavBar.incl" -->
+            <!--Main navigation bar-->
+            <img src="Images/ObjectJ-banner.gif" />
+            <div id="bondi">
+                <div id="bar">
+
+                    <ul>
+
+                        <li id="Home"><a href="index.html" name="Home">Home</a></li>
+                        <li id="Concept"><a href="5-Concept.html" name="Concept">Concept+Tips</a></li>
+                        <li id="Tutorial"><a href="2-Tutorial.html" name="Tutorial">Tutorial</a></li>
+                        <li id="Manual"><a href="3a-ManualMenu.html" name="Manual">Manual</a></li>
+                        <li id="Macros"><a href="4a-ObjectJMacroFunctions.html" name="Macros">Macros</a></li>
+                        <li id="News"><a href="6-News.html" name="News">News</a></li>
+                        <li id="Examples"><a href="7a-Examples.html" name="Examples">Examples</a></li>
+                        <li id="Download"><a href="download" name="Download">Download</a></li>
+                    </ul>
+                </div>
+                <div class="clear_noline"></div>    <!--End Navigation Bar-->
+
+
+            </div>
+            <hr> </hr>
+            <!-- end bbinclude -->
+        </div>
+
+
+
+        <H2>&nbsp;News <small><small><small>20-jun-2014</small></small></small> </H2>
+
+      <H3>version 1.03o  &nbsp;&nbsp;&nbsp;  20-jun-2014
+        </H3>  <H4><ul>
+                <li> Columns panel now automatically becomes taller if Presentation tab is selected, making all fields visible
+                </li>
+               <li> Fixed a bug which created a NullPointer when renaming a non-linked image
+                </li>
+
+            </ul>
+        </H4> 
+
+
+        <H3>version 1.03n  &nbsp;&nbsp;&nbsp;  14-may-2014
+        </H3>  <H4><ul>
+                <li> Item-to-Roi command (either via macro or menu) now works with sub-pixel resolution
+                </li>
+                <li> A linked image can be renamed either via menu Image &gt; Rename, or by right-clicking on an image name in the images panel of the project window. 
+                    Both the image and the related file on disk will be renamed.
+                </li>
+                <li> macro command ojRenameImage(oldName, newName) renames a linked image
+                </li>
+                <li> macro command ojLineToPolygon(linewidth, false) macro command
+                </li>
+                <li> fixed a bug where slash-star and slash-slash comments in same line were conflicting
+                </li>
+
+            </ul>
+        </H4> 
+
+        
+        <H3>version 1.03m  &nbsp;&nbsp;&nbsp;  12-mar-2014
+        </H3>  <H4><ul>
+                <li>
+                    Project window on OS X shows proxy icon title bar (drag it to create an alias, alt-drag it to make a copy, right-click it to reveal in enclosing folder)
+                </li>
+
+                <li>
+                    Fixed a bug which, when typing a character in the Fiji script editor, triggered the corresponding short-cut in embedded macros.</li> 
+
+            </ul>
+        </H4> 
+
+        <H3>version 1.03k  &nbsp;&nbsp;&nbsp;  15-feb-2014
+        </H3>  <H4><ul>
+                <li>
+                    Project window contains buttons for "Show Results" and "Show in Finder/Explorer" </li> <li>
+                    Choosing Object>Link All Images did not sort image names alphabetically in some cases. This is fixed. </li> 
+                <li>
+                    Propagate Scale to all linked images (by right click in the images panel on some scaling information), 
+                    now chooses the image being clicked, not the one that was previously selected. </li> 
+                <li>
+                    Propagate Scale to all linked images will close each image directly after saving . </li> 
+            </ul>
+        </H4> 
+
+        <H3>version 1.03j  &nbsp;&nbsp;&nbsp;  03-feb-2014
+        </H3>  <H4><ul>
+                <li>
+                    In the Qualifiers panel, if a qualifiers row was selected, it could be altered when a new column was created. This bug is fixed. </li> 
+            </ul>
+        </H4> 
+
+        <H3>version 1.03i  &nbsp;&nbsp;&nbsp;  02-feb-2014
+        </H3>  <H4><ul>
+
+                <li>
+                    In the Qualifiers panel, unlinked column names are omitted </li> 
+                <li>
+                    In Columns panel, unlinked columns (whose names start with underscore) are correctly placed at the end of the list </li> 
+                <li>
+                    When choosing "Update Histogram" in Panel Columns>Presentation, then older histograms with same name are closed </li> 
+            </ul>
+        </H4> 
+
+        <H3>version 1.03h  &nbsp;&nbsp;&nbsp;  07-jan-2014
+        </H3>  <H4><ul>
+                <li>
+                    columns in Columns Panel can be rearranged in blocks via ctrl-up/down arrow key </li> 
+                <li>
+                    columns in Columns Panel can be selected and deleted in blocks, </li> 
+            </ul>
+        </H4> 
+
+        <H3>version 1.03e  &nbsp;&nbsp;&nbsp;  26-Nov-2013
+        </H3>  <H4><ul>
+                <li>
+                    fixed slow-down problem with large number of objects</li> 
+            </ul>
+        </H4> 
+
+        <H3>version 1.03d  &nbsp;&nbsp;&nbsp;  04-Nov-2013
+        </H3>  <H4><ul>
+                <li>
+                    an open object is closed whenever a linked image is closed, or project is closed</li> 
+                <li>
+                    linking an image that already was open correctly shows ObjectJ markers
+                </li> 
+            </ul>
+        </H4> 
+        <H3>version 1.03c  &nbsp;&nbsp;&nbsp;  14-Oct-2013
+        </H3>  <H4><ul>
+                <li>
+                    composite checkbox needs alt key
+                </li> 
+            </ul>
+        </H4> 
+
+
+
+        <H3>version 1.03b  &nbsp;&nbsp;&nbsp;  02-Sep-2013
+        </H3>  <H4><ul>
+                <li>
+                    delete slice of linked image is possible, and will delete related objects</li> 
+                <li>
+                    abort debugging after reloading macros</li> 
+                <li>
+                    submenus supported in embedded macros</li> 
+                <li>
+                    frame interval is stored in project file as double</li> 
+                <li>
+                    last 3 digits of build number shown in About ObjectJ</li> 
+
+            </ul>
+        </H4> 
+
+        <H3>version 1.03a  &nbsp;&nbsp;&nbsp;  11-Jul-2013
+        </H3>  <H4><ul>
+                <li>
+                    ojGetItemLength() returns length of selected item in pixels</li> 
+                <li>
+                    ojOrderObjectsInZ()
+                    changes number labels of objects in ascending order of home slice</li> 
+                <li>
+                    ojGetTarget()
+                    ojSetTarget(argument)
+                    Accellerates marking by avoiding screen updates (similar to batchmode)
+                </li> 
+            </ul>
+        </H4> 
+
+        <H3>version 1.02s  &nbsp;&nbsp;&nbsp;  xx xx 10-Jul-2013
+        </H3>  <H4><ul>
+                <li>
+                    Included macro command ojSaveProject()
+                </li> 
+            </ul>
+        </H4> 
+
+
+        <H3>version 1.02r  &nbsp;&nbsp;&nbsp;  29-May-2013
+        </H3>  <H4><ul>
+
+                <li>
+                    Menu Linked Images - Link All Images also linked non-image files. This bug is fixed.
+
+                </li> 
+            </ul>
+        </H4> 
+
+        <H3>version 1.02p  &nbsp;&nbsp;&nbsp;  16-Mar-2013
+        </H3>  <H4><ul>
+
+                <li>
+                    Opening and then linking an image could make markers invisible. This bug is fixed.
+
+                </li> 
+            </ul>
+        </H4> 
+
+        <H3>version 1.02k  &nbsp;&nbsp;&nbsp;  24-Oct-2012
+        </H3>  <H4><ul>
+
+                <li>
+                    Added macro commands for handling GlassWindow:<br/>
+                    ojGlassWindow("show")<br/>
+                    -- "show" : shows a transparent GlassWindow<br/>
+                    -- "hide" : hides the GlassWindow (same as clicking the red "Close" icon<br/>
+
+
+                    -- "connect" : connects GlassWindow to front image, which must be linked to the ObjectJ project,
+                    and must have same size as the GlassWindow. Additionally, the current slice is refreshed.<br/>
+
+                    -- "refresh" : grabs screen content under the GlassWindow and pastes it into last slice of 
+                    connected stack<br/>
+
+                    -- "addSlice" : adds a slice to the end of connected stack, and refreshes it with the current
+                    screen content under the GlassWindow<br/> 
+
+
+                    -- "color=0x00114433" : defines the transparent color of GlassWindow in a hex string
+                    0xaarrggbb, where aa is alpha channel, rr is red, gg is green and bb is blue <br/>
+
+                    ojGetGlassDimensions()<br/>
+                    returns an array holding GlassWindow-dimensions left, top, width, height                   
+
+
+                </li> 
+                <li>
+                    Fixed a bug that occurred when using ojMovePoint(x, y, z) to a different z position 
+                </li>
+            </ul>
+        </H4> 
+
+
+        <H3>version 1.02j  &nbsp;&nbsp;&nbsp;  13-Jul-2012
+        </H3>  <H4><ul>
+                <li>
+                    Fixed collision between shortcuts. Embedded shortcuts are always interpreted as 
+                    lowercase, and now override other shortcuts.
+                </li> 
+                <li>
+                    Fixed a bug that gave problems when converting a polygon object to a roi.
+                </li> 
+                <li>
+                    Fixed a bug that gave problems when propagating scale to all linked images when 
+                    virtual stacks were involved
+
+                </li> 
+            </ul>
+        </H4> 
+        <H3>version 1.02h  &nbsp;&nbsp;&nbsp;  23-May-2012
+        </H3>  <H4><ul>
+                <li>Fixed a bug that occurred when right-clicking on the "scale" column in the "Linked Images" panel. 
+                    If the corresponding image was already open and was a virtual stack, its contents could be 
+                    overwritten with zero content. </li> 
+                <li>Fixed a regression introduced in 1.02f where z-coordinates of objects could be set to zero when applying 
+                    the vertex calculator. 
+                    This new version also automatically repairs this when opening a damaged .ojj file containing the z=0 bug.
+                    . </li> 
+            </ul>
+        </H4> 
+
+        <H3>version 1.02f1  &nbsp;&nbsp;&nbsp;  03-Apr-2012
+        </H3>  <H4><ul>
+                <li>Fixed a bug that handled ojPushItem and ojPushPoint as 3D also in 2D case </li>  
+                <li>macro command ojClose(pattern) closes all image windows whose title matches the 
+                    wildcard pattern (without asking to save changes). </li> 
+            </ul>
+        </H4> 
+
+
+        <H3>version 1.02f  &nbsp;&nbsp;&nbsp;  03-Apr-2012
+        </H3>  <H4><ul>
+                <li>Fixed a bug that did not "Show Embedded Macros" on Windows when macro text was empty</li>  
+                <li>macro command ojClose(pattern) closes all image windows whose title matches the 
+                    wildcard pattern (without asking to save changes). </li> 
+            </ul>
+        </H4> 
+
+        <H3>version 1.02d  &nbsp;&nbsp;&nbsp;  15-Jan-2012
+        </H3>  <H4><ul>
+                <li>After macro ojSetItemVisible, gray/black "visibility eyes" automatically appear</li>  
+                <li>ObjectJ Results are closed before columns in the Columns panel are manually added or removed</li>  
+
+            </ul>
+        </H4> 
+
+        <H3>version 1.02c  &nbsp;&nbsp;&nbsp;  21-Nov-2011
+        </H3>  <H4><ul>
+
+                <!--<li>Removed global item visibility switch: visibility "eyes" are always there</li>-->    
+                <li>When item types are selected, they are automatically set to visible</li>    
+                <li>Show Object Results, Show Project Window, and Show Embedded Macros had no effect on Windows while window was iconized</li>    
+                <li>Images panel allows multiple selection</li>    
+                <li>Flattening is possible via menu ObjectJ> Linked Images> Flattened Duplicate</li>    
+                <li>macro command ojFlatten() creates an RGB image of same size with  markers burnt-in</li>    
+
+            </ul>
+        </H4> 
+
+        <H3>version 1.01w  &nbsp;&nbsp;&nbsp;  22-Aug-2011
+        </H3>  <H4><ul>
+
+                <li>macro command ojQualify() didn't switch to modus "Arbitrary" and became too slow with many objects</li>    
+
+            </ul>
+        </H4>
+        <H3>version 1.01v  &nbsp;&nbsp;&nbsp;  18-Aug-2011
+        </H3>  <H4><ul>
+                <li>Qualify dialog did not update ObjectJ Results immediately</li>  
+                <li>Qualify dialog did not update hit list after clicking "Invert"</li>  
+                <li>
+                    Stacks that were created by other applications will not trigger the "different properties" anymore. 
+                    The stack properties are shown as "-1 slices" and will be updated when the linked image is opened.. 
+                </li>    
+                <li>macro command ojCloseItem() does not close the entire object anymore</li>    
+                <li>macro command ojImageLink() returned NaN instead 0 when not being linked</li>    
+
+            </ul>
+        </H4>
+
+        <H3>version 1.01u  &nbsp;&nbsp;&nbsp;  12-Aug-2011
+        </H3>  <H4><ul>
+                <li>After qualifying, statistics were not updated (bug introduced in v1.01t). 
+                    Now, if you change qualifiers and then activate ObjectJ Results, statistic rows are updated</li>    
+                <li>Copy/Export could omit first column or add empty header; this is fixed</li>    
+
+            </ul>
+        </H4>
+
+        <H3>version 1.01t  &nbsp;&nbsp;&nbsp;  25-Jul-2011
+        </H3>  <H4><ul>
+                <li>Fixed a bug that caused a time delay when qualifying sorted results with many (>1000) objects</li>    
+                <li>Fixed a bug that would not highlight column title yellow when being sorted</li> 
+                <li>Fixed a NullPointer bug that could occur during redrawing ObjectJ canvas </li>    
+            </ul>
+
+        </H4>
+
+        <H3>version 1.01r    &nbsp;&nbsp;&nbsp;   30-Jun-2011
+        </H3>  <H4><ul>
+                <li>Fixed a bug that did not properly advance to next item type when single-point items where involved</li>    
+            </ul>
+
+        </H4>
+
+        <H3>version 1.01q    &nbsp;&nbsp;&nbsp;    19-Jun-2011
+        </H3>  <H4><ul>
+                <li>Added "Propagate Scale to Linked Images" to menu ObjectJ>Linked Images.<br/>
+                    It applies same scale (eg pixels/um) to all images linked to the project. <br/>
+                    This function can also be invoked by right-clicking onto the px/unit value in the "Images" panel.
+                </li>
+                <li>ObjectJ results are recalculated after changing the image scale</li>    
+            </ul>
+
+        </H4>
+
+        <H3>version 1.01p    &nbsp;&nbsp;&nbsp;    28-May-2011
+        </H3>  <H4><ul>
+                <li>Additional check box "Forget linked images" when deleting all objects</li>
+                <li>Macro command ojIdToIndex(id) and ojIndexToId(n)</li>    
+            </ul>
+
+        </H4>
+
+        <H3>version 1.01n   &nbsp;&nbsp;&nbsp;     29-Mar-2011
+        </H3>  <H4><ul>
+                <li>Removed unused test data "roi dots"  from ObjectJ project file (non-critical)</li>
+            </ul>
+
+        </H4>
+        <H3>version 1.01m    &nbsp;&nbsp;&nbsp;    14-Feb-2011
+        </H3>  <H4><ul>
+                <li>Using double-buffering for markers to avoid flicker on Windows</li>
+                <li>Added macro command ojUpdateMarkers(b); while b is false,  screen updating is suppressed when setting markers by macro.</li>
+            </ul>
+
+        </H4>
+
+        <H4><ul>
+                <li>Added a demo project that analyzes Eucalyptus leafs (see   <a href="7a-Examples.html">Examples</a>)</li>
+            </ul>
+
+        </H4>
+        <H3>version 1.01i    &nbsp;&nbsp;&nbsp;  14-Nov-2010
+        </H3>
+        <H4><ul>
+                <li>Fixed a bug that occurred when using the "Angle Algorithm" with non-existing items</li>
+            </ul>
+
+        </H4>
+
+        <H3>version 1.01h    &nbsp;&nbsp;&nbsp;  10-Nov-2010
+        </H3>
+        <H4><ul>
+                <li>Fixed a bug that caused "Roi To Item" fail in non-Z stacks</li>
+            </ul>
+
+        </H4>
+
+        <H3>version 1.01g   &nbsp;&nbsp;&nbsp;   25-oct-2010
+        </H3>
+        <H4><ul>
+                <li>Opening linked images are correctly un-docked</li>
+                <li>Opening linked images from Finder, rather than from Images panel, did not work</li>
+                <li>Unlinked images did not listen to ObjectJ macro tools</li>
+                <li>Delete Object per slice or image was dimmed, this is fixed</li>
+            </ul>
+
+        </H4>
+
+        <H3>version 1.01e   &nbsp;&nbsp;&nbsp;   20-oct-2010
+        </H3>
+        <H4><ul>
+                <li>Fixed error"Load failed" when loading empty macro text</li>
+                <li>Fixed error when word "macro" was not followed by blank</li>
+                <li>Fixed an error "Show Cell: Image xxx not available" (regression)</li>
+            </ul>
+
+        </H4>
+
+        <H3>version 1.01b   &nbsp;&nbsp;&nbsp;   18-oct-2010
+        </H3>
+        <H4><ul>
+                <li>Link button to ObjectJ website in ObjectJ> Project> About ObjectJ </li>
+                <li>Automatic renaming of linked files is suppressed. </li>
+                <li>Automatic duplicating of linked files is suppressed. </li>
+                <li>Bug-fix: Auto-range of linked histograms did not work. </li>
+                <li>Bug-fix: Opening two project files at once gave conflicts </li>
+            </ul>
+
+        </H4>
+        <H3>version 0.98q   &nbsp;&nbsp;&nbsp;   05-oct-2010
+        </H3>
+        <H4><ul>
+                <li>Bug-fix (regression): When project was created from scratch, no markers could be set</li>
+            </ul>
+        </H4>
+
+        <H3>version 0.98p   &nbsp;&nbsp;&nbsp;   01-oct-2010
+        </H3>
+        <H4><ul>
+                <li>Bugfix: previous versions could not create a new empty project</li>
+                <li>Bugfix: on Windows, previous versions would save project under temporary name  without renaming it back to the correct name</li>
+            </ul>
+        </H4>
+
+        <H3>version 0.98n   &nbsp;&nbsp;&nbsp;   28-sep-2010
+        </H3>
+        <H4><ul>
+                <li>After "Quit ImageJ" and similar, "Save Changes to Project" did not work as expected </li>
+                <li>"About ObjectJ" dialog was not properly updated in Windows </li>
+                <li>NullPointer when n was out of range in ojOwnerIndex(n)</li>
+                <li>NullPointer when a linked image was opened while an unlinked,
+                    newly created image with same name was open</li>
+                <li>Delete Slice from a linked hyperstack is now possible. You will be asked to re-save the (hyper-)stack</li>
+            </ul>
+        </H4>
+
+        <H3>version 0.98j   &nbsp;&nbsp;&nbsp;  22-Sep-2010
+        </H3>
+        <H4><ul>
+                <li>"About ObjectJ" dialog incl. version checking, is available from menu ObjectJ>Project File>, </li>
+                <li>Swapped menu shortcuts: now "Show Embedded Macros" is [cmd-shift-F4], "Show In Finder/Explorer" is [cmd-shift-F5]</li>
+                <li>Fixed a regression: "Show in Finder/Explorer" did not work anymore if java was less than 1.6</li>
+                <li>Saving project: first saves under temporary name, and if successful, renames it correctly</li>
+                <li>Embedded macros appear indented under ObjectJ menu to differentiate them from the constant items at the top</li>
+                <li>Fixed a bug that caused double-clicking an .ojj file, or dragging it onto the ImageJ microscope symbol appear "ObjectJ" in the menu twice</li>
+            </ul>
+
+        </H4>
+        <H3>version 0.98h   &nbsp;&nbsp;&nbsp;  22-Aug-2010
+        </H3>
+        <H4><ul>
+                <li>Fixed a bug that appeared when qualifiers were used in combination with text columns </li>
+                <li>Vertex calculator accepts operations like "partialPositionX 50%" and "partialPositionY 0.3",
+                    that returns the location after traveling part of a segmented line </li>
+                <li>Vertex calculator accepts operation "partialpath signedoffset", returning
+                    the off-road distance negative if it was in travel direction left </li>
+                <li>macro commands ojRankToIndex(n) and ojIndexRank(n) allow to address sorted ObjectJ results </li>
+                <li>Export of XML fromat uses correct .xml extension</li>
+
+            </ul>
+
+        </H4>
+
+        <H3>version 0.98e   &nbsp;&nbsp;&nbsp;  24-june-2010
+        </H3>
+        <H4><ul>
+                <li>Fixed a bug that occurred when loading subsequently project files on Windows
+                </li>
+                <li>Fixed a bug that did not close window with embedded macros when closing a project
+                </li>
+
+
+
+            </ul>
+
+        </H4>
+
+
+
+        <H3>version 0.98d   &nbsp;&nbsp;&nbsp;  20-june-2010
+        </H3>
+        <H4><ul>
+                <li>The ".ojj" project file is now saved in compressed binary format, not xml. This is much faster and files are much smaller.
+                    It is still possible to export the project in the old xml format.
+                    Old projects still can be loaded, but older versions of ObjectJ will not recognize the newer binary format.
+                </li>
+                <li>Project file now has an embedded macro set. With older versions, it was necessary to supply an
+                    accompanying macro file with the same base name. If older projects are opened, that external macro will
+                    automatically be recognized and embedded, i.e it will become part of the .ojj file when being saved.<br/>
+                </li>
+                <li>Importing macro text currently only works only via menu "Show Embedded Macros" and Copy-Paste. The macro set will be installed and embedded
+                    via the button "Install under ObjectJ menu".
+                </li>
+
+
+                <li>New menu Command ObjectJ> Project File> Save an Empty Copy allows to transfer macros, object definitions, column names etc to a new project.
+                </li>
+                <li>Statistics in the results table can be shown by clicking on the leftmost column and selecting "Show all"
+                </li>
+                <li>Thanks to Mateusz Kuzak, ObjectJ is now being tested on Linux.
+                </li>
+
+
+            </ul>
+
+        </H4>
+
+        <H3>version 0.98a   &nbsp;&nbsp;&nbsp;  5-apr-2010
+        </H3>
+        <H4><ul>
+                <li>Fixed a bug causing macro errors like "notifyListeners" and "resetImage"
+                </li>
+
+            </ul>
+
+        </H4>
+
+        <H3>version 0.97k --- 11-mar-2010
+        </H3>
+        <H4><ul>
+                <li>Fixed nullpointer bug when ImageJ was started with drag+drop and then immediately a new image was created
+                </li>
+                <li>menu "Help> Update Menus" was not working, so I currently disabled it (restart ImageJ to update menus).
+                </li>
+                <li>Added examples for tree rings, otoliths, oocytes, weibel grid counting
+                </li>
+
+            </ul>
+
+        </H4>
+
+        <H3>version 0.97f --- 15-feb-2010
+        </H3>
+        <H4><ul>
+                <li>Right-clicking an ObjectJ column title allows to show and change its histogram
+                </li>
+
+            </ul>
+
+        </H4>
+
+        <H3>version 0.97e --- 16-oct-2009
+        </H3>
+        <H4><ul>
+                <li>Better stability of results table user interface by using Java Beans Binding.
+                </li>
+
+            </ul>
+
+        </H4>
+
+        <H3>version 0.97d --- 5-oct-2009
+        </H3>
+        <H4><ul>
+                <li>When setting the scale or properties of a linked image while
+                    results window is open, ImageJ would crash. This is currently solved by first closing
+                    the results window.
+                </li>
+
+            </ul>
+
+        </H4>
+
+        <H3>version 0.97c --- 1-oct-2009
+        </H3>
+        <H4><ul>
+                <li>Panning to different location with space bar: when space bar is released,
+                    ObjectJ cursor is restored correctly</li>
+                <li>First Drag and Drop after launch is ignored on OS X Java 1.6: now at least
+                    you are asked to repeat</li>
+                <li>Count algorithm was not updated in columns settings (cosmetic)</li>
+                <li> Alt or shift keys while moving  point or item of an object were not recoginzed
+                    on Windows </li>
+            </ul>
+        </H4>
+
+
+
+
+
+
+        <H3>version 0.97a --- 22-Sep-2009
+        </H3>
+        <H4>
+            <ul>
+                <li> macro command ojGetVoxelSize(n, "x")  returns x-voxelsize of n-th linked image </li>
+
+                <li> a column can hold the linked result "index", so that an object's index can be used for qualifying </li>
+
+                <li> macro command ojResultString(column, row) returns correctly text entries such as "filename" </li>
+            </ul>
+
+        </H4>
+
+        <H3>version 0.96z --- 17-Sep-2009
+        </H3>
+        <H4>
+            <ul>
+                <li> In the "Objects" panel, changing item definitions such as "shape" or "marker type" could stop to accept further user input.
+                    Operation is now safe, though you may be asked to repeat the input.<br/></li>
+            </ul>
+        </H4>
+
+
+
+        <H3>version 0.96y --- 14-Sep-2009
+        </H3>
+        <H4>
+            <ul>
+                <li>In previous versions, the ObjectJ results table as well as the columns settings could stop to respond
+                    to user actions. This was a non-reproducible bug, which now hopefully is fixed due to synchronizing threads.
+                </li> <li> Fixed a cosmetic bug  that appeared in OS X 10.5 (Leopard) and later, where buttons in the ObjectJ tools
+                    window lost their "Selected" appearance when e.g selecting an image window.
+                </li> <li> Fixed a bug that would not delete "All Objects in Current Image/Slice" when image was not shown at 100% zoom
+                </li>    <li> Unqualified object numbers are better visible on any gray background<br/>
+                </li>    </ul>
+        </H4>
+
+        <H3>version 0.96x --- 23-Aug-2009
+        </H3>
+        <H4>
+            <ul>
+                <li> Thanks to Wayne Rasband, ImageJ 1.43f recognizes project files with the .ojj extension:
+                    opening a project file will automatically load the ObjectJ plugin. You now can drag an .ojj file
+                    onto ImageJ's microscope icon.
+                    Further, project files are double-clickable if you associate the ".ojj" extension to ImageJ (see
+                    <a href="5-Concept.html" name="Tips">Concept+Tips</a>).
+                </li>
+            </ul>
+        </H4>
+        <H3>version 0.96u --- 03-Aug-2009
+        </H3>
+        <H4>
+            <ul>
+                <li> Drag and Drop of macros or images from a webbrowser to ImageJ window didn't work with ObjectJ. This is fixed.<br/>
+                </li>  <li> See "Usage of macros" for an explanation how to debug linked macros</li>
+            </ul>
+        </H4>
+        <H3>version 0.96t --- 23-Jul-2009
+        </H3>
+        <H4>
+            <ul>
+                <li> Column names are now protected (must not contain wildcard *, comma, space) <br/></li>
+                <li> Static columns are automatically put to bottom of columns list<br/></li>
+                <li> Fixed a bug that caused editing column names to show temporarily nonsense text<br/></li>
+                <li> Using arrow keys when selecting columns in "Columns" panel didn't update corresponding "Operands" panel<br/></li>
+                <li> Reduced sensitive area of "Visible Objects" checkbox<br/></li>
+            </ul>
+        </H4>
+
+        <H3>--- 14-Jul-2009
+        </H3>
+        <H4>
+            <ul>
+                <li>Virus alerts: I removed all StatCounter code from this website. This was a script embedded into
+                    html code to count visitors.
+                    Unfortunately, some PC users complained about virus alerts, athough this is not a virus.
+                    If your computer still shows a virus alert, it is because the old content is still in the cache.
+                    The statcounter script was visible at the bottom of the "Home" or "Tutorial" html code. It is now removed.
+
+
+                    <br/></li>
+            </ul>
+        </H4>
+        <H3>version 0.96r --- 9-Jul-2009
+        </H3>
+        <H4>
+            <ul>
+                <li> Column names must be unique</li>
+                <li> Comboboxes needed scrolling because of limited height, this is improved<br/></li>
+            </ul>
+        </H4>
+
+        <H3>version 0.96q --- 4 Jul 2009
+        </H3>
+        <H4>
+            <ul>
+                <li> Mouse events (such as making a roi) were failing when no ojj project was open.
+                    This bug was introduced in the previous version and is fixed<br/></li>
+            </ul>
+        </H4>
+
+        <H3>version 0.96p --- 25 Jun 2009
+        </H3>
+        <H4>
+            <ul>
+                <li> Menu Help>Update ImageJ also can update ObjectJ<br/></li>
+                <li> Clicking with ObjectJ macro tool in unlinked image didn't work, this is fixed</li>
+            </ul>
+        </H4>
+
+
+        <H3>version 0.96o --- 20 Jun 2009
+        </H3>
+        <H4>
+            <ul>
+                <li> This version is necessary to work with ImageJ1.43a (from 19 june 2009)
+                    or later - otherwise you cannot link images to the project.<br/></li>
+                <li> new macro command: ojZoom(factor, centerx, centery) <br/></li>
+                <li> fixed a bug that gave wrong mouse actions when no project was open <br/>
+                </li> <li> added the "Show Project Folder" to the ObjectJ menu, which brings Finder/Explorer to the front <br/>
+                </li>
+            </ul>
+        </H4>
+        <H3>version 0.96c --- 26 Apr 2009
+        </H3>
+        <H4>
+            <ul>
+                <li> Removed a bug (introduced in prev version, where progam could hang after opening/saving.
+                </li> </ul>
+        </H4>
+
+        <H3>version 0.96a --- 23 Apr 2009
+        </H3>
+        <H4>
+            <ul>
+                <li> Checks after opening and before saving a project whether there are empty
+                    cells or items, and removes them if found-improved version
+                </li></ul>
+        </H4>
+
+
+
+
+        <!-- begin google analytics, 20.6.2010 -->
+        <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+        </script>
+        <script type="text/javascript">
+            try {
+                var pageTracker = _gat._getTracker("UA-10085222-2");
+                pageTracker._trackPageview();
+            } catch (err) {
+            }</script>
+
+        <!-- end google analytics, 1.9.2009 -->
+
+
+    </body>
+</html>

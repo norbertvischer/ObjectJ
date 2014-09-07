@@ -1,0 +1,8 @@
+Good morning,
+this is the new Log-nv.txt file. 
+It will be used to formulate text
+=================================
+
+
+Problems with Qualifying:
+a) Unlinked column titles should not appear as qualifying candidates:

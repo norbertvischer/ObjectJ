@@ -1,0 +1,630 @@
+<!-- #bbinclude "Head.incl" -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+
+
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+        <meta name="generator" content="BBEdit 8.7" />
+        <meta name="author" content="Norbert Vischer" />
+        <meta name="keywords" content="Non-destructive marking, ImageJ, Object-Image, ObjectJ, Image analysis "/>
+        <title>
+            Homepage of ObjectJ
+        </title>
+        <style type="text/css">
+            @import url("main.css");
+        </style>
+    </head>
+    <!-- end bbinclude -->
+
+
+    <body id="Macros">
+
+        <div id="container">
+
+            <!-- #bbinclude "NavBar.incl" -->
+            <!--Main navigation bar-->
+            <img src="Images/ObjectJ-banner.gif" />
+            <div id="bondi">
+                <div id="bar">
+
+                    <ul>
+
+                        <li id="Home"><a href="index.html" name="Home">Home</a></li>
+                        <li id="Concept"><a href="5-Concept.html" name="Concept">Concept+Tips</a></li>
+                        <li id="Tutorial"><a href="2-Tutorial.html" name="Tutorial">Tutorial</a></li>
+                        <li id="Manual"><a href="3a-ManualMenu.html" name="Manual">Manual</a></li>
+                        <li id="Macros"><a href="4a-ObjectJMacroFunctions.html" name="Macros">Macros</a></li>
+                        <li id="News"><a href="6-News.html" name="News">News</a></li>
+                        <li id="Examples"><a href="7a-Examples.html" name="Examples">Examples</a></li>
+                        <li id="Download"><a href="download" name="Download">Download</a></li>
+                    </ul>
+                </div>
+                <div class="clear_noline"></div>    <!--End Navigation Bar-->
+
+
+            </div>
+            <hr> </hr>
+            <!-- end bbinclude -->
+
+
+
+        </div>
+
+        <!-- #bbinclude "LinksForMacro.incl" -->
+        <ul id="manuallinks"> <li>
+                <a href="4a-ObjectJMacroFunctions.html">Usage of macros </a> &nbsp;|&nbsp;
+                <a href="4b-ObjectJMacroFunctions.html">ObjectJ functions</a>&nbsp;|&nbsp;
+                <a href="4c-ObjectJMacroFunctions.html">Generic macros</a>
+            </li>
+        </ul>
+        <!-- end bbinclude -->
+
+        <blockquote>
+
+            <div id="Macros">
+
+
+
+                <H2>Macro functions in ObjectJ</H2>
+                <br></br>
+
+                <font size = "1">
+                    14-may-2014
+                    
+                </font>
+
+                <p>
+                </p>
+
+
+
+
+                <H3>
+
+
+                    ojActiveItemName()  </H3><H4>
+                    returns the item name that is highlighted in the ObjectJ Tools. </H4><H3>
+
+                    ojAdvance()   </H3><H4>
+                    activates next item type in ObjectJ Tools window. However, if an item is open, and more clones are allowed to be added, this command only closes the current item. If no more items are allowed to be added, the object is closed.   </H4><H3>
+
+
+                    ojClose(pattern)   </H3><H4>
+                    closes all image windows whose title matches the wildcard pattern 
+                    (without asking to save changes). ojClose("\\others") closes all except the active image window. </H4><H3>
+
+                    ojCloseItem()   </H3><H4>
+                    if an item with variable number of points such as polygon or segmented line is open, it is closed, otherwise nothing happens. (not yet implemented)   </H4><H3>
+
+
+                    ojCloseObject()   </H3><H4>
+                    if an object is open, it is closed, otherwise nothing happens. If "Composite Objects" is true, the frist item in the sequence is activated, otherwise the same item is active before and after.  </H4><H3>
+
+
+                    ojColumnNumber(columnTitle)   </H3><H4>
+                    returns the index of the column with that title (1-based), or 0 if not found.   </H4><H3>
+
+
+                    ojDeleteAllObjects()	</H3><H4>
+                    deletes all objects	</H4><H3>
+
+
+                    ojDeleteColumn(columnTitle)   </H3><H4>
+                    Deletes the object results column with that title. Use "*" to delete all columns, or other wildcards to delete a set of columns.   </H4><H3>
+
+
+                    ojDeleteItem("itemType", n)   </H3><H4>
+                    in the currently selected object, those markers that belong to the n-th item of itemType are deleted. Use "*" to count across all types. (1-based) </H4><H3>
+
+
+                    ojDeleteObject(n)	</H3><H4>
+                    deletes the n-th object (1-based)	</H4><H3>
+
+
+                    ojExtendVisibilityDepth(low, high)   </H3><H4>
+                    extends visibility range of an item. Example: if a item has been marked in slice 5,
+                    then if low = 2 and high = 1 will make the item visible in slice 3, 4, 5 and 6.</H4><H3>
+
+
+                    ojFlatten()   </H3><H4>
+                    creates an RGB image of same size as linked front image,  with markers permanently burnt-in.</H4><H3>
+
+                    ojFirstObject(n)   </H3><H4>
+                    returns number of first object in the n-th linked image, or 0 if image is unmarked.   </H4><H3>
+
+
+                    ojGetColumnTitle(n)   </H3><H4>
+                    returns the title of the n-th column (1-based).   </H4><H3>
+
+                    <!--        ojGetImageString(n, key)  (not implemented) </H3><H4>
+                                returns numerical info of the n-th linked image (1-based), where key can be:
+                                <br/>"width", "height", "channels", "slices", "frames", "stacksize", "ID"
+                                <br/> stacksize is product of channels, slices and frames. ID is negative if image is open, otherwise zero.
+                                </H4><H3>
+                    -->
+                    ojGetImageValue(n, key)  </H3><H4>
+                    returns numerical info of the n-th linked image (1-based), where key can be:
+                    <br/>"width", "height", "channels", "slices", "frames", "stacksize", "ID"
+                    <br/> stacksize is product of channels, slices and frames. ID is negative if image is open, otherwise zero.
+                </H4><H3>
+
+                    ojGetImageName(n)   </H3><H4>
+                    returns the name of the n-th linked image (1-based) </H4><H3>
+
+
+                    ojGetItemName()   </H3><H4>
+                    returns the name of item that has been selected via ojSelectItem  </H4><H3>
+
+                    ojGetItemNames()   </H3><H4>
+                    returns the used item names in the order they are listed in the ObjectJ Tools window, separated by spaces </H4><H3>
+
+                    ojGetItemTypes()   </H3><H4>
+                    returns the used item types (Point, Line etc) in the order they are listed in the ObjectJ Tools window, separated by spaces </H4><H3>
+
+                    ojGetOpenObject()	</H3><H4>
+                    returns index of object that is currently open. (An open object is indicated by an asterisk after the number label). 	</H4><H3>
+
+
+                    ojGetProjectName()   </H3><H4>
+                    Returns name of the project without the .ojj extension.   </H4><H3>
+
+
+                    ojGetProjectPath()   </H3><H4>
+                    Returns directory path of current project, such as "/Users/oetzi/MiniProject/" Non-ObjectJ macros   </H4><H3>
+
+
+                    ojGetStatistics(columnTitle, operation)   </H3><H4>
+                    returns a statistical value of a column. Operation can be: "count", "mean", "min", "max", "sum", "stdev", "cv%". The returned value is NaN if the calculation is impossible. Only qualified objects are used for calculation.   </H4><H3>
+
+                    ojGetTarget()   </H3><H4>
+                    If in target mode,  target is returned as single string (image index and stack index, both 1-based).  Otherwise, an empty string is returned.
+
+
+                </H4><H3>
+
+                    ojGetVoxelSize(n, "x")  </H3><H4>
+                    returns x-voxelsize of n-th linked image (1-based; ditto for "y" and "z") </H4><H3>
+
+
+
+
+                    ojGlassWindow("show")</H3><H4>
+                    -- "show" : shows a transparent GlassWindow<br/>
+                    -- "hide" : hides the GlassWindow (same as clicking the red "Close" icon<br/>
+
+
+                    -- "connect" : connects GlassWindow to front image, which must be linked to the ObjectJ project,
+                    and must have same size as the GlassWindow. Additionally, the current slice is refreshed.<br/>
+
+                    -- "refresh" : grabs screen content under the GlassWindow and pastes it into last slice of 
+                    connected stack<br/>
+
+                    -- "addSlice" : adds a slice to the end of connected stack, and refreshes it with the current
+                    screen content under the GlassWindow<br/> 
+
+
+                    -- "color=0x00114433" : defines the transparent color of GlassWindow in a hex string
+                    0xaarrggbb, where aa is alpha channel, rr is red, gg is green and bb is blue </H4><H3>
+
+                    ojGetGlassDimensions()</H3><H4>
+                    returns an array holding GlassWindows left, top, width, height </H4><H3>                     
+
+
+
+
+
+
+                    ojHideResults()   </H3><H4>
+                    Closes the ObjectJ results window   </H4><H3>
+
+
+                    ojIdToIndex(id)
+                </H3><H4>
+                    returns  (1-based) index of the objact with that (negative) id, or zero
+                    if that object does not exist.
+                </H4>
+                <H3>
+
+
+                    ojImageLink()   </H3><H4>
+                    returns the link number of the active image, e.g returns 3 if the image name appears at the
+                    third position on the list of linked images. A non-linked image returns 0.
+                </H4><H3>
+
+
+                    ojIndexToId(index)
+                </H3><H4>
+                    returns the unique (negative) id of the n-th object (n is 1-based). 
+                    This macro was formerly called ojObjectID(n).
+                </H4>
+                <H3>
+
+                    ojIndexToRank(n)   </H3><H4>
+                    when ObjectJ linked results are sorted, the ranking of the n-th object is returned.
+                    Returns zero if out of range. (1-based) </H4><H3>
+
+
+                    ojIndexToRow(n)	</H3><H4>
+                    returns rank of  n-th object, useful in sort mode	</H4><H3>
+
+
+                    ojInitColumn(columnTitle)   </H3><H4>
+                    if the object results table contains a column with this title, it is cleared (i.e. it is filled with NaNs).
+                    If the column was static, it is made dynamic. If no column has this title, a new dynamic column is created in the object results.
+                    No algorithms will be attached.   </H4><H3>
+
+                    ojInitTextColumn(columnTitle)   </H3><H4>
+                    creates column that can contain strings, or clears it if it already exists    </H4><H3>
+
+
+                    ojItemToRoi()   </H3><H4>
+                    creates a selection from the currently selected item.   </H4><H3>
+
+
+                    ojLastObject(n)   </H3><H4>
+                    returns number of last object in the n-th linked image, or -1 if image is unmarked.   </H4><H3>
+
+
+                    ojLastRow(columnTitle)   </H3><H4>
+                    returns index of last row of a static column (1-based). Use wildtype to obtain largest index of a group of columns. Returns zero if no static column has this title. Project file   </H4><H3>
+
+
+                    ojLineToPolygon(linewidth, withRounding)   </H3><H4>
+                    converts a segmented line roi into a polygon roi with defined line width. For now, set  withRounding  to false</H4><H3>
+
+                    ojLinkImage(columnTitle)   </H3><H4>
+                    if active image is unlinked and saved in the project folder, it will be linked.</H4><H3>
+
+
+                    ojMatches(string, pattern)   </H3><H4>
+                    returns true if string matches wildcard pattern (not case sensitive).
+                    Wildcards  are * (for any substring including one with zero length) and ? (for any single character)
+                    Note: this is different from "matches()", which uses regular expressions.
+
+                </H4><H3>
+
+
+
+                    ojMovePoint(n, x, y, z)   </H3><H4>
+                    moves the n-th point of currently selected item to a new location specified by x, y, z. Use -1 for x, y or z if no movement is desired in that direction.    </H4><H3>
+
+
+                    ojNColumns()   </H3><H4>
+                    returns total number of ObjectJ result columns  </H4><H3>
+
+                    ojNewestObject()   </H3><H4>
+                    returns index (1-based) of object that was most recently open, or zero if not found  </H4><H3>
+
+
+                    ojNImages()   </H3><H4>
+                    Returns the number of linked images as listed in the "Images" panel.    </H4><H3>
+
+
+                    ojNItems("itemType")   </H3><H4>
+                    returns the number of items of a certain item type in the currently selected object (use "*" to count all items).    </H4><H3>
+
+
+                    ojNObjects()  </H3><H4>
+                    Returns the total number of objects.    </H4><H3>
+
+                    ojNPoints()   </H3><H4>
+                    returns the number of points of the currently selected item   </H4><H3>
+
+
+                    ojOpenObject(n)   </H3><H4>
+                    opens the n-th object, so that more markers can be added. Only one object can receive markers at a time.   </H4><H3>
+
+
+                    ojOrderObjectsInZ(n)	</H3><H4>
+                    renumbers objects so number labels will ascend with stack index in n-th image. Use n=0 to include all linked images.	</H4><H3>
+
+                    ojOwnerIndex(n)	</H3><H4>
+                    returns index of the image  that holds the n-th object; returns zero if n is out of range.	</H4><H3>
+
+
+                    ojOwnerName(n)	</H3><H4>
+                    returns name of the image that holds the n-th object.	</H4><H3>
+
+
+                    ojPutAlgorithm("area")	</H3><H4>
+                    attaches an algorithm to the most recently created linked result column.
+                    Argument can be something like: "area", "count", "exists", "file", "id", "image",
+                    "none", "slice", "path", "length", "distance", "xpos", "ypos", "zpos", "angle", "orientation",
+                    "abspartialpath", "relpartialpath". </H4><H3>
+
+
+                    ojPutOperand("itemtype", clone, point)	</H3><H4>
+                    adds an operand to the most recently created result column. </H4><H3>
+
+                    ojQualified(n)   </H3><H4>
+                    returns true if n-th object is qualified.   </H4><H3>
+
+
+                    ojQualify(n, flag)   </H3><H4>
+                    qualifies n-th object if flag is true, disqualifies it if flag is false. -   </H4><H3>
+
+
+                    ojRankToIndex(n)   </H3><H4>
+                    when ObjectJ linked results are sorted, the index (1-based) of object with ranking n (1-based)
+                    is returned (smallest value is defined to have rank=1). Returns zero if out of range. </H4><H3>
+
+
+                    ojRecalculate()   </H3><H4>
+                    Recalculates all dynamic results   </H4><H3>
+
+                    ojRenameImage("oldName", "newName")   </H3><H4>
+                    Renames a linked image in the project and renames the corresponding file on disk. The image needs not to be open. 
+                    Make sure to save your .ojj project file after renaming.</H4><H3>
+
+                    ojRepositionItem(fromIndex, toIndex)()   </H3><H4>
+                    Changes item order in selected object (1-based indexes); coordinates are not changed.   </H4><H3>
+
+                    ojReqires("1.03")   </H3><H4>
+                    Aborts macro if ObjectJ version is too old   </H4><H3>
+
+                    ojResult("column", row)   </H3><H4>
+                    Returns a value from the object result array. The column can be specified either by number or by the title string. Returns NaN if that place is empty. (1-based)   </H4><H3>
+
+
+                    ojResultString("column", row)   </H3><H4>
+                    Same as ojResult, but returns a string   </H4><H3>
+
+
+                    ojRoiToItem()	</H3><H4>
+                    converts a standard roi into an object.</H4><H3>
+
+
+                    ojRowToIndex(row)	</H3><H4>
+                    returns index of object that appears in n-th row, useful in sort mode	</H4><H3>
+
+                    ojSaveProject()	</H3><H4>
+                    saves current project	</H4><H3>
+
+
+                    ojSelectClosestItem(x, y, tolerance)
+                </H3><H4>
+                    Searches closest object point in current image and slice, and selects corresponding object and item.
+                    Selects nothing if distance is larger than tolerance.
+                </H4>
+
+                <H3>
+
+                    ojSelectedItemName()	</H3><H4>
+                    returns the name of selected item </H4><H3>
+
+
+                    ojSelectedObject()   </H3><H4>
+                    returns the index of selected object, or zero if no object is selected.    </H4><H3>
+
+
+                    ojSelectItem("itemType", n)   </H3><H4>
+                    selects the n-th item (1-based) in the currently selected object (use "*" to count across all item types.
+                </H4><H3>
+
+
+
+                    ojSelectObject(n)   </H3><H4>
+                    selects and highlights the n-th object (1-based), and also selects the first item. Use n=0 to select none
+                </H4><H3>
+
+
+                    ojSet3D(b)	</H3><H4>
+                    if b=true, objects are allowed to extend over more than one slice.	</H4><H3>
+
+
+                    ojSetColumnProperty(columnTitle, name, value)   </H3><H4>
+                    changes appearance of the column with that column title, or a of a set of columns if wildcards are used. Name- value pairs can be: "sort": 0= don't sort, 1 = min at top, 2 = max at top "digits": 0 .. 9 "width": column width in pixels; 0 is automatic "color": color (eg 0xff0000 is red, 0x00ff00 is green, 0x0000ff is blue, 0 is black) "visible": 0= hidden, 1 = visible Example: ojColumnOptions("Area", "sort", 1); sorts the column "Area" so min is at top.   </H4><H3>
+
+
+                    ojSetComposite(b)   </H3><H4>
+                    b=false sets collect mode to "single", so that an object can only contain a single item. b=true sets collect mode to "composite", so that an object can contain a whole collection of different items, that reside under the same object number and whose results populate the same row. This command only affects future point collection - it doesn't change existing objects.   </H4><H3>
+
+
+                    ojSetItemVisible("ItemName", b)	</H3><H4>
+                    shows or hides specified items depending on boolen b	</H4><H3>
+
+
+                    ojSetMarker(x, y)   </H3><H4>
+                    sets a marker as if the user was clicking with current object tool into the active image. x and y can have fractional values.   </H4><H3>
+
+                    ojSetPlotProperties(columnTitle, properties)   </H3><H4>
+                    sets a marker as if the user was clicking with current object tool into the active image. x and y can have fractional values.   </H4><H3>
+
+
+                    ojSetResult("column", row, value)   </H3><H4>
+                    Writes a value into the object result array (row is 1-based). For numerical columns, use value=NaN to create an empty field. 
+                    For text columns, use value="" to create an empty field.
+                </H4><H3>
+
+                    ojSetTarget(argument)   </H3><H4>
+                    Accellerates marking by avoiding screen updates (similar to batchmode). Target image needs not to be in front or open.
+                    <br/>- ojSetTarget("frontimage") sets current image in target mode.
+                    <br/>- ojSetTarget("exit") leaves target mode and updates screen and results.
+                    <br/>- ojSetTarget("image=2") markers will be set into linked image #2
+                    <br/>- ojSetTarget("channel=5") markers will be set into channel #5
+                    <br/>- ojSetTarget("slice=5") markers will be set into slice #5 (used for hyperstack)
+                    <br/>- ojSetTarget("frame=7") markers will be set into frame #7
+                    <br/>- ojSetTarget("stackindex=9") markers will be set into stackindex #9
+                    <br/>--- All parameters are one-based; stackindex regards a hyperstack as linear array of images.
+
+
+                </H4><H3>
+
+
+
+                    ojSetTool(n)	</H3><H4>
+                    positive n: selects tool in ImageJ window, and deselects ObjectJ tool, (also accepts name like "Rectangle")
+                    <br/>
+                    negative n: deselects tool in ImageJ window and selects a tool in ObjectJ Tools	
+                    (also accepts name like "Pistol", "Marker", "SelectObject", "MoveObject", "ObjectToRoi").</H4><H3>
+                    ojShowImage(n)   </H3>
+                <H4>
+                    displays the n-th image as listed in the panel "Linked images" (1-based).
+                </H4>
+
+                <!--
+                <H3>
+                        ojCloseImages(conditions)
+                </H3><H4>
+                        closes image window for which all conditions are true. Conditions string may contain:<br/>
+                        linked, unlinked, images, unchanged, background, title=[blobs.gif]<br/>
+                        Title accepts wildcards. For example <br/>
+                        &nbsp;&nbsp;&nbsp; ojCloseImages("linked, unchanged, background");<br/>
+                        closes all windows that are linked and unchanged except the front window.
+                        The user is never asked to save changes.
+                
+                
+                
+                </H4>
+                not used -->
+
+
+
+
+                <H3>
+
+                    ojShowObject(n)
+                </H3><H4>
+                    displays the n-th object(1-based) upon its linked image.</H4><H3>
+
+                    ojShowResults()   </H3><H4>
+                    Brings the ObjectJ results window to the front   </H4><H3>
+
+
+                    ojShowTools()	</H3><H4>
+                    brings the ObjectJ Tools window to the front	</H4><H3>
+
+                    ojSwitchToItem("name")   </H3><H4>
+                    used to select a different item type before setting markers. "name" must be one of the defined item names.   </H4><H3>
+
+
+                    ojUpdateMarkers(b)   </H3><H4>
+                    if b is set false, markers are not updated on the screen after ojSetMarker etc. until  ojUpdateMarkers(true) is called   </H4><H3>
+
+                    ojXPos(n), ojYPos(n), ojZPos(n)</H3><H4>
+
+
+                    returns the x- or y-coordinate of the n-th point (1-based) of the currently selected item in fractional pixels (x, y). 
+                    The z position is same as the corresponding sliceNumber, but can also be fractional.
+                    returned as fractional slices, starting at 1 and </H4><H3>
+
+                    ojXYZPos(n)   </H3><H4>
+
+
+                    ditto, but returns all three coordinates as float array. </H4><H3>
+
+
+
+
+                    ojZoom(factor, centerX, centerY)
+                </H3><H4>
+                    if linked window is in front, it is zoomed by 'factor', and
+                    pixel location (centerX, centerY) is put to the center if possible.
+                </H4>
+
+                <hr/> 
+                <H3><big>Vertex calculator </big>  </H3>
+                <blockquote>
+                    <H4>
+                        The vertex calculator is a utility for performing geometric calculations. First,
+                        input parameters are pushed onto the "vertex stack", where each entry contains a 2d
+                        location (x,y); then a certain calculation can be performed.
+                        For example, you can push the three points of a triangle onto the stack and get result "area" of that triangle. 
+                        These macro commands start with "ojv..."</H4>
+                </blockquote><hr/><H3>
+
+
+                    ojvInitStack("2d")   </H3><H4>
+                    resets the vertex stack pointer to zero and prepares it for 2D calculations.  </H4><H3>
+
+
+                    ojvPushItem()   </H3><H4>
+                    pushes all points of selected item onto the vertex stack   </H4><H3>
+
+
+                    ojvPushPoint(n)   </H3><H4>
+                    pushes n-th point of selected item onto the vertex stack (1-based)   </H4><H3>
+
+
+                    ojvPushVertex("x=33 y=44")   </H3><H4>
+                    pushes a point position (vertex) onto the vertex stack   </H4><H3>
+
+                    ojvCalculate("operation")   </H3><H4>
+                    returns a floating point result from the vertex stack. Possible operations: see table   </H4>
+
+
+                <blockquote>
+                    <table  width="600" border="1">
+                        <col width="300"></col>
+                        <col width="300"></col>
+                        <tr>
+                            <th>Operation</th>
+                            <th>Comment</th>
+                        </tr>
+                        <tr ><td valign="top" align="center" colspan="2" > <br/><i>Line (2 entries)</i></td></tr>
+                        <tr><td valign="top">orientation</td><td valign="top">2 o'clock = 30 deg; 4 o'clock = -30 deg</td></tr>
+
+                        <tr ><td valign="top"  align="center" colspan="2" > <br/><i>Triangle (3 entries: A, B, C)</i></td></tr>
+                        <tr><td valign="top">innercircle centerx</td><td valign="top"></td></tr>
+                        <tr><td valign="top">innercircle centery</td><td valign="top"></td></tr>
+                        <tr><td valign="top">innercircle radius</td><td valign="top"></td></tr>
+                        <tr><td valign="top">outercircle centerx</td><td valign="top"></td></tr>
+                        <tr><td valign="top">outercircle centery</td><td valign="top"></td></tr>
+                        <tr><td valign="top">outercircle radius</td><td valign="top"></td></tr>
+                        <tr><td valign="top">angle</td><td valign="top">Angle at B (0..180 deg) </td></tr>
+                        <tr><td valign="top">deviation</td><td valign="top">Deviation at B when travelling A-B-C (range -180..0..180 deg, left is negative) </td></tr>
+                        <tr><td valign="top">height</td><td valign="top">Triangle height at B onto A-C
+                            </td></tr>
+
+                        <tr><td valign="top"  align="center" colspan="2" > <br/><i>Partial path(&gt; 3 entries): <br/>
+                                    Finds the shortest line (spark line) from a point to a segmented line (=path). Stack must contain first the path, then the point.
+                                    The spark line meets the path at the "impact point".
+                                </i></td></tr>
+                        <tr><td valign="top">partialpath</td><td valign="top">Travel distance along path until impact point</td></tr>
+                        <tr><td valign="top">partialpath offset</td><td valign="top">length of spark line</td></tr>
+                        <tr><td valign="top">partialpath signedoffset</td><td valign="top">off-road left turn gives negative distance</td></tr>
+                        <tr><td valign="top">partialpath impactx</td><td valign="top"></td></tr>
+                        <tr><td valign="top">partialpath impacty</td><td valign="top"></td></tr>
+                        <tr><td valign="top">partialpath leftedge</td><td valign="top">index of neighbor vertex towards start of path (zero-based)</td></tr>
+                        <tr><td valign="top">partialpath rightedge</td><td valign="top">index of neighbor vertex towards end of path (zero-based)</td></tr>
+
+                        <tr><td valign="top"  align="center" colspan="2" > <br/><i>Segmented line and polygon(&gt; 3 entries): <br/>
+
+                                </i></td></tr>
+                        <tr><td valign="top">area</td><td valign="top">polygon area (if segments cross, sub-areas are subtracted)</td></tr>
+                        <tr><td valign="top">perimeter</td><td valign="top">perimeter of polygon (includes closing segment)</td></tr>
+                        <tr><td valign="top">totalpath</td><td valign="top">sum of all line segments</td></tr>
+                        <tr><td valign="top">partialpositionx 50%</td><td valign="top">x position after traveling 50% of total path</td></tr>
+                        <tr><td valign="top">partialpositiony 0.3</td><td valign="top">y position after traveling 30% of total path</td></tr>
+
+                        <tr><td valign="top"  align="center" colspan="2" > <br/><i>Two lines A-B and C-D (4 entries): <br/>
+                                </i></td></tr>
+                        <tr><td valign="top">crosspointx</td><td valign="top"></td></tr>
+                        <tr><td valign="top">crosspointy</td><td valign="top"></td></tr>
+
+                    </table>
+                </blockquote>
+            </div>
+        </blockquote>
+
+
+        <!-- begin google analytics, 1.9.2009 -->
+        <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+        </script>
+        <script type="text/javascript">
+            try {
+                var pageTracker = _gat._getTracker("UA-10085222-2");
+                pageTracker._trackPageview();
+            } catch (err) {
+            }</script>
+
+        <!-- end google analytics, 1.9.2009 -->
+
+
+
+    </body>
+</html>

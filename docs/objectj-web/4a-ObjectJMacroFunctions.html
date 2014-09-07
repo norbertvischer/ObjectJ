@@ -1,0 +1,111 @@
+<!-- #bbinclude "Head.incl" -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+
+
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<meta name="generator" content="BBEdit 8.7" />
+		<meta name="author" content="Norbert Vischer" />
+		<meta name="keywords" content="Non-destructive marking, ImageJ, Object-Image, ObjectJ, Image analysis "/>
+		<title>
+			Homepage of ObjectJ
+		</title>
+		<style type="text/css">
+			@import url("main.css");
+		</style> 
+	</head>
+<!-- end bbinclude -->
+
+
+    <body id="Macros">
+
+        <div id="container">
+
+            <!-- #bbinclude "NavBar.incl" -->
+    <!--Main navigation bar-->
+   <img src="Images/ObjectJ-banner.gif" />
+  <div id="bondi">
+  <div id="bar">
+    
+      <ul>
+
+		<li id="Home"><a href="index.html" name="Home">Home</a></li>
+        <li id="Concept"><a href="5-Concept.html" name="Concept">Concept+Tips</a></li>
+        <li id="Tutorial"><a href="2-Tutorial.html" name="Tutorial">Tutorial</a></li>
+        <li id="Manual"><a href="3a-ManualMenu.html" name="Manual">Manual</a></li>
+        <li id="Macros"><a href="4a-ObjectJMacroFunctions.html" name="Macros">Macros</a></li>
+        <li id="News"><a href="6-News.html" name="News">News</a></li>
+  			<li id="Examples"><a href="7a-Examples.html" name="Examples">Examples</a></li>
+  			<li id="Download"><a href="download" name="Download">Download</a></li>
+      </ul>
+    </div>
+    <div class="clear_noline"></div>    <!--End Navigation Bar-->
+   
+   
+    </div>
+ <hr> </hr>
+<!-- end bbinclude -->
+
+
+
+        </div>
+
+ <!-- #bbinclude "LinksForMacro.incl" -->
+ <ul id="manuallinks">
+                <a href="4a-ObjectJMacroFunctions.html">Usage of macros </a> &nbsp;|&nbsp;
+                <a href="4b-ObjectJMacroFunctions.html">ObjectJ functions</a>&nbsp;|&nbsp;
+                <a href="4c-ObjectJMacroFunctions.html">Generic macros</a>
+
+        </ul>
+<!-- end bbinclude -->
+<blockquote>
+<H2>Usage of macros in ObjectJ</H2></blockquote><br/>
+<H4>
+ObjectJ provides additional macro functions for creating markers or accessing linked results; for example ojSetMarker(x, y) places a marker point.<br/>
+The ".ojj" project file can encapsulate a set of macros. The text becomes visible via  menu ObjectJ>Show Embedded Macros.
+Here you can edit the macros and re-install them with button "Install in ObjectJ Menu".
+(Older versions before 0.98c needed a separate text file with same base name and path as the project file.)
+
+<br/><br/>
+
+- embedded macro commands can be invoked from the ObjectJ menu, independent of other macros. <br/>
+- if the embedded text defines macro tools, they appear as buttons in the ObjectJ Tools window,
+independent of other macro tools.<br/>
+- exchanging text currently only works via Copy-Paste<br/><br/>
+
+<b>Debugging:</b><br/>
+
+If you want to single-step through an embedded macro:<br/>
+- insert a debug() statement into the text, and re-load it<br/>
+- make sure the window with the embedded macro text is not closed.<br/>
+- debugging will be started when debug() statement is reached.
+
+
+
+</H4>
+
+<!-- begin google analytics, 1.9.2009 -->
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-10085222-2");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+
+<!-- end google analytics, 1.9.2009 -->
+
+
+
+
+</body>
+</html>
+
+
+
+
+

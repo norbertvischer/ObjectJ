@@ -1,0 +1,276 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Basic</title>
+    <meta name="generator" content="BBEdit 10.1" />
+
+
+
+    <style>
+      body {
+        margin-left: 33px;
+        margin-top: 55px;
+        max-width: 44em;
+      }
+
+      h1 {
+        background-color: #99AAFF;
+        color: #333333;
+        font-family: sans-serif;
+        font-size: 165%;
+        margin-bottom: 0;
+        margin-top: 0;
+      }
+      h2 {
+        color: #222222;
+        font-family: sans-serif;
+        font-size: 135%;
+        margin-bottom: 2px;
+      }
+      h3 {
+        color: #222222;
+        font-family: sans-serif;
+        font-size: 110%;
+        margin-bottom: 2px;
+      }
+      h4 {
+        color: #222222;
+        font-family: sans-serif;
+        font-size: 100%;
+        margin-bottom: 2px;
+      }
+      h5 {
+        color: #cc0000;
+        font-size: 100%;
+        margin-top: 8px;
+        margin-bottom: 0;
+        font-style: italic; 
+      }
+
+      i { font-size: 100%;
+          margin-left: 0px;
+          color: #cc0000;
+      }
+      small {
+        color: #404040;
+      }
+      p{
+        margin-top: 0;
+        margin-bottom: 0;
+        margin-left: 28px;
+      }
+      a:link {
+        color: #0044AA;
+        text-decoration: none;
+      }
+      a:visited {
+        color: #0044AA;
+        text-decoration: none;
+      }
+      a:hover {
+        color: #003377;
+        text-decoration: underline;
+      }
+      a:active {
+        color: red;
+        text-decoration: underline;
+      }
+    </style>
+
+  </head>
+  <body>
+    <a href="http://simon.bio.uva.nl/objectj/examples/">Back to ObjectJ examples</a> 
+
+    <br/>
+    <br/>    
+    <br/>
+
+
+
+    <h1>
+      <b>Align Fluorescence Channels</b>
+    </h1>
+
+
+
+    <table cellspacing="8" width="650">
+
+      <tbody><tr valign="top"><td><b>Author:</b></td><td>
+
+            Norbert Vischer (vischer -at- science.uva.nl)
+
+          </td></tr><tr valign="top"><td><b>History:</b></td><td>
+            2012-Nov-21: First version<br>
+          </td></tr>
+
+        <tr valign="top"><td><b>Source:</b></td><td>
+            <a href="http://simon.bio.uva.nl/objectj/examples/PerspectiveStackView/PerspectiveStackView.txt">
+              AlignFluorChannels.txt</a>
+          </td></tr>
+
+        <tr valign="top"><td><b>Description:</b></td><td>
+            Repairs displacement of fluorescence channels in bacterial images.
+            Channel #1 (phase contrast) is used as reference.
+        <tr valign="top">
+          <td><b>Features</b></td><td>
+            <ul>
+              <li> Manual operation: drag cell outlines to match fluorescence pattern
+              </li><li> Automatic operation: FFT correlation
+              </li><li> Batch proceccing: process all hyperstacks in a folder
+              </li><li> Numerical output: table of displacements
+
+              </li></ul>
+        </tr>
+      </tbody></table>
+    <hr/>
+    <b>Macro Commands:</b><br/>
+
+
+    <h5>Show Outlines [1]</h5>
+
+    <p>Displays outlines derived from channel 1 of current frame as selection. This can manually be dragged 
+      so it matches the fluorescence pattern. Use <i>Edit: Select None</i> to remove selection.
+    </p>
+
+    <h5>Align [2]</h5>
+
+    <p>Translates current channel depending on </p>
+
+    <h5></h5>
+
+    <p></p>
+
+    <h5></h5>
+
+    <p></p>
+
+    <h5></h5>
+
+    <p></p>
+
+
+
+    <h5>Save As PNG with Transparent Background [3]</h5>
+
+    <p>Programs like PowerPoint will honor transparency of .PNG images. See also <i>New Demo Stack</i>. For adding shadow in PowerPoint, choose Format&gt;Picture&gt;Shadow</p>
+
+
+    <h1>GlassWindow in ObjectJ
+    </h1>
+    <h2>GlassWindow is an extension to the ObjectJ plugin. It allows to mark and snap 
+      any underlying live image that is displayed by a foreign application. Markers 
+      appear both on the glass window and on the currently linked stack that can 
+      receive any number of snapshots. </h2>
+
+    Applications include:
+    - Marking live images provided by any camera acquisition program
+    - Marking movies from any source, and only store those frames that are relevant
+
+
+    Macro Commands:
+
+    <h1>Show GlassWindow</h1>
+    <h2>Shows the GlassWindow whose size and position can be adjusted to cover the underlying live image. 
+    </h2>
+    <h3>Connect New Stack</h3>
+    Creates a stack of same size as the GlassWindow for receiving snapshots.
+
+    <h5>Update Snapshot
+    </h5><p>
+      In the connected stack, the current snapshot is refreshed.
+    </p>
+
+
+    <h5>Append Snapshot</h5>
+    <p>
+      A new snapshot is appended to the connected stack.
+    </p>
+
+
+    <h5>Toggle Visibility Range</h5>
+    <p>
+      Toggles between these two cases:
+      a) markers are only visible if their home slice is selected
+      b) all markers from all stack slices are visible (shining through).
+      The visibility range has effect on the glass window and all linked images.
+    </p>
+
+    <h5></h5>
+
+    <p></p>
+
+
+
+    <h5></h5>
+
+    <p></p>
+
+
+
+    <h5></h5>
+
+    <p></p>
+
+
+
+
+    <i>Make Perspective [2]</i><br/>
+    Uses current (hyper)stack to create perspective montage <br/><br/>
+    <i></i><br/>
+
+    Programs like PowerPoint will honor transparency of .PNG images. For adding shadow in PowerPoint, choose Format&gt;Picture&gt;Shadow
+
+    <br/>
+
+
+
+
+
+
+    <p>My long description about how to indent this piece of text. We can continue on and on and on, until some line break is involved</p>
+
+
+    <br/>
+    <img width="450" src="http://simon.bio.uva.nl/objectj/examples/PerspectiveStackView/PerspectiveStackView_files/PerspectiveWithArrows.png">
+    <br/>
+    Fig 1: Demo stack and geometric properties
+    <br/>
+    <br/>
+
+    <img width="600" src="http://simon.bio.uva.nl/objectj/examples/PerspectiveStackView/PerspectiveStackView_files/NeuronPPTscreenshot.png">
+    <br/>
+    Fig 2: Neuron (IJ sample image) shown in PowerPoint with soft shadow
+
+
+
+    <i>Create Demo Stack [1]</i>
+    <i>Create Demo Stack [1]</i><br/>
+    <i>Create Demo Stack [1]</i><br/>
+    <br/>
+
+
+    <p><b>|<a href="http://simon.bio.uva.nl/objectj/examples/">Back to ObjectJ examples</a> </b>
+
+
+
+    </p>
+
+
+    <!-- begin google analytics  -->
+    <script type="text/javascript">
+      var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+      document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+      try {
+        var pageTracker = _gat._getTracker("UA-10085222-2");
+        pageTracker._trackPageview();
+      } catch(err) {}</script>
+
+    <!-- end google analytics  -->
+
+
+  </body>
+</html>

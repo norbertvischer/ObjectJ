@@ -1,0 +1,6 @@
+Today there is a new study file
+
+
+
+Doubleclick on an element in Navigator to isolate it in"Design"
+Goto Tools>Palette and drag elements from the menu

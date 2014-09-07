@@ -1,0 +1,679 @@
+//SIPchart-1.18
+//15.04.13 10:19
+var chartTitle, chartAvg, chartStdev,
+panelsHookY = 80,
+panelWidth150 = 150,
+panelSpacing210 = 210,
+profilesHookX = 0,
+profilesHookY = 250,
+resBarHookX = 530,
+resBarHookY = 265,
+outputHookX = 866,
+outputHookY = 265,
+inputHookX = 600,
+inputHookY = 265,
+backgnd = 0,
+maxmax = 0,
+	
+avgs = newArray(5),
+stds = newArray(5),
+maxs = newArray(5),
+pxWidth, pxHeight, pxDepth,
+//              0    1    2    3    4     
+labels = split("ISum IMax ZMax FWHM Skew"),
+parameterStrings = newArray(5),
+origID = 0,
+srcID = 0,
+chartID = 0,
+resultID =0,
+prevProfileID, 
+//inputKeys = split("Microscope: ,Objective: ,NA: ,Excitation [nm]: ,Emission [nm]: ", ","),
+//allKeys = "Microscope:\nObjective:\nNA:\nExcitation [nm]:\nEmission [nm]:\nISum:\n\IMax:\nZMax:\nFWHM:\nSkew:\n),
+infoValues,
+srcTitle,
+fivePlotsW, fivePlotsH,
+myList = "Microscope\nObjective\nNA\nExcitation[nm]\nEmission[nm]\n",//ISum\n\IMax\nZMax\nFWHM\nSkew\n",
+keysOnly=myList,
+keys = split(keysOnly, "\n"),
+
+
+;
+
+// macro "Load Demo Stack [F1]"{
+// 	loadDemoStack();
+// }
+
+function loadDemoStack(){
+    run("URL...", "url=http://simon.bio.uva.nl/sipcharts/sip043.zip");
+    run("Set... ", "zoom=400 x=32 y=32");
+    setSlice(50);
+}
+
+// macro "Make SipChart [F2]"{
+// 	makeSipChart();
+// }
+
+function makeSipChart(){
+	if (nImages == 0)
+		exit("First bring 3D stack to front");
+	if (nSlices < 10 )
+		exit("Front image should have at least 10 slices");
+	if (nImages > 1){
+		showMessageWithCancel("OK to close all other images?");
+		thisID = getImageID;
+		for (img = nImages; img >=1; img--){
+			selectImage(img);
+			if (getImageID != thisID)
+				close;
+		}
+	}
+	time = getTime;
+	
+	requires("1.47");
+	setFont("Sans Serif", 12, "antialiased");
+	run("Line Width...", "line=1");
+	run("Conversions...", "scale");
+	run("Profile Plot Options...", "width=450 height=200 minimum=0 maximum=0 interpolate draw");
+
+	ww = getWidth;
+	hh = getHeight;	
+	getVoxelSize(pxWidth, pxHeight, pxDepth, dummy);
+	isSrc = (ww == 64 && hh == 64);
+
+//create binned image if necessary
+	if (!isSrc){
+		origID = getImageID;
+		srcTitle = getTitle;	
+		info = getMetadata("Info");
+		ss = minOf(ww, hh);
+		x1 = floor((ww-ss)/2);
+		y1 = floor((hh-ss)/2);
+		makeRectangle(x1, y1, ss, ss);
+		if (!startsWith(srcTitle, "binned-"))
+			binnedTitle = "binned-" + srcTitle ;
+		run("Scale...", "x=- y=- width=64 height=64 interpolation=Bilinear average process create title=[" + binnedTitle + "]");
+		//setMetadata("Info", info);12.9.2011
+		srcID = getImageID;
+		selectImage(origID);
+		close;//1.8.2011
+		selectImage(srcID);
+
+	}
+	srcID = getImageID;
+	srcTitle = replace(getTitle, "binned-", "");
+	srcTitle = replace(srcTitle, "binned ", "");
+	srcTitle = replace(srcTitle, "binned", "");
+
+
+//create chart window
+	newImage("SIPchart " + srcTitle, "RGB White", 1080, 550, 1);//++ create the main panel
+	chartID = getImageID;
+	setLocation(250, 90);
+
+	selectImage(srcID);
+	setLocation(10, 90);
+
+//calculate background
+	maxSlc = nSlices;
+	run("Scale...", "x=- y=- width=16 height=16 interpolation=Bilinear average process create title=Mini");
+	setSlice(1);
+	getRawStatistics(nPixels, mean, min1, max, std, histogram);
+	setSlice(maxSlc);
+	getRawStatistics(nPixels, mean, min2, max, std, histogram);
+	backgnd = minOf(min1, min2);
+	close;
+	selectWindow("ImageJ");//expose progress bar
+	
+//run SIPchart plugin which returns the PanelStack
+	selectImage(srcID);
+	run("SIPchart ", "a");
+	resultID	= getImageID;
+	run("Set... ", "zoom=400");
+	rename("PanelStack");
+	setLocation( 10, 360);
+	dispMins = newArray(5);
+	dispMaxs = newArray(5);
+	for (panel = 0; panel < 5; panel++){
+		setSlice(panel + 1);
+		run("Enhance Contrast", "saturated=0");// to be changed later
+		run("Select All");
+		getRawStatistics(nPixels, mean, min, max, std, histogram);
+		avgs[panel] = mean;
+		stds[panel] = std;
+		maxs[panel] = max;
+		if (panel <= 1)
+			setMinAndMax(max * 0.4, max);
+		if (panel == 1)
+			maxmax = max;//for interactive z-tool
+		getMinAndMax(dispMin, dispMax);
+		dispMins[panel] = dispMin;
+		dispMaxs[panel] = dispMax;
+	}
+
+//enlarge to 150 px before pasting panels
+	run("Scale...", "x=- y=- width="+ panelWidth150+ " height="+ panelWidth150+ " interpolation=Bilinear average create title=bigResult.tmp");
+	run("Set... ", "zoom=10");
+	bigResultID = getImageID;
+	nPanels = labels.length;
+	ww10 = 10;
+
+//prepare scale bar
+	newImage("ScaleBar", "8-bit Ramp", panelWidth150, ww10, 1);
+	run("Rotate 90 Degrees Left");
+	scaleBarID = getImageID;	
+	setBatchMode(true);
+	
+//copy-paste panels
+	for (panel = 0; panel < nPanels; panel++){
+ 		selectImage(resultID);
+ 		setSlice(panel+1);
+ 		selectImage(bigResultID);
+		setSlice(panel+1);
+		run("Select All");
+		run("Copy");
+		selectImage(chartID);
+		xhook = 10 + panel*(panelSpacing210);
+		makeRectangle(xhook, panelsHookY, panelWidth150, panelWidth150);
+		run("Paste");
+	}
+
+//copy-paste colored scale bars and draw parameters at top of panels
+	for (panel = 0; panel < nPanels; panel++){
+ 		selectImage(resultID);
+ 		setSlice(panel+1);
+ 		getLut(reds, greens, blues);
+ 		getMinAndMax(dispMin, dispMax);
+		dispMin = dispMins[panel];
+		dispMax = dispMaxs[panel];
+		xhook = 10 + panel*(panelSpacing210);
+		selectImage(scaleBarID);
+		setLut(reds, greens, blues);
+		
+		run("Select All");
+		run("Copy");
+		//close;
+		selectImage(chartID);
+		makeRectangle(xhook + panelWidth150 + 10, panelsHookY, ww10, panelWidth150);
+		run("Paste");
+		intervals = 6;
+		if (panel < 2){ 
+			dispMin = 40; 
+			dispMax = 100;
+		}
+		if (panel == 4){ 
+			dispMax= maxOf(abs(dispMin), dispMax); 
+			dispMin = -dispMax;
+		}
+		makeScaleBar(panel, xhook + panelWidth150 + 10, panelsHookY, panelWidth150, dispMin, dispMax, intervals);
+		drawPanelParameters(xhook, panelsHookY, panel);
+	}
+	selectImage(bigResultID);
+	close;
+	selectImage(scaleBarID);
+	close;
+
+//add center+quadrants plots
+	selectImage(srcID);
+	fivePlotsToClip();
+
+	selectImage(chartID);
+
+	makeRectangle(0, 250, fivePlotsW, fivePlotsH);
+	run ("Paste");
+	
+//add resolution bar
+	resolutionBar();
+
+//prepare gray text rectangles 
+	makeRectangle(outputHookX-2, resBarHookY, 180, 200);
+	setForegroundColor(220, 220, 220);
+	run("Fill");
+
+	makeRectangle(inputHookX-2, resBarHookY, 250, 200);
+	run("Fill");
+	run("Select None");
+	setForegroundColor(0, 0, 0);
+
+	setFont("Sans Serif", 12, "antialiased");
+	lineSpacing = 16;
+
+	yy = outputHookY + 16;
+	x1 = outputHookX;
+	x2 = outputHookX + 60;
+	x3 = outputHookX + 130;
+
+//draw output data in gray rectangles
+	drawString("avg", x2, yy);
+	drawString("std", x3, yy);
+	yoff = 0;
+	outputStr = "\tavg\tstd\n";
+	for (jj =0; jj < parameterStrings.length; jj++){
+		yoff += lineSpacing;
+		parts = split(parameterStrings[jj], "\t");
+		drawString(parts[0], x1, yy + yoff);
+		drawString(parts[1], x2, yy + yoff);
+		drawString(parts[2], x3, yy + yoff);
+		outputStr =  outputStr  +parts[0] + "\t" + parts[1] + "\t" + parts[2] + "\n";
+	}
+
+//draw input data in gray rectangles
+	yy = inputHookY + 16;
+	x1 = inputHookX;
+	x2 = inputHookX + 100;
+	yoff = 0;
+	drawString("File", x1, yy + yoff);
+	drawString(srcTitle, x2, yy + yoff);
+
+	yoff += lineSpacing;
+	date = getNiceDate();
+	drawString("Date", x1, yy + yoff);
+	drawString(date, x2, yy + yoff);
+	
+	for (jj = 0; jj < keys.length; jj++){
+		yoff += lineSpacing;
+		drawString(keys[jj], x1, yy + yoff);
+		drawString(List.get(keys[jj]), x2, yy + yoff);
+	}
+
+//set Metadata
+	makeCleanList(myList);
+	buffer = "File:\t" + srcTitle +"\nDate:\t" + date + "\n\n";
+	for (jj= 0; jj < lengthOf(keys); jj++)
+		buffer = buffer + keys[jj] + "\t" + List.get(keys[jj]) + "\n";//want my own order
+	buffer = buffer + outputStr;
+	setMetadata("Info", buffer);
+
+}
+	
+
+function makeScaleBar(panel, xhook, yhook, height, min, max, intervals){
+	setColor(0,0,0);
+	setLineWidth(1);
+	for (jj =0; jj <= intervals; jj++){
+		val = min + jj * (max - min)/intervals;
+		digits = 0;
+		if (val < 10) digits = 2;
+		if (panel == 1234)//resBar
+			digits = 1;
+		ss = d2s(val, digits);
+		y = yhook + height - jj * height/intervals;
+		drawLine(xhook, y, xhook + 9, y);
+		if (panel < 2 && val == 100)
+			ss = ss + "%";
+		drawString(ss, xhook + 13, y+6);
+	}
+	
+}
+
+function drawPanelParameters(xhook, yhook, panel){
+	setColor(0,0,0);
+	setFont("Sans Serif", 18, "antialiased");
+	drawString (labels[panel], xhook, yhook-16);
+	setFont("Sans Serif", 10, "antialiased");
+	mean = avgs[panel];
+	max = maxs[panel];
+	stdev = stds[panel];
+	if (panel < 2){
+		mean = mean * 100/max;
+		stdev = stdev * 100/max;
+	}
+	avgStr = toString(mean);
+	stdStr = toString(stdev);
+	parameterStrings[panel] = labels[panel] + "\t" + avgStr + "\t" + stdStr;
+	avgStr = "avg = " + avgStr;
+	stdStr = "std = " + stdStr;
+	drawString (avgStr, xhook + 64, yhook-28);
+	drawString (stdStr, xhook + 64, yhook-16);
+}
+
+function toString(val){
+	if (val > 100)
+		return d2s(val, 0);
+	return d2s(val, 2);
+}
+
+
+function resolutionBar(){
+	selectImage(resultID);
+	setSlice(4);
+	run("Select None");
+	getRawStatistics(nPixels, mean, min, max, std, histogram);
+	resBarHeight = 200;
+	fullRamge = 4;//therm full range
+	newImage("A.tmp", "32-bit Black", 1, resBarHeight, 1);
+	range = max - min;
+	len = histogram.length;
+	for (jj = 0; jj < len; jj++){
+		color = histogram[jj];
+		pos1 = min + jj/255*range;
+		pos2 = resBarHeight - round(pos1/fullRamge * resBarHeight);
+		val = getPixel(0, pos2);
+		color = val + color;
+		putPixel(0, pos2, color);
+	}
+	run("Scale...", "x=16 y=1 width=50 height=200 interpolation=Bilinear create title=B.tmp");
+	run("Enhance Contrast", "saturated=1");
+	run("RGB Color");
+	optimum = getOptimum();
+	if (!isNaN(optimum)){
+		setForegroundColor(255, 57, 0);
+		y = getHeight - optimum /fullRamge * getHeight;
+		makeRectangle(0, y-1, getWidth, 2);
+		run("Fill", "slice"); 
+	}
+	run("Select All");
+	run("Copy");
+	selectImage(chartID);
+	run("Restore Selection");
+	setSelectionLocation(resBarHookX, resBarHookY);
+	run("Paste");
+	run("Select None");
+	dispMin=0; dispMax=4; intervals=8;
+	panel = 1234;
+	resBarWidth = 10;
+	makeScaleBar(panel, resBarHookX + resBarWidth + 10, resBarHookY, resBarHeight, dispMin, dispMax, intervals);
+	if(isOpen("Results")){
+		selectWindow("Results");
+		run("Close");
+	}
+}
+
+
+function makeLiveProfile(xPos, yPos){
+	setBatchMode(true);
+	selectImage(resultID);
+	resultsArr = newArray(nSlices);
+	for (jj = 1; jj <= nSlices; jj++){
+		setZCoordinate(jj -1);
+		val = getPixel(xPos, yPos);
+		resultsArr[jj-1] = val;
+	}
+	
+	iMax = resultsArr[1];
+	zMax = resultsArr[2];
+	fwhm = resultsArr[3];
+	skew = resultsArr[4];
+	lwhm =(fwhm - fwhm * skew)/2;
+	rwhm = fwhm - lwhm;
+	
+	marksX = newArray(4);
+	marksY = newArray(4);
+	marksX[0] = zMax;
+	marksY[0] = iMax  + backgnd;
+	
+	marksX[1] = zMax - lwhm;
+	marksY[1] = iMax / 2 + backgnd;
+
+	marksX[2] = zMax + rwhm;
+	marksY[2] = iMax / 2 + backgnd;
+
+	marksX[3] = zMax;
+	marksY[3] = backgnd;
+
+	selectImage(srcID);
+	yArr = newArray(nSlices);
+	xArr = newArray(nSlices);
+	//getVoxelSize(pxWidth, pxHeight, pxDepth, dummy);
+	xRange = nSlices * pxDepth;
+	max = 0;
+	maxPos = 0;
+	for (jj = 1; jj <= nSlices; jj++){
+	
+		setZCoordinate(jj -1);
+		//setSlice(jj);
+		val = getPixel(xPos, yPos);
+		if(val>max){
+			max = val;
+			maxPos = jj;
+		}
+		yArr[jj-1] = val;
+		xArr[jj-1] = (jj -1) * pxDepth;
+		
+	}
+	
+	selectImage(srcID);
+	setSlice(maxPos);
+	setBatchMode(false);
+	Plot.create("Live Profile", "Z-position", "Y");
+	Plot.setLimits(0,  xRange, 0, (maxmax + backgnd) * 1.1);
+	Plot.setLineWidth(1);
+	Plot.setColor("lightGray");
+	Plot.add("lines", xArr, yArr);
+	Plot.setColor("blue");
+	Plot.setLineWidth(2);
+	Plot.add("dots", xArr, yArr);
+	Plot.setColor("red");
+	Plot.add("circles", marksX, marksY);
+
+	Plot.addText("x = " + xPos + "  y = " + yPos, 0.7, -0.01);
+	Plot.addText("FWHM = " + d2s(fwhm, 2), 0.7, 0.1);
+	Plot.addText("skew = " + d2s(skew, 2), 0.7, 0.2);
+	Plot.update();
+}
+
+
+
+// macro "Set Microscope Specs [F3]"{
+// 	setMicroscopeSpecs();
+// }
+
+// macro "Set Microscope Specs from CLip [F4]"{
+//	setMicroscopeSpecsFromClip();
+//}
+function setMicroscopeSpecsFromClip(){
+	str = String.paste;
+	str = replace(str, "\t", "=");
+	makeCleanList(str);
+	setMicroscopeSpecs();
+}
+
+function makeCleanList(str){//puts str to List without unwanted keys
+	List.clear;
+	ss = split(str, "\n");
+	for (jj= 0; jj < ss.length; jj++){
+		parts = split(ss[jj], "=");
+		if (lengthOf(parts) > 0){
+			key = parts[0];
+			key = replace(key, " ", "");
+			if(indexOf(keysOnly, key + "\n") >=0){
+				if(lengthOf(parts) >1)
+					List.set(parts[0], parts[1]);//must not contain two =
+				else
+					List.set(parts[0], "");//must not contain two equal signs
+			}
+		}
+	}
+	myList = List.getList;
+}
+
+
+
+
+function setMicroscopeSpecs(){
+	List.setList(myList);
+
+	Dialog.create("Edit Info");
+	Dialog.addString(keys[0], List.get(keys[0]), 40);
+	Dialog.addString(keys[1], List.get(keys[1]), 40);
+	Dialog.addString(keys[2], List.get(keys[2]));
+	Dialog.addString(keys[3], List.get(keys[3]));
+	Dialog.addString(keys[4], List.get(keys[4]));
+	Dialog.show();
+	
+	List.set(keys[0], Dialog.getString());
+	List.set(keys[1], Dialog.getString());
+	List.set(keys[2], Dialog.getString());
+	List.set(keys[3], Dialog.getString());
+	List.set(keys[4], Dialog.getString());
+	myList = List.getList;
+}
+
+
+
+function fivePlotsToClip(){
+	spotsXY= newArray( 32, 32, 16, 16, 48, 16, 48, 48, 16, 48);
+	colorsS = split(  "blue  red       green   cyan  magenta");
+	colorsN = newArray(0xff, 0xff0000, 0xcc00, 0xccff, 0xff00ff );
+	
+
+	brightest = 0;
+	Plot.create("FWHM Plots.tmp", "Z [um]", "Int");
+	xArr = newArray(nSlices);
+	yArr = newArray(nSlices);
+	stackID = getImageID;
+	max = 0;
+	for (plot = 0; plot < 5; plot++){
+		x = spotsXY[plot*2];
+		y = spotsXY[plot*2 +1];
+		makeOval(x-3, y-3, 6, 6);
+		for (jj = 0; jj < nSlices; jj++){
+			setSlice(jj + 1);
+			val = getPixel(x, y);
+			if (val > brightest)
+				brightest = val;
+			xArr[jj] = jj * pxDepth;
+			yArr[jj] = val;
+		}
+		if (plot == 0)
+			Plot.setLimits(0, nSlices * pxDepth, 0, brightest* 1.2);
+		Plot.setColor(colorsS[plot]);
+		Plot.add("line", xArr, yArr);
+		run("Select None");
+		setSlice(nSlices/2);
+	}
+	Plot.show;
+
+	top = 20;
+	left = 441;
+	makeRectangle(left, top, 64, 64);
+	changeValues(0, 1e12, 0);
+	for (plot = 0; plot < 5; plot++){
+		x = spotsXY[plot*2];
+		y = spotsXY[plot*2 +1];
+		makeOval(left + x-4, top + y-4, 8, 8);
+		changeValues(0, 0, colorsN[plot]);
+		
+	}
+	plotID = getImageID;
+	run("Select All");
+	run("Scale...", "x=1 y=1 interpolation=Bilinear create title=tmp");
+	run("Select All");
+	fivePlotsW = getWidth;
+	fivePlotsH = getHeight;
+	run("Copy");
+	close;
+	
+	selectImage(plotID);
+	close;
+}
+
+function getOptimum(){
+	List.setList(myList);
+	NA = parseFloat(List.get("NA"));
+	Ex = parseFloat(List.get("Excitation[nm]"))/1000;
+	Em = parseFloat(List.get("Emission[nm]"))/1000;
+	LayerThickness = 0.1; // 100 nm
+	SIP_n=1.5; // polyvinylalcohol refractive index
+		
+	tmp = 1.0 / sqrt(1 + (Ex/Em)*(Ex/Em));
+	tmp = tmp * (2 * SIP_n * Ex / (NA * NA));
+	
+	tmp2 = LayerThickness * LayerThickness + tmp * tmp;;
+	res = sqrt(tmp2);
+	return res;//in microns
+}
+
+
+function getNiceDate(){
+	getDateAndTime(year, month, dayOfWeek, dayOfMonth, hour, minute, second, msec);
+	hour = substring("" + (100 + hour), 1);
+	minute = substring("" + (100 + minute), 1);
+	months = split("jan feb mar apr may jun jul aug sep oct nov dec");
+	date = "" + dayOfMonth + "-" + months[month] + "-" + year + "  " + hour + ":" + minute;
+	return date;
+}
+
+
+// macro "Show Numerical Results "{
+	showNumericResults();
+}
+function showNumericResults(){
+	info = getMetadata("info");
+ 	if (!startsWith(info, "File"))
+ 		exit("Front image does not contain SIPchart metadata");
+ 	print("\\Clear");
+	print(info);
+	selectWindow("Log");
+}
+
+macro "Unused Tool -" {}
+
+  var dCmds = newMenu("SIP Menu Tool",
+      newArray("Load Demo Stack From Web","Make SIPchart", "Set Microscope Specs", "Set Microscope Specs from CLip", "Show Numerical Results", "-", "About SIPchart"));
+      
+
+macro "SIP Menu Tool -C83e   T0a12S T7a12i Tba12p" {
+//macro "SIP Menu Tool - Ce4a T0912S T7912i Tb912p" {
+       cmd = getArgument();
+       if (cmd=="Load Demo Stack From Web")
+           loadDemoStack();
+       else if (cmd=="Make SIPchart")
+           makeSipChart();
+       else if (cmd=="Set Microscope Specs")
+           setMicroscopeSpecs();
+       else if (cmd=="Set Microscope Specs from CLip")
+           setMicroscopeSpecsFromClip();
+       else if (cmd=="Show Numerical Results")
+			showNumericResults();
+       else if (cmd=="About SIPchart")
+			run("URL...", "url=http://simon.bio.uva.nl/sipcharts/SIPchart.html");
+
+  }
+macro "SIP Plot Live Tool -C83e    T0a12P T8a12L" {//  L0f4f L4f5d L5d7c   L7ccd   Lcdef Lefff " {
+//macro "Z Profile Plotter Tool -Ce4a  L0f3f L3f5d L5d78" {
+    leftButton=16;
+	thisID = getImageID;
+	oldx = 0;
+	oldy = 0;
+	if (isOpen("Live Profile")){
+		selectImage("Live Profile");
+		selectImage(thisID);
+	}	
+	if (!isOpen(srcID)) exit("Source image not found");
+	getCursorLoc(x, y, z, flags);
+	while (flags & leftButton!=0) {
+		getCursorLoc(x, y, z, flags);
+		if (x != oldx || y !=oldy){
+			
+			wait(5);
+		
+			if (getImageID == chartID){
+				oldx = x;
+				oldy = y;	
+				panel = floor((x - 10) / panelSpacing210);
+				x = (x - 10) % panelSpacing210;
+				x = round(x /panelWidth150 * 64);
+				y -= panelsHookY;
+				y = round(y/150 * 64);
+				
+				if (y < 0 || y >= 64 ||x >= 64) exit;
+				selectImage(resultID);				
+				makeLiveProfile(x, y);
+				selectImage("Live Profile");
+				setLocation(310, 360);
+				selectImage(resultID);
+				setSlice(panel + 1);
+				run("Set... ", "zoom=400");
+				makeOval(x - 1, y- 1, 3, 3);
+				return;
+			}		
+			if (getImageID == resultID && x >= 0 && x < 64 && y >= 0 && y < 64){
+				makeLiveProfile(x, y);
+				selectImage(resultID);
+				makeOval(x - 1, y- 1, 3, 3);
+			}				
+		}
+	}
+}
+
+

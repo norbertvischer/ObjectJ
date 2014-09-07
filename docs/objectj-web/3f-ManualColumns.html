@@ -1,0 +1,165 @@
+<!-- #bbinclude "Head.incl" -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+
+
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+        <meta name="generator" content="BBEdit 8.7" />
+        <meta name="author" content="Norbert Vischer" />
+        <meta name="keywords" content="Non-destructive marking, ImageJ, Object-Image, ObjectJ, Image analysis "/>
+        <title>
+			Homepage of ObjectJ
+        </title>
+        <style type="text/css">
+            @import url("main.css");
+        </style>
+    </head>
+    <!-- end bbinclude -->
+    <body id="Manual">
+        <div id="container">
+            <!-- #bbinclude "NavBar.incl" -->
+            <!--Main navigation bar-->
+            <img src="Images/ObjectJ-banner.gif" />
+            <div id="bondi">
+                <div id="bar">
+
+                    <ul>
+
+                        <li id="Home"><a href="index.html" name="Home">Home</a></li>
+                        <li id="Concept"><a href="5-Concept.html" name="Concept">Concept+Tips</a></li>
+                        <li id="Tutorial"><a href="2-Tutorial.html" name="Tutorial">Tutorial</a></li>
+                        <li id="Manual"><a href="3a-ManualMenu.html" name="Manual">Manual</a></li>
+                        <li id="Macros"><a href="4a-ObjectJMacroFunctions.html" name="Macros">Macros</a></li>
+                        <li id="News"><a href="6-News.html" name="News">News</a></li>
+                        <li id="Examples"><a href="7a-Examples.html" name="Examples">Examples</a></li>
+                        <li id="Download"><a href="download" name="Download">Download</a></li>
+                    </ul>
+                </div>
+                <div class="clear_noline"></div>    <!--End Navigation Bar-->
+
+
+            </div>
+            <hr> </hr>
+            <!-- end bbinclude -->
+            <br>
+
+            </br>
+            <div id="manual">
+                <!-- #bbinclude "LinksForManual.incl" -->
+                <ul id="manuallinks">
+                    <a href="3a-ManualMenu.html">Menu</a> |
+                    <a href="3b-ManualTools.html">Tools</a> |
+                    <a href="3c-ManualResults.html">Results</a> |
+                    <a href="3d-ManualImages.html">Images</a> |
+                    <a href="3e-ManualObjects.html">Objects</a> |
+                    <a href="3f-ManualColumns.html">Columns</a> |
+                    <a href="3g-ManualQualifiers.html">Qualifiers</a>
+
+                </ul>
+                <!-- end bbinclude -->
+
+
+                <H2> <a name="manualtools">Columns Panel </a></H2>
+                <H4>
+                    <img src="Images/ColumnsPanel.png" />
+                </H4>
+
+
+                <H4>
+
+
+                    <ul id="subbuzz">
+                        <li>Use the Columns panel to connect numerical results to markers</li>
+                        <li>For each operation, a certain number of operands are needed. For example, to calculate a distance between two points, you need two operands. An operand is defined by name of the item, clone number, and point number.</li>
+
+
+                    </ul>
+
+                </H4>
+
+
+
+
+                <H4>
+
+
+
+                    <table border="1">
+                        <tr><th>Operation</th><th>Operands</th><th>Description</th></tr>
+                        <tr><td>Length      </td><td>(1) </td><td>	Returns the length of an object, whose shape is a straight or segmented line, or returns the
+                                perimeter for polygon shapes. Because begin and end of the (line-) object is determined automatically,
+                                only one operand is needed.
+                            </td></tr>
+                        <tr><td>Path        </td><td>(2) </td><td>	On a segmented line, travel from operand 1 to operand 2 , visiting all corner points in between,
+                                and return the travel distance. Travel to the last point of the object if operand 2 is beyond
+                                the end, or if it is set to -1. Both points must be on same object (e.g. a segmented line).
+                            </td></tr>
+                        <tr><td>Distance    </td><td>(2) </td><td>	The distance between 2 points. If both points are on a straight line, it's more convenient to use 'Length'.
+                            </td></tr>
+                        <tr><td>PartialPath </td><td>(2) </td><td>	The first operand should indicate a (segmented) line. The second operand indicates a point that will be
+                                projected onto that line, so the line can be seen as consisting of two parts. The length of the first part is
+                                calculated. Reslult is >=0  and <= total path length.
+                                (2D operations, z coordinate is ignored).
+                            </td></tr>
+                        <tr><td>Rel.PartialPath </td><td>(2) </td><td>	Same as PartialPath, but returning a relative value between 0 and 1.
+                            </td></tr>
+                        <tr><td>XPos        </td><td>(1) </td><td>	X-co-ordinate of the point
+                            </td></tr>
+                        <tr><td>YPos        </td><td>(1) </td><td>	Y-co-ordinate of the point (top is always zero)
+                            </td></tr>
+                        <tr><td>ZPos        </td><td>(1) </td><td>	Z-Co-ordinate ; example: in a stack with 3 slices and slice spacing = 10 um, ZPos is between 5 and 35 um
+                            </td></tr>
+                        <tr><td>Orientation </td><td>(2) </td><td>	Returns the orientation of a line formed by 2 points, with respect to the x axis. (0..360 degrees, 2D only).
+                            </td></tr>
+                        <tr><td>Angle       </td><td>(3) </td><td>	Returns the angle formed by 3 points. (0..180 degrees, 2D or 3D; the second point is the corner).
+                            </td></tr>
+                        <tr><td>Count       </td><td>(1) </td><td>	Returns the occurrence of a certain item type per object (also called the number of clones).
+                            </td></tr>
+                        <tr><td>Area        </td><td>(1) </td><td>	Returns the area of a polygon or ROI (not available for other shapes). The result is mathematically
+                                derived from the corner points and is more precise than pixel counting. Crossing lines like in an '8' cause
+                                subtraction of the sub-areas.
+                            </td></tr>
+                        <tr><td>Slice       </td><td>(1) </td><td>	Returns the integer slice number to which the point belongs.
+                            </td></tr>
+                        <tr><td>Image       </td><td>(0) </td><td>	Returns image number which holds the cell
+                            </td></tr>
+                        <tr><td>ID          </td><td>(0) </td><td>	Returns the unique negative ID number of the cell, which doesn’t change after renumbering
+                            </td></tr>
+                        <tr><td>Exists      </td><td>(1) </td><td>	Returns 1 if the point exists, otherwise returns NaN
+                            </td></tr>
+                        <tr><td>None	</td><td>(0) </td><td>          No automatic calculation takes place. Such a column can be used by macro commands to store any number.
+                            </td></tr>
+                        <tr><td>Static User Column	</td><td>(0) </td><td>	Not fully supported yet
+                            </td></tr>
+
+                    </table>
+                </H4>
+
+
+
+
+
+            </div>
+        </div>
+
+        <!-- begin google analytics, 1.9.2009 -->
+        <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+        </script>
+        <script type="text/javascript">
+            try {
+                var pageTracker = _gat._getTracker("UA-10085222-2");
+                pageTracker._trackPageview();
+            } catch(err) {}</script>
+
+        <!-- end google analytics, 1.9.2009 -->
+
+
+
+    </body>
+
+
+</html>

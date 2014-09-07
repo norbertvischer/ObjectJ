@@ -1,0 +1,1848 @@
+   Issues offline is intended to for comments
+while I sit in the Hotel without internet.
+
+1- PutAlgorithm fails if column existed before;
+   (InitColumn must set NewestColumn to nothing)
+   
+2- We now can pass arrays to and from ojMacro functions.
+this is done by special array converter functions.
+We can now do this:
+loc1 = newArray(10, 20, 0);
+loc2 = newArray(100, 200, 0);
+loc3 = newArray(70, 80, 0);
+locScale = newArray(1, 1, 0);
+
+ojvClear();
+ojvSetScale(xyzAr);
+ojvPushVertex(loc1);
+ojvPushVertex(loc2);;
+ojvPushVertex(loc3);;
+ojvCalculate("OuterCircle");
+radius = ojvScalar("radius");
+center = ojvVertex("center");
+
+Later, we use this for the turtle and add direction and pen color:
+loc1 = newArray(10, 20, 0, 270, 0xFF0000);
+ojvPushVertex(loc1);
+ojvStep(rad, angle); //later, we add ojvStep2(phi1, phi2);
+
+
+-However, we cannot use:  ojvPushVertex(newArray(1,2,3));
+- by the way, can we check if a variable is of which type? No!
+
+
+The vertex pointer points to the next (empty) location of the
+stack;
+
+ojv Functions:
+ojvClear();
+sets the vertex stack pointer.
+
+ojvSetScale(xyzArray);
+sets the aspect ratios, which is used only by ojvCalculate
+
+ojvPushVertex(xyzArray);
+pushes a vertex (array containing x, y z) onto the vertex stack
+
+ojvCalculate("operation");
+uses the vertex stack to calculate a result  (see table)
+
+ojvPushItem();
+pushes all points of selected item onto the vertex stack
+
+ojvVertex(n)
+returns a vertex from the stack, where  0 <= n < ojvVertices()
+
+ojvNVertices()
+returns the number of vertices in the vertex stack
+
+ojvResultVertex("resultType")
+returns a result vertex
+
+ojvResultScalar("resultType")
+returns a result scalar
+
+
+
+
+
+
+
+
+Operation		VertexResult	ScalarResult	
+InnerCircle		Center			Radius	
+OuterCircle		Center			Radius
+PartialPath		DropPoint		path, offset	
+Area			Center?			area
+Angle							angle
+length							length
+perimeter						perimeter	(adds closing segment of polygon)
+distance						distance	(necessary? length does the same)
+orientation						orientation
+crosspoint		crosspoint 		angle?
+
+
+
+Issues 20.9.2007
+
+1 an macro Interpreter error also gives a runtime exception, that is visible in the debugger.
+
+2 When no objects are defined yet, clicking with the object tool in an image 
+  has no effect at all - but there should be a message "First define objects").
+  
+3 default line witdth in Define Objects should be 1.
+
+4 default marker shoud be "Dot"
+
+5 + Quit ImageJ when project file has changed: I am asked for changes, but then have to force quit!
+
+6 shortcuts like Cmd-shift-L for reLoad macros sometimes don't work with project window or
+  ObjectJ Tools in front- not reproducible!
+
+
+7 + menu ObjectJ>Linked Images>Link Image From Project Folder...
+  does nothing.
+  If I use "Link Current Image to Project", the name appears 
+  in the menu list (below "Forget Unmarked Images"), but not
+  in the project window, and I cannot place markers.
+  Also, linked columns is empty, although I defined some.
+  This all will work when I save and re-load the project.
+
+8 "Reload Macros" should give message: file "thisProject.txt" was not 
+  found in the same folder as "thisProject.ojj" when appropriate.
+
+9 + Popup menus for each column should contain:
+  Color... (for defining a color like 0xff8800, or more fancy)
+  Precision ... ( for defining 0..9 digits)
+  Hide
+
+10 In the project window, images are accompanied by a 16x16 icon,
+  depending on file type, but no-one will recognize the meaning.
+  I suggest to use only two icons, the red X and a green V (check mark)
+  showing wheather the image is in the correct place.
+
+11 + In the project window, unscaled images should not be 
+  indicated with "1.0px/pixel",
+  but with "-" or "none" or "unscaled" or empty space.
+
+12 + In the project window, can we adjust the column width so 
+  that the image name gets the largest width?
+
+13 + menu ObjectJ>Linked Images>Remove Image from project
+
+14 + when object tool is selected, and I issue ojSelectObject(1),
+  then the Finger tool will be selected.
+
+15 + clicking with the ItemToRoi Tool on an item, the resulting roi
+  is only on the correct place if zoom=100%. (tested with point objects).
+
+16 ojNObjects() (and others?) gives an exception if no project is open
+(>>> use OJ.isProjectOpen()
+
+17 --- once menubar became populated with a repetition of the set of menus
+   (not reproducible)
+   
+18 We need macro commands:
+   ojShowResults()    -already implemented
+   ojShowTools()      - brings ObjectJ tools window to front
+   ojShowProject()    - brings ObjectJ project window to front
+   setLocation(x, y)  - this ImageJ command should also move ObjectJ windows
+
+   -> The subtraction is not performed on the first slice
+
+20 we should care about the batch mode (dont draw markers when batch=true)
+
+21 ojSetResult() immediately updates the results window, but statistics
+  are only updated when objectj results are brought to front.
+
+22 already solved....   could not perform  menu Images>Stacks>Add Slice
+
+23 + StDev and CV was calculated wrong, I fixed it
+
+
+
+24 ojInitColumn("_myColumn") creates a static column because of 
+   leading underscore; creating it by pop-up menu does not!
+
+25 Diamond marker looks messed up- lets talk about these gif icons
+   when you are here.
+
+26 + Following macro gives an exception, if "DemoSpots" is already linked.
+    This even happens after closing the project!
+
+		newImage("DemoSpots", "8-bit Black", 300, 300, 14); 
+
+27	menu "Link Image from Project Folder" does nothing
+
+28	ImageJ renaming policy (consequencies for us: see #29):
+    open an image that is already open: ImageJ opens it in a second window
+    and renames it.
+
+    Renaming detects last minus sign "-" and checks the rest:
+    - rest is a digit: it will be incremented*.
+    - rest is 1 or 2 letters: they are *discarded* and replaced by a number
+    - rest is >2 letters: minus sign plus number is appended
+
+    Renaming is also applied when two different files - with the same
+    name but on different locations-  are opened: 
+    the second one will be renamed!
+ 
+ 	*incremented is only true if lower numbers are occuppied - otherwise,
+ 	the smallest unoccupied number will be chosen.
+ 	
+ 	Example: a user has on disk 10 images im-1 ..im-10;
+ 	in ImageJ he opens im-1, im-2, im-4.  However, im-4 will
+ 	open as im-3 if im-4 has already been open.
+ 	This also happens when opening files via macro.
+ 	
+ 	*** This is just a mess!
+    > There is no reason to rename images: either you allow same names
+    (what most apps do), or you don't (like Object-Image linked files),
+    > One image should not be shown in two different windows.
+    
+29	Can we ask Wayne for an event when an image is opened, renamed, scaled? If yes:
+	
+	Opening:
+	--------
+	a- Open from File>Open
+	b- Open by dragging to ImageJ icon
+	c- Open by dragging to ImageJ window
+	d- Open by macro
+	
+		If the file is unlinked, we let Wayne open it (and rename it for god's sake)
+		If the file is linked and already open, we bring it to front
+		If the file is linked but not open, we open it and show the markers
+	
+	Renaming:
+	---------
+	e- menu Image>Rename
+	f- run("Rename", title)
+	g- Save As
+	
+		if image is linked, we propagate the new name to the project file, if
+		it does not collide with other names.
+	
+	Set Scale:
+	----------
+	h- menu Analyze>Set Scale
+	i- run("Set Scale", ...)
+	
+		if image is linked, we propagate the new scale to the project file,
+		and recalculate
+		
+30	What about stealing the keyboard shortcuts "1" and "2" (Select first and next Lane)?
+	Hardly anyone uses them! We could use them for Close Item and Close Object.
+	Tab and double-click are not really satisfactory.
+	
+31	Drawing a roi item is not responsive. Switching to next item after drawing a roi object
+    does not work.
+
+32 ** Important **
+   I wanted to save a project, but an error message came like "toString" "aaa" (where "aaa" was the name of the first linked image)
+   In the end, the old project file was erased but the new one not written. This is very dangerous.
+   Can we avoid that such a bug erases the old file before the write operation is successful?
+   
+   
+33	Link images from Project folder doesn't always present that directory if
+	another place has been visited last.
+	
+34	Cannot close a brand new (empty) project if project window is closed
+
+35	macro does not wait for
+	ojShowImage(n) and ojShowObject(n) to complete.
+	Example:  
+
+		while(nImages > 0) close;
+		newImage("abc", "RGB White", 600, 500, 3);
+		print(nSlices); // shows "3"
+		ojShowImage(1);//has 20 slices
+		print(nSlices);// shows "3" instead of "20"
+		
+	I found out that adding getTitle() solves the problem:
+		ojShowImage(1);
+		tmp = getTitle;
+		
+
+36	We need a visual feedback about which column is sorted (could be underline
+	of title in "Linked Results" Static Results" and in the "Linked Columns" list.
+
+37	"Linked Columns" pop-up menu needs a "Hide" item (not only  "Hide Others").
+	
+38	Statistics,  "Set Digits" etc for column "anyNumber" does not work. 
+
+39	Cannot save a linked image. In following macro, the modification date 
+	should change, but doesn't:
+
+			ojShowImage(1);
+			title =getTitle;
+			path = ojGetProjectPath();
+			fullpath = path+title;
+			//print(fullpath); 
+			saveAs("Tiff", fullpath);
+
+40  Clicking once on a linked result row should select the corresponding object.
+	Double-clicking selects and shows the object (this works already).
+
+41  While creating a polygon or roi object manually, closing segment should 
+	not be drawn before item is closed.
+	
+42	SaveAs macro renames linked image strangely. 
+
+  	path = getDirectory("image");
+	fullPath = path+getTitle;
+	print(fullPath);
+	saveAs('tiff', fullPath); //image should keep its name, but doesn't!
+
+43 + Added a check on the setMarker for the linked images
+   Possibly the same as #32:
+   java.lang.NullPointerException
+	at oj.cell.results.ColumnOJ.updateValues(ColumnOJ.java:395)
+	at oj.cell.results.ColumnOJ.getResultCount(ColumnOJ.java:304)
+	at oj.processor.MacroProcessorOJ.setResult(MacroProcessorOJ.java:385)
+	at oj.macro.MacroOJ.ojSetResult(MacroOJ.java:443)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+	at java.lang.reflect.Method.invoke(Method.java:585)
+	at ij.macro.Functions.call(Functions.java:3103)
+
+44	(Norbert)
+	ojDeleteItem("*", 2);
+		should delete the second item, independent of type- but it down't.
+
+(50)  ObjectJ>Objects>Delete Objects does not work right after opening
+     a project.
+     
+     === 15. 12 2007 : reviving the issues-offline list (Norbert)
+
+51	In Define Objects dialog:
+			Default values:
+					"clones" should be set to default 1 (now it is zero).
+					"Color" should propose an unused color, (Object-Image used red, then green...)
+					"Marker" should be default "dot"
+					"3D Objects" should be switched off
+					"name" suggestion should be "Item1", "Item2"
+					if "Sequence panel contains item types, one
+					  should be selected (by default, the first one).
+			"Sequence" could be renamed to "Sequence of Items"
+			"New" could be renamed to "Add Item Type"
+			"Remove": you can loose a lot of manual work: warning? 
+			  (Object-Image didn't allow to remove  object types that were in use.
+			  It could be the simplest thing also here)
+			"Properties" could be renamed to "Item Properties"
+			Settings Panel should have a kind of "Close" or "Ok" or "Done" 
+			or "Apply" button bottom right. This could also update the new
+			appearance of visible markers(color, marker type, line width, numbers)
+			
+			
+52  My first linked image is called Filament-A
+		In the Finder, its name is    	Filament-A.tif
+		When I choose "Save", the proposed name is Filament-A.tif; 
+		I click Yes and Overwrite. 
+		Image correctly remains open with visible objects.
+		
+		When I perform ojShowImage(1), a copy opens, and I see the same
+		markers in Filament-A and Filament-A.tif .
+		Placing new markers displays them in both windows 
+
+53  I don't get any results in v 451
+
+====== 31. 12. 2007
+54  Dragging a point of an object to different location so "Axis" becomes longer:
+    results are not updated, I have to choose ObjectJ>Recalculate
+
+55+	"Settings" window title should always be  "Project Settings", so it
+		can be refeneced in the manual with a constant name 
+		(currently it can be as confusing as "FewColi 5 Qualifiers")
+
+56+	Qualifiers don't work correctly (for example, often the "value" field
+		does not appear, or a qualifier is called "null"
+
+57-	Cannot drag an image from Finder to "Images" pane of Project Settings.
+
+58+	"Voxel size" in images pane in Project settings: too many digits.
+
+59	moving project file in Finder, while it was used, gives later a null pointer
+		(I have to specify this bug better).
+
+60+  I unlink the only linked image. Number of objects goes correctly to zero,
+    but statistics remain, also after "recalculate".
+
+61 Marker types in ObjectDef Settings is not set correct.
+
+62 DeleteObjects... with no image open does not work
+
+63 Delete column in ColumnSettings does not reset the properties
+
+64 Advance macro in a reopened cell does not work
+
+65 Unlink image in ImageSettings does not reset the buttons and properties
+
+66 Remove point number for partial path
+
+67 "recalculate" now also calls checkImagesScale. However, we can have a situation
+    where we have 3 different scales: the open image, the saved image, the project.
+    Recalculate should clear all discrepancies: let us discuss this later...
+    and urge Wayne to tame the Global flag!
+
+
+69 (Norbert) if no Project is open:  java.lang.NullPointerException
+	at oj.processor.MacroProcessorOJ.closeObject(MacroProcessorOJ.java:92)
+70 I have the results open and sorted (1607 cells); adding more derived results
+    is very slow
+71+ A row in results table is selected (=highlighted); Showing or hiding a
+    column makes highlighitn disappear 
+72 In Settings>Columns, when clicking the "Remove" button, list of column
+    titles should be updated immediately (Currently, column title remains visible)
+73 When qualifying, then closing and re-opening Settings>Qualifiers, radio button
+   "All" is selected; however, "If" should be selected.
+   Further, the Invert checkbox isn't updated either.
+   
+
+74+ In ImageJ, I can drag a folder into the ImageJ window in order to load all
+    images inside. This does not work when the ObjectJ plugin is loaded.
+
+75+ We once said: linking a single image also opens it, linking a group does not open
+    anything. When demonstrating ObjectJ, I realized that opening disrupts the cognitive
+    process of starting a project. I'd prefer that linking never should open an image,
+    but double-clicking should. (Currently, double-clicking an image name in
+    the settings window has no effect)
+
+76+  I can compile version 566, but cannot set any markers in this version
+
+77  ojSetTool(n) should disable any ImageJ tool and set the specified tool in
+    the ObjectJ Tools.  1= marker tool, 2= Pistol tool, etc. We have now 5 tools
+    but it should be extendible, and we may regret if the first user macro tool
+    occupies 6. Any ideas?
+    (Example: there may come a roi to object button:
+    click this button to convert an existing roi into a roi object 
+
+78+  Cannot move a polygon point with the triangle tool, and other things when zoom +/-
+    It should work like this:
+    - Find closest marker-point in neighborhood of triangle-click
+    - neighborhood is defined in screen pixels, not image pixels
+    - roi-object: only the start marker-point responds
+    - other objects: every marker-point responds
+
+79+  The XML file saves macro sets, and shows them on the bottom of the ObjectJ menu.
+    I have no way to remove them. (I think the problem appeared when I renamed
+    the ojj file and the txt file in the Finder; the XML remembers the old file name)
+    I think for this beta version, we should disable them and allow only one set,
+    that is defined in the accomanying txt file. Later, we can think about hierarchies.
+	
+80  Backspace in the middle of marking deletes the latest point. One should be 
+    able to repeat backspace until the entire cell is eaten up; currently backspace
+    only affects the last item.
+    The reopen of the cell should work properly!!!
+
+81+  Statistics are not updated after adding or moving markers. At any time, the numbers 
+    you see should be correct, even if results window is not in front.
+
+82+  v0.90: the macro tool (button in  ObjectJ Tools) does not work. Could disable this
+    and draw the tools into the ImageJ window, until the new version works?
+
+83+  With a project open, I created a new hyperstack and got an exception.
+    I cannot reproduce this anymore. Here is the start of the exception text which is
+    repetitive:
+
+    java.lang.StackOverflowError
+	at ij.WindowManager.getNthImageID(WindowManager.java:158)
+	at ij.WindowManager.getImage(WindowManager.java:127)
+	at oj.gui.MouseEventManagerOJ.<init>(MouseEventManagerOJ.java:30)
+	at oj.gui.MouseEventManagerOJ.getInstance(MouseEventManagerOJ.java:36)
+	at oj.gui.MouseEventManagerOJ.replaceMouseListener(MouseEventManagerOJ.java:58)
+	at oj.gui.MouseEventManagerOJ.<init>(MouseEventManagerOJ.java:30)
+	at oj.gui.MouseEventManagerOJ.getInstance(MouseEventManagerOJ.java:36)
+	at oj.gui.MouseEventManagerOJ.replaceMouseListener(MouseEventManagerOJ.java:58)
+
+84+ When I attempt to link a hyperstack, I get the message that hyperstacks cannot be linked (Link current image - menu).
+    However, when I link the hyperstack by dragging it from the Finder into the "Images" panel,
+    it does link. - (I hope that also hyperstacks can receive markers by November)
+
+
+85+ Could not open a project by dragging ojj to ImageJ window (nothing happens, grey ObjectJ menu items)
+    However, when I drag a second time, I am asked to close the old project,
+    although no project seems to be open. Cannot reproduce, but perhaps it is the same as #86
+
+
+86+ Cannot set markers into an existing project:
+ 	Restart ImageJ
+	status = ImageJ1.39t
+	ObjectJ 0.90
+	build 566
+
+	download http://simon.bio.uva.nl/Problems/Cannot-Mark.zip
+	drag FishEggs-32.ojj into ImageJ window
+	drag Coli-Project.ojj into ImageJ window
+	(Save old? = No)
+	Double-click in project window "Coli-11.tif"
+	Images opens ans shows markers, but I cannot add new ones.
+
+        ...so I didn't put v0.90 onto the server yet.
+
+87  Cropping a linked image (menu Image>Crop) looses its objects, which is correct, but it also
+    should become really unlinked.
+    So double-clicking the original image name in the images panel should re-load
+    the original, uncropped image (it doesn't).
+
+
+88? java.lang.IndexOutOfBoundsException: Index: 34, Size: 34
+	at java.util.ArrayList.RangeCheck(ArrayList.java:546)
+	at java.util.ArrayList.remove(ArrayList.java:389)
+	at oj.cell.CellsOJ.removeCellByIndex(CellsOJ.java:220)
+	at oj.processor.DataProcessorOJ.removeCellByIndex(DataProcessorOJ.java:296)
+	at oj.processor.MacroProcessorOJ.deleteObject(MacroProcessorOJ.java:447)
+	at oj.macro.MacroOJ.ojDeleteObject(MacroOJ.java:105)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+
+89  We need two reliable macros for the slide show:
+        ojZoom(factor, xhook, yhook)
+            zooms image so that pixel(xhook, yhook) appears top-left in window
+
+        ojSetWindowLocation(x, y, width, height).
+            defines window position and size without changing zoom. 
+            preferably, width and height are visible image contents 
+            (not window including borders, which are 4, 8, 4, 4 pixels on the Mac).
+
+        We ignore Waynes commands that try to be too clever (Microsoft syndrome):
+            setLocation(x, y, w, h)  -> changes also zoom factor, and does not work properly
+            run("To Selection");  -> derives zoom from roi AND screen AND adds some pixels!
+
+90+ In simon.bio.uva.nl/problems/coli-folder, I open objectJ results and settings>Results,
+    then I try to remove results column "Dia": I get in Netbeans an error:
+
+Exception in thread "AWT-EventQueue-0" java.lang.StackOverflowError
+        at javax.swing.JComboBox.setSelectedItem(JComboBox.java:531)
+        at javax.swing.JComboBox.setSelectedIndex(JComboBox.java:597)
+        at oj.settings.ColumnsSettingsOJ.cbxOperationItemStateChanged(ColumnsSettingsOJ.java:1354)
+        at oj.settings.ColumnsSettingsOJ.access$400(ColumnsSettingsOJ.java:39)
+        at oj.settings.ColumnsSettingsOJ$5.itemStateChanged(ColumnsSettingsOJ.java:585)
+        at javax.swing.JComboBox.fireItemStateChanged(JComboBox.java:1162)
+        at javax.swing.JComboBox.selectedItemChanged(JComboBox.java:1210)
+        at javax.swing.JComboBox.setSelectedItem(JComboBox.java:558)
+        at javax.swing.JComboBox.setSelectedIndex(JComboBox.java:597)
+
+91+  When I change first qualifier condition from 33 to 55, then click into the field of
+    the second condition, value jumps back to 33. (It apply the changes to the selected row
+    - even if the selected row is a different row than the one you just edited)
+
+92  Double-click to add qualifier is too cryptic, I think.
+    We could remove the "Remove" button, and require only a single-click in the item field.
+    Additionally to the item types, the user could choose "Clear This Condition", that appears
+    as part of the pop-up menu (at it's top).
+
+93+ placing a marker of type "Pixel" should set one pixel to show the start of a line
+
+
+
+94+ double-clicking an image name whose link is broken says:
+    "I'll open this with white background", but nothing is opened.
+
+95+ Situation Fingerbutton and setMarker button backgnd :both are selected (see screenshot)
+
+
+96 I double-click with the Finger a cell:
+   cell opens correctly, and cursor switches to yellow "constriction" marker 
+   because "Axis" and "Dia" are already full.
+   Then I want to place the constriction, but a new cell with red Axis marker is started
+
+97+ version 0.92 (build 591): -- 27. March 2008
+        download http://simon.bio.uva.nl/Problems/ and choose coli-Folder 
+        Open Coli-Project.ojj   
+        goto Settings>Objects, 
+        a) change Axis from "Line" to "SegLine"
+        b) set Axis Marker="Pixel" 
+        c) set Dia Marker = "Square"
+        d) go back to  "Axis": Marker should still be "Pixel", but it is "Square"
+
+98+  When "Composite" is switched off, the active item type never should jump. Currently
+    when I close a SegLine or Polygon with the tab key, active item jumps to the
+    first item type in the ObjectJ tools list - it shouldn't.
+
+99+ In v 0.92 (build 591):
+    a) within NetBeans, I create a new project, but only get an empty message box with OK
+    b) outside NetBeans, I could create a new project and link an image, but not 
+      place any markers (I could place markers with macro, though)
+
+100 Must protect ojImageLink() against case where no image is open
+
+
+101+ ImageJ is ok, ImageJ+ObjectJ crashes either after [F1] or after [F2] 
+    (also within NetBeans)
+
+
+    var 	fullPath = getDirectory("home") + "2MD-003-1.tif";
+
+    macro "Download Test File [F1]"{
+            run("URL...", "url=http://simon.bio.uva.nl/Problems/2MD-003.tif");
+            saveAs("Tiff", fullPath);
+            close;
+    }
+ 
+    macro "Count Rois [F2]" {
+            fullPath = getDirectory("home") + "2MD-003-1.tif";
+            showMessage("aa");
+            open(fullPath);
+            showMessage("bb");
+    }
+
+102** No project Open Error:
+    
+    - download  http://simon.bio.uva.nl/Problems/NoProjectError.zip
+    - open project Disector-tmp.ojj, choose ObjectJ>Make Outlines
+    - put Match_.java into the plugins folder
+    - choose Plugins>Compile and Run> Match_.java
+    - again choose ObjectJ>>Make Outlines
+    -->> complains: No project is open (Only on Tiger ????)
+
+103+ Placing 3d objects by macro:
+    
+    Still I get these problems:
+
+    - download  http://simon.bio.uva.nl/Problems/DisectorBug.zip
+    - open Disector0.ojj
+    - position the cursor somewhere in linked window (e.g. first slice)
+    - press F1: red 3d markers are set correctly in subseq slices
+    - press F2: green 3d markers are also ok
+    - press F3: blue markers expected, but green markers appear
+    - press F4: 
+        java.lang.NullPointerException
+	at oj.processor.state.proxy.CellProxyOJ.addLocation(CellProxyOJ.java:60)
+	at oj.processor.state.proxy.ImageProxyOJ.addLocation(ImageProxyOJ.java:33)
+	at oj.processor.state.CreateObjectStateOJ.mousePressed(CreateObjectStateOJ.java:60)
+	at oj.processor.CellProcessorOJ.mousePressed(CellProcessorOJ.java:103)
+	at oj.processor.MacroProcessorOJ.setMarker(MacroProcessorOJ.java:293)
+	at oj.macro.MacroOJ.ojSetMarker(MacroOJ.java:407)
+
+
+104+ 3D objects are flattened
+    when I save 3D objects and open them again, all markers of an
+    object are drawn  into the same slice (although the XML looks ok)
+
+105+ I went back to v0.89, because 	
+        getCursorLoc(x, y, z, flags);
+    does not work in 0.93 after the first ojSetMarker().
+
+106+ THE TOOLS FOR DISECTOR project are not working
+
+107+ Check the setTool macro function - "Pistol" selected the tool but didn't set the button as selected
+
+108+ add ojSetItemVisble("Name",true/false); - should switch on the vibility GUI
+
+109+ java.lang.ArrayIndexOutOfBoundsException: -1
+	at java.util.ArrayList.get(ArrayList.java:323)
+	at oj.cell.CellsOJ.getCellByIndex(CellsOJ.java:204)
+	at oj.processor.DataProcessorOJ.deleteCellsSlice(DataProcessorOJ.java:123)
+
+110+ Added ojGetOpenObject() (n.v.)
+
+111+ java.lang.NullPointerException
+	at oj.processor.MacroProcessorOJ.setObjectDefVisible(MacroProcessorOJ.java:156)
+	at oj.macro.MacroOJ.ojSetItemVisible(MacroOJ.java:417)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+
+112?? java.lang.ClassCastException: oj.processor.state.ToolStateAdaptorOJ
+	at oj.processor.MacroProcessorOJ.openObject(MacroProcessorOJ.java:303)
+	at oj.macro.MacroOJ.ojOpenObject(MacroOJ.java:314)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+	at java.lang.reflect.Method.invoke(Method.java:585)
+	at ij.macro.Functions.call(Functions.java:3134)
+
+113+ java.lang.IndexOutOfBoundsException: Index: 245, Size: 245
+	at java.util.ArrayList.RangeCheck(ArrayList.java:546)
+	at java.util.ArrayList.remove(ArrayList.java:389)
+	at oj.cell.CellsOJ.removeCellByIndex(CellsOJ.java:220)
+	at oj.processor.DataProcessorOJ.removeCellByIndex(DataProcessorOJ.java:302)
+	at oj.processor.MacroProcessorOJ.deleteObject(MacroProcessorOJ.java:536)
+	at oj.macro.MacroOJ.ojDeleteObject(MacroOJ.java:105)
+
+        I have added an extra checkfor the value of the index - anyway, the index is wrong, is to high; now, if the index is weong nothing will happen
+
+114+     An open cell shows its number label in italics, which is hard to see.
+        What about not using italic but append e.g. an asterisk (or precede?)
+        Example:   13*
+
+115?     First, I got into a situation where range = 2 ..11 (i.e. cell #1 was missing)
+        possibly due to an earlier exception? then: 
+        java.lang.NullPointerException
+	at oj.processor.DataProcessorOJ.showCell(DataProcessorOJ.java:251)
+	at oj.processor.MacroProcessorOJ.showObject(MacroProcessorOJ.java:343)
+	at oj.macro.MacroOJ.ojShowObject(MacroOJ.java:489)
+
+116+     http://simon.bio.uva.nl/Problems/GR2.ojj
+        a)all points appear in slice 1, (I wrote a conversion macro)
+        b)?? I am not able to save that ojj file: I get an empty dialog 
+        
+
+
+117+     Delete Objects dialog "From" and "To" is swapped
+
+118+    appended the ojSelectedItemName() macro
+
+119   see 102 (No Project Open)
+
+120+   ObjectJ Toolmacros behave different: 
+	it appears that not 'click' but 'mouse-moved is detected
+
+121+    a) Crash counter: entire ImageJ crashes without any message. I now append here each crash:
+        16 April: Disector method, double-click on linked image, iMac 24" (better go to b)
+
+        b) crash can be reproduced: on iMac 24", opened ImageJ (with ObjectJ 0.93f), created a new text window (shift-N)
+            it, activated the ImageJ main window, then did shortcut B (=open the Blobs): window is opened, but remains empty,
+            then application -> crashes!
+            I can reproduce this now, also after restart, also in Nebeans debug mode. No crash without ObjectJ.
+            Report see   http://simon.bio.uva.nl/Problems/crash-2008-04-17
+
+        Only Mac (Windows is OK)
+
+122+    I drag project GR3.ojj onto the ImageJ window: menu remains empty, but project exists!
+        See item #85 (glad we didn't remove that)
+
+123+	Cannot type letter "L" into an image with the "A" tool. Is "L" absorbed by "Reload Macros [L]"?
+        Remark: Check if the roi is present also!!!
+
+124+	120 not solved yet: ObjectJ Toolmacros behave different: 
+	it appears that not 'click' but 'mouse-moved' is detected.
+
+125+	using ObjectJ tool messes up disector rotation and even could give me the
+	dialog intended for parameter transfer such as phi=.., xoff=..
+
+126**	Linked image "is in use" and cannot be trashed in the Finder.. have to find out details..
+
+127+	When trying to quit ImageJ via dock>quit, I got this:
+
+	java.lang.NullPointerException
+	at apple.awt.CMenuItem.setLabel(CMenuItem.java:49)
+	at apple.awt.CMenuItem.setLabel(CMenuItem.java:76)
+	at java.awt.MenuItem.setLabel(MenuItem.java:221)
+	at oj.gui.MenuManagerOJ.changeProjectName(MenuManagerOJ.java:113)
+	at oj.gui.MenuManagerOJ.close(MenuManagerOJ.java:99)
+	at oj.gui.actions.ProjectActionsOJ.closeProjectData(ProjectActionsOJ.java:164)
+	at oj.gui.actions.ProjectActionsOJ.access$000(ProjectActionsOJ.java:31)
+	at oj.gui.actions.ProjectActionsOJ$4.actionPerformed(ProjectActionsOJ.java:74)
+	at oj.plugin.QuitOJ.run(QuitOJ.java:24)
+	at ij.IJ.runUserPlugIn(IJ.java:158)
+
+128+   setTool(15) still shows the Marker tool (should be about ojSetToll which looks OK)
+
+129+   Cannot unlink the last image in the Settings panel
+
+130   Image not found exception, see grave of exceptions on Powerbook 12"
+      Looks that during the test the original image with ID -5 has been closed a new image has been vreated ID -6.
+      Still, the macro was pointing to -5.
+java.lang.RuntimeException: Macro canceled
+	at ij.Macro.abort(Macro.java:73)
+	at ij.IJ.error(IJ.java:463)
+	at ij.IJ.selectWindow(IJ.java:875)
+	at oj.processor.MacroProcessorOJ.showImage(MacroProcessorOJ.java:245)
+	at oj.macro.MacroOJ.ojShowImage(MacroOJ.java:492)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+
+131+  With FishEggs-Lux01.ojj open, I made a rectangular roi in unlinked stack
+      "wholeStuff.tif". Then chose
+      "Duplicate, Slice only".
+      The duplicate is created, but then the error comes:
+    
+      java.lang.StackOverflowError
+	at ij.WindowManager.getImage(WindowManager.java:127)
+	at oj.gui.MouseEventManagerOJ.<init>(MouseEventManagerOJ.java:31)
+	at oj.gui.MouseEventManagerOJ.getInstance(MouseEventManagerOJ.java:37)
+	at oj.gui.MouseEventManagerOJ.replaceMouseListener(MouseEventManagerOJ.java:59)
+	at oj.gui.MouseEventManagerOJ.<init>(MouseEventManagerOJ.java:31)
+	at oj.gui.MouseEventManagerOJ.getInstance(MouseEventManagerOJ.java:37)
+	at oj.gui.MouseEventManagerOJ.replaceMouseListener(MouseEventManagerOJ.java:59)
+
+132   drag+drop an ojj file too quickly after ImageJ launch, shows XML instead of 
+      opening the project file. Could we add some readable text to the XML
+      like "this file should not be visible, please close it again"
+
+133   We still get occasionally a multiple set of menus, e.g. "File Edit.." could appear 3 times
+
+134+ Change the operation for column setting does not trigger the event in the Results!!!
+
+135 The Match plugin does not compile on PC using ImageJ
+
+136+ fname = ojResult("File name", 1);//string column
+    print(fname);
+	
+
+    java.lang.NumberFormatException: For input string: "a.tif"
+	at sun.misc.FloatingDecimal.readJavaFormatString(FloatingDecimal.java:1224)
+	at java.lang.Double.valueOf(Double.java:447)
+	at oj.cell.results.ColumnOJ.getDoubleResult(ColumnOJ.java:267)
+	at oj.processor.MacroProcessorOJ.getResult(MacroProcessorOJ.java:444)
+	at oj.macro.MacroOJ.ojResult(MacroOJ.java:178)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+
+137+ Again crash without notice (same as 101?) After starting ImageJ, and no image
+    has been open yet, I open one by macro and ImageJ crashes (but is ok without ObjectJ) 
+
+138? Save Project As..  I get an empty dialog with OK only; nothing is saved.
+
+
+139+ Don't remember when I got this exception:
+    Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
+        at oj.settings.ColumnsSettingsOJ.cbxThirdObjectTypeItemStateChanged(ColumnsSettingsOJ.java:1216)
+        at oj.settings.ColumnsSettingsOJ.access$1100(ColumnsSettingsOJ.java:39)
+        at oj.settings.ColumnsSettingsOJ$12.itemStateChanged(ColumnsSettingsOJ.java:802)
+        at javax.swing.JComboBox.fireItemStateChanged(JComboBox.java:1162)
+        at javax.swing.JComboBox.selectedItemChanged(JComboBox.java:1219)
+        at javax.swing.JComboBox.contentsChanged(JComboBox.java:1266)
+        at javax.swing.AbstractListModel.fireContentsChanged(AbstractListModel.java:100)
+        at javax.swing.DefaultComboBoxModel.setSelectedItem(DefaultComboBoxModel.java:88)
+        at javax.swing.DefaultComboBoxModel.addElement(DefaultComboBoxModel.java:126)
+        at javax.swing.JComboBox.addItem(JComboBox.java:690)
+        at oj.settings.ColumnsSettingsOJ.fillObjectDefs(ColumnsSettingsOJ.java:78)
+        at oj.settings.ColumnsSettingsOJ.objectDefChanged(ColumnsSettingsOJ.java:1694)
+        at oj.processor.EventProcessorOJ.fireObjectDefChangedEvent(EventProcessorOJ.java:386)
+        at oj.cell.ObjectDefsOJ.addObjectDef(ObjectDefsOJ.java:106)
+        at oj.settings.ObjectDefsSettingsOJ$12.focusLost(ObjectDefsSettingsOJ.java:405)
+        at java.awt.AWTEventMulticaster.focusLost(AWTEventMulticaster.java:172)
+        at java.awt.Component.processFocusEvent(Component.java:5494)
+
+140+ "Delete Objects" dialog:
+    from 0 to 0 (1 object will be deleted) is wrong
+
+141+ Qualifier panel should indicate "No columns exist" so the user knows
+    why he cannot enter any criteria.
+
+    Even if no columns exist, "Qualify All" and "Qualify None"  should work
+
+142 in build  682:
+    No qualifiers are defined yet. I click "If",  don't click "New", but  double-click
+    the empty qualifier field. 
+    I get exceptions (ocuurs the same problem in Define Objects?):
+    Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
+        at oj.cell.results.QualifierOJ.qualify(QualifierOJ.java:267)
+        at oj.cell.ResultsOJ.qualifyCells(ResultsOJ.java:253)
+        at oj.cell.ResultsOJ.qualifyCells(ResultsOJ.java:198)
+        at oj.processor.DataProcessorOJ.qualifyCells(DataProcessorOJ.java:489)
+        at oj.processor.DataProcessorOJ.qualifierChanged(DataProcessorOJ.java:579)
+        at oj.processor.EventProcessorOJ.fireQualifierChangedEvent(EventProcessorOJ.java:368)
+        at oj.cell.results.QualifiersOJ.addQualifier(QualifiersOJ.java:137)
+        at oj.settings.QualifiersSettingsOJ$ColumnActionListener.actionPerformed(QualifiersSettingsOJ.java:157)
+    Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
+        at oj.cell.results.QualifierOJ.qualify(QualifierOJ.java:267)
+        at oj.cell.ResultsOJ.qualifyCells(ResultsOJ.java:253)
+        at oj.cell.ResultsOJ.qualifyCells(ResultsOJ.java:198)
+        at oj.processor.DataProcessorOJ.qualifyCells(DataProcessorOJ.java:489)
+        at oj.processor.DataProcessorOJ.qualifierChanged(DataProcessorOJ.java:579)
+        at oj.processor.EventProcessorOJ.fireQualifierChangedEvent(EventProcessorOJ.java:368)
+        at oj.cell.results.QualifiersOJ.setQualifyMethod(QualifiersOJ.java:130)
+        at oj.settings.QualifiersSettingsOJ.radIfActionPerformed(QualifiersSettingsOJ.java:516)
+        at oj.settings.QualifiersSettingsOJ.access$1200(QualifiersSettingsOJ.java:49)
+        at oj.settings.QualifiersSettingsOJ$7.actionPerformed(QualifiersSettingsOJ.java:396)
+        at javax.swing.AbstractButton.fireActionPerformed(AbstractButton.java:1882)
+
+143     ObjectJ Tools window is often niet long (high) enough to show all item types. 
+        I have to manually resize it.
+
+144     Download download http://simon.bio.uva.nl/Problems/ManualRoi.zip
+        First I place the point (Item1), then the roi: after the roi, object should be closed and 
+        ObjectJ Tools should switch to "Item1" to prepare the next object. But it remains 
+        at "Roi", and cursor remains cyan.
+
+145     still to be defined:
+
+        java.lang.NullPointerException
+	at oj.cell.results.ColumnOJ.updateValues(ColumnOJ.java:394)
+	at oj.cell.results.ColumnOJ.getResultCount(ColumnOJ.java:299)
+	at oj.processor.MacroProcessorOJ.getResult(MacroProcessorOJ.java:439)
+	at oj.macro.MacroOJ.ojResult(MacroOJ.java:178)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+
+        Looks like a cell points to an image (image name) which does not exist any more in the project?
+
+
+146 	The following bug I only could reproduce on my G4 Powerbook (build 678).
+	(Bug does not occur without ObjectJ)
+	
+	Save Blobs.gif onto the Desktop
+	Quit ImageJ
+	Drag  file Blobs.gif onto ImageJ icon in the dock:
+	Blobs.gif is opened correctly in ImageJ
+	
+	
+	choose menu 
+        File> New > Image wit these properties: "Bulls Eye", "RGB Ramp", 512, 512, 8
+        Now I get the exception:
+
+        java.lang.StackOverflowError
+	at java.awt.AWTEventMulticaster.removeInternal(AWTEventMulticaster.java:837)
+	at java.awt.AWTEventMulticaster.remove(AWTEventMulticaster.java:87)
+	at java.awt.AWTEventMulticaster.removeInternal(AWTEventMulticaster.java:837)
+
+147 ojSelectObject(n) also selects the Finger tool. In most cases, this is not desired: 
+
+
+148 Internet Explorer makes a mess from downloading objectj_.jar (it is renamed to zip).
+    We need an exact description how the user who hasn't a Mac yet can repair this.
+
+149 Cannot reproduce: after working with  Cindy's fish macro, project was closed, 
+    then opened a fish file: could change tools e.g. point selection tool, but action
+    was finger tool.
+
+150+ when getting a macro error (e.g. because no project is open), I get 
+    exceptions in Netbeans:
+    java.lang.reflect.InvocationTargetException
+        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
+        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+        at java.lang.reflect.Method.invoke(Method.java:585)
+        at oj.util.ImageJAccessOJ$InterpreterAccess.interpError(ImageJAccessOJ.java:201)
+        at oj.macro.MacroOJ.ojRoiToItem(MacroOJ.java:366)
+        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+
+    After showing the error message, the Interpreter si throwing a RuntimeException:
+        "throw new RuntimeException(Macro.MACRO_CANCELED);"
+    This was also the cause that the macro didn't stop at the first error.
+    The InvocationTargetException is a wrapper of the RuntimeException and is no problem.
+    I have added a new line for the Interpreter to abort to be sure that at the first error the macro does stop/
+
+151  Project with tool in ObjectJ tools and same name gives: 
+
+        macro "Number [9]"{
+            setSpeciesOrStage(9);
+        }
+
+        function setSpeciesOrStage(nnn){
+            print("nnn=", nnn);
+           
+            prints nnn = 1 instead of 9.
+
+        if I load it under different name tahn project file, it works correctly.
+
+152 A lot trouble with ojOpenObject() etc (Cindy's fisheggs)
+
+
+153+  Setting 0 digits in results should "round", not "floor"
+
+154+  ojSetColumnProperty("StPhi", "visible", 0); 
+
+155  +visibility of columns, and -visibility of statistics, should be saved in project
+
+156+ try to start adding columns by macro, then delete a column manually: crash of results table
+
+157+ try to change scale of linked image: does not work
+
+158+ advance command: often cursor does not appear correctly
+
+
+159+
+    ojInitColumn("Hello");
+    ojPutOperand("Axis", 1, 1); ??
+    ojPutAlgorithm("Length");
+
+    java.lang.IndexOutOfBoundsException: Index: 6, Size: 6
+	at java.util.ArrayList.RangeCheck(ArrayList.java:546)
+	at java.util.ArrayList.get(ArrayList.java:321)
+	at oj.cell.results.ColumnsOJ.getColumnByIndex(ColumnsOJ.java:258)
+	at oj.settings.ColumnsSettingsOJ$ColumnCellModelOJ.getElementAt(ColumnsSettingsOJ.java:1613)
+	at javax.swing.JList.getSelectedValue(JList.java:1814)
+	at oj.settings.ColumnsSettingsOJ.updateView(ColumnsSettingsOJ.java:248)
+
+160+ last row of export results is not saved
+
+161+ default name for export results: should not be the same as linked macro file!
+
+162 Can happen that an item has no coordinates, such as the first GSpot:
+
+    <object id="-8" image="B02.tif" slice="1" qualified="true">
+      <items>
+        <segline slice="1" definition="Axis">
+          <location x="248.3735" y="144.9746" z="1.0"/>
+          <location x="230.6265" y="152.8365" z="1.0"/>
+        </segline>
+        <line slice="1" definition="Dia">
+          <location x="237.8614" y="145.2068" z="1.0"/>
+          <location x="241.1386" y="152.6044" z="1.0"/>
+        </line>
+        <point slice="1" definition="GSpot"/>
+        <point slice="1" definition="GSpot">
+          <location x="242.16666666666669" y="150.66666666666669" z="1.0"/>
+        </point>
+        <point slice="1" definition="RSpot">
+          <location x="239.83333333333331" y="148.16666666666669" z="1.0"/>
+        </point>
+      </items>
+      <properties>
+        <property name="Dia" value="0.7355468286860347"/>
+        <property name="GSpot04" value="NaN"/>
+        <property name="GSpot03" value="NaN"/>
+        <property name="RSpot04" value="NaN"/>
+        <property name="GSpot02" value="0.7254908768929996"/>
+        <property name="Len" value="1.7645861561742981"/>
+        <property name="RSpot03" value="NaN"/>
+        <property name="GSpot01" value="NaN"/>
+        <property name="RSpot02" value="NaN"/>
+        <property name="RSpot01" value="0.8273803194092707"/>
+      </properties>
+    </object>
+
+
+163 In "Images" panel, checkbox "Show Object Layer" is often accidentally clicked
+    Similar behaviour is in "Objects" checkboxes "Show Object Label" etc. 
+    Could we reduce sensitive area to the checkbox itself, not including the text?
+
+    Only if you create your "own components".
+
+164+ try to start adding columns by macro, then delete a column manually: crash of results table
+
+
+ojInitColumn("Hello");
+ojPutOperand("Axis", 1, 1);
+ojPutAlgorithm("Length");
+
+java.lang.IndexOutOfBoundsException: Index: 6, Size: 6
+	at java.util.ArrayList.RangeCheck(ArrayList.java:546)
+	at java.util.ArrayList.get(ArrayList.java:321)
+	at oj.cell.results.ColumnsOJ.getColumnByIndex(ColumnsOJ.java:258)
+	at oj.settings.ColumnsSettingsOJ$ColumnCellModelOJ.getElementAt(ColumnsSettingsOJ.java:1613)
+	at javax.swing.JList.getSelectedValue(JList.java:1814)
+	at oj.settings.ColumnsSettingsOJ.updateView(ColumnsSettingsOJ.java:248)
+
+
+165+ try to change scale of linked image: does not update the results table
+
+166+ advance command: often cursor does not appear correctly
+
+
+167+ last row of export results is not saved- this is fixed
+
+168+ default name for export results: should not be the same as linked macro file! (fixed? n.v.)
+
+
+169 just caught that:
+	java.lang.RuntimeException: Macro canceled
+	at ij.Macro.abort(Macro.java:73)
+	at ij.IJ.error(IJ.java:463)
+	at ij.IJ.selectWindow(IJ.java:877)
+	at oj.processor.MacroProcessorOJ.showImage(MacroProcessorOJ.java:246)
+	at oj.macro.MacroOJ.ojShowImage(MacroOJ.java:503)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+
+170+ object range in Settings>Images is not updated when I do Delete All Objects
+
+171 too fast browsing through images via showObject?
+	java.lang.NullPointerException
+	at sun.reflect.UnsafeFieldAccessorImpl.ensureObj(UnsafeFieldAccessorImpl.java:36)
+	at sun.reflect.UnsafeObjectFieldAccessorImpl.get(UnsafeObjectFieldAccessorImpl.java:18)
+	at java.lang.reflect.Field.get(Field.java:357)
+	at oj.util.ImageJAccessOJ$InterpreterAccess.getFunctions(ImageJAccessOJ.java:221)
+	at oj.util.ImageJAccessOJ$FunctionsAccess.resetImage(ImageJAccessOJ.java:244)
+	at oj.processor.MacroProcessorOJ.showObject(MacroProcessorOJ.java:347)
+
+172+  function keys for macro shorcuts only work with image or imagej window in front 
+
+173+ "New Project" (when being in NetBeans) does not save the project, but
+        gives me an empty Dialog with only "OK" (Powerbook and iMac Leopard). It works 
+        ok when being ouside Netbeans.
+      Save to binary was enabled on the laptop and the application is not able yet to handle the binary format
+
+174 When editing the Objects-Panel, we first have to make sure that no cell is open
+    + if the cell is open force close
+    + if the user try to remove a item definition and there are items of that type - ask for confirmation and delete items and item definition
+
+176 Check delete all items from slice to be able to handle hyperstacks
+
+177 New feature - user change item definition order
+
+178  cannot reproduce:
+java.lang.StackOverflowError
+	at ij.WindowManager.getNthImageID(WindowManager.java:158)
+	at ij.WindowManager.getImage(WindowManager.java:127)
+	at oj.gui.MouseEventManagerOJ.<init>(MouseEventManagerOJ.java:31)
+	at oj.gui.MouseEventManagerOJ.getInstance(MouseEventManagerOJ.java:37)
+	at oj.gui.MouseEventManagerOJ.replaceMouseListener(MouseEventManagerOJ.java:59)
+	at oj.gui.MouseEventManagerOJ.<init>(MouseEventManagerOJ.java:31)
+	at oj.gui.MouseEventManagerOJ.getInstance(MouseEventManagerOJ.java:37)
+	at oj.gui.MouseEventManagerOJ.replaceMouseListener(MouseEventManagerOJ.java:59)
+
+
+
+179+ This is serious: I open an ojj file, then I open a new text window, but this doesn't accept keyboard input
+
+180 + a) Line type 0 points desired (we have already 1,2,3, dotted and light dotted)
+    b) Default color when creating new object definitions:
+        first row = red,
+        second = green, 
+        ..... blue, yellow cyan, magenta
+    + c) menu objectJ>Show Project Window (not Settings)
+    + d) title of project window: include the .ojj extension (and should we include
+       the word project, like    "Project: FewColi.ojj" ?
+    + e)  px/unit should be "-" insterad of 1.000
+    f) Button "Unlink" in "Images Panel": we need a warning like :
+       "This operation will delete 17 objects"  
+       buttons "Delete" and "Cancel"
+
+    g) When opening a project, we often get the message "Save Project..?" which confuses
+       the user who is not aware that a project is open and needs to closed first.
+       We could extend teh text to "Save old project 'FewColi.ojj' before opening
+       a new one?"
+
+181  Column algorithm zPos should be revised for hyperstacks (Norbert) 
+
+182+ pressing tab key correctly advances to the next item type. But it also should 
+     close the object when last item was reached. Example:
+     open  SequenceDemo.ojj from:  http://simon.bio.uva.nl/Problems/seqDemo.zip
+     Mark length, diameter, then 3 of 5 possible spots. Press Tab:
+     object should be closed and "Filaments" should be selected in ObjectJ Tools,
+     but tab has no effect.
+
+
+183   Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
+        at java.util.Hashtable.get(Hashtable.java:336)
+        at oj.settings.DataSettingsOJ.formComponentResized(DataSettingsOJ.java:337)
+        at oj.settings.DataSettingsOJ.access$000(DataSettingsOJ.java:24)
+        at oj.settings.DataSettingsOJ$1.componentResized(DataSettingsOJ.java:152)
+        at java.awt.Component.processComponentEvent(Component.java:5428)
+        at java.awt.Component.processEvent(Component.java:5382)
+        at java.awt.Container.processEvent(Container.java:2010)
+        at java.awt.Window.processEvent(Window.java:1174)
+
+184 +Cannot set points:
+    - open  SequenceDemo.ojj from:  http://simon.bio.uva.nl/Problems/seqDemo.zip
+    - choose ObjectJ>Show Project Settings, 
+    - select the Objects panel
+    - set Linewidth of Filament to "invisible"
+    - go to "Images" panel, double-click the image
+    - try to place markers of type "Filament" 
+        -->  markers cannot be set into the image
+
+
+185+  Exception when un-scaling linked image (same project as in 184):
+    - open linked image
+    - menu Analyze>Set Scale > Reset
+    now the exception comes:
+        Exception in thread "AWT-EventQueue-0" java.lang.ArrayIndexOutOfBoundsException: 3 >= 3
+        at java.util.Vector.elementAt(Vector.java:432)
+        at javax.swing.table.DefaultTableColumnModel.getColumn(DefaultTableColumnModel.java:276)
+        at javax.swing.plaf.basic.BasicTableUI.paintCells(BasicTableUI.java:1970)
+        at javax.swing.plaf.basic.BasicTableUI.paint(BasicTableUI.java:1897)
+        at javax.swing.plaf.ComponentUI.update(ComponentUI.java:154)
+        at javax.swing.JComponent.paintComponent(JComponent.java:743)
+        at javax.swing.JComponent.paint(JComponent.java:1006)
+        at javax.swing.JComponent.paintChildren(JComponent.java:843)
+        at javax.swing.JComponent.paint(JComponent.java:1015)
+  
+186 Delete All Objects dialog should include the option to unlink all images
+    as well
+
+187+ Cannot change "Designs" as I have not java 1.6. I cannot even change the text!
+
+
+188+ changed objects to ytems
+
+189 This error I get only in the Netbeans panel; in normal operation it is invisible.
+    
+
+    Load
+        http://simon.bio.uva.nl/Problems/seqDemo.zip
+    then force an error by selecting a non-existing item:
+
+            ojSelectObject(1);
+            ojSelectItem("*", 99);
+
+
+java.lang.reflect.InvocationTargetException
+        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
+        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+        at java.lang.reflect.Method.invoke(Method.java:585)
+        at oj.util.ImageJAccessOJ$InterpreterAccess.interpError(ImageJAccessOJ.java:201)
+        at oj.processor.MacroProcessorOJ.selectYtem(MacroProcessorOJ.java:723)
+        at oj.macro.MacroOJ.ojSelectItem(MacroOJ.java:382)
+        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
+        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+        at java.lang.reflect.Method.invoke(Method.java:585)
+        at ij.macro.Functions.call(Functions.java:3919)
+        at ij.macro.Functions.getStringFunction(Functions.java:579)
+        at ij.macro.Interpreter.getStringTerm(Interpreter.java:1243)
+        at ij.macro.Interpreter.getString(Interpreter.java:1221)
+        at ij.macro.Interpreter.doStatement(Interpreter.java:267)
+        at ij.macro.Interpreter.doBlock(Interpreter.java:561)
+        at ij.macro.Interpreter.runUserFunction(Interpreter.java:299)
+        at ij.macro.Interpreter.doStatement(Interpreter.java:225)
+        at ij.macro.Interpreter.doBlock(Interpreter.java:561)
+        at ij.macro.Interpreter.runMacro(Interpreter.java:120)
+        at ij.macro.MacroRunner.run(MacroRunner.java:105)
+        at java.lang.Thread.run(Thread.java:613)
+Caused by: java.lang.RuntimeException: Macro canceled
+        at ij.macro.Interpreter.error(Interpreter.java:1186)
+        ... 23 more
+
+190+ Important: when I have linked macros (those under ObjectJ menu) e.g with
+    shortcut "C", I cannot type "C" into a text window.
+
+191+ ojSetColumnProperty("SpPhi", "vilsible", 0); (same as 154)
+ 
+192+ Drag an ojj file on the ImageJ main window does not work on blue iMac "Simon".
+    I have to use ObjectJ>Open Project..
+
+193 Downloading ojj file on the mac silently can add hidden .txt extension:
+    filaments.ojj.txt (Nasty: you have to change the name in Finders Info panel!).
+
+194 Changing itemtype Point to Polygon in Objects panel: this should be forbidden
+    if markers already use the old definition.
+
+195+ Drag an ojj file onto the ImageJ window gives in Netbeans exception; can I ignore it?
+
+    Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
+        at java.util.Hashtable.get(Hashtable.java:336)
+        at oj.settings.ProjectSettingsOJ.formComponentResized(ProjectSettingsOJ.java:337)
+        at oj.settings.ProjectSettingsOJ.access$000(ProjectSettingsOJ.java:24)
+        at oj.settings.ProjectSettingsOJ$1.componentResized(ProjectSettingsOJ.java:152)
+        at java.awt.Component.processComponentEvent(Component.java:5428)
+        at java.awt.Component.processEvent(Component.java:5382)
+        at java.awt.Container.processEvent(Container.java:2010)
+        at java.awt.Window.processEvent(Window.java:1174)
+
+196+  I switched Edit>Options>Misc>Debug Mode = on and dragged an ojj file to ImageJ window (newest version, 1.41g)
+        I get this log file, does this help identifying broken Drag&Drop?
+
+        DragAndDrop.dragEnter: java.awt.dnd.DropTargetDragEvent[source=java.awt.dnd.DropTarget@dc049d]
+        DragAndDrop.dragEnter: java.awt.dnd.DropTargetDragEvent[source=java.awt.dnd.DropTarget@54b574]
+        DragAndDrop.dragEnter: java.awt.dnd.DropTargetDragEvent[source=java.awt.dnd.DropTarget@dc049d]
+        DragAndDrop.drop: java.awt.dnd.DropTargetDropEvent[source=java.awt.dnd.DropTarget@dc049d]
+        DragAndDrop.open: /Users/norbert/Desktop/Untitled.ojj
+        openImage: "txt", /Users/norbert/Desktop/Untitled.ojj
+        runPlugin: HandleExtraFileTypes /Users/norbert/Desktop/Untitled.ojj
+        runPlugin: loci.plugins.LociImporter /Users/norbert/Desktop/Untitled.ojj
+        runPlugin: ij.plugin.frame.Editor 
+
+197 Sorting doesn't immediately switch column title to yellow.
+
+198 Names for items and columns should be restricted: no asterisk, comma, whitespace, start with letter
+
+199 "Reload Macros" makes my macro tool button (green M) in the ObjectJ tools invisible. I have to closeand re-open
+    ObjectJ tools to make it visible again.
+
+200 Condition notWithin does not work (0.94d?)
+
+201 key-down event is not captured if linked image is in the front (0.94d?)
+    (ImageJ at least captures it when an image or the ImageJ window is in front).
+    for (i=1; i<=10; i++) {
+	wait(1000);
+	test = isKeyDown("space");
+	print (test);
+	if (test>0) {
+		setKeyDown=("esc");
+	}
+}
+
+202 ojInitColumn with ojPutAlgorithm: slow if results are open, interferes if column definitions are open
+    (0.94d?)
+
+203 Deletinv a column in the project panel does not delete it in the Results window 
+    (work around: close and re-open project file)
+
+204 If a macro is called "AutoRun", it should be invisible in the ObjectJ menu.
+
+205+  Newest version of ImageJ, 1.41m, has a Help>Update menus command. Unfortunately,
+    the ObjectJ menu will disappear and not come back.
+
+---- 2 oct 2008 ---
+206+"Save project after exception overwrites project with zero bytes!
+    open:
+        http://simon.bio.uva.nl/Problems/SavingZeroBytes.zip
+     perform "mark Filaments" macro -> in version 0.94i, this gives an exception
+     because "ojLastObject()" does not work yet. After that exception, try to "save project"
+     An empty ok box appears and old ojj file is lost.
+
+207+"Delete all objects" crashes in newest version 0.94i, (not in older version) download:
+        http://simon.bio.uva.nl/Problems/DeleteAllObj-crash.zip  and Delete all objects
+
+208+Selective pistol does not work (0.94d)- should work like triangle tool (shift and alt key)
+
+209  Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
+        at oj.gui.data.YtemDefListOJ$YtemDefCellModelOJ.getSize(YtemDefListOJ.java:524)
+        at javax.swing.plaf.basic.BasicListUI.paint(BasicListUI.java:244)
+        at javax.swing.plaf.ComponentUI.update(ComponentUI.java:154)
+        at javax.swing.JComponent.paintComponent(JComponent.java:743)
+        at javax.swing.JComponent.paint(JComponent.java:1006)
+
+
+210  In Filaments 40, I set a constriction only and then kill it with backspace:
+    (I even cannot kill the 1-point constriction with backspace!)
+
+    Exception in thread "AWT-EventQueue-0" java.lang.IndexOutOfBoundsException: Index: 1, Size: 1
+        at java.util.ArrayList.RangeCheck(ArrayList.java:546)
+        at java.util.ArrayList.get(ArrayList.java:321)
+        at oj.project.CellOJ.getYtemByIndex(CellOJ.java:164)
+        at oj.processor.state.proxy.CellProxyOJ.deleteLastLocation(CellProxyOJ.java:173)
+        at oj.processor.state.CreateCellStateOJ.keyPressed(CreateCellStateOJ.java:213)
+        at oj.processor.ToolStateProcessorOJ.keyPressed(ToolStateProcessorOJ.java:82)
+        at oj.gui.KeyEventManagerOJ.keyPressed(KeyEventManagerOJ.java:104)
+        at java.awt.Component.processKeyEvent(Component.java:5560)
+        at java.awt.Component.processEvent(Component.java:5379)
+        at java.awt.Component.dispatchEventImpl(Component.java:4068)
+
+211 cannot sort columns that have no algorithms
+
+212 double-clicking on a result line shows the corresponding object. But when I
+    use on of the tools (pistol, triangle) they don't work. I have to explicitely
+    click into the window to gain focus
+
+
+213  changing a linked window (such as adding slices) gives conflict bitween image and object file.
+    I get "there are no images.."
+
+214+Downloading an ojj file silently adds a .txt! Solution: only supply zipped ojj files!
+
+
+--- 7 jan 2009
+215 +User shouldn't be allowed to use twice the same name for an item type
+
+
+-- 2 march 2009
+216 + Unlinking an image, but then linking it again, recoveres the deleted objects
+
+
+-- 11 april 2009
+217 + Unlink doesnt correctly remove all objects it contains - there was one left!
+
+218 +double-clicking at the end of an item (eg red seg line etc) places immediatly a new
+    item point (green), We should discard double-clicking
+
+219 Annas macro still needs the 3d workaround, otherwise the circle becomes a
+    new object on slice #2
+
+220 An object has already dia, now I want to re-open it and add the axis: cell is closed!
+
+221 +If I open ojj file via drag&drop, I get path without trailing /; if I open via "Open Project",
+    path has trailing /.
+
+222 table exceptions:
+Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
+       at oj.gui.results.ResultsContentTableRendererOJ.getTableCellRendererComponent(ResultsContentTableRendererOJ.java:56)
+       at oj.gui.ProjectResultsOJ.cellChanged(ProjectResultsOJ.java:1334)
+       at oj.gui.ProjectResultsOJ$38.mouseClicked(ProjectResultsOJ.java:690)
+
+223 linking a zipped file: this gives problems
+
+224+ saving project under different name: old macros survive-should we drop SaveAs?
+
+--11 aug 2009
+
+225 drawing a roi doesn't draw the outline before I rest with the mouse.
+
+226 editing a column name, and then pressing "Remove" button, gives the impression that a different column is removed.
+
+227 Linked Images> Remove Image from Project: this is stupid should be removed
+
+228 Right-click instead orf tiny triangles in results for pop-up menu
+
+229 Definition of results must be "close" to results: Add an "Edit" or "Define" or "Algorithm' to popup menu
+    and/or a button "Settings"
+
+230 Just received a new Nullpointer- this time in the Columns settings!!
+    (I was double-clicking "Category" in Columns panel):
+    06.09.09 1:11:23 [0x0-0x34034].gov.nih.info.rsb.ImageJ[373] 373  at oj.settings.ColumnSettingsOJ$ColumnsTableRenderer.getTableCellRendererComponent(ColumnSettingsOJ.java:1903)
+
+
+231 Questions for 09.09.09- Stelian:
+    a) How can I increase memory when running ObjectJ witnin NetBeans?
+    b) Is it easy to restore the automatic insertion of Build number in subversion + Google code?
+    c) Tool button un-hilights when loosing focus (in Leopard), can we manually change color instead?
+
+
+232 Summary of 9.9.2009:
+    Synchronized methods that accept an event such as cell changed etc.
+    look at: http://mindprod.com/jgloss/synchronized.html
+    - Different icons for  active/non-active tool buttons
+
+232 Remove the add and delete column in results table's columns panel
+
+233 pressing spacebar enables Waynes Hand cursor- releasing it, objectJ cursor does not re-appear
+
+234  + cannot select a polygon in row2,3,4 in ytem definitions since we used "synchronized": it jumps back to a line.
+    try to remove update "fireTableUpdated()" (15.9.). Now when changing a color I get this:
+
+    Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
+        at oj.settings.YtemDefsSettingsOJ$ColorRendererOJ.getColorName(YtemDefsSettingsOJ.java:1262)
+        at oj.settings.YtemDefsSettingsOJ$YtemDefsTableModel.getValueAt(YtemDefsSettingsOJ.java:712)
+        at javax.swing.JTable.getValueAt(JTable.java:2695)
+        at javax.swing.JTable.prepareRenderer(JTable.java:5712)
+
+235 + restoring fireTableUpdated()- so we are back at 9.9.2009: when I play with the ytem settings>shape, I got this:
+    Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
+        at oj.settings.YtemDefsSettingsOJ$10.actionPerformed(YtemDefsSettingsOJ.java:368)
+        at javax.swing.JComboBox.fireActionEvent(JComboBox.java:1240)
+        at javax.swing.JComboBox.setSelectedItem(JComboBox.java:567)
+        at javax.swing.JComboBox.setSelectedIndex(JComboBox.java:599)
+
+236 + Again crash when changing a color
+    Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
+        at oj.settings.YtemDefsSettingsOJ$ColorRendererOJ.getColorName(YtemDefsSettingsOJ.java:1277)
+        at oj.settings.YtemDefsSettingsOJ$YtemDefsTableModel.getValueAt(YtemDefsSettingsOJ.java:727)
+        at javax.swing.JTable.getValueAt(JTable.java:2695)
+        at javax.swing.JTable.prepareRenderer(JTable.java:5712)
+
+237 I have to drag&drop twice an image into the image panel..
+
+238 Nullpointer:
+		22.09.09 23:30:45	[0x0-0x18c18c].gov.nih.info.rsb.ImageJ[3403]	Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
+		22.09.09 23:30:45	[0x0-0x18c18c].gov.nih.info.rsb.ImageJ[3403]		at javax.swing.ImageIcon.<init>(ImageIcon.java:167)
+		22.09.09 23:30:45	[0x0-0x18c18c].gov.nih.info.rsb.ImageJ[3403]		at oj.tools.MoveCellToolOJ.getSelectedIcon(MoveCellToolOJ.java:34)
+		22.09.09 23:30:45	[0x0-0x18c18c].gov.nih.info.rsb.ImageJ[3403]		at oj.gui.data.YtemDefListOJ.updateToolButtonState(YtemDefListOJ.java:738)
+		22.09.09 23:30:45	[0x0-0x18c18c].gov.nih.info.rsb.ImageJ[3403]		at oj.gui.data.YtemDefListOJ.toolSelectionChanged(YtemDefListOJ.java:730)
+		22.09.09 23:30:45	[0x0-0x18c18c].gov.nih.info.rsb.ImageJ[3403]		at oj.tools.ToolManagerOJ.fireToolSelectionChangedEvent(ToolManagerOJ.java:380)
+		22.09.09 23:30:45	[0x0-0x18c18c].gov.nih.info.rsb.ImageJ[3403]		at oj.tools.ToolManagerOJ.selectObjectTool(ToolManagerOJ.java:205)
+		22.09.09 23:30:45	[0x0-0x18c18c].gov.nih.info.rsb.ImageJ[3403]		at oj.tools.ToolManagerOJ.selectTool(ToolManagerOJ.java:250)
+		22.09.09 23:30:45	[0x0-0x18c18c].gov.nih.info.rsb.ImageJ[3403]		at oj.gui.data.YtemDefListOJ$ToolListener.actionPerformed(YtemDefListOJ.java:621)
+		22.09.09 23:30:45	[0x0-0x18c18c].gov.nih.info.rsb.ImageJ[3403]		at javax.swing.AbstractButton.fireActionPerformed(AbstractButton.java:2028)
+		22.09.09 23:30:45	[0x0-0x18c18c].gov.nih.info.rsb.ImageJ[3403]		at javax.swing.AbstractButton$Handler.actionPerformed(AbstractButton.java:2351)
+
+239 static columns
+
+
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]	ojInitColumnjava.lang.reflect.InvocationTargetException
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at java.lang.reflect.Method.invoke(Method.java:597)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at oj.macro.ExtensionOJ.handleExtension(ExtensionOJ.java:130)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at oj.macro.ExtensionOJ.handleMacroExtension(ExtensionOJ.java:99)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at sun.reflect.GeneratedMethodAccessor17.invoke(Unknown Source)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at java.lang.reflect.Method.invoke(Method.java:597)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at ij.macro.Functions.call(Functions.java:3327)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at ij.macro.Functions.getStringFunction(Functions.java:244)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at ij.macro.Interpreter.getStringTerm(Interpreter.java:1154)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at ij.macro.Interpreter.getString(Interpreter.java:1133)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at ij.macro.Interpreter.doReturn(Interpreter.java:392)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at ij.macro.Interpreter.doStatement(Interpreter.java:206)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at ij.macro.Interpreter.doBlock(Interpreter.java:512)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at ij.macro.Interpreter.runUserFunction(Interpreter.java:275)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at ij.macro.Interpreter.doStatement(Interpreter.java:203)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at ij.macro.Interpreter.doBlock(Interpreter.java:512)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at ij.macro.Interpreter.runMacro(Interpreter.java:127)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at ij.macro.MacroRunner.run(MacroRunner.java:126)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at java.lang.Thread.run(Thread.java:637)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]	Caused by: java.lang.NullPointerException
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at oj.gui.ProjectResultsOJ.columnAdded(ProjectResultsOJ.java:134)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at javax.swing.table.DefaultTableColumnModel.fireColumnAdded(DefaultTableColumnModel.java:516)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at javax.swing.table.DefaultTableColumnModel.addColumn(DefaultTableColumnModel.java:108)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at javax.swing.JTable.addColumn(JTable.java:2782)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at javax.swing.JTable.createDefaultColumnsFromModel(JTable.java:1263)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at javax.swing.JTable.tableChanged(JTable.java:4383)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at javax.swing.table.AbstractTableModel.fireTableChanged(AbstractTableModel.java:280)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at javax.swing.table.AbstractTableModel.fireTableStructureChanged(AbstractTableModel.java:200)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at oj.gui.ProjectResultsOJ.columnChanged(ProjectResultsOJ.java:1304)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at oj.processor.EventProcessorOJ.fireColumnChangedEvent(EventProcessorOJ.java:285)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at oj.project.results.ColumnDefOJ.setName(ColumnDefOJ.java:244)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at oj.processor.MacroProcessorOJ.initColumn(MacroProcessorOJ.java:927)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at oj.macro.FunctionsOJ.ojInitColumn(FunctionsOJ.java:160)
+25.09.09 10:55:51	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		... 22 more
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]	ojInitColumnjava.lang.reflect.InvocationTargetException
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:39)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at java.lang.reflect.Method.invoke(Method.java:597)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at oj.macro.ExtensionOJ.handleExtension(ExtensionOJ.java:130)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at oj.macro.ExtensionOJ.handleMacroExtension(ExtensionOJ.java:99)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at sun.reflect.GeneratedMethodAccessor17.invoke(Unknown Source)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at java.lang.reflect.Method.invoke(Method.java:597)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at ij.macro.Functions.call(Functions.java:3327)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at ij.macro.Functions.getStringFunction(Functions.java:244)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at ij.macro.Interpreter.getStringTerm(Interpreter.java:1154)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at ij.macro.Interpreter.getString(Interpreter.java:1133)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at ij.macro.Interpreter.doReturn(Interpreter.java:392)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at ij.macro.Interpreter.doStatement(Interpreter.java:206)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at ij.macro.Interpreter.doBlock(Interpreter.java:512)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at ij.macro.Interpreter.runUserFunction(Interpreter.java:275)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at ij.macro.Interpreter.doStatement(Interpreter.java:203)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at ij.macro.Interpreter.doBlock(Interpreter.java:512)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at ij.macro.Interpreter.runMacro(Interpreter.java:127)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at ij.macro.MacroRunner.run(MacroRunner.java:126)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at java.lang.Thread.run(Thread.java:637)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]	Caused by: java.lang.NullPointerException
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at oj.gui.ProjectResultsOJ.columnAdded(ProjectResultsOJ.java:134)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at javax.swing.table.DefaultTableColumnModel.fireColumnAdded(DefaultTableColumnModel.java:516)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at javax.swing.table.DefaultTableColumnModel.addColumn(DefaultTableColumnModel.java:108)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at javax.swing.JTable.addColumn(JTable.java:2782)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at javax.swing.JTable.createDefaultColumnsFromModel(JTable.java:1263)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at javax.swing.JTable.tableChanged(JTable.java:4383)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at javax.swing.table.AbstractTableModel.fireTableChanged(AbstractTableModel.java:280)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at javax.swing.table.AbstractTableModel.fireTableStructureChanged(AbstractTableModel.java:200)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at oj.gui.ProjectResultsOJ.columnChanged(ProjectResultsOJ.java:1304)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at oj.processor.EventProcessorOJ.fireColumnChangedEvent(EventProcessorOJ.java:285)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at oj.project.results.ColumnDefOJ.setName(ColumnDefOJ.java:244)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at oj.processor.MacroProcessorOJ.initColumn(MacroProcessorOJ.java:927)
+25.09.09 10:56:36	[0x0-0x124124].gov.nih.info.rsb.ImageJ[2231]		at oj.macro.FunctionsOJ.ojInitColumn(FunctionsOJ.java:160)
+
+25.09.09 12:26:28	[0x0-0x140140].gov.nih.info.rsb.ImageJ[2405]	Exception in thread "AWT-EventQueue-0"
+25.09.09 12:26:28	[0x0-0x140140].gov.nih.info.rsb.ImageJ[2405]	java.lang.ArrayIndexOutOfBoundsException: 1 >= 1
+25.09.09 12:26:28	[0x0-0x140140].gov.nih.info.rsb.ImageJ[2405]		at java.util.Vector.elementAt(Vector.java:427)
+25.09.09 12:26:28	[0x0-0x140140].gov.nih.info.rsb.ImageJ[2405]		at javax.swing.table.DefaultTableColumnModel.getColumn(DefaultTableColumnModel.java:277)
+25.09.09 12:26:28	[0x0-0x140140].gov.nih.info.rsb.ImageJ[2405]		at javax.swing.plaf.basic.BasicTableHeaderUI.paint(BasicTableHeaderUI.java:609)
+25.09.09 12:26:28	[0x0-0x140140].gov.nih.info.rsb.ImageJ[2405]		at javax.swing.plaf.ComponentUI.update(ComponentUI.java:155)
+25.09.09 12:26:28	[0x0-0x140140].gov.nih.info.rsb.ImageJ[2405]		at javax.swing.JComponent.paintComponent(JComponent.java:763)
+25.09.09 12:26:28	[0x0-0x140140].gov.nih.info.rsb.ImageJ[2405]		at javax.swing.JComponent.paint(JComponent.java:1029)
+25.09.09 12:26:28	[0x0-0x140140].gov.nih.info.rsb.ImageJ[2405]		at javax.swing.JComponent._paintImmediately(JComponent.java:5098)
+25.09.09 12:26:28	[0x0-0x140140].gov.nih.info.rsb.ImageJ[2405]		at javax.swing.JComponent.paintImmediately(JComponent.java:4882)
+25.09.09 12:26:28	[0x0-0x140140].gov.nih.info.rsb.ImageJ[2405]		at javax.swing.RepaintManager.paintDirtyRegions(RepaintManager.java:829)
+
+
+26.09.09 21:11:44	[0x0-0x28028].gov.nih.info.rsb.ImageJ[307]	ojSelectObjectjava.lang.reflect.InvocationTargetException
+26.09.09 21:11:44	[0x0-0x28028].gov.nih.info.rsb.ImageJ[307]		at sun.reflect.GeneratedMethodAccessor17.invoke(Unknown Source)
+26.09.09 21:11:44	[0x0-0x28028].gov.nih.info.rsb.ImageJ[307]		at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+26.09.09 21:11:44	[0x0-0x28028].gov.nih.info.rsb.ImageJ[307]		at java.lang.reflect.Method.invoke(Method.java:597)
+26.09.09 21:11:44	[0x0-0x28028].gov.nih.info.rsb.ImageJ[307]		at oj.macro.ExtensionOJ.handleExtension(ExtensionOJ.java:130)
+26.09.09 21:11:44	[0x0-0x28028].gov.nih.info.rsb.ImageJ[307]		at oj.macro.ExtensionOJ.handleMacroExtension(ExtensionOJ.java:99)
+26.09.09 21:11:44	[0x0-0x28028].gov.nih.info.rsb.ImageJ[307]		at sun.reflect.GeneratedMethodAccessor13.invoke(Unknown Source)
+
+
+26.09.09 21:11:44	[0x0-0x28028].gov.nih.info.rsb.ImageJ[307]	Caused by: java.lang.IllegalArgumentException: Row index out of range
+26.09.09 21:11:44	[0x0-0x28028].gov.nih.info.rsb.ImageJ[307]		at javax.swing.JTable.boundRow(JTable.java:2105)
+26.09.09 21:11:44	[0x0-0x28028].gov.nih.info.rsb.ImageJ[307]		at javax.swing.JTable.setRowSelectionInterval(JTable.java:2128)
+26.09.09 21:11:44	[0x0-0x28028].gov.nih.info.rsb.ImageJ[307]		at oj.gui.ProjectResultsOJ.cellChanged(ProjectResultsOJ.java:1336)
+26.09.09 21:11:44	[0x0-0x28028].gov.nih.info.rsb.ImageJ[307]		at oj.processor.EventProcessorOJ.fireCellChangedEvent(EventProcessorOJ.java:267)
+26.09.09 21:11:44	[0x0-0x28028].gov.nih.info.rsb.ImageJ[307]		at oj.processor.DataProcessorOJ.selectCell(DataProcessorOJ.java:293)
+26.09.09 21:11:44	[0x0-0x28028].gov.nih.info.rsb.ImageJ[307]		at oj.processor.MacroProcessorOJ.selectCell(MacroProcessorOJ.java:728)
+
+
+26.09.09 22:47:18	[0x0-0xad0ad].backupd-helper[1250]	Not starting Time Machine backup after wake - failed to resolve alias to backup volume
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]	ojSelectObjectjava.lang.reflect.InvocationTargetException
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at sun.reflect.GeneratedMethodAccessor17.invoke(Unknown Source)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at java.lang.reflect.Method.invoke(Method.java:597)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at oj.macro.ExtensionOJ.handleExtension(ExtensionOJ.java:130)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at oj.macro.ExtensionOJ.handleMacroExtension(ExtensionOJ.java:99)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at sun.reflect.GeneratedMethodAccessor13.invoke(Unknown Source)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:25)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at java.lang.reflect.Method.invoke(Method.java:597)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at ij.macro.Functions.call(Functions.java:3327)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at ij.macro.Functions.getStringFunction(Functions.java:244)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at ij.macro.Interpreter.getStringTerm(Interpreter.java:1154)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at ij.macro.Interpreter.getString(Interpreter.java:1133)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at ij.macro.Interpreter.doReturn(Interpreter.java:392)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at ij.macro.Interpreter.doStatement(Interpreter.java:206)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at ij.macro.Interpreter.doBlock(Interpreter.java:512)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at ij.macro.Interpreter.runUserFunction(Interpreter.java:275)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at ij.macro.Interpreter.doStatement(Interpreter.java:203)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at ij.macro.Interpreter.doBlock(Interpreter.java:512)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at ij.macro.Interpreter.runUserFunction(Interpreter.java:275)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at ij.macro.Interpreter.doStatement(Interpreter.java:203)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at ij.macro.Interpreter.doBlock(Interpreter.java:512)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at ij.macro.Interpreter.runMacro(Interpreter.java:127)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at ij.macro.MacroRunner.run(MacroRunner.java:126)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at java.lang.Thread.run(Thread.java:637)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]	Caused by: java.lang.IllegalArgumentException: Row index out of range
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at javax.swing.JTable.boundRow(JTable.java:2105)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at javax.swing.JTable.setRowSelectionInterval(JTable.java:2128)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at oj.gui.ProjectResultsOJ.cellChanged(ProjectResultsOJ.java:1336)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at oj.processor.EventProcessorOJ.fireCellChangedEvent(EventProcessorOJ.java:267)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at oj.processor.DataProcessorOJ.selectCell(DataProcessorOJ.java:293)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at oj.processor.MacroProcessorOJ.selectCell(MacroProcessorOJ.java:728)
+26.09.09 22:51:50	[0x0-0xa30a3].gov.nih.info.rsb.ImageJ[1199]		at oj.macro.FunctionsOJ.ojSelectObject(FunctionsOJ.java:300)
+
+
+28.09.09 0:30:40	[0x0-0x68068].gov.nih.info.rsb.ImageJ[772]	Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
+28.09.09 0:30:40	[0x0-0x68068].gov.nih.info.rsb.ImageJ[772]		at oj.settings.ColumnSettingsOJ$ColumnsTableRenderer.getTableCellRendererComponent(ColumnSettingsOJ.java:1908)
+28.09.09 0:30:40	[0x0-0x68068].gov.nih.info.rsb.ImageJ[772]		at javax.swing.JTable$AccessibleJTable.getAccessibleChild(JTable.java:7032)
+28.09.09 0:30:40	[0x0-0x68068].gov.nih.info.rsb.ImageJ[772]		at javax.swing.JTable$AccessibleJTable.getAccessibleAt(JTable.java:7419)
+28.09.09 0:30:40	[0x0-0x68068].gov.nih.info.rsb.ImageJ[772]		at javax.swing.JTable$AccessibleJTable.valueChanged(JTable.java:6932)
+28.09.09 0:30:40	[0x0-0x68068].gov.nih.info.rsb.ImageJ[772]		at javax.swing.DefaultListSelectionModel.fireValueChanged(DefaultListSelectionModel.java:167)
+28.09.09 0:30:40	[0x0-0x68068].gov.nih.info.rsb.ImageJ[772]		at javax.swing.DefaultListSelectionModel.fireValueChanged(DefaultListSelectionModel.java:137)
+28.09.09 0:30:40	[0x0-0x68068].gov.nih.info.rsb.ImageJ[772]		at javax.swing.DefaultListSelectionModel.setValueIsAdjusting(DefaultListSelectionModel.java:668)
+28.09.09 0:30:40	[0x0-0x68068].gov.nih.info.rsb.ImageJ[772]		at javax.swing.plaf.basic.BasicTableUI$Handler.setValueIsAdjusting(BasicTableUI.java:929)
+28.09.09 0:30:40	[0x0-0x68068].gov.nih.info.rsb.ImageJ[772]		at javax.swing.plaf.basic.BasicTableUI$Handler.mouseReleased(BasicTableUI.java:1140)
+28.09.09 0:30:40	[0x0-0x68068].gov.nih.info.rsb.ImageJ[772]		at javax.swing.plaf.basic.BasicTableUI$MouseInputHandler.mouseReleased(BasicTableUI.java:778)
+28.09.09 0:30:40	[0x0-0x68068].gov.nih.info.rsb.ImageJ[772]		at java.awt.AWTEventMulticaster.mouseReleased(AWTEventMulticaster.java:273)
+28.09.09 0:30:40	[0x0-0x68068].gov.nih.info.rsb.ImageJ[772]		at java.awt.AWTEventMulticaster.mouseReleased(AWTEventMulticaster.java:272)
+
+
+
+240 6.10.2009
+    a) Save to disk this tiff file: File>Open Samples>Bat-Cochlea-Volume
+    b) restart ImageJ (with ObjectJ),
+    c) open Bat-Cochlea-Volume from disk
+    d) select all, Image>Duplicate.. (slice only):
+
+java.lang.StackOverflowError
+	at java.awt.AWTEventMulticaster.removeInternal(AWTEventMulticaster.java:892)
+	at java.awt.AWTEventMulticaster.remove(AWTEventMulticaster.java:128)
+	at java.awt.AWTEventMulticaster.removeInternal(AWTEventMulticaster.java:892)
+	at java.awt.AWTEventMulticaster.remove(AWTEventMulticaster.java:128)
+
+this is not the case with jpgs, or with tiff stacks opened from web, or
+if other duplicates have taken place already
+
+
+241 5.11.2009 creating a new stack(5 slices), save it, "Link current image", then press ">" to advance through
+    slices: it beeps and says "Window locked" in status bar
+
+242  19.11.2009 crash with Jantine (filaments):
+
+19.11.09 2:57:57 PM	[0x0-0x7b07b].gov.nih.info.rsb.ImageJ[1150]	Exception in thread "Run$_AWT-EventQueue-0" java.lang.NullPointerException
+19.11.09 2:57:57 PM	[0x0-0x7b07b].gov.nih.info.rsb.ImageJ[1150]		at org.jdesktop.beansbinding.ext.BeanAdapterFactory.loadProviders(BeanAdapterFactory.java:60)
+19.11.09 2:57:57 PM	[0x0-0x7b07b].gov.nih.info.rsb.ImageJ[1150]		at org.jdesktop.beansbinding.ext.BeanAdapterFactory.loadProvidersIfNecessary(BeanAdapterFactory.java:51)
+19.11.09 2:57:57 PM	[0x0-0x7b07b].gov.nih.info.rsb.ImageJ[1150]		at org.jdesktop.beansbinding.ext.BeanAdapterFactory.getAdapter0(BeanAdapterFactory.java:102)
+19.11.09 2:57:57 PM	[0x0-0x7b07b].gov.nih.info.rsb.ImageJ[1150]		at org.jdesktop.beansbinding.ext.BeanAdapterFactory.getAdapter(BeanAdapterFactory.java:33)
+19.11.09 2:57:57 PM	[0x0-0x7b07b].gov.nih.info.rsb.ImageJ[1150]		at org.jdesktop.beansbinding.BeanProperty.getAdapter(BeanProperty.java:1008)
+19.11.09 2:57:57 PM	[0x0-0x7b07b].gov.nih.info.rsb.ImageJ[1150]		at org.jdesktop.beansbinding.BeanProperty.getWriter(BeanProperty.java:870)
+19.11.09 2:57:57 PM	[0x0-0x7b07b].gov.nih.info.rsb.ImageJ[1150]		at org.jdesktop.beansbinding.BeanProperty.isWriteable(BeanProperty.java:637)
+19.11.09 2:57:57 PM	[0x0-0x7b07b].gov.nih.info.rsb.ImageJ[1150]		at org.jdesktop.beansbinding.Binding.getSourceValueForTarget(Binding.java:823)
+19.11.09 2:57:57 PM	[0x0-0x7b07b].gov.nih.info.rsb.ImageJ[1150]		at org.jdesktop.beansbinding.Binding.refreshUnmanaged(Binding.java:1222)
+19.11.09 2:57:57 PM	[0x0-0x7b07b].gov.nih.info.rsb.ImageJ[1150]		at org.jdesktop.beansbinding.Binding.refresh(Binding.java:1207)
+19.11.09 2:57:57 PM	[0x0-0x7b07b].gov.nih.info.rsb.ImageJ[1150]		at org.jdesktop.beansbinding.AutoBinding.tryRefreshThenSave(AutoBinding.java:162)
+19.11.09 2:57:57 PM	[0x0-0x7b07b].gov.nih.info.rsb.ImageJ[1150]		at org.jdesktop.beansbinding.AutoBinding.bindImpl(AutoBinding.java:199)
+19.11.09 2:57:57 PM	[0x0-0x7b07b].gov.nih.info.rsb.ImageJ[1150]		at org.jdesktop.beansbinding.Binding.bindUnmanaged(Binding.java:959)
+19.11.09 2:57:57 PM	[0x0-0x7b07b].gov.nih.info.rsb.ImageJ[1150]		at org.jdesktop.beansbinding.Binding.bind(Binding.java:944)
+19.11.09 2:57:57 PM	[0x0-0x7b07b].gov.nih.info.rsb.ImageJ[1150]		at org.jdesktop.beansbinding.BindingGroup.bind(BindingGroup.java:143)
+19.11.09 2:57:57 PM	[0x0-0x7b07b].gov.nih.info.rsb.ImageJ[1150]		at oj.gui.ProjectResultsOJ.initComponents(ProjectResultsOJ.java:916)
+19.11.09 2:57:57 PM	[0x0-0x7b07b].gov.nih.info.rsb.ImageJ[1150]		at oj.gui.ProjectResultsOJ.<init>(ProjectResultsOJ.java:103)
+19.11.09 2:57:57 PM	[0x0-0x7b07b].gov.nih.info.rsb.ImageJ[1150]		at oj.gui.menuactions.ViewActionsOJ$4.actionPerformed(ViewActionsOJ.java:105)
+19.11.09 2:57:57 PM	[0x0-0x7b07b].gov.nih.info.rsb.ImageJ[1150]		at java.awt.MenuItem.processActionEvent(MenuItem.java:627)
+19.11.09 2:57:57 PM	[0x0-0x7b07b].gov.nih.info.rsb.ImageJ[1150]		at java.awt.MenuItem.processEvent(MenuItem.java:586)
+
+243 (2.dec 2009) I start to save a linked tiff, but then press Cancel:
+
+java.lang.NullPointerException
+	at java.io.FileOutputStream.<init>(FileOutputStream.java:172)
+	at java.io.FileOutputStream.<init>(FileOutputStream.java:70)
+	at ij.io.FileSaver.saveAsTiffStack(FileSaver.java:125)
+	at oj.plugin.WriterOJ.run(WriterOJ.java:49)
+	at ij.plugin.filter.PlugInFilterRunner.processOneImage(PlugInFilterRunner.java:247)
+
+*** this happened only in NetBeans 5.1.2010
+eps-jar:
+Compiling 281 source files to /Users/norbert/Objj/ObjectJ/build/classes
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+Copying 1 file to /Users/norbert/Objj/ObjectJ/build/classes
+compile:
+run:
+Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
+        at javax.swing.ImageIcon.<init>(ImageIcon.java:167)
+        at oj.gui.Proj
+        at oj.gui.ProjectResultsOJ.initComponents(ProjectResultsOJ.java:740)
+        at oj.gui.ProjectResultsOJ.<init>(ProjectResultsOJ.java:105)
+        at oj.gui.menuactions.ViewActionsOJ$4.actionPerformed(ViewActionsOJ.java:105)
+        at oj.gui.KeyEventManagerOJ.keyPressed(KeyEventManagerOJ.java:143)
+        at java.awt.Component.processKeyEvent(Component.java:6306)
+        at java.awt.Component.processEvent(Component.java:6125)
+        at java.awt.Component.dispatchEventImpl(Component.java:4714)
+        at java.awt.Component.dispatchEvent(Component.java:4544)
+        at java.awt.KeyboardFocusManager.redispatchEvent(KeyboardFocusManager.java:1850)
+/*** this happened only in NetBeans 5.1.2010
+
+
+
+
+
+
+
+244 (10.2.2010)
+java.lang.StackOverflowError
+	at ij.WindowManager.getImage(WindowManager.java:154)
+	at oj.gui.MouseEventManagerOJ.<init>(MouseEventManagerOJ.java:36)
+	at oj.gui.MouseEventManagerOJ.getInstance(MouseEventManagerOJ.java:42)
+	at oj.gui.MouseEventManagerOJ.replaceMouseListener(MouseEventManagerOJ.java:73)
+	at oj.gui.MouseEventManagerOJ.<init>(MouseEventManagerOJ.java:36)
+	at oj.gui.MouseEventManagerOJ.getInstance(MouseEventManagerOJ.java:42)
+	at oj.gui.MouseEventManagerOJ.replaceMouseListener(MouseEventManagerOJ.java:73)
+	at oj.gui.MouseEventManagerOJ.<init>(MouseEventManagerOJ.java:36)
+	at oj.gui.MouseEventManagerOJ.getInstance(MouseEventManagerOJ.java:42)
+when duplicating my new Histogram window
+
+
+245 Stack overflow solved?
+    I removed automatic replacement from constructor MouseEventManagerOJ() (10.2.2010)
+    Now I can duplicate my histogram without stack overflow.
+
+246 10.2.2010
+java.lang.StackOverflowError
+	at java.awt.AWTEventMulticaster.removeInternal(AWTEventMulticaster.java:892)
+	at java.awt.AWTEventMulticaster.remove(AWTEventMulticaster.java:128)
+	at java.awt.AWTEventMulticaster.removeInternal(AWTEventMulticaster.java:892)
+	at java.awt.AWTEventMulticaster.remove(AWTEventMulticaster.java:128)
+	at java.awt.AWTEventMulticaster.removeInternal(AWTEventMulticaster.java:892)
+	at java.awt.AWTEventMulticaster.remove(AWTEventMulticaster.java:128)
+
+it still happens, when drag an image onto the microscope icon, then choose ImageJ>About ImageJ.
+However it does not on the laptop when using a larger hyperstack
+
+23.2.2010
+
+247 ObjectJ menu remains blue if Results table is visible, but macro does "ojHideResults"
+
+248
+    java.lang.StackOverflowError
+            at java.awt.AWTEventMulticaster.removeInternal(AWTEventMulticaster.java:892)
+            at java.awt.AWTEventMulticaster.remove(AWTEventMulticaster.java:128)
+
+    after choosing ImageJ>About ImageJ
+
+    This happens when:
+    - dragging an image onto dock icon of un-opened imageJ
+    - dragging an image onto  icon of un-opened imageJ (32/64bit)
+    - double-clicking a tiff, which then opens ImageJ
+
+
+
+    Does not happen when:
+    - ImageJ is already open
+    - ObjectJ is missing
+    - double-clicking an ojj file which then opens ImageJ
+
+    Infinite number text windows
+    after cmd-shift-N
+
+    Stack overflow really solved?
+    Previously, I solved the recursive call to MouseEventManagerOJ(), now also to  KeyEventManagerOJ() (3.3.2010)
+
+
+249 Double-click Atresia_Mackerel.ojj,
+    then choose twice "Help> update menus"
+    second time:
+    java.lang.NullPointerException
+	at oj.plugin.ImageJUpdaterOJ.run(ImageJUpdaterOJ.java:39)
+	at ij.IJ.runUserPlugIn(IJ.java:184)
+	at ij.IJ.runPlugIn(IJ.java:151)
+	at ij.Executer.runCommand(Executer.java:124)
+	at ij.Executer.run(Executer.java:58)
+	at java.lang.Thread.run(Thread.java:637)
+
+250 "notifyListener" exception: ar you using the newest version of ObjectJ?"
+    This occurs when opening Stoehr's crash/Butterfly-Sal.ojj, drag VHW.tiff into the images panel
+    and double-click it.
+
+251 Delete Slice in a hyperstack deletes all channels of that slice. However, if a stack is linked
+    it tells me "stack needed".
+
+
+   This occurs when opening Stoehr's crash/Butterfly-Sal.ojj, drag VHW.tiff into the images panel
+
+    and double-click it.
+
+
+252 After removing static columns and creating a nee dynamic one?
+
+01.04.10 23:52:22	[0x0-0xc80c8].gov.nih.info.rsb.ImageJ[1244]	Exception in thread "Run$_AWT-EventQueue-0" java.lang.NullPointerException
+01.04.10 23:52:22	[0x0-0xc80c8].gov.nih.info.rsb.ImageJ[1244]		at org.jdesktop.beansbinding.ext.BeanAdapterFactory.loadProviders(BeanAdapterFactory.java:60)
+01.04.10 23:52:22	[0x0-0xc80c8].gov.nih.info.rsb.ImageJ[1244]		at org.jdesktop.beansbinding.ext.BeanAdapterFactory.loadProvidersIfNecessary(BeanAdapterFactory.java:51)
+01.04.10 23:52:22	[0x0-0xc80c8].gov.nih.info.rsb.ImageJ[1244]		at org.jdesktop.beansbinding.ext.BeanAdapterFactory.getAdapter0(BeanAdapterFactory.java:102)
+01.04.10 23:52:22	[0x0-0xc80c8].gov.nih.info.rsb.ImageJ[1244]		at org.jdesktop.beansbinding.ext.BeanAdapterFactory.getAdapter(BeanAdapterFactory.java:33)
+01.04.10 23:52:22	[0x0-0xc80c8].gov.nih.info.rsb.ImageJ[1244]		at org.jdesktop.beansbinding.BeanProperty.getAdapter(BeanProperty.java:1008)
+01.04.10 23:52:22	[0x0-0xc80c8].gov.nih.info.rsb.ImageJ[1244]		at org.jdesktop.beansbinding.BeanProperty.getWriter(BeanProperty.java:870)
+01.04.10 23:52:22	[0x0-0xc80c8].gov.nih.info.rsb.ImageJ[1244]		at org.jdesktop.beansbinding.BeanProperty.isWriteable(BeanProperty.java:637)
+01.04.10 23:52:22	[0x0-0xc80c8].gov.nih.info.rsb.ImageJ[1244]		at org.jdesktop.beansbinding.Binding.getSourceValueForTarget(Binding.java:823)
+01.04.10 23:52:22	[0x0-0xc80c8].gov.nih.info.rsb.ImageJ[1244]		at org.jdesktop.beansbinding.Binding.refreshUnmanaged(Binding.java:1222)
+01.04.10 23:52:22	[0x0-0xc80c8].gov.nih.info.rsb.ImageJ[1244]		at org.jdesktop.beansbinding.Binding.refresh(Binding.java:1207)
+01.04.10 23:52:22	[0x0-0xc80c8].gov.nih.info.rsb.ImageJ[1244]		at org.jdesktop.beansbinding.AutoBinding.tryRefreshThenSave(AutoBinding.java:162)
+01.04.10 23:52:22	[0x0-0xc80c8].gov.nih.info.rsb.ImageJ[1244]		at org.jdesktop.beansbinding.AutoBinding.bindImpl(AutoBinding.java:199)
+01.04.10 23:52:22	[0x0-0xc80c8].gov.nih.info.rsb.ImageJ[1244]		at org.jdesktop.beansbinding.Binding.bindUnmanaged(Binding.java:959)
+01.04.10 23:52:22	[0x0-0xc80c8].gov.nih.info.rsb.ImageJ[1244]		at org.jdesktop.beansbinding.Binding.bind(Binding.java:944)
+01.04.10 23:52:22	[0x0-0xc80c8].gov.nih.info.rsb.ImageJ[1244]		at org.jdesktop.beansbinding.BindingGroup.bind(BindingGroup.java:143)
+01.04.10 23:52:22	[0x0-0xc80c8].gov.nih.info.rsb.ImageJ[1244]		at oj.gui.ProjectResultsOJ.initComponents(ProjectResultsOJ.java:925)
+01.04.10 23:52:22	[0x0-0xc80c8].gov.nih.info.rsb.ImageJ[1244]		at oj.gui.ProjectResultsOJ.<init>(ProjectResultsOJ.java:107)
+01.04.10 23:52:22	[0x0-0xc80c8].gov.nih.info.rsb.ImageJ[1244]		at oj.gui.menuactions.ViewActionsOJ$4.actionPerformed(ViewActionsOJ.java:105)
+01.04.10 23:52:22	[0x0-0xc80c8].gov.nih.info.rsb.ImageJ[1244]		at oj.gui.KeyEventManagerOJ.keyPressed(KeyEventManagerOJ.java:143)
+
+
+
+253  I have 12 cells in Filaments-77: it takes about 10 sec to switch to "Qualify - If".
+
+    and double-click it.
+
+255 Delete Slice in a hyperstack deletes all channels of that slice. However, if a stack is linked
+    it tells me "stack needed".
+
+256 static columns?
+
+04.04.10 23:26:07	[0x0-0x1d01d].gov.nih.info.rsb.ImageJ[467]	Exception in thread "Run$_AWT-EventQueue-0" java.lang.ArrayIndexOutOfBoundsException: 5 >= 3
+04.04.10 23:26:07	[0x0-0x1d01d].gov.nih.info.rsb.ImageJ[467]		at java.util.Vector.elementAt(Vector.java:427)
+04.04.10 23:26:07	[0x0-0x1d01d].gov.nih.info.rsb.ImageJ[467]		at javax.swing.table.DefaultTableColumnModel.getColumn(DefaultTableColumnModel.java:277)
+04.04.10 23:26:07	[0x0-0x1d01d].gov.nih.info.rsb.ImageJ[467]		at javax.swing.plaf.basic.BasicTableUI.paintCells(BasicTableUI.java:1970)
+04.04.10 23:26:07	[0x0-0x1d01d].gov.nih.info.rsb.ImageJ[467]		at javax.swing.plaf.basic.BasicTableUI.paint(BasicTableUI.java:1770)
+04.04.10 23:26:07	[0x0-0x1d01d].gov.nih.info.rsb.ImageJ[467]		at javax.swing.plaf.ComponentUI.update(ComponentUI.java:155)
+04.04.10 23:26:07	[0x0-0x1d01d].gov.nih.info.rsb.ImageJ[467]		at javax.swing.JComponent.paintComponent(JComponent.java:751)
+
+257, when using the leafs macro
+11.04.10 21:39:25	[0x0-0x136136].gov.nih.info.rsb.ImageJ[1726]	Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
+11.04.10 21:39:25	[0x0-0x136136].gov.nih.info.rsb.ImageJ[1726]		at oj.processor.state.ToolStateAdaptorOJ.showMouseStatus(ToolStateAdaptorOJ.java:139)
+11.04.10 21:39:25	[0x0-0x136136].gov.nih.info.rsb.ImageJ[1726]		at oj.processor.state.ToolStateAdaptorOJ.mouseMoved(ToolStateAdaptorOJ.java:64)
+11.04.10 21:39:25	[0x0-0x136136].gov.nih.info.rsb.ImageJ[1726]		at oj.processor.state.CreateCellStateOJ.mouseMoved(CreateCellStateOJ.java:116)
+11.04.10 21:39:25	[0x0-0x136136].gov.nih.info.rsb.ImageJ[1726]		at oj.gui.MouseEventManagerOJ.mouseMoved(MouseEventManagerOJ.java:212)
+11.04.10 21:39:25	[0x0-0x136136].gov.nih.info.rsb.ImageJ[1726]		at java.awt.Component.processMouseMotionEvent(Component.java:6393)
+11.04.10 21:39:25	[0x0-0x136136].gov.nih.info.rsb.ImageJ[1726]		at java.awt.Component.processEvent(Component.java:6117)
+11.04.10 21:39:25	[0x0-0x136136].gov.nih.info.rsb.ImageJ[1726]		at java.awt.Component.dispatchEventImpl(Component.java:4714)
+
+
+Double-appearance of ObjecJ menu can be reproduced with the old treerings.ojj + treerings.txt.
+
+When I disable "autorun ObjectJ" in startup macros, it works ok.
+
+What happens:
+I double-click an ojj file while ImageJ is not running:
+OS looks which application is linked
+OS starts ImageJ
+ImageJ runs startup macros- these contain "run ObjectJ" with no argument
+ImageJ checks which files are associated with Startup and finds an ojj file included
+This causes a second run ObjectJ_
+
+7.10.2010 loop in tutorial-5
+at apple.awt.CGraphicsEnvironment.createGraphics(CGraphicsEnvironment.java:301)
+at java.awt.image.BufferedImage.createGraphics(BufferedImage.java:1147)
+at java.awt.image.BufferedImage.getGraphics(BufferedImage.java:1135)
+at oj.processor.state.CreateCellStateOJ.ytemDefCursor(CreateCellStateOJ.java:293)
+at oj.processor.state.CreateCellStateOJ.ytemDefSelectionChanged(CreateCellStateOJ.java:260)
+at oj.processor.EventProcessorOJ.fireYtemDefSelectionChangedEvent(EventProcessorOJ.java:405)
+
+at oj.project.YtemDefsOJ.setSelectedYtemDef(YtemDefsOJ.java:83)
+at oj.processor.state.proxy.ImageProxyOJ.setYtemDefName(ImageProxyOJ.java:93)
+at oj.processor.state.CreateCellStateOJ.setYtemDefName(CreateCellStateOJ.java:115)
+at oj.processor.state.CreateCellStateOJ.ytemDefSelectionChanged(CreateCellStateOJ.java:259)
+at oj.processor.EventProcessorOJ.fireYtemDefSelectionChangedEvent(EventProcessorOJ.java:405)
+
+at oj.project.YtemDefsOJ.setSelectedYtemDef(YtemDefsOJ.java:83)
+at oj.processor.state.proxy.CellProxyOJ.nextYtemDef(CellProxyOJ.java:224)
+at oj.processor.state.proxy.CellProxyOJ.createYtemProxy(CellProxyOJ.java:262)
+at oj.processor.state.proxy.CellProxyOJ.setYtemDefName(CellProxyOJ.java:243)
+at oj.processor.state.proxy.ImageProxyOJ.setYtemDefName(ImageProxyOJ.java:91)
+at oj.processor.state.CreateCellStateOJ.setYtemDefName(CreateCellStateOJ.java:115)
+at oj.processor.state.CreateCellStateOJ.ytemDefSelectionChanged(CreateCellStateOJ.java:259)
+at oj.processor.EventProcessorOJ.fireYtemDefSelectionChangedEvent(EventProcessorOJ.java:405)
+
+at oj.project.YtemDefsOJ.setSelectedYtemDef(YtemDefsOJ.java:83)
+at oj.processor.state.proxy.ImageProxyOJ.setYtemDefName(ImageProxyOJ.java:93)
+
+
+254 2-nov-2010
+    Install in ObjectJ menu: installing empty text should remove old menu items
+255 Qualify does not update statistics
+
+256  I tried to create a user defined pop-up menu: no keyboard shorcut like + foor zoom
+nor  > for next slice, did work
+
+
+257: Quit: sorting causes NullPointer
+java.lang.ArrayIndexOutOfBoundsException: 59
+	at oj.project.ResultsOJ.sort(ResultsOJ.java:359)
+	at oj.project.ResultsOJ.getSortedIndexes(ResultsOJ.java:134)
+	at oj.gui.results.ProjectResultsOJ.imageChanged(ProjectResultsOJ.java:1670)
+	at oj.processor.EventProcessorOJ.fireImageChangedEvent(EventProcessorOJ.java:335)
+	at oj.project.ImagesOJ.removeImageByName(ImagesOJ.java:99)
+	at oj.project.ImagesOJ.removeAllImages(ImagesOJ.java:112)
+	at oj.project.ImagesOJ.removeAllImages(ImagesOJ.java:104)
+	at oj.gui.menuactions.ProjectActionsOJ.closeProjectData(ProjectActionsOJ.java:268)
+	at oj.gui.menuactions.ProjectActionsOJ.access$500(ProjectActionsOJ.java:26)
+	at oj.gui.menuactions.ProjectActionsOJ$9.actionPerformed(ProjectActionsOJ.java:102)
+	at oj.plugin.QuitOJ.run(QuitOJ.java:18)
+	at ij.IJ.runUserPlugIn(IJ.java:183)
+	at ij.IJ.runPlugIn(IJ.java:150)
+	at ij.Executer.runCommand(Executer.java:124)
+	at ij.Executer.run(Executer.java:61)
+	at java.lang.Thread.run(Thread.java:637)

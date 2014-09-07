@@ -1,0 +1,266 @@
+<!-- #bbinclude "Head.incl" -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+
+
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+        <meta name="generator" content="BBEdit 8.7" />
+        <meta name="author" content="Norbert Vischer" />
+        <meta name="keywords" content="Non-destructive marking, ImageJ, Object-Image, ObjectJ, Image analysis "/>
+        <title>
+            Homepage of ObjectJ
+        </title>
+        <style type="text/css">
+            @import url("main.css");
+        </style>
+    </head>
+    <!-- end bbinclude -->
+    <body id="Concept">
+        <div id="container">
+            <!-- #bbinclude "NavBar.incl" -->
+            <!--Main navigation bar-->
+            <img src="Images/ObjectJ-banner.gif" />
+            <div id="bondi">
+                <div id="bar">
+
+                    <ul>
+
+                        <li id="Home"><a href="index.html" name="Home">Home</a></li>
+                        <li id="Concept"><a href="5-Concept.html" name="Concept">Concept+Tips</a></li>
+                        <li id="Tutorial"><a href="2-Tutorial.html" name="Tutorial">Tutorial</a></li>
+                        <li id="Manual"><a href="3a-ManualMenu.html" name="Manual">Manual</a></li>
+                        <li id="Macros"><a href="4a-ObjectJMacroFunctions.html" name="Macros">Macros</a></li>
+                        <li id="News"><a href="6-News.html" name="News">News</a></li>
+                        <li id="Examples"><a href="7a-Examples.html" name="Examples">Examples</a></li>
+                        <li id="Download"><a href="download" name="Download">Download</a></li>
+                    </ul>
+                </div>
+                <div class="clear_noline"></div>    <!--End Navigation Bar-->
+
+
+            </div>
+        </div>
+        <hr> </hr>
+        <!-- end bbinclude -->
+        <blockquote>
+
+
+            <H2>Concept</H2>
+            <H3>
+                Markers are stored in a project file	</H3><H4>
+
+                ObjectJ allows images to be superimposed with graphical objects that appear as colored markers. Markers are non-destructive and are typically distributed over many images or stacks. They are stored in a separate  project file such as "MyProject.ojj". This file also holds pointers to linked images - they must reside in the same folder as the project file. Further, the project file contains a results table that is independent of the ImageJ results.	</H4><H3>
+
+
+                What means "Save" ?		</H3><H4>
+
+                It is important to realize that the screen typically shows two different
+                types of information: i) the image, and ii) the superimposed colored markers.
+                These two parts are stored in different files. For example, after some image processing,
+                you would save a changed image via File>Save. On the other hand, if you have placed
+                markers manually or automatically into an image, you would save the changed set of
+                markers by choosing ObjectJ>Save Project, while the image remains unchanged.	</H4><H3>
+
+                What are objects?	</H3><H4>
+
+                In ObjectJ, an object is a collection of vectorized markers, that are linked to a certain image.
+                An object can be composite, i.e. consist of different items, just like a molecule can contain various elements.
+                Objects carry number labels, starting at 1. The numbers are contiguous within an image. (The term "cell", as
+                used in the former application "Object-Image", is not used anymore).
+            </H4>
+            <H3>
+
+
+                What are items?	</H3><H4>
+                An item is part of an object and consists of a collection of points; it belongs to a certain item type.
+                If you compare an object with a molecule, an item would correspond to an atom. The item type defines
+                appearance such as shape (e.g. point, line, segmented line, polygon, roi), color and marker type. 	</H4><H3>
+
+                Results table	</H3><H4>
+
+                The ObjectJ results table is independent of the ImageJ results table;
+                it is stored as part of the project file. Each row of the linked results table is connected to the
+                object with the same number. The user can append any number of columns;
+                either automatic columns that dynamically hold e.g. the length of a line,
+                or columns that hold results calculated by macro using any algorithm.<br/>
+                Besides the linked results, there is also an unlinked results table, whose entries are
+                not connected to any marked objects.
+
+            </H4><H3>
+
+                ObjectJ Tools		</H3><H4>
+
+                This window is important for manual marking. Here you can pick your user-defined shapes that are suitable to mark butterfly
+                wings, tree rings or fish larvae. Or use tools to edit or delete existing markers. </H4>
+            <H3>
+
+                Project Macros
+            </H3><H4>
+                Since version 0.98c, macros are embedded into the project file. Older versions needed a separate file with
+                the same base name (e.g. myProject.ojj was accompanied with myProject.txt. Loading such a pair still works ok.) <br/>
+                Embedded macro commands appear under the ObjectJ menu, where they can be accessed without navigating through submenus,
+                and where they are not affected by standard ImageJ macros. You can display, edit and re-install these macros via "ObjectJ>Show
+                Embedded Macros".
+
+            </H4><H3>    Structure of a project file
+            </H3><H4>
+                Since version 0.98c,  project files (".ojj" files) are saved binary, not XML. The project file contains marker
+                positions, item definitions, columns, qualifiers- practically everything except the images themselves.
+                Technically, the .ojj file is a zipped folder containing two files, data and macro. To prevent that
+                other programs (Explorer!) unpack this program, I added 4 spoiler characters 'o','j', 'j', 0x0)
+                to the beginning of the file.
+
+
+            </H4>
+            <br />
+
+
+            <H2>&nbsp;Tips</H2>
+            <H3> Download</H3><H4>
+                I observed that Internet Explorer may not
+                correctly download JAR files like objectj_.jar (visible at a smaller file size).
+                You should use another browser like Firefox or Safari.
+                Once ObjectJ is running, you can update ImageJ and ObjectJ via Help menu without using
+                a browser.</H4>
+            <H3> Installation</H3><H4>
+                Drag objectj_.jar into the plugins folder and restart ImageJ.
+                Then, when choosing  menu Plugins>ObjectJ, the ObjectJ menu will appear (between
+                "Analyze" and "Plugins").
+                <br/>
+                ObjectJ will automatically be installed if a project file (.ojj extension) is opened (ImageJ1.43f required).
+            </H4>
+            <H3> Updating ObjectJ</H3><H4>
+                If ObjectJ is already installed (= ObjectJ menu is visible), you can simultaneously update 
+                ImageJ and ObjectJ. Choose menu Help>Update ImageJ...
+                <br/>
+            </H4>
+            </H4>
+            <H3> Do not move the project file</H3><H4>
+                Avoid changing the file path of the ".ojj" project in Finder/Explorer while  that project is open.
+                <br/>
+            </H4>
+            <H3>
+                Double-clicking .ojj files in Finder/Explorer
+            </H3><H4>
+                You can double-click a project file (which has the .ojj extension).
+                Both OS X Finder and Windows Explorer will correctly launch ImageJ, load the
+                ObjectJ plugin, and then open the project file. However, following conditions must be true:<br/>
+                - objectj_.jar must be in the plugins folder<br/>
+                - at least these versions must be used: ObjectJ 0.96x and ImageJ 1.43f<br/>
+                - the .ojj extension must already be associated to the ImageJ application. <br/><br/>
+                Associating .ojj files to ImageJ in OS X Finder:<br/>
+                <blockquote>
+                    - select an .ojj file in the Finder<br/>
+                    - choose menu File>Get Info<br/>
+                    - Select "Open with:"<br/>
+                    - as ImageJ doesn't appear in the drop-down menu, choose "Other.."<br/>
+                    - navigate to the application ImageJ.app<br/>
+                    - click the "Change All.." button<br/>
+                    - in the Dialog "Are you sure.." click "Continue<br/>
+                    - I recommend to keep the extension visible (uncheck "Hide extension")<br/>
+                </blockquote>
+                Associating .ojj files to ImageJ in Windows XP Explorer:<br/>
+                <blockquote>
+                    - open any folder in the Explorer<br/>
+                    - choose menu Tools> Folder Options<br/>
+                    - Navigate to panel  "File Types"<br/>
+                    - if extension "OJJ" is not listed yet, click "New" and enter file extension: OJJ<br/>
+                    - click OK, then select OJJ in the list of extensions<br/>
+                    - next to "Opens with:", click "Change"<br/>
+                    - in the list of "Programs", select "ImageJ Launcher"<br/>
+                    - check "Always use the selected program.."<br/>
+                    - click OK.<br/>
+                    - Now Windows shows .ojj files with a black microscope icon.<br/>
+                </blockquote>
+
+                Associating .ojj files to ImageJ in Windows 7 Explorer:<br/>
+                <blockquote>
+                    - double-click a project file (with extension ".ojj")<br/>
+                    - If message appears: "Windows can't open this file", then:<br/>
+                    - choose "Select a program from a list of programs" <br/>
+                    - If "ImageJ Launcher" does not appear as option, navigate to ImageJ.exe and click "Open"<br/> 
+                    - Now, "ImageJ Launcher" should appear: Select it.<br/> 
+                    - check "Always use the selected program.." and click OK<br/>
+                    
+                    - Now .ojj files are double-clickable and have a black microscope icon.<br/><br/><br/>
+                    - Once a file type is associated, the extension (here: .ojj) may be hidden<br/>
+                    - You can turn it on by opening an Explorer window, ,<br/>
+                    - Choose "Organize > Folder and Search Options<br/>
+                    - Select the View tab<br/>
+                    - Turn off "Hide Extensions for known file types"<br/>
+                    - Click "Apply to Folders"<br/>
+                    - Click OK, and again click OK<br/>
+
+                    - .
+                </blockquote>
+
+
+            </H4>
+
+
+            <H3>
+                Function Keys in OS X Finder
+            </H3><H4>
+                OS X by default occupies function keys (F1, F2..) for e.g. screen brightness or speaker volume. To use these keys in a
+                program, you additionally would have to keep down the "fn" key.
+                <br/>
+                For faster operation, select "Use F1, F2.. as standard function keys" in System Preferences>Keyboard & Mouse> .
+                Now the "fn" key is needed for brightness etc, but not for shortcuts in ImageJ/ObjectJ.
+
+            </H4>
+
+
+
+
+
+
+            <H3>
+                Scaling of jpg images
+            </H3>
+            <H4>
+                Scientific scaling information (pixels per unit) of a JPG image is normally lost
+                when you close it's window. However, if the image is linked to the current project
+                file, ObjectJ will remember scaling and automatically apply it next time you open it.
+                This also applies for other formats like gif etc.<br/>
+                How to scale a linked image:<br/>
+                <blockquote>
+                    - Open a linked image by double-clicking it's name in the "Images" panel<br/>
+                    - Apply a scale (pixels/unit) either via Analyze>Set Scale, or via Image>Properties<br/>
+                    - In the ObjectJ project window, the column "px/unit" will be updated<br/>
+                    - ObjectJ>Save Project will save the scaling and apply it next time the JPG image is opened from within the project.<br/>
+
+                    - Warning: avoid the "global" checkbox in "Set Scale", because it silently re-scales
+                    anything that is open now or later - this will not work with ObjectJ. <br/>
+
+                    - Bug: opening an image other than via the ObjectJ panel or ObjectJ menu
+                    or an ObjectJ macro will not apply the scaling. This needs to be fixed.
+                </blockquote>
+
+
+            </H4>
+
+
+
+        </blockquote>
+
+
+
+        <!-- begin google analytics, 1.9.2009 -->
+        <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+        </script>
+        <script type="text/javascript">
+            try {
+                var pageTracker = _gat._getTracker("UA-10085222-2");
+                pageTracker._trackPageview();
+            } catch (err) {
+            }</script>
+
+        <!-- end google analytics, 1.9.2009 -->
+
+
+    </body>
+</html>

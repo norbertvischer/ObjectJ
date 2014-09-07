@@ -1,0 +1,251 @@
+<!-- #bbinclude "Head.incl" -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+
+
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <meta name="generator" content="BBEdit 8.7" />
+    <meta name="author" content="Norbert Vischer" />
+    <meta name="keywords" content="Non-destructive marking, ImageJ, Object-Image, ObjectJ, Image analysis "/>
+    <title>
+			Homepage of ObjectJ
+    </title>
+    <style type="text/css">
+      @import url("main.css");
+    </style>
+  </head>
+  <!-- end bbinclude -->
+  <body id="Manual">
+    <div id="container">
+      <!-- #bbinclude "NavBar.incl" -->
+      <!--Main navigation bar-->
+      <img src="Images/ObjectJ-banner.gif" />
+      <div id="bondi">
+        <div id="bar">
+
+          <ul>
+
+            <li id="Home"><a href="index.html" name="Home">Home</a></li>
+            <li id="Concept"><a href="5-Concept.html" name="Concept">Concept+Tips</a></li>
+            <li id="Tutorial"><a href="2-Tutorial.html" name="Tutorial">Tutorial</a></li>
+            <li id="Manual"><a href="3a-ManualMenu.html" name="Manual">Manual</a></li>
+            <li id="Macros"><a href="4a-ObjectJMacroFunctions.html" name="Macros">Macros</a></li>
+            <li id="News"><a href="6-News.html" name="News">News</a></li>
+            <li id="Examples"><a href="7a-Examples.html" name="Examples">Examples</a></li>
+            <li id="Download"><a href="download" name="Download">Download</a></li>
+          </ul>
+        </div>
+        <div class="clear_noline"></div>    <!--End Navigation Bar-->
+
+
+      </div>
+      <hr> </hr>
+      <!-- end bbinclude -->
+      <br/>
+
+      <div id="manual">
+
+        <!-- #bbinclude "LinksForManual.incl" -->
+        <ul id="manuallinks"><li>
+            <a href="3a-ManualMenu.html">Menu</a> |
+            <a href="3b-ManualTools.html">Tools</a> |
+            <a href="3c-ManualResults.html">Results</a> |
+            <a href="3d-ManualImages.html">Images</a> |
+            <a href="3e-ManualObjects.html">Objects</a> |
+            <a href="3f-ManualColumns.html">Columns</a> |
+            <a href="3g-ManualQualifiers.html">Qualifiers</a>
+          </li>
+        </ul>
+        <!-- end bbinclude -->
+
+        <blockquote>
+
+          <H2> <a name="manualmenu">ObjectJ Menu </a></H2>
+
+        <!-- </blockquote>-->
+        <ul>
+
+          <li><a HREF="#project">Project&gt;</a></li>
+          <li><a HREF="#save">Save Project;</a></li>
+          <li><a HREF="#linked">Linked Images&gt;</a></li>
+          <li><a HREF="#objects">Objects&gt;</a></li>
+          <li><a HREF="#showproject">Show Project Window;</a></li>
+          <li><a HREF="#showtools">Show ObjectJ Tools;</a></li>
+          <li><a HREF="#showresults">Show ObjectJ Results;</a></li>
+          <li><a HREF="#finder">Show in Finder/Explorer;</a></li>
+
+        </ul>
+        <br/>
+        <!-- <blockquote>-->
+          <H3></H3>
+          <H4></H4>
+
+          <a name=project></a>
+          <H3>
+            Project File &nbsp &gt 	</H3>
+
+          <blockquote>
+            <H3>About ObjectJ...</H3>
+            <H4>Displays information about ObjectJ version and current
+              project file</H4>
+
+            <H3>Open Project ...</H3>
+            <H4>Opens an existing project file such as "MyProject.ojj". ObjectJ allows only one project to be open and
+              therefore first closes any previous project.
+              An alternative way to open a project is to drag the .ojj file onto the ImageJ main window.
+              You also can drag it onto the ImageJ "microscope" icon, but be aware that in Windows this could open a
+              second instance of ImageJ, which can be confusing.
+            </H4>
+
+            <H3>Export Linked Results...</H3>
+            <H4>Opens a dialog to control what needs to exported or copied. 
+                You can specify column titles by supplying several comma-separated terms that may contain wildcards '*' and '?'
+              Only qualified rows of linked results will be exported. If "Include Statistics" is checked, edit the comma-separated
+              list such as "count, mean, stdev, min, max, sum"
+            </H4>
+
+            <H3>Save  A Copy Of Project...</H3>
+            <H4>This can be useful when you want to
+              make a backup of the project's current state with a different name</H4>
+
+            <H3>Save An Empty Copy...</H3>
+            <H4>Saves a copy of current project, but without including objects and image
+              references. Besides that, the entire structure of the project,
+              including embedded macros, is preserved.
+              Use this command when you want to start a new project with same conditions as an existing one.
+            </H4>
+
+            <H3>Export Project As XML...</H3>
+            <H4>Saves a copy of current project in XML format, but excludes embedded macros.
+              You usually don't need
+              this, unless you want to observe project data in a human readable form. ObjectJ can
+              correctly read such an XML file, if it's extension is changed from .xml to .ojj.</H4>
+
+            <H3>Close Project</H3>
+            <H4>Closes current project</H4>
+
+          </blockquote>
+
+
+          <hr/>
+
+
+          <a name=save></a>
+
+          <H3> Save Project</H3>
+          <H4> Saves current project as an .ojj file, which includes markers,  ObjectJ results, image links and
+            all project settings in the project file. It doesn't save any images.</H4>
+
+
+
+          <hr/>
+          <a name=linked></a>
+
+          <H3>Link Images &nbsp &gt 	</H3>
+          <H3>&nbsp</H3>
+          <blockquote>
+
+            <H3>Link Image From Project Folder</H3>
+            <H4>Opens a dialog to include a reference to one the images in the project folder.
+              Image types can be TIF, GIF, JPG, PNG etc, but not Zip, Mov, Avi etc.
+              Alternatively, you can drag an image from Finder/Explorer into the 'Images' panel</H4>
+
+            <H3>Link All Images from Project Folder</H3>
+            <H4>Automatically loads references to all supported images in
+              the project folder (not in sub directories)</H4>
+
+            <H3>Link Front Image</H3>
+            <H4>If front image is stored in project folder and is not linked yet,
+              it will be linked</H4>
+
+            <H3>Forget Unmarked Images</H3>
+            <H4>Removes references to images that do not contain any markers</H4>
+
+            <H3>Propagate Scale to Linked Images...</H3>
+            <H4>Sets the same scale to all images that are linked. 
+                A right-click onto a "px/unit" value in the Images panel does the same.</H4>
+
+
+          </blockquote>
+
+          <hr/>
+          <a name=objects></a>
+
+          <H3>
+            Objects &nbsp &gt   </H3>
+          <H3>&nbsp</H3>
+          <blockquote>
+            <H3>Show Object # ...	</H3>
+            <H4>shows and selects an object upon underlying image</H4>
+
+            <H3>Delete Objects</H3>
+            <H4> Deletes non-destructive markers according to criteria shown
+              in a dialog box.</H4>
+
+            <H3>Delete All Objects</H3>
+            <H4>just what it says. There is no Undo!</H4>
+
+            <H3>Roi to Object Item</H3>
+            <H4>converts a region of interest into an object's item.
+              Example: if the image shows a straight-line selection, and
+              in the ObjectJ Tools window an item is highlighted of type "Line",
+              the coordinates of the selection are used to create a
+              line object of that item type, as if the two end points
+              would have been clicked with the mouse.</H4>
+
+
+
+          </blockquote>
+          <hr/>
+          <a name=showproject></a>
+          <H3>Show Project Window [shift-F1]</H3>
+          <H4>Brings the project window to the front; this is the place to define a project
+            via four panels:  images, objects, columns, qualifiers.</H4>
+
+          <a name=showtools></a>
+          <H3>Show ObjectJ Tools [shift-F2]</H3>
+          <H4>Brings the ObjectJ tool window to the front, showing tools like
+            pistol etc, plus the currently available item types. Also custom tools
+          defined in embedded macros appear here as extra buttons.</H4>
+
+          <a name=showresults></a>
+          <H3>Show Project Results [shift-F3]</H3>
+          <H4>Brings the ObjectJ results table to the front, which is completely
+            independent from the ImageJ results table.</H4>
+
+          <a name=showmacros></a>
+          <H3>Show Embedded Macros [shift-F4]</H3>
+          <H4>Displays a text window that holds embedded macros. These can be edited and
+            reloaded by pressing button 'Install in ObjectJ Menu'. The only way to embed
+            macros from elsewhere is via Copy-Paste. Once the macros are installed, choose ObjectJ>Save Project
+            to save them as part of the project file. </H4>
+
+          <a name=finder></a>
+          <H3>Show in Finder/Explorer [shift-F5]</H3>
+          <H4>Tells the Finder (Mac) or Explorer (Windows) to display the project folder.</H4>
+        </blockquote>
+
+      </div>
+    </div>
+
+    <!-- begin google analytics, 1.9.2009 -->
+    <script type="text/javascript">
+      var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+      document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+      try {
+        var pageTracker = _gat._getTracker("UA-10085222-2");
+        pageTracker._trackPageview();
+      } catch(err) {}</script>
+
+    <!-- end google analytics, 1.9.2009 -->
+
+
+
+  </body>
+
+
+</html>

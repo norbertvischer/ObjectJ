@@ -1,0 +1,9 @@
+#!/bin/bash
+sed 's/simon-intern.science.uva.nl/simon-intern.science.uva.nl/' '.svn/entries'
+for f in `grep -rl "simon-intern.science.uva.nl" *`;
+#for f in `grep -rl "simon-intern" * | grep entriese?*`;
+do
+    echo $f  
+#    rm -f $f
+    sed 's/simon-intern.science.uva.nl/simon-intern.science.uva.nl/' $f
+done
