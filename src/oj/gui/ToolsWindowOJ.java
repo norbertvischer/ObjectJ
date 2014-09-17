@@ -10,6 +10,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -33,6 +34,7 @@ import javax.swing.ListCellRenderer;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import oj.OJ;
+import oj.graphics.CustomCanvasOJ;
 import oj.project.YtemDefOJ;
 import oj.processor.events.CellChangedEventOJ;
 import oj.processor.events.CellChangedListenerOJ;
@@ -100,8 +102,10 @@ public class ToolsWindowOJ extends javax.swing.JPanel implements ToolListChanged
             return;
         }
         ToolsWindowOJ.instance.setLocation(ToolsWindowOJ.instance_xpos, ToolsWindowOJ.instance_ypos);
-        ToolsWindowOJ.instance.setPreferredSize(new Dimension(75, 240));
-        ToolsWindowOJ.instance.setSize(new Dimension(75, 240));
+        ToolsWindowOJ.instance.setPreferredSize(new Dimension(124, 240));
+        ToolsWindowOJ.instance.setMinimumSize(new Dimension(124, 240));
+        ToolsWindowOJ.instance.setMaximumSize(new Dimension(124, 900));
+        ToolsWindowOJ.instance.setSize(new Dimension(124, 240));
 
         if (instance instanceof JFrame) {
             instance_type = ToolsWindowOJ.JFRAME_TYPE;
@@ -149,6 +153,7 @@ public class ToolsWindowOJ extends javax.swing.JPanel implements ToolListChanged
         };
         ;
         buttCloseCell = new javax.swing.JButton();
+        butSizes = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         jPanel5 = new javax.swing.JPanel();
         pnlVisibility = new javax.swing.JPanel();
@@ -202,7 +207,7 @@ public class ToolsWindowOJ extends javax.swing.JPanel implements ToolListChanged
 
         jPanel3.setFocusable(false);
         jPanel3.setRequestFocusEnabled(false);
-        jPanel3.setLayout(new java.awt.GridLayout(2, 0));
+        jPanel3.setLayout(new java.awt.GridLayout(3, 0));
 
         chkCollectMode.setBackground(new java.awt.Color(0, 102, 102));
         chkCollectMode.setText("Composite");
@@ -231,6 +236,14 @@ public class ToolsWindowOJ extends javax.swing.JPanel implements ToolListChanged
             }
         });
         jPanel3.add(buttCloseCell);
+
+        butSizes.setText("Sizes...");
+        butSizes.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                butSizesActionPerformed(evt);
+            }
+        });
+        jPanel3.add(butSizes);
 
         jPanel2.add(jPanel3, java.awt.BorderLayout.NORTH);
 
@@ -375,6 +388,36 @@ public class ToolsWindowOJ extends javax.swing.JPanel implements ToolListChanged
         ij.IJ.showStatus("key in tool");
     }//GEN-LAST:event_formKeyPressed
 
+    private void butSizesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butSizesActionPerformed
+        GenericDialog gd = new GenericDialog("Font and Marker Sizes");
+        String[] choices = "12 16 20".split(" ");
+        gd.addRadioButtonGroup("Font Size", choices, 3, 1, "" + CustomCanvasOJ.fontSize);
+//gd.addMessage("___");
+        choices = "Small Medium Large".split(" ");
+        gd.addRadioButtonGroup("Marker Size", choices, 3, 1, choices[CustomCanvasOJ.markerRad - 2]);
+
+        gd.showDialog();
+        if (gd.wasCanceled()) {
+            return;
+        }
+        String fontSize = gd.getNextRadioButton();
+        String markerSizeStr = gd.getNextRadioButton();
+        int mSize = 2;
+        if (markerSizeStr.startsWith("M")) {
+            mSize = 3;
+        }
+        if (markerSizeStr.startsWith("L")) {
+            mSize = 4;
+        }
+
+        CustomCanvasOJ.markerRad = mSize;
+        CustomCanvasOJ.markerSize = mSize * 2;
+
+        CustomCanvasOJ.fontArial = Font.decode("Arial-" + fontSize);
+        CustomCanvasOJ.fontSize = Integer.parseInt(fontSize);
+        OJ.getEventProcessor().fireCellChangedEvent();
+    }//GEN-LAST:event_butSizesActionPerformed
+
     private void updateScrollPane() {
         listYtemDefs.setVisibleRowCount(OJ.getData().getYtemDefs().getYtemDefsCount() + 1);
         Dimension ld = listYtemDefs.getPreferredScrollableViewportSize();
@@ -497,6 +540,7 @@ public class ToolsWindowOJ extends javax.swing.JPanel implements ToolListChanged
         }
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton butSizes;
     private javax.swing.JButton buttCloseCell;
     private javax.swing.JCheckBox chkCollectMode;
     private javax.swing.ButtonGroup grpEditCell;

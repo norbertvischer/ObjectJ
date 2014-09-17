@@ -43,8 +43,8 @@ public class OJ {
     private static IjImageChangedListenerOJ ilj;
     private static StackChangedListenerOJ slj;
     public final static int build = 485;
-    public final static String releaseVersion = "1.03q";//do not follow Wayne
-    public final static String buildDate = "02-sep-2014 16:52";
+    public final static String releaseVersion = "1.03q1";//do not follow Wayne
+    public final static String buildDate = "18-sep-2014 01:08";
     public static final String URL = "http://simon.bio.uva.nl/objectj";
     public static final String ICONS = "/oj/gui/icons/";
     public static int bufferStrategy = 2;//10.7.2009

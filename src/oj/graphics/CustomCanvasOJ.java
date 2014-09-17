@@ -50,6 +50,7 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
     public static int hits = 0;
     public static int markerRad = 2;
     public static int markerSize = 4;
+    public static int fontSize = 12;
     private String imageName;
     private DataOJ dataOJ;
     private ImageOJ image;
@@ -448,7 +449,7 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
                                         if (y < 8) {
                                             y = y + 10;
                                         } else {
-                                            y = y - 4 - markerRad + 2;
+                                            y = y - fontSize/3 - markerRad + 2;
                                         }
                                         if (cell.isOpen()) {
                                             if (cell.isQualified()) {
