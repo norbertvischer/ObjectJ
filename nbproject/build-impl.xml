@@ -316,7 +316,7 @@ is divided into following sections:
     <target depends="init" name="deps-jar" unless="no.deps"/>
     <target depends="init,deps-jar" name="-pre-pre-compile">
         <mkdir dir="${build.classes.dir}"/>
-        <mkdir dir="SIPchartDist"/><!-- 4.9.2011 -->
+        <!-- <mkdir dir="SIPchartDist"/> 4.9.2011 -->
     </target>
     <target name="-pre-compile">
         <!-- Empty placeholder for easier customization. -->
@@ -328,8 +328,8 @@ is divided into following sections:
     <target depends="init,deps-jar,-pre-pre-compile,-pre-compile,-compile-depend" if="have.sources" name="-do-compile">
         <j2seproject3:javac/>
 
-       <!--<copy file="build/classes/SipChart_.class" tofile="plugins/SipChart_.class" />   14.4.2013 -->  
-        <copy file="build/classes/EFA_.class" tofile="plugins/EFA_.class" /> <!-- 28.2.2011. -->
+        <!--<copy file="build/classes/SipChart_.class" tofile="plugins/SipChart_.class" />   14.4.2013 -->  
+        <!--<copy file="build/classes/EFA_.class" tofile="plugins/EFA_.class" />  28.2.2011. -->
        
         <copy todir="${build.classes.dir}">
             <fileset dir="${src.dir}" excludes="${build.classes.excludes},${excludes}" includes="${includes}"/>
@@ -362,7 +362,7 @@ is divided into following sections:
     <target depends="init" name="-pre-pre-jar">
         
         
-        <jar jarfile = "SIPchart_.jar" basedir = "SIPchart_" />
+        <!--<jar jarfile = "SIPchart_.jar" basedir = "SIPchart_" /> -->
         <!--<jar jarfile = "CCSim_.jar" basedir = "CCSimDist" /> 7.3.2012 -->
         <dirname file="${dist.jar}" property="dist.jar.dir"/>
         <mkdir dir="${dist.jar.dir}"/>
@@ -424,7 +424,7 @@ is divided into following sections:
             <fileset file="${plugins.dir}/plugins.config" casesensitive="yes"/>
         </jar>
  
-        <jar jarfile ="SIPchart_.jar" basedir="sipClasses" ></jar>
+        <!--<jar jarfile ="SIPchart_.jar" basedir="sipClasses" ></jar> -->
         <!--<jar jarfile ="CCSim_.jar" basedir="cellcycleClasses" > </jar>  24.9.2012 -->
         
  
@@ -444,36 +444,12 @@ is divided into following sections:
                 =========
                 SIP Chart
                 =========
-            
-    
-    <copy todir = "SIPchart_" file="build/classes/SIPchart_.class" />
+      <copy todir = "SIPchart_" file="build/classes/SIPchart_.class" />
     
     <jar jarfile="SIPchart_.jar" basedir="SIPchart_" />
     <copy todir = "plugins" file="SIPchart_.jar" />
     -->
     
-    
-       
-         <!--
-                =========
-                Cell Cycle
-                =========
- <target depends="init" name="-funny-name-jar">
- </target>              
-    7.3.2012
-    -->  
-    
-  <!--   
-        <copy todir = "CCSim_" file="build/classes/CCSim_.class" />
-        <mkdir dir="build/classes/CCSim_/cellcycle" />
-        <copy todir = "CCSim_/cellcycle"  >
-            <fileset dir="build/classes/cellcycle/"/>
-        </copy>
-        <jar jarfile="CCSim_.jar" basedir="CCSim_" />
-        <copy todir = "plugins" file="CCSim_.jar" />
-  
-    12.11.2012
-    -->
     
 
      
