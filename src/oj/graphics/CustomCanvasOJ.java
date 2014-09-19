@@ -14,6 +14,7 @@ import ij.Macro;
 import ij.gui.ImageCanvas;
 import ij.gui.NewImage;
 import ij.macro.Interpreter;
+import ij.util.Java2;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
@@ -55,8 +56,8 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
     private DataOJ dataOJ;
     private ImageOJ image;
     public BufferStrategy buforowanie;
-    public static Font fontArial = Font.decode("Arial-11");
-    public static Font fontArialItalic = Font.decode("Arial-ITALIC-11");
+    public static Font fontArial = Font.decode("Arial-12");
+    public static Font fontArialItalic = Font.decode("Arial-ITALIC-12");
     private Image offScreenImage;
     private int offScreenWidth = 0;
     private int offScreenHeight = 0;
@@ -138,10 +139,6 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
     /**
      * first ImageJ repaints image, then markers are superimposed
      */
-//  public void paintOld(Graphics g) {
-//    super.paint(g);
-//    drawOverlayoj(g);
-//  }
     @Override
     public void resetDoubleBuffer() {
         super.resetDoubleBuffer();
@@ -298,20 +295,22 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
      */
     public void drawOverlayoj(Graphics g) {//25.3.2012 made public
 
-        if (g == null || image == null || dataOJ == null ||  !OJ.isProjectOpen) {
+        if (g == null || image == null || dataOJ == null || !OJ.isProjectOpen) {
             return;//11.10.2012
         }
         if (IJ.isMacro() && OJ.getMacroProcessor().getTargetImage() != null) {
             return;
         }
-         boolean allvisible = true;
+        boolean allvisible = true;
         YtemDefsOJ ytemDefs = OJ.getData().getYtemDefs();
         if (ytemDefs != null) {
             allvisible = ytemDefs.isCellLayerVisible();
         }
 
-        //       if (OJ.getData().getYtemDefs().isCellLayerVisible()) {
         if (allvisible) {
+            if (fontSize > 12) {
+                Java2.setAntialiasedText(g, true);//18.9.2014
+            }
             int visRangeHigh = OJ.getData().getYtemDefs().getVisRangeHigh();//28.1.2009
             int visRangeLow = OJ.getData().getYtemDefs().getVisRangeLow();
             FontRenderContext frc = ((Graphics2D) g).getFontRenderContext();
@@ -417,8 +416,6 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
                                             case YtemDefOJ.YTEM_TYPE_ROI:
                                                 if (ydefType != YtemDefOJ.LINE_TYPE_ZEROPT) {
 
-
-
                                                     if (ytem.isOpen()) {
                                                         g.drawPolyline(x_array, y_array, x_array.length);//don't close shape while it is open, 8.7.2009
                                                     } else {
@@ -449,7 +446,7 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
                                         if (y < 8) {
                                             y = y + 10;
                                         } else {
-                                            y = y - fontSize/3 - markerRad + 2;
+                                            y = y - fontSize / 3 - markerRad + 2;
                                         }
                                         if (cell.isOpen()) {
                                             if (cell.isQualified()) {
