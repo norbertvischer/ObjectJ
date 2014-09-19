@@ -102,10 +102,10 @@ public class ToolsWindowOJ extends javax.swing.JPanel implements ToolListChanged
             return;
         }
         ToolsWindowOJ.instance.setLocation(ToolsWindowOJ.instance_xpos, ToolsWindowOJ.instance_ypos);
-        ToolsWindowOJ.instance.setPreferredSize(new Dimension(124, 240));
-        ToolsWindowOJ.instance.setMinimumSize(new Dimension(124, 240));
+        ToolsWindowOJ.instance.setPreferredSize(new Dimension(124, 260));
+        ToolsWindowOJ.instance.setMinimumSize(new Dimension(124, 260));
         ToolsWindowOJ.instance.setMaximumSize(new Dimension(124, 900));
-        ToolsWindowOJ.instance.setSize(new Dimension(124, 240));
+        ToolsWindowOJ.instance.setSize(new Dimension(124, 260));
 
         if (instance instanceof JFrame) {
             instance_type = ToolsWindowOJ.JFRAME_TYPE;
@@ -716,7 +716,7 @@ public class ToolsWindowOJ extends javax.swing.JPanel implements ToolListChanged
             macroToolsCount += 1;
         }
 
-        instance_height = 205 + ((macroToolsCount + 1) / 2) * 28 + Math.min(12, Math.max((OJ.getData().getYtemDefs().getYtemDefsCount() + 1), 3)) * 28;
+        instance_height = 225 + ((macroToolsCount + 1) / 2) * 28 + Math.min(12, Math.max((OJ.getData().getYtemDefs().getYtemDefsCount() + 1), 3)) * 28;
         ToolsWindowOJ.instance.setPreferredSize(new Dimension(75, instance_height));
         ToolsWindowOJ.instance.setSize(new Dimension(75, instance_height));
         ToolsWindowOJ.instance.pack();
