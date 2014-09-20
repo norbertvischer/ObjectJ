@@ -378,6 +378,8 @@ public class PolygonRoi extends Roi {
 			imp.draw();
 			return;
 		}
+                if (IJ.altKeyDown())
+                    wipeBack();
 		drawRubberBand(sx, sy);
 		degrees = Double.NaN;
 		double len = -1;
@@ -420,6 +422,78 @@ public class PolygonRoi extends Roi {
 		IJ.showStatus(imp.getLocationAsString(ox,oy) + length + angle);
 	}
 
+       
+    //Mouse behaves like an eraser when moved backwards with alt key down
+    //mouse is at point p3
+    //If latest vertex is sharp and within correctionRadius, it is removed.
+    //N. Vischer
+   
+    private void wipeBackOldAndGood() {
+        int p1 = nPoints - 3;
+        int p2 = nPoints - 2;
+        int p3 = nPoints - 1;
+        if (p1 < 0) {
+            return;
+        }
+         double correctionRadius =  20/ic.getMagnification();
+        double dx = xp[p3] - xp[p2];
+        double dy = yp[p3] - yp[p2];
+        double dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist > correctionRadius || dist == 0) {
+            return;
+        }
+        double dotproduct = (xp[p3] - xp[p2]) * (xp[p1] - xp[p2]) + (yp[p3] - yp[p2]) * (yp[p1] - yp[p2]);
+        double crossproduct = (xp[p3] - xp[p2]) * (yp[p1] - yp[p2]) - (yp[p3] - yp[p2]) * (xp[p1] - xp[p2]);
+        double angle = (180 / Math.PI) * Math.atan2(crossproduct, dotproduct);
+        if (Math.abs(angle) <= 90) {
+            xp[p2] = xp[p3];
+            yp[p2] = yp[p3];
+            nPoints--;
+        }
+    }
+
+    
+     //Mouse behaves like an eraser when moved backwards with alt key down
+    //mouse is at point p3
+    //go back and find point p1 (where path entered correction circle last time) 
+    //check if any intermediate vertex forms a sharp angle (p1-p2-p3), and if so remove it
+    //repeat this with new path until all sharp vertices are removed
+    //N. Vischer
+    protected void wipeBack() {
+        double correctionRadius = 20 / ic.getMagnification();
+        boolean found = false;
+        int p3 = nPoints - 1;
+        int p1 = p3 - 1;
+        while (p1 > 1 && !found) {
+            double dx = xp[p3] - xp[p1];
+            double dy = yp[p3] - yp[p1];
+            double dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist > correctionRadius) {
+                found = true;
+            } else {
+                p1--;
+            }
+        }
+        if (found) {
+            for (int b = p1 + 1; b < p3; b++) {
+                int a = b - 1;
+                int c = b + 1;
+                double dotproduct = (xp[c] - xp[b]) * (xp[a] - xp[b]) + (yp[c] - yp[b]) * (yp[a] - yp[b]);
+                double crossproduct = (xp[c] - xp[b]) * (yp[a] - yp[b]) - (yp[c] - yp[b]) * (xp[a] - xp[b]);
+
+                double angle = (180 / Math.PI) * Math.atan2(crossproduct, dotproduct);
+
+                if (Math.abs(angle) <= 90 || crossproduct == 0) {
+                    
+                    xp[b] = xp[p3];
+                yp[b] = yp[p3];
+                nPoints = b+1;
+                }
+            }
+           
+    }
+}
+        
 	void drawRubberBand(int sx, int sy) {
 		double oxd = ic!=null?ic.offScreenXD(sx):sx;
 		double oyd = ic!=null?ic.offScreenYD(sy):sy;

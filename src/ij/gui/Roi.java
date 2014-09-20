@@ -1939,5 +1939,7 @@ public class Roi extends Object implements Cloneable, java.io.Serializable {
 		return hashCode() ^ (new Double(getXBase()).hashCode()) ^
 			Integer.rotateRight(new Double(getYBase()).hashCode(),16);
 	}
+        
+        
 
 }
