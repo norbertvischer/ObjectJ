@@ -21,7 +21,6 @@ import oj.OJ;
 import oj.gui.tools.ToolManagerOJ;
 import oj.processor.events.MacroChangedEventOJ;
 import oj.project.DataOJ;
-import oj.util.ImageJAccessOJ;
 import oj.util.UtilsOJ;
 
 public class EmbeddedMacrosOJ {
@@ -38,24 +37,23 @@ public class EmbeddedMacrosOJ {
     }
     public //static
             ActionListener LoadEmbeddedMacroAction = new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
+                public void actionPerformed(ActionEvent e) {
 
             //Interpreter.abort();//17.9.2010 -checks for null instance etc removed 11.8.2013
+                    Editor ed = OJ.editor;
 
-            Editor ed = OJ.editor;
+                    String theText = ed.getText();
+                    theText = UtilsOJ.fixLineFeeds(theText);//7.9.2010
+                    OJ.getData().setLinkedMacroText(theText);
+                    int caretPos = ed.getTextArea().getCaretPosition();
+                    ed.getTextArea().setText(theText);
+                    ed.getTextArea().setCaretPosition(caretPos);
 
-            String theText = ed.getText();
-            theText = UtilsOJ.fixLineFeeds(theText);//7.9.2010
-            OJ.getData().setLinkedMacroText(theText);
-            int caretPos = ed.getTextArea().getCaretPosition();
-            ed.getTextArea().setText(theText);
-            ed.getTextArea().setCaretPosition(caretPos);
-
-            doInstall(theText);
-            setEditorUnchanged(ed);
-            ij.IJ.getInstance().setVisible(true);
-        }
-    };
+                    doInstall(theText);
+                    setEditorUnchanged(ed);
+                    ij.IJ.getInstance().setVisible(true);
+                }
+            };
 
     public EmbeddedMacrosOJ() {
         instance = this;
@@ -74,7 +72,13 @@ public class EmbeddedMacrosOJ {
             return;
         }
 
-        Editor ed = new Editor(16, 60, 0, Editor.MONOSPACED + Editor.MENU_BAR);
+        String version = IJ.getFullVersion();
+        Editor ed;
+        if (version.compareToIgnoreCase("1.49i03") >= 0) {
+            ed = new EditorOJ(16, 60, 0, Editor.MONOSPACED + Editor.MENU_BAR);
+        } else {
+            ed = new Editor(16, 60, 0, Editor.MONOSPACED + Editor.MENU_BAR);
+        }
         ed.create("Embedded Macros", macros_text);
         JButton loadButton = new JButton("Install in ObjectJ menu");
         loadButton.addActionListener(LoadEmbeddedMacroAction);
@@ -87,7 +91,6 @@ public class EmbeddedMacrosOJ {
         panel1.setLayout(new FlowLayout());
         loadButton.setFont(new Font("SansSerif", Font.PLAIN, 14));
         panel1.add(loadButton);
-
 
         JLabel myLabel = new JLabel("Macros Overview");
 
@@ -163,8 +166,6 @@ public class EmbeddedMacrosOJ {
                     color = new Color(200, 0, 80);
                     title = "    " + title;
                 }
-
-
 
                 JMenuItem thisItem = new javax.swing.JMenuItem(title);
                 thisItem.setAlignmentX((float) lineNo / 1000000);
@@ -243,8 +244,7 @@ public class EmbeddedMacrosOJ {
         if (intp != null) {
             Interpreter.getInstance().abortMacro();//11.8.2013
         }
-        
-        
+
         //ImageJAccessOJ.InterpreterAccess.
         OJ.initMacroProcessor();//4.7.2013
         //OJ.getMacroProcessor().setTarget("exit");//4.7.2013
