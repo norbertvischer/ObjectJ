@@ -148,7 +148,7 @@ public class MouseEventManagerOJ implements MouseListener, MouseMotionListener {
                 if (OJ.getToolStateProcessor().getToolStateObject() instanceof MoveCellStateOJ) {
                     EventProcessorOJ.BlockEventsOnDrag = true;
                 }
-            } else if (OJ.isValidData() && OJ.getToolStateProcessor().getToolStateObject() instanceof MacroToolStateOJ) {//4.7.2009
+            } else if ((OJ.isValidData() && OJ.getToolStateProcessor().getToolStateObject() instanceof MacroToolStateOJ) &&!IJ.spaceBarDown()){//12.10.2014
                 OJ.getToolStateProcessor().getToolStateObject().mousePressed(imp2.getTitle(), stackIndex, x, y, e.getModifiers());
             } else {
                 imp2.getCanvas().mousePressed(e);

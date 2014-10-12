@@ -13,6 +13,7 @@ import ij.ImagePlus;
 import ij.Macro;
 import ij.gui.ImageCanvas;
 import ij.gui.NewImage;
+import ij.gui.Roi;
 import ij.macro.Interpreter;
 import ij.util.Java2;
 import java.awt.BasicStroke;
@@ -337,6 +338,13 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
                         for (int ytemNo = 0; ytemNo < ytemsCount; ytemNo++) {
                             YtemOJ ytem = cell.getYtemByIndex(ytemNo);
                             if (ytem != null) {//11.7.2011
+                                if (ytem.getRoiBytes() != null){//8.10.2014
+                                
+                                    
+                                    Roi roi = ytem.getIJRoi() ;
+                                    //roi.draw(g);
+                                    roi.drawOverlay(g);
+                                }
                                 int homeSlice = ytem.getStackIndex();
                                 if (homeSlice == 0) {
                                     homeSlice = cell.getStackIndex();

@@ -780,8 +780,13 @@ public class FunctionsOJ implements MacroExtension {
         return null;
     }
 
-    public String ojTest(String arg) {
+    public String ojTestOld(String arg) {
         Functions.registerExtensions(this);
+        return null;
+    }
+
+      public String ojTest(String arg) {//6.10.2014
+        OJ.getData().getCells().getSelectedCell().getSelectedYtem().setIJRoi(ij.IJ.getImage().getRoi());
         return null;
     }
 

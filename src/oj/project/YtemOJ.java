@@ -10,9 +10,11 @@ import ij.gui.Line;
 import ij.gui.PointRoi;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
+import ij.io.RoiDecoder;
+import ij.io.RoiEncoder;
 import java.awt.Rectangle;
+import java.io.IOException;
 import java.util.ArrayList;
-import oj.OJ;
 import oj.util.UtilsOJ;
 
 public abstract class YtemOJ extends BaseAdapterOJ {
@@ -22,17 +24,34 @@ public abstract class YtemOJ extends BaseAdapterOJ {
     protected int stackIndex = 0;
     protected transient boolean open;
     protected ArrayList <LocationOJ> locations = new ArrayList();
-    //protected int[] roiSteps = new int[]{1, 2, 3};//15.3.2010 testing freeman
-//  protected byte[] roiBytes = null;//15.3.2014
-//
-//    public void setIJRoi(Roi theRoi){//15.3.2014
-//        roiBytes = RoiEncoder.saveAsByteArray(theRoi);
-//    }
-//
-//    
-//       public void showIJRoi(Roi theRoi){//15.3.2014
-//        
-//    }
+   protected byte[] roiBytes = null;//13.10.2014 not used yet, but must not be changed
+
+    public void setIJRoi(Roi theRoi){//15.3.2014 not used yet
+        roiBytes = RoiEncoder.saveAsByteArray(theRoi);
+    }
+    
+    public byte[] getRoiBytes() {//13.10.2014 not used yet
+        return roiBytes;
+    }
+
+    public Roi getIJRoi() {//13.10.2014 not used yet
+
+        String name = "Hello";
+        RoiDecoder rd = null;
+        Roi roi = null;
+        if (roiBytes != null) {
+            rd = new RoiDecoder(roiBytes, name);
+        }
+        try {
+            roi = rd.getRoi();
+        } catch (IOException e) {
+        }
+        return roi;
+    }
+
+    public void showIJRoi(Roi theRoi) {//13.10.2014 not used yet
+
+    }
 /** @return stack index (1-based ?) */
     public int getStackIndex() {
         return stackIndex;
