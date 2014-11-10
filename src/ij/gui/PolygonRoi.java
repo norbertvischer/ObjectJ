@@ -99,6 +99,7 @@ public class PolygonRoi extends Roi {
 			Prefs.pointAutoMeasure = false;
 			Prefs.pointAutoNextSlice = false;
 			Prefs.pointAddToManager = false;
+			Prefs.pointAddToOverlay = false;
 			userCreated = true;
 		}
 		if (lineWidth>1 && isLine())
@@ -197,7 +198,7 @@ public class PolygonRoi extends Roi {
 		Color color =  strokeColor!=null?strokeColor:ROIColor;
 		boolean hasHandles = xSpline!=null||type==POLYGON||type==POLYLINE||type==ANGLE;
 		boolean isActiveOverlayRoi = !overlay && isActiveOverlayRoi();
-		if (isActiveOverlayRoi && !hasHandles) {
+		if (isActiveOverlayRoi) {
 			if (color==Color.cyan)
 				color = Color.magenta;
 			else
@@ -378,8 +379,8 @@ public class PolygonRoi extends Roi {
 			imp.draw();
 			return;
 		}
-                if (IJ.altKeyDown())
-                    wipeBack();
+		if (IJ.altKeyDown())
+			wipeBack();
 		drawRubberBand(sx, sy);
 		degrees = Double.NaN;
 		double len = -1;
@@ -422,44 +423,49 @@ public class PolygonRoi extends Roi {
 		IJ.showStatus(imp.getLocationAsString(ox,oy) + length + angle);
 	}
 
-       
-   
-    //Mouse behaves like an eraser when moved backwards with alt key down
-    //mouse is at point p3
-    //go back and find point p1 (where path entered correction circle last time) 
-    //check if any intermediate vertex forms a sharp angle (p1-p2-p3), and if so remove it
-    //repeat this with new path until all sharp vertices are removed
-    //N. Vischer
-    protected void wipeBack() {
-        double correctionRadius = 20;
-        if(ic != null)
-            correctionRadius/= ic.getMagnification();
-        boolean found = false;
-        int p3 = nPoints - 1;
-        int p1 = p3;
-        while (p1 > 0 && !found) {
-            p1--;
-            double dx = xp[p3] - xp[p1];
-            double dy = yp[p3] - yp[p1];
-            double dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist > correctionRadius) {
-                found = true;
-            }
-        }
-        for (int b = p1 + 1; b < p3; b++) {
-            int a = b - 1;
-            int c = b + 1;
-            double dotproduct = (xp[c] - xp[b]) * (xp[a] - xp[b]) + (yp[c] - yp[b]) * (yp[a] - yp[b]);
-            double crossproduct = (xp[c] - xp[b]) * (yp[a] - yp[b]) - (yp[c] - yp[b]) * (xp[a] - xp[b]);
-            double angle = (180 / Math.PI) * Math.atan2(crossproduct, dotproduct);
-            if (Math.abs(angle) <= 90 || crossproduct == 0) {
-                xp[b] = xp[p3];
-                yp[b] = yp[p3];
-                nPoints = b + 1;
-            }
-        }
-    }
-        
+	//Mouse behaves like an eraser when moved backwards with alt key down.
+	//Within correction circle, all vertices with sharp angles are removed.
+	//Norbert Vischer
+	protected void wipeBack() {
+		double correctionRadius = 20;
+		if (ic!=null)
+			correctionRadius /= ic.getMagnification();
+		boolean found = false;
+		int p3 = nPoints - 1;
+		int p1 = p3;
+		while (p1 > 0 && !found) {
+			p1--;
+			double dx = xp[p3] - xp[p1];
+			double dy = yp[p3] - yp[p1];
+			double dist = Math.sqrt(dx * dx + dy * dy);
+			if (dist > correctionRadius)
+				found = true;
+		}
+		//examine all angles p1-p2-p3
+		boolean killed = false;
+		int safety = 10;
+		do {
+			killed = false;
+			safety--;
+			for (int p2 = p1 + 1; p2 < p3; p2++) {
+				double dx1 = xp[p2] - xp[p1];
+				double dy1 = yp[p2] - yp[p1];
+				double dx2 = xp[p3] - xp[p1];
+				double dy2 = yp[p3] - yp[p1];
+				double kk = 1;//allowed sharpness
+				if (this instanceof FreehandRoi)
+					kk = 0.8;
+				if ((dx1 * dx1 + dy1 * dy1) > kk * (dx2 * dx2 + dy2 * dy2)) {
+					xp[p2] = xp[p3];//replace sharp vertex with end point, 
+					yp[p2] = yp[p3];
+					p3 = p2;
+					nPoints = p2 + 1; //shorten array
+					killed = true;
+				}
+			}
+		} while (killed && safety > 0);
+	}
+           
 	void drawRubberBand(int sx, int sy) {
 		double oxd = ic!=null?ic.offScreenXD(sx):sx;
 		double oyd = ic!=null?ic.offScreenYD(sy):sy;
@@ -497,8 +503,8 @@ public class PolygonRoi extends Roi {
 			if (mag<1.0) margin = (int)(margin/mag);
 		}
 		margin = (int)(margin+getStrokeWidth());
-                if(IJ.altKeyDown())
-                    margin+=20;//for wipe-back n__
+		if (IJ.altKeyDown())
+			margin+=20;
 		if (xpf!=null) {
 			xpf[nPoints-1] = (float)(oxd-getXBase());
 			ypf[nPoints-1] = (float)(oyd-getYBase());
@@ -571,36 +577,6 @@ public class PolygonRoi extends Roi {
 		}
 	}
 	
-	/*
-	void move(int sx, int sy) {
-		int xNew = ic.offScreenX(sx);
-		int yNew = ic.offScreenY(sy);
-		x += xNew - startX;
-		y += yNew - startY;
-		startX = xNew;
-		startY = yNew;
-		if (bounds!=null) {
-			double xdNew = ic.offScreenXD(sx);
-			double ydNew = ic.offScreenYD(sy);
-			bounds.x += xdNew - startXD;
-			bounds.y += ydNew - startYD;
-			startXD = xdNew;
-			startYD = ydNew;
-			x = (int)bounds.x;
-			y = (int)bounds.y;
-		}
-		updateClipRect();
-		if ((lineWidth>1 && isLine()) || ignoreClipRect)
-			imp.draw();
-		else
-			imp.draw(clipX, clipY, clipWidth, clipHeight);
-		oldX = x;
-		oldY = y;
-		oldWidth = width;
-		oldHeight=height;
-	}
-	*/
-
 	protected void moveHandle(int sx, int sy) {
 		if (clipboard!=null) return;
 		int ox = ic.offScreenX(sx);
@@ -619,7 +595,7 @@ public class PolygonRoi extends Roi {
 			fitSpline(splinePoints);
 			imp.draw();
 		} else {
-			if (!subPixelResolution())
+			if (!subPixelResolution() || (type==POINT&&nPoints==1))
 				resetBoundingRect();
 			if (type==POINT && width==0 && height==0)
 				{width=1; height=1;}
@@ -814,9 +790,14 @@ public class PolygonRoi extends Roi {
 			if (i!=pointToDelete)
 				points2.addPoint(points.xpoints[i], points.ypoints[i]);
 		}
-		if (type==POINT)
-			imp.setRoi(new PointRoi(points2.xpoints, points2.ypoints, points2.npoints));
-		else {
+		if (type==POINT) {
+			PointRoi roi1 = (PointRoi)this;
+			PointRoi roi2 = new PointRoi(points2.xpoints, points2.ypoints, points2.npoints);
+			roi2.setPointType(roi1.getPointType());
+			roi2.setSize(roi1.getSize());
+			roi2.setShowLabels(roi1.getShowLabels());
+			imp.setRoi(roi2);
+		} else {
 			if (subPixelResolution()) {
 				Roi roi2 = new PolygonRoi(points2, type);
 				roi2.setDrawOffset(getDrawOffset());
