@@ -32,7 +32,8 @@ public class IjImageChangedListenerOJ implements ImageListener {
 
 
         if (OJ.isValidData() && (imp.getOriginalFileInfo() != null) && (imp.getOriginalFileInfo().directory != null)) {
-            String file_name = imp.getOriginalFileInfo().fileName;
+            //String file_name = imp.getOriginalFileInfo().fileName;
+            String file_name = imp.getTitle();//11.11.2014 file called zip, image called tif
             ImageOJ imageOJ = OJ.getData().getImages().getImageByName(file_name);
             if (imageOJ == null) {
                 KeyEventManagerOJ.getInstance().replaceKeyListener(imp);//also listen to non-linked images because of the tool macro, 24.10.2010

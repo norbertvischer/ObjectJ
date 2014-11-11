@@ -87,7 +87,9 @@ public class SimpleCommandsOJ extends SimpleCommands {
 
         String oldExt = UtilsOJ.getFileExtension(oldName);
         String newExt = UtilsOJ.getFileExtension(newName);
-        if (!oldExt.equalsIgnoreCase(newExt)) {
+        String both = (oldExt + newExt).toLowerCase();
+        boolean tiftif = both.equals(".tiff.tif") || both.equals(".tif.tiff");
+        if (!oldExt.equalsIgnoreCase(newExt) && !tiftif) {
             return "Cannot change file extension ";
         }
 

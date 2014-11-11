@@ -50,7 +50,9 @@ import oj.util.ImageWindowUtilsOJ;
 import oj.util.TiffFileInfoOJ;
 
 public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetListener {
-
+static int NOT_FOUND = 0,  FOUND = 1, FOUND_ZIP = 2;
+               
+        
     private Hashtable openedImages = new Hashtable();//ImageOJ <-> Name
 
     public ImageProcessorOJ() {
@@ -104,7 +106,8 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
         //check for the file in the project directory
         ImageOJ imageOJ = OJ.getData().getImages().getImageByName(imageName);
         if (imageOJ != null) {
-            if (!isInProjectDir(imageOJ.getFilename())) {
+            int exists = isInProjectDir(imageOJ.getFilename());
+            if (exists == NOT_FOUND) {
 
                 String msg = "The selected image \n\"" + imageName + "\" \nwas not found in the project directory.";//8.7.2009
                 if (ij.IJ.isMacro()) {
@@ -135,7 +138,22 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
                 if (imp == null) {
                     String dir = OJ.getData().getDirectory();
                     String fName = imageOJ.getFilename();
-                    imp = new Opener().openImage(dir, fName);//30.6.2013
+                    if (exists == FOUND_ZIP) {
+                        String zipName = UtilsOJ.stripExtension(fName) + ".zip";
+                        imp = new Opener().openImage(dir, zipName);//10.11.2014
+                        if (imp != null) {
+
+                            if (!imp.getTitle().equals(fName)) {
+
+                                imp.close();
+                                imp = null;
+                                return;
+                            }
+                        }
+                    } else {
+                        imp = new Opener().openImage(dir, fName);//30.6.2013
+                    }
+
                     imp.show();//30.6.2013                  
                     IJ.selectWindow(imp.getID());//7.12.2013
                 }
@@ -177,7 +195,7 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
         //check for the file in the project directory
         String fileName = imp.getTitle();
         String imageName = fileName;
-        if (!isInProjectDir(fileName)) {
+        if (isInProjectDir(fileName) == 0) {
             IJ.showMessage("Error: Image \"" + imageName + "\" is not saved in the project directory.");
             return;
 
@@ -221,7 +239,7 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
     public void addImage(String fileName, boolean shouldOpen, boolean showAlreadyLinkedMessage) {
         String imageName = fileName;
         //check for the file in the project directory
-        boolean valid = isInProjectDir(fileName);//23.2.2010 wrong message when it is a directory
+        boolean valid = isInProjectDir(fileName) != NOT_FOUND;
         if (!valid) {
             String msg = "Before linking image \n \"" + imageName + "\"\n to the project, you need to move it to the project folder.";
 
@@ -306,7 +324,6 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 //        image.setFilename(filename);
 //        OJ.getData().getImages().updateImageName(imageName, image.getName());
 //    }
-    
 //    public void renameImage(int index) {
 //
 //        ImagesOJ images = OJ.getData().getImages();
@@ -319,7 +336,6 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 //        }
 //
 //    }
-
     public void propagateScale(int index) {
 
         ImagesOJ images = OJ.getData().getImages();
@@ -475,11 +491,25 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
      * @param imageName
      * @return
      */
-    private boolean isInProjectDir(String imageName) {
+    private int isInProjectDir(String imageName) {
+        String zipName = "";
         String dir = OJ.getData().getDirectory();
         File file = new File(dir, imageName);
-
-        return (file.exists() && file.isFile() && !file.isHidden());
+        if (!file.exists()) {
+            if (imageName.toLowerCase().endsWith(".tif")) {
+                zipName = UtilsOJ.stripExtension(imageName) + ".zip";
+                File zipFile = new File(dir, zipName);
+                if (zipFile.exists() && zipFile.isFile() && !zipFile.isHidden()) {
+                    return NOT_FOUND;
+                    //return FOUND_ZIP; //so far, we disable the acceptance of zip files
+                }
+            }
+        }
+        if ((file.exists() && file.isFile() && !file.isHidden())) {
+            return FOUND;
+        } else {
+            return NOT_FOUND;
+        }
     }
 
     /**
@@ -491,7 +521,7 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
     }
 
     public boolean isLinked(ImagePlus imp) {
-        return (isLinked(imp.getTitle()) && isInProjectDir(imp.getTitle()));
+        return (isLinked(imp.getTitle()) && (isInProjectDir(imp.getTitle()) > 0));
     }
 
     /**
