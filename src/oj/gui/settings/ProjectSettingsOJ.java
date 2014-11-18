@@ -9,12 +9,14 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.awt.dnd.DropTarget;
 import java.io.File;
 import java.util.Hashtable;
 import javax.swing.JLabel;
 import javax.swing.border.Border;
 import oj.OJ;
 import oj.gui.KeyEventManagerOJ;
+import oj.processor.ImageProcessorOJ;
 
 /**
  * Project window with the five icons
@@ -92,6 +94,8 @@ public class ProjectSettingsOJ extends javax.swing.JFrame {
         pnlSettings.add((javax.swing.JPanel) settingsPanels.get(ProjectSettingsOJ.QUALIFIERS_PANEL), ProjectSettingsOJ.QUALIFIERS_PANEL);
         pnlSettings.add((javax.swing.JPanel) settingsPanels.get(ProjectSettingsOJ.YTEM_DEFS_PANEL), ProjectSettingsOJ.YTEM_DEFS_PANEL);
         pnlSettings.add((javax.swing.JPanel) settingsPanels.get(ProjectSettingsOJ.IMAGE_DEFS_PANEL), ProjectSettingsOJ.IMAGE_DEFS_PANEL);
+        
+        new DropTarget(lblImageDefs, ImageProcessorOJ.dropOperations, OJ.getImageProcessor());//18.11.2014
 
         if (PlotSettingsOJ.withPlots) {
             pnlSettings.add((javax.swing.JPanel) settingsPanels.get(ProjectSettingsOJ.PLOTS_PANEL), ProjectSettingsOJ.PLOTS_PANEL);

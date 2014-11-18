@@ -36,8 +36,8 @@ import oj.OJ;
 import oj.util.UtilsOJ;
 import oj.graphics.CustomCanvasOJ;
 import oj.gui.MouseEventManagerOJ;
+import oj.gui.settings.ProjectSettingsOJ;
 import oj.plugin.GlassWindowOJ;
-import oj.plugin.SimpleCommandsOJ;
 import oj.processor.events.CellChangedListenerOJ;
 import oj.processor.events.ImageChangedEventOJ;
 import oj.processor.events.ImageChangedListener2OJ;
@@ -1102,6 +1102,7 @@ static int NOT_FOUND = 0,  FOUND = 1, FOUND_ZIP = 2;
                 ij.IJ.showMessage("Drag&Drop ignored, -please try again");//30.9.2009
             }
             if (t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+                ProjectSettingsOJ.getInstance().selectImageDefsPanel();//18.11.2014
                 Object data = t.getTransferData(DataFlavor.javaFileListFlavor);
                 Collections.sort((List) data);
                 Iterator iterator = ((List) data).iterator();
