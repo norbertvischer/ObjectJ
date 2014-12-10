@@ -142,7 +142,7 @@ public class Functions implements MacroConstants, Measurements {
 			case SET_Z_COORDINATE: setZCoordinate(); break;
 			case GET_THRESHOLD: getThreshold(); break;
 			case GET_PIXEL_SIZE: getPixelSize(); break;
-			case SETUP_UNDO: interp.getParens(); Undo.setup(Undo.TRANSFORM, getImage()); break;
+			case SETUP_UNDO: interp.getParens(); Undo.setup(Undo.MACRO, getImage()); break;
 			case SAVE_SETTINGS: saveSettings(); break;
 			case RESTORE_SETTINGS: restoreSettings(); break;
 			case SET_KEY_DOWN: setKeyDown(); break;
@@ -4752,9 +4752,12 @@ public class Functions implements MacroConstants, Measurements {
 	}
 
 	void makePoint() {
-		int x = (int)getFirstArg();
-		int y = (int)getLastArg();
-		IJ.makePoint(x, y);
+		double x = getFirstArg();
+		double y = getLastArg();
+		if ((int)x==(int)y)
+			IJ.makePoint((int)x, (int)y);
+		else
+			IJ.makePoint(x, y);
 		resetImage(); 
 	}
 
@@ -4922,21 +4925,21 @@ public class Functions implements MacroConstants, Measurements {
 			else
 				return null;
 		}
-		if (interp.editor==null && !(arg.equals("throw")||arg.equals("dump"))) {
+		if (interp.getDebugger()==null && !(arg.equals("throw")||arg.equals("dump"))) {
 			Editor ed = Editor.getInstance();
 			if (ed==null)
 				interp.error("Macro editor not available");
 			else
-				interp.setEditor(ed);
+				interp.setDebugger(ed);
 		}
 		if (arg.equals("run"))
-			interp.setDebugMode(Interpreter.RUN);
+			interp.setDebugMode(Debugger.RUN_TO_COMPLETION);
 		else if (arg.equals("break"))
-			interp.setDebugMode(Interpreter.STEP);
+			interp.setDebugMode(Debugger.STEP);
 		else if (arg.equals("trace"))
-			interp.setDebugMode(Interpreter.TRACE);
+			interp.setDebugMode(Debugger.TRACE);
 		else if (arg.indexOf("fast")!=-1)
-			interp.setDebugMode(Interpreter.FAST_TRACE);
+			interp.setDebugMode(Debugger.FAST_TRACE);
 		else if (arg.equals("dump"))
 			interp.dump();
 		else if (arg.indexOf("throw")!=-1)
@@ -4983,9 +4986,40 @@ public class Functions implements MacroConstants, Measurements {
 			return findArrayMaxima(true);
 		else if (name.equals("show"))
 			return showArray();
+		else if (name.equals("fourier"))
+			return fourierArray();
 		else
 			interp.error("Unrecognized Array function");
 		return null;
+	}
+	
+	Variable[] fourierArray() {
+		interp.getLeftParen();
+		Variable[] a = getArray();
+		int windowType = FHT.NO_WINDOW;
+		if (interp.nextToken()==',') {
+			interp.getComma();
+			String windowS = getString().toLowerCase();
+			if (windowS.equals("hamming"))
+				windowType = FHT.HAMMING;
+			else if (windowS.startsWith("hann")) //sometimes also called 'Hanning'
+				windowType = FHT.HANN;
+			else if (windowS.startsWith("flat"))
+				windowType = FHT.FLATTOP;
+			else if (!windowS.startsWith("no"))
+				interp.error("Invalid Fourier window '"+windowType+"'");
+		}
+		interp.getRightParen();
+		int n = a.length;
+		float[] data = new float[n];
+		for (int i=0; i<n; i++)
+			data[i] = (float)a[i].getValue();
+		float[] result = new FHT().fourier1D(data, windowType);
+		int n2 = result.length;
+		Variable[] a2 = new Variable[n2];
+		for (int i=0; i<n2; i++)
+			a2[i] = new Variable(result[i]);
+		return a2;
 	}
 	
 	Variable[] printArray() {
@@ -5842,7 +5876,11 @@ public class Functions implements MacroConstants, Measurements {
 		Roi roi = imp.getRoi();
 		if (roi==null)
 			interp.error("No selection");
-		if (name.equals("getBounds")) {
+		if (name.equals("contains")) {
+			int x = (int)Math.round(getFirstArg());
+			int y = (int)Math.round(getLastArg());
+			return roi.contains(x,y)?"1":"0";
+		} else if (name.equals("getBounds")) {
 			getBounds();
 			return null;
 		} else if (name.equals("getDefaultColor")) {
@@ -5910,7 +5948,6 @@ public class Functions implements MacroConstants, Measurements {
 			interp.error("Unrecognized Roi function");
 		return null;
 	}
-
 		
 } // class Functions
 

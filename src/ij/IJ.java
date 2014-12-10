@@ -767,24 +767,12 @@ public class IJ {
 			return "3.4e38";
 		double np = n;
 		if (n<0.0) np = -n;
-		if (df==null) {
-			dfs = new DecimalFormatSymbols(Locale.US);
-			df = new DecimalFormat[10];
-			df[0] = new DecimalFormat("0", dfs);
-			df[1] = new DecimalFormat("0.0", dfs);
-			df[2] = new DecimalFormat("0.00", dfs);
-			df[3] = new DecimalFormat("0.000", dfs);
-			df[4] = new DecimalFormat("0.0000", dfs);
-			df[5] = new DecimalFormat("0.00000", dfs);
-			df[6] = new DecimalFormat("0.000000", dfs);
-			df[7] = new DecimalFormat("0.0000000", dfs);
-			df[8] = new DecimalFormat("0.00000000", dfs);
-			df[9] = new DecimalFormat("0.000000000", dfs);
-		}
 		if (decimalPlaces<0) {
 			decimalPlaces = -decimalPlaces;
 			if (decimalPlaces>9) decimalPlaces=9;
 			if (sf==null) {
+				if (dfs==null)
+					dfs = new DecimalFormatSymbols(Locale.US);
 				sf = new DecimalFormat[10];
 				sf[1] = new DecimalFormat("0.0E0",dfs);
 				sf[2] = new DecimalFormat("0.00E0",dfs);
@@ -800,6 +788,20 @@ public class IJ {
 		}
 		if (decimalPlaces<0) decimalPlaces = 0;
 		if (decimalPlaces>9) decimalPlaces = 9;
+		if (df==null) {
+			dfs = new DecimalFormatSymbols(Locale.US);
+			df = new DecimalFormat[10];
+			df[0] = new DecimalFormat("0", dfs);
+			df[1] = new DecimalFormat("0.0", dfs);
+			df[2] = new DecimalFormat("0.00", dfs);
+			df[3] = new DecimalFormat("0.000", dfs);
+			df[4] = new DecimalFormat("0.0000", dfs);
+			df[5] = new DecimalFormat("0.00000", dfs);
+			df[6] = new DecimalFormat("0.000000", dfs);
+			df[7] = new DecimalFormat("0.0000000", dfs);
+			df[8] = new DecimalFormat("0.00000000", dfs);
+			df[9] = new DecimalFormat("0.000000000", dfs);
+		}
 		return df[decimalPlaces].format(n);
 	}
 
@@ -1084,13 +1086,29 @@ public class IJ {
 		getImage().setRoi(new Line(x1, y1, x2, y2));
 	}
 
-	/** Creates a point selection. */
+	/** Creates a point selection using integer coordinates.. */
 	public static void makePoint(int x, int y) {
 		ImagePlus img = getImage();
 		Roi roi = img.getRoi();
 		if (shiftKeyDown() && roi!=null && roi.getType()==Roi.POINT) {
 			Polygon p = roi.getPolygon();
 			p.addPoint(x, y);
+			img.setRoi(new PointRoi(p.xpoints, p.ypoints, p.npoints));
+			IJ.setKeyUp(KeyEvent.VK_SHIFT);
+		} else if (altKeyDown() && roi!=null && roi.getType()==Roi.POINT) {
+			((PolygonRoi)roi).deleteHandle(x, y);
+			IJ.setKeyUp(KeyEvent.VK_ALT);
+		} else
+			img.setRoi(new PointRoi(x, y));
+	}
+	
+	/** Creates a point selection using floating point coordinates. */
+	public static void makePoint(double x, double y) {
+		ImagePlus img = getImage();
+		Roi roi = img.getRoi();
+		if (shiftKeyDown() && roi!=null && roi.getType()==Roi.POINT) {
+			Polygon p = roi.getPolygon();
+			p.addPoint((int)Math.round(x), (int)Math.round(y));
 			img.setRoi(new PointRoi(p.xpoints, p.ypoints, p.npoints));
 			IJ.setKeyUp(KeyEvent.VK_SHIFT);
 		} else if (altKeyDown() && roi!=null && roi.getType()==Roi.POINT) {
@@ -1176,7 +1194,7 @@ public class IJ {
 		lowerThreshold = cal.getRawValue(lowerThreshold); 
 		upperThreshold = cal.getRawValue(upperThreshold); 
 		img.getProcessor().setThreshold(lowerThreshold, upperThreshold, mode);
-		if (mode != ImageProcessor.NO_LUT_UPDATE) {
+		if (mode!=ImageProcessor.NO_LUT_UPDATE && img.getWindow()!=null) {
 			img.getProcessor().setLutAnimation(true);
 			img.updateAndDraw();
 			ThresholdAdjuster.update();
@@ -1586,7 +1604,9 @@ public class IJ {
 		Calls HandleExtraFileTypes plugin if the file type is not recognised.
 		Displays a file open dialog if 'path' is null or an empty string.
 		Note that 'path' can also be a URL. Some reader plugins, including
-		the Bio-Formats plugin, display the image and return null. */
+		the Bio-Formats plugin, display the image and return null.
+		Use IJ.open() to display a file open dialog box.
+	*/
 	public static ImagePlus openImage(String path) {
 		return (new Opener()).openImage(path);
 	}

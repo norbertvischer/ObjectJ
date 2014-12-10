@@ -95,6 +95,10 @@ public class TiffDecoder {
 		else
 			return ((b1 << 24) + (b2 << 16) + (b3 << 8) + b4);
 	}
+	
+	final long getUnsignedInt() throws IOException {
+		return (long)getInt()&0xffffffffL;
+	}
 
 	final int getShort() throws IOException {
 		int b1 = in.read();
@@ -341,13 +345,11 @@ public class TiffDecoder {
 	double getRational(long loc) throws IOException {
 		long saveLoc = in.getLongFilePointer();
 		in.seek(loc);
-		int numerator = getInt();
-		int denominator = getInt();
+		double numerator = getUnsignedInt();
+		double denominator = getUnsignedInt();
 		in.seek(saveLoc);
-		//System.out.println("numerator: "+numerator);
-		//System.out.println("denominator: "+denominator);
-		if (denominator!=0)
-			return (double)numerator/denominator;
+		if (denominator!=0.0)
+			return numerator/denominator;
 		else
 			return 0.0;
 	}
@@ -429,23 +431,31 @@ public class TiffDecoder {
 								fi.fileType = FileInfo.BITMAP;
 							else
 								error("Unsupported BitsPerSample: " + value);
-						} else if (count==3) {
+						} else if (count>1) {
 							long saveLoc = in.getLongFilePointer();
 							in.seek(lvalue);
 							int bitDepth = getShort();
-							if (!(bitDepth==8||bitDepth==16))
-								error("ImageJ can only open 8 and 16 bit/channel RGB images ("+bitDepth+")");
-							if (bitDepth==16)
-								fi.fileType = FileInfo.RGB48;
+							if (bitDepth==8)
+								fi.fileType = FileInfo.GRAY8;
+							else if (bitDepth==16)
+								fi.fileType = FileInfo.GRAY16_UNSIGNED;
+							else
+								error("ImageJ can only open 8 and 16 bit/channel images ("+bitDepth+")");
 							in.seek(saveLoc);
 						}
 						break;
 				case SAMPLES_PER_PIXEL:
 					fi.samplesPerPixel = value;
-					if (value==3 && fi.fileType!=FileInfo.RGB48)
-						fi.fileType = fi.fileType==FileInfo.GRAY16_UNSIGNED?FileInfo.RGB48:FileInfo.RGB;
-					else if (value==4 && fi.fileType==FileInfo.GRAY8) {
+					if (value==3 && fi.fileType==FileInfo.GRAY8)
+						fi.fileType = FileInfo.RGB;
+					else if (value==3 && fi.fileType==FileInfo.GRAY16_UNSIGNED)
+						fi.fileType = FileInfo.RGB48;
+					else if (value==4 && fi.fileType==FileInfo.GRAY8)
 						fi.fileType = photoInterp==5?FileInfo.CMYK:FileInfo.ARGB;
+					else if (value==4 && fi.fileType==FileInfo.GRAY16_UNSIGNED) {
+						fi.fileType = FileInfo.RGB48;
+						if (photoInterp==5)  //assume cmyk
+							fi.whiteIsZero = true;
 					}
 					break;
 				case ROWS_PER_STRIP:
@@ -473,12 +483,10 @@ public class TiffDecoder {
 					break;
 				case PLANAR_CONFIGURATION:  // 1=chunky, 2=planar
 					if (value==2 && fi.fileType==FileInfo.RGB48)
-							 fi.fileType = FileInfo.GRAY16_UNSIGNED;
+							 fi.fileType = FileInfo.RGB48_PLANAR;
 					else if (value==2 && fi.fileType==FileInfo.RGB)
 						fi.fileType = FileInfo.RGB_PLANAR;
-					else if (value==1 && fi.samplesPerPixel==4) {
-						fi.fileType = photoInterp==5?FileInfo.CMYK:FileInfo.ARGB;
-					} else if (value!=2 && !((fi.samplesPerPixel==1)||(fi.samplesPerPixel==3))) {
+					else if (value!=2 && !(fi.samplesPerPixel==1||fi.samplesPerPixel==3||fi.samplesPerPixel==4)) {
 						String msg = "Unsupported SamplesPerPixel: " + fi.samplesPerPixel;
 						error(msg);
 					}
@@ -781,12 +789,15 @@ public class TiffDecoder {
 				in.close();
 			if (info[0].info==null)
 				info[0].info = tiffMetadata;
+			FileInfo fi = info[0];
+			if (fi.fileType==FileInfo.GRAY16_UNSIGNED && fi.description==null)
+				fi.lutSize = 0; // ignore troublesome non-ImageJ 16-bit LUTs
 			if (debugMode) {
 				int n = info.length;
-				info[0].debugInfo += "number of IFDs: "+ n + "\n";
-				info[0].debugInfo += "offset to first image: "+info[0].getOffset()+ "\n";
-				info[0].debugInfo += "gap between images: "+getGapInfo(info) + "\n";
-				info[0].debugInfo += "little-endian byte order: "+info[0].intelByteOrder + "\n";
+				fi.debugInfo += "number of IFDs: "+ n + "\n";
+				fi.debugInfo += "offset to first image: "+fi.getOffset()+ "\n";
+				fi.debugInfo += "gap between images: "+getGapInfo(info) + "\n";
+				fi.debugInfo += "little-endian byte order: "+fi.intelByteOrder + "\n";
 			}
 			return info;
 		}

@@ -115,7 +115,7 @@ public class MaximumFinder implements ExtendedPlugInFilter, DialogListener {
 
     public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr) {
         ImageProcessor ip = imp.getProcessor();
-        ip.resetBinaryThreshold(); // remove invisible threshold set by MakeBinary and Convert to Mask
+        ip.resetBinaryThreshold(); // remove any invisible threshold set by Make Binary or Convert to Mask
         thresholded = ip.getMinThreshold()!=ImageProcessor.NO_THRESHOLD;
         GenericDialog gd = new GenericDialog(command);
         int digits = (ip instanceof FloatProcessor)?2:0;
@@ -668,8 +668,7 @@ public class MaximumFinder implements ExtendedPlugInFilter, DialogListener {
                     ypoints[i] = xy[1];
                 }
                 if (imp!=null) {
-                	Roi points = new PointRoi(xpoints, ypoints, npoints);
-                	((PointRoi)points).setHideLabels(true);
+                	PointRoi points = new PointRoi(xpoints, ypoints, npoints);
                 	imp.setRoi(points);
                 }
                 points = new Polygon(xpoints, ypoints, npoints);

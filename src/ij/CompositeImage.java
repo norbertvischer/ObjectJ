@@ -123,6 +123,11 @@ public class CompositeImage extends ImagePlus {
 	}
 
 	void setup(int channels, ImageStack stack2) {
+		if (stack2!=null && stack2.getSize()>0 && (stack2.getProcessor(1) instanceof ColorProcessor)) { // RGB?
+			cip = null;
+			lut = null;
+			return;
+		}
 		setupLuts(channels);
 		if (mode==COMPOSITE) {
 			cip = new ImageProcessor[channels];
@@ -164,6 +169,8 @@ public class CompositeImage extends ImagePlus {
 	
 	public void resetDisplayRanges() {
 		int channels = getNChannels();
+		if (lut==null)
+			setupLuts(channels);
 		ImageStack stack2 = getImageStack();
 		if (lut==null || channels!=lut.length || channels>stack2.getSize() || channels>MAX_CHANNELS)
 			return;

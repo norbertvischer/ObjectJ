@@ -283,18 +283,22 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		return getProcessor();
 	}
 		
-	/* The CompositeImage class overrides this method  to
-		return, as an array, copies of this image's channel LUTs. */
+	/**  Returns an array containing the lookup tables used by this image,
+	 * one per channel, or an empty array if this is an RGB image.
+	 * @see #getNChannels
+	 * @see #isComposite
+	 * @see #getCompositeMode
+	*/
 	public LUT[] getLuts() {
-		return null;
-		//ImageProcessor ip = getProcessor();
-		//ColorModel cm = ip.getColorModel();
-		//if (cm instanceof IndexColorModel) {
-		//	LUT[] luts = new LUT[1];
-		//	luts[0] = new LUT((IndexColorModel)cm, ip.getMin(), ip.getMax());
-		//	return luts;
-		//} else
-		//	return null;
+		ImageProcessor ip2 = getProcessor();
+		if (ip2==null)
+			return new LUT[0];
+		LUT lut = ip2.getLut();
+		if (lut==null)
+			return new LUT[0];
+		LUT[] luts = new LUT[1];
+		luts[0] = lut;
+		return luts;
 	}
 
 	/** Calls draw to draw the image and also repaints the
@@ -344,11 +348,9 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		"Save changes?" dialog, first set the public 'changes' variable to false. */
 	public void close() {
 		ImageWindow win = getWindow();
-		if (win!=null) {
-			//if (IJ.isWindows() && IJ.isJava14())
-			//	changes = false; // avoid 'save changes?' dialog and potential Java 1.5 deadlocks
+		if (win!=null)
 			win.close();
-		} else {
+		else {
             if (WindowManager.getCurrentImage()==this)
                 WindowManager.setTempCurrentImage(null);
 			deleteRoi(); //save any ROI so it can be restored later
@@ -556,10 +558,13 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	void setProcessor2(String title, ImageProcessor ip, ImageStack newStack) {
 		//IJ.log("setProcessor2: "+ip+" "+this.ip+" "+newStack);
 		if (title!=null) setTitle(title);
-		if (ip!=null & this.ip!=null && getWindow()!=null)
+		if (ip==null)
+			return;
+		if (this.ip!=null && getWindow()!=null)
 			notifyListeners(UPDATED);
 		this.ip = ip;
-		if (ij!=null) ip.setProgressBar(ij.getProgressBar());
+		if (ij!=null)
+			ip.setProgressBar(ij.getProgressBar());
         int stackSize = 1;
 		if (stack!=null) {
 			stackSize = stack.getSize();
@@ -1632,16 +1637,28 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 				break;
 			case Toolbar.POINT:
 				roi = new PointRoi(sx, sy, this);
+				if (Prefs.pointAddToOverlay) {
+					int measurements = Analyzer.getMeasurements();
+					if (!(Prefs.pointAutoMeasure && (measurements&Measurements.ADD_TO_OVERLAY)!=0))
+						IJ.run(this, "Add Selection...", "");
+					Overlay overlay2 = getOverlay();
+					if (overlay2!=null)
+						overlay2.drawLabels(true);
+					Prefs.pointAddToManager = false;
+				}
 				if (Prefs.pointAutoMeasure || (Prefs.pointAutoNextSlice&&!Prefs.pointAddToManager))
-					IJ.run("Measure");
+					IJ.run(this, "Measure", "");
 				if (Prefs.pointAddToManager) {
-					IJ.run("Add to Manager ");
+					IJ.run(this, "Add to Manager ", "");
 					ImageCanvas ic = getCanvas();
-					if (ic!=null && ic.getShowAllList()==null)
-						ic.setShowAllROIs(true);
+					if (ic!=null) {
+						RoiManager rm = RoiManager.getInstance();
+						if (rm!=null)
+							rm.runCommand("show all with labels");
+					}
 				}
 				if (Prefs.pointAutoNextSlice && getStackSize()>1) {
-					IJ.run("Next Slice [>]");
+					IJ.run(this, "Next Slice [>]", "");
 					deleteRoi();
 				}
 				break;
@@ -1653,6 +1670,9 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	public void deleteRoi() {
 		if (roi!=null) {
 			saveRoi();
+			RoiManager rm = RoiManager.getInstance();
+			if (rm!=null)
+				rm.deselect(roi);
 			roi = null;
 			if (ip!=null)
 				ip.resetRoi();
@@ -2135,8 +2155,8 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
     			String s = (int)value==value?IJ.d2s(value,0)+".0":IJ.d2s(value,4,7);
     			return(", value=" + s);
 			case COLOR_RGB:
-				//String hex = Colors.colorToString(new Color(v[0],v[1],v[2]));
-    			return(", value=" + IJ.pad(v[0],3) + "," + IJ.pad(v[1],3) + "," + IJ.pad(v[2],3));
+				String hex = Colors.colorToString(new Color(v[0],v[1],v[2]));
+				return(", value=" + IJ.pad(v[0],3) + "," + IJ.pad(v[1],3) + "," + IJ.pad(v[2],3) + " ("+hex + ")");
     		default: return("");
 		}
     }
