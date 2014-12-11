@@ -641,7 +641,9 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 
         imgw.validate();
         //}
-        imp.getRoi().setImage(imp);//11.12.2014
+        if (imp.getRoi() != null) {
+            imp.getRoi().setImage(imp);//11.12.2014
+        }
         MouseEventManagerOJ.getInstance().replaceMouseListener(imp);
 
         imp.getWindow().getComponent(0).requestFocus();
