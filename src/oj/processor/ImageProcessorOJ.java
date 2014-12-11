@@ -43,6 +43,7 @@ import oj.processor.events.ImageChangedEventOJ;
 import oj.processor.events.ImageChangedListener2OJ;
 import oj.processor.events.YtemChangedListenerOJ;
 import oj.processor.events.YtemDefChangedListenerOJ;
+import oj.project.DataOJ;
 import oj.project.ImageOJ;
 import oj.project.ImagesOJ;
 import oj.util.ImageJAccessOJ;
@@ -50,9 +51,9 @@ import oj.util.ImageWindowUtilsOJ;
 import oj.util.TiffFileInfoOJ;
 
 public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetListener {
-static int NOT_FOUND = 0,  FOUND = 1, FOUND_ZIP = 2;
-               
-        
+
+    static int NOT_FOUND = 0, FOUND = 1, FOUND_ZIP = 2;
+
     private Hashtable openedImages = new Hashtable();//ImageOJ <-> Name
 
     public ImageProcessorOJ() {
@@ -640,7 +641,7 @@ static int NOT_FOUND = 0,  FOUND = 1, FOUND_ZIP = 2;
 
         imgw.validate();
         //}
-
+        imp.getRoi().setImage(imp);//11.12.2014
         MouseEventManagerOJ.getInstance().replaceMouseListener(imp);
 
         imp.getWindow().getComponent(0).requestFocus();

@@ -251,6 +251,7 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
         }
         srcRect = new Rectangle(ic.getSrcRect().x, ic.getSrcRect().y, ic.getSrcRect().width, ic.getSrcRect().height);
         setMagnification(ic.getMagnification());
+        setOverlay(ic.getOverlay());// 11.12.2014
         setDrawingSize(ic.getPreferredSize().width, ic.getPreferredSize().height);
     }
 

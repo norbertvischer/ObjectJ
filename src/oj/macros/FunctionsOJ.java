@@ -785,25 +785,64 @@ public class FunctionsOJ implements MacroExtension {
         return null;
     }
 
-      public String ojTest(String arg) {//6.10.2014
-        OJ.getData().getCells().getSelectedCell().getSelectedYtem().setIJRoi(ij.IJ.getImage().getRoi());
+    public String ojTest(String arg) {//2.12.2014
+        //OJ.getData().getCells().getSelectedCell().getSelectedYtem().setIJRoi(ij.IJ.getImage().getRoi()); //ImageJ Roi
+        /*
+         String mm = "axis = $Axis; ax100 = axis * 100;  $Result = ax100;";
+         mm = mm.replaceAll("\\$Result", "__result__");
+         String all = "for (obj = 1; obj <= ojNObjects(); obj++){print(obj);";
+  
+         int inDollar = -1;
+         for (int jj = 0; jj < mm.length(); jj++) {
+         char ch = mm.charAt(jj);
+         if (ch == '$') {
+         inDollar = jj;
+         all += "ojResult(\"";
+         } else if (inDollar >= 0 && !(ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' || ch >= '0' && ch <= '9' || ch == '_')) {
+         all += "\", obj)";
+         inDollar = -1;
+         }
+         if (ch != '$') {
+         all += ch;
+         }
+         }
+         all += "ojSetResult(\"ThisOne\", obj, __result__);}";
+        
+        
+         //all = all.replaceAll("ojResult(\\\"Result\\\"", "ojSetResult((\\\"thresh\\\", obj, 777);");
+         //all = all.replaceAll("__Result__", "ojSetResult(\"ThisOne\", obj, 777);");
+
+         ij.IJ.log("----");
+         ij.IJ.log(mm);
+         ij.IJ.log("--");
+         ij.IJ.log(all);
+         //String[] statements = mm.split(";");
+         //String result = ij.IJ.e
+         //ij.IJ.log("Result=" + );
+
+         // eval("val = ojResult(\"Axis\",3); ojSetResult(\"Column1\", 3, 2*val);");
+
+       
+         //all = "for (obj = 1; obj <= ojNObjects(); obj++){print(-obj);axis = ojResult(\"Axis\", obj); ax100 = axis * 0.01;  __result__ = ax100;ojSetResult(\"ThisOne\", obj, __result__);}";
+
+         ij.IJ.runMacro(all);
+         */
         return null;
     }
 
     private ExtensionDescriptor[] extensions = {//test, 13.5.2013
         ExtensionDescriptor.newDescriptor("getColumnData", this, ARG_STRING, ARG_OUTPUT + ARG_ARRAY),
-        ExtensionDescriptor.newDescriptor("getItemPoints", this, ARG_OUTPUT + ARG_NUMBER,  ARG_OUTPUT + ARG_NUMBER),
-        };
+        ExtensionDescriptor.newDescriptor("getItemPoints", this, ARG_OUTPUT + ARG_NUMBER, ARG_OUTPUT + ARG_NUMBER),};
 
     public String handleExtension(String name, Object[] args) {
-     if (name.equals("getColumnData")) {//test, 13.5.2013
-      ((Double[]) args[0])[0] = new Double(3.3);
-      }
+        if (name.equals("getColumnData")) {//test, 13.5.2013
+            ((Double[]) args[0])[0] = new Double(3.3);
+        }
         return "hoi;";
     }
 
     public ExtensionDescriptor[] getExtensionFunctions() {
-    return extensions;
+        return extensions;
     }
 
     public static class ValidateExceptionOJ extends Exception {
