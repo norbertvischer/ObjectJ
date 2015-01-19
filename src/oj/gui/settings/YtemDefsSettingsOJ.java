@@ -236,7 +236,7 @@ public class YtemDefsSettingsOJ extends javax.swing.JPanel implements TableColum
             GenericDialog gd = new GenericDialog("Composite Objects", IJ.getInstance());
             gd.addMessage("Alt key must be down to change the 'Composite' checkbox");
             gd.addMessage("For more information, click 'Help'");
-            gd.addHelp("http://simon.bio.uva.nl/objectj/3b-ManualTools.html");
+            gd.addHelp(OJ.URL + "/3b-ManualTools.html");
             gd.showDialog();
         }
 

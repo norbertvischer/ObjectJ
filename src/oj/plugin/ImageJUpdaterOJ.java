@@ -101,7 +101,7 @@ public class ImageJUpdaterOJ extends ImageJ_Updater {
             error(msg);
             return false;
         }
-        String simonUrl = "http://simon.bio.uva.nl/objectj/download/download_ObjectJ/" + selectedJar + "/objectj_.jar";
+        String simonUrl = OJ.URL+"/download/download_ObjectJ/" + selectedJar + "/objectj_.jar";
 
         byte[] jar = getJar(simonUrl, selectedJar);
         saveJar(file, jar);

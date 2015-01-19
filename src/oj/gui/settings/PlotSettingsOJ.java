@@ -94,6 +94,7 @@ public class PlotSettingsOJ extends javax.swing.JPanel implements IControlPanelO
         btnHelp = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
         lblPercent1 = new java.awt.Label();
+        btnPlot1 = new javax.swing.JButton();
 
         jMenu1.setText("jMenu1");
 
@@ -117,7 +118,7 @@ public class PlotSettingsOJ extends javax.swing.JPanel implements IControlPanelO
 
         scrollCurrentPlotDef.setViewportView(pnlCurrentPlotDef);
 
-        btnPlot.setText("Plot");
+        btnPlot.setText("Show Plot Macro..");
         btnPlot.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnPlotActionPerformed(evt);
@@ -158,54 +159,67 @@ public class PlotSettingsOJ extends javax.swing.JPanel implements IControlPanelO
 
         lblPercent1.setText("All");
 
+        btnPlot1.setText("Plot");
+        btnPlot1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPlot1ActionPerformed(evt);
+            }
+        });
+
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
-                .add(20, 20, 20)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(titlesPane, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 234, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                     .add(layout.createSequentialGroup()
-                        .add(10, 10, 10)
+                        .add(30, 30, 30)
+                        .add(btnHelp)
+                        .add(155, 155, 155)
+                        .add(choiceQualify, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 130, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                        .add(20, 20, 20)
+                        .add(lblPercent1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 80, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                    .add(layout.createSequentialGroup()
+                        .add(20, 20, 20)
                         .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(cbxAutoRefresh)
-                            .add(choiceNewPlot, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 140, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                            .add(jButton1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 140, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))))
-                .add(16, 16, 16)
-                .add(scrollCurrentPlotDef, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 204, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-            .add(layout.createSequentialGroup()
-                .add(260, 260, 260)
-                .add(btnPlot, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 130, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-            .add(layout.createSequentialGroup()
-                .add(30, 30, 30)
-                .add(btnHelp)
-                .add(155, 155, 155)
-                .add(choiceQualify, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 130, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .add(20, 20, 20)
-                .add(lblPercent1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 80, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                            .add(titlesPane, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 234, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                            .add(layout.createSequentialGroup()
+                                .add(10, 10, 10)
+                                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                                    .add(cbxAutoRefresh)
+                                    .add(choiceNewPlot, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 140, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                    .add(jButton1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 140, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                                    .add(btnPlot, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 214, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))))
+                        .add(16, 16, 16)
+                        .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
+                            .add(scrollCurrentPlotDef, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 204, Short.MAX_VALUE)
+                            .add(btnPlot1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                .addContainerGap(25, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
                 .add(10, 10, 10)
-                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
                     .add(layout.createSequentialGroup()
                         .add(titlesPane, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 250, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                         .add(10, 10, 10)
                         .add(cbxAutoRefresh)
                         .add(7, 7, 7)
                         .add(choiceNewPlot, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                        .add(3, 3, 3)
-                        .add(jButton1))
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .add(btnPlot))
                     .add(scrollCurrentPlotDef, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 350, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                 .add(10, 10, 10)
-                .add(btnPlot)
-                .add(1, 1, 1)
+                .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(jButton1)
+                    .add(btnPlot1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 39, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .add(30, 30, 30)
                 .add(layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(btnHelp)
                     .add(choiceQualify, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(lblPercent1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 30, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
+                    .add(lblPercent1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 30, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(94, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 //Click once in column 0 to plot; click once in column 1 to edit
@@ -318,6 +332,10 @@ public class PlotSettingsOJ extends javax.swing.JPanel implements IControlPanelO
         
         //createIgorIpf();
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void btnPlot1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPlot1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnPlot1ActionPerformed
 
     void qualifyRoi(ImagePlus imp, double[] xArr, double[] yArr, int[] indexes0, boolean chooseInner) {
         CellsOJ cells = OJ.getData().getCells();
@@ -478,6 +496,7 @@ public class PlotSettingsOJ extends javax.swing.JPanel implements IControlPanelO
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnHelp;
     private javax.swing.JButton btnPlot;
+    private javax.swing.JButton btnPlot1;
     private javax.swing.JCheckBox cbxAutoRefresh;
     private javax.swing.JComboBox choiceNewPlot;
     private javax.swing.JComboBox choiceQualify;
