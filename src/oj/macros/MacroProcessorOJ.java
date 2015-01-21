@@ -1228,10 +1228,12 @@ public class MacroProcessorOJ {
         return -1;
     }
 
+    
+    //Empties a column if title already exists, otherwise creates a new one. 
     public void initColumn(String columnName, boolean isUnlinked, boolean isTextMode) {//10.5.2010synchronized
-        newestColumn = OJ.getData().getResults().getColumns().getColumnByName(columnName);
-        if (newestColumn != null) {
-            newestColumn.getColumnDef().clearOperands();
+        newestColumn = OJ.getData().getResults().getColumns().getColumnByName(columnName);//used for subsequent addition of properties like color or algor);
+        if (newestColumn != null) {//column already exists
+            newestColumn.getColumnDef().clearOperands();//don't appearance like color or precision
             if (isUnlinked) {
                 if (isTextMode) {
                     newestColumn.getColumnDef().setAlgorithm(ColumnDefOJ.ALGORITHM_CALC_UNLINKED_TEXT);
@@ -1241,7 +1243,7 @@ public class MacroProcessorOJ {
                 newestColumn.rows.clear();
 
             }
-            if (!isUnlinked) {
+            if (!isUnlinked) {//if linked
                 if (isTextMode) {
                     newestColumn.getColumnDef().setAlgorithm(ColumnDefOJ.ALGORITHM_CALC_LINKED_TEXT);
                 } else {
@@ -1260,7 +1262,7 @@ public class MacroProcessorOJ {
             }
         }
 
-        if (newestColumn == null) {
+        else if (newestColumn == null) {//column did not exist yet
             newestColumn = new ColumnOJ();
             newestColumn.getColumnDef().setName(columnName);
 

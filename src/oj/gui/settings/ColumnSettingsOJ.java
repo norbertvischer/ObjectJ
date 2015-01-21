@@ -345,119 +345,124 @@ public class ColumnSettingsOJ extends javax.swing.JPanel implements TableColumnM
      * updates the two tabbed panels for operands and presentation
      */
     private void updateView() {
-        ColumnOJ column = getSelectedColumn();
-        if (column != null) {
-            String name = column.getName();
-            if (name.startsWith("Column")) {
-                name = name + "";
-            }
-            ColumnDefOJ colDef = column.getColumnDef();
-            updateHistoSettings(colDef);
-            int alg = column.getColumnDef().getAlgorithm();
-            boolean nonAutomatic = alg > ColumnDefOJ.ALGORITHM_LAST_AUTOMATIC && alg != ColumnDefOJ.ALGORITHM_CALC_OFFROAD;//10.2.2010
-            if (nonAutomatic) {//27.9.2009
-                if ((column.getColumnDef().getAlgorithm() == ColumnDefOJ.ALGORITHM_CALC_LINKED_NUMBER)
-                        || (column.getColumnDef().getAlgorithm() == ColumnDefOJ.ALGORITHM_CALC_LINKED_TEXT)) {
-                    if (cbxOperation.getSelectedIndex() != 0) {
-                        cbxOperation.setSelectedIndex(0);
+        try {//20.1.2015
+            ColumnOJ column = getSelectedColumn();
+            if (column != null) {
+                String name = column.getName();
+                if (name.startsWith("Column")) {
+                    name = name + "";
+                }
+                ColumnDefOJ colDef = column.getColumnDef();
+                updateHistoSettings(colDef);
+                int alg = column.getColumnDef().getAlgorithm();
+                boolean nonAutomatic = alg > ColumnDefOJ.ALGORITHM_LAST_AUTOMATIC && alg != ColumnDefOJ.ALGORITHM_CALC_OFFROAD;//10.2.2010
+                if (nonAutomatic) {//27.9.2009
+                    if ((column.getColumnDef().getAlgorithm() == ColumnDefOJ.ALGORITHM_CALC_LINKED_NUMBER)
+                            || (column.getColumnDef().getAlgorithm() == ColumnDefOJ.ALGORITHM_CALC_LINKED_TEXT)) {
+                        if (cbxOperation.getSelectedIndex() != 0) {
+                            cbxOperation.setSelectedIndex(0);
+                        }
+                    }
+                    if ((column.getColumnDef().getAlgorithm() == ColumnDefOJ.ALGORITHM_CALC_UNLINKED_NUMBER)
+                            || (column.getColumnDef().getAlgorithm() == ColumnDefOJ.ALGORITHM_CALC_UNLINKED_TEXT)) {
+                        if (cbxOperation.getSelectedIndex() != 1) {
+                            cbxOperation.setSelectedIndex(1);
+                        }
+                    }
+                } else {
+                    if (cbxOperation.getSelectedIndex() != (column.getColumnDef().getAlgorithm() + 1)) {
+                        cbxOperation.setSelectedIndex(column.getColumnDef().getAlgorithm() + 1);
                     }
                 }
-                if ((column.getColumnDef().getAlgorithm() == ColumnDefOJ.ALGORITHM_CALC_UNLINKED_NUMBER)
-                        || (column.getColumnDef().getAlgorithm() == ColumnDefOJ.ALGORITHM_CALC_UNLINKED_TEXT)) {
-                    if (cbxOperation.getSelectedIndex() != 1) {
-                        cbxOperation.setSelectedIndex(1);
+                pnlTextMode.setVisible(false);
+
+                switch (column.getColumnDef().getAlgorithm()) {
+                    case ColumnDefOJ.ALGORITHM_CALC_ABS_PARTIAL_PATH:
+                    case ColumnDefOJ.ALGORITHM_CALC_REL_PARTIAL_PATH:
+                    case ColumnDefOJ.ALGORITHM_CALC_DISTANCE:
+                    case ColumnDefOJ.ALGORITHM_CALC_ORIENTATION:
+                    case ColumnDefOJ.ALGORITHM_CALC_OFFROAD:
+                        updateOperandsView(2, true, true);
+                        updateYtemTypeText(column, 0);
+                        updateYtemTypeText(column, 1);
+                        updateCloneText(column, 0);
+                        updateCloneText(column, 1);
+                        updatePointText(column, 0);
+                        updatePointText(column, 1);
+                        break;
+
+                    case ColumnDefOJ.ALGORITHM_CALC_PATH:
+
+                    case ColumnDefOJ.ALGORITHM_CALC_XPOS:
+                    case ColumnDefOJ.ALGORITHM_CALC_YPOS:
+                    case ColumnDefOJ.ALGORITHM_CALC_ZPOS:
+                        updateOperandsView(1, true, true);
+                        updateYtemTypeText(column, 0);
+                        updateCloneText(column, 0);
+                        updatePointText(column, 0);
+                        break;
+                    case ColumnDefOJ.ALGORITHM_CALC_ANGLE:
+                        updateOperandsView(3, true, true);
+                        updateYtemTypeText(column, 0);
+                        updateYtemTypeText(column, 1);
+                        updateYtemTypeText(column, 2);
+                        updateCloneText(column, 0);
+                        updateCloneText(column, 1);
+                        updateCloneText(column, 2);
+                        updatePointText(column, 0);
+                        updatePointText(column, 1);
+                        updatePointText(column, 2);
+                        break;
+                    case ColumnDefOJ.ALGORITHM_CALC_COUNT:
+                        updateOperandsView(1, false, false);
+                        updateYtemTypeText(column, 0);//29.9.2009
+                        break;
+                    case ColumnDefOJ.ALGORITHM_CALC_AREA:
+                    case ColumnDefOJ.ALGORITHM_CALC_LENGTH:
+                    case ColumnDefOJ.ALGORITHM_CALC_SLICE:
+                    case ColumnDefOJ.ALGORITHM_CALC_EXISTS:
+                        updateOperandsView(1, true, false);
+                        updateYtemTypeText(column, 0);
+                        updateCloneText(column, 0);
+                        break;
+                    case ColumnDefOJ.ALGORITHM_CALC_IMAGE:
+                    case ColumnDefOJ.ALGORITHM_CALC_ID:
+                    case ColumnDefOJ.ALGORITHM_CALC_INDEX://21.9.2009
+                    case ColumnDefOJ.ALGORITHM_CALC_FILE_NAME:
+                        updateOperandsView(0, false, false);
+                        break;
+                    case ColumnDefOJ.ALGORITHM_CALC_LINKED_NUMBER:
+                    case ColumnDefOJ.ALGORITHM_CALC_LINKED_TEXT:
+                    case ColumnDefOJ.ALGORITHM_CALC_UNLINKED_NUMBER:
+                    case ColumnDefOJ.ALGORITHM_CALC_UNLINKED_TEXT:
+                        pnlTextMode.setVisible(true);
+                        updateOperandsView(0, false, false);
+                        break;
+                    default:
+                        updateOperandsView(0, false, false);
+                }
+
+                spinDigits.setValue(new Integer(column.getColumnDef().getColumnDigits()));
+
+                int colorIndex = getColorIndex(column.getColumnDef().getColumnColor());
+                if (colorIndex < 13) {
+                    if (cbxColor.getSelectedIndex() != colorIndex) {
+                        cbxColor.setSelectedIndex(colorIndex);
                     }
+                } else {
+                    ((DefaultComboBoxModel) cbxColor.getModel()).setSelectedItem(column.getColumnDef().getColumnColor());
                 }
+                tabbedColumnDetail.setVisible(true);
             } else {
-                if (cbxOperation.getSelectedIndex() != (column.getColumnDef().getAlgorithm() + 1)) {
-                    cbxOperation.setSelectedIndex(column.getColumnDef().getAlgorithm() + 1);
-                }
-            }
-            pnlTextMode.setVisible(false);
-
-            switch (column.getColumnDef().getAlgorithm()) {
-                case ColumnDefOJ.ALGORITHM_CALC_ABS_PARTIAL_PATH:
-                case ColumnDefOJ.ALGORITHM_CALC_REL_PARTIAL_PATH:
-                case ColumnDefOJ.ALGORITHM_CALC_DISTANCE:
-                case ColumnDefOJ.ALGORITHM_CALC_ORIENTATION:
-                case ColumnDefOJ.ALGORITHM_CALC_OFFROAD:
-                    updateOperandsView(2, true, true);
-                    updateYtemTypeText(column, 0);
-                    updateYtemTypeText(column, 1);
-                    updateCloneText(column, 0);
-                    updateCloneText(column, 1);
-                    updatePointText(column, 0);
-                    updatePointText(column, 1);
-                    break;
-
-                case ColumnDefOJ.ALGORITHM_CALC_PATH:
-
-                case ColumnDefOJ.ALGORITHM_CALC_XPOS:
-                case ColumnDefOJ.ALGORITHM_CALC_YPOS:
-                case ColumnDefOJ.ALGORITHM_CALC_ZPOS:
-                    updateOperandsView(1, true, true);
-                    updateYtemTypeText(column, 0);
-                    updateCloneText(column, 0);
-                    updatePointText(column, 0);
-                    break;
-                case ColumnDefOJ.ALGORITHM_CALC_ANGLE:
-                    updateOperandsView(3, true, true);
-                    updateYtemTypeText(column, 0);
-                    updateYtemTypeText(column, 1);
-                    updateYtemTypeText(column, 2);
-                    updateCloneText(column, 0);
-                    updateCloneText(column, 1);
-                    updateCloneText(column, 2);
-                    updatePointText(column, 0);
-                    updatePointText(column, 1);
-                    updatePointText(column, 2);
-                    break;
-                case ColumnDefOJ.ALGORITHM_CALC_COUNT:
-                    updateOperandsView(1, false, false);
-                    updateYtemTypeText(column, 0);//29.9.2009
-                    break;
-                case ColumnDefOJ.ALGORITHM_CALC_AREA:
-                case ColumnDefOJ.ALGORITHM_CALC_LENGTH:
-                case ColumnDefOJ.ALGORITHM_CALC_SLICE:
-                case ColumnDefOJ.ALGORITHM_CALC_EXISTS:
-                    updateOperandsView(1, true, false);
-                    updateYtemTypeText(column, 0);
-                    updateCloneText(column, 0);
-                    break;
-                case ColumnDefOJ.ALGORITHM_CALC_IMAGE:
-                case ColumnDefOJ.ALGORITHM_CALC_ID:
-                case ColumnDefOJ.ALGORITHM_CALC_INDEX://21.9.2009
-                case ColumnDefOJ.ALGORITHM_CALC_FILE_NAME:
-                    updateOperandsView(0, false, false);
-                    break;
-                case ColumnDefOJ.ALGORITHM_CALC_LINKED_NUMBER:
-                case ColumnDefOJ.ALGORITHM_CALC_LINKED_TEXT:
-                case ColumnDefOJ.ALGORITHM_CALC_UNLINKED_NUMBER:
-                case ColumnDefOJ.ALGORITHM_CALC_UNLINKED_TEXT:
-                    pnlTextMode.setVisible(true);
-                    updateOperandsView(0, false, false);
-                    break;
-                default:
-                    updateOperandsView(0, false, false);
+                tabbedColumnDetail.setVisible(false);
             }
 
-            spinDigits.setValue(new Integer(column.getColumnDef().getColumnDigits()));
-
-            int colorIndex = getColorIndex(column.getColumnDef().getColumnColor());
-            if (colorIndex < 13) {
-                if (cbxColor.getSelectedIndex() != colorIndex) {
-                    cbxColor.setSelectedIndex(colorIndex);
-                }
-            } else {
-                ((DefaultComboBoxModel) cbxColor.getModel()).setSelectedItem(column.getColumnDef().getColumnColor());
-            }
-            tabbedColumnDetail.setVisible(true);
-        } else {
-            tabbedColumnDetail.setVisible(false);
+            //btnRemove.setEnabled(column != null);
+            btnRemove.setEnabled(tblColumns.getSelectedRowCount() > 0);
+        } catch (Exception e) {//20.1.2015
+            IJ.beep();
+            IJ.showStatus("Error= 6488 " + e.toString());
         }
-
-        //btnRemove.setEnabled(column != null);
-        btnRemove.setEnabled(tblColumns.getSelectedRowCount() > 0);
     }
 
     /**
@@ -1264,7 +1269,12 @@ public class ColumnSettingsOJ extends javax.swing.JPanel implements TableColumnM
                         }
                     }
 
-                    if (oldIsUnlinked != newIsUnlinked) {
+                    if (oldIsUnlinked && !newIsUnlinked) {
+                        IJ.showMessage("Column Settings", "Cannot change from 'unlinked' to 'linked'. \nBetter remove and re-create column ");
+                            return;
+                    }
+
+                     if (oldIsUnlinked != newIsUnlinked) {
                         if (IJ.showMessageWithCancel("Column Settings", "Changing from 'unlinked' to 'linked' or vice versa will clear contents of this column")) {
                             column.clear();
                             column.setName(newName);
@@ -1646,97 +1656,105 @@ private void cbxOperationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-
      * Fill operations panel with default operands when changing the algorithm
      */
 private void cbxOperationItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbxOperationItemStateChanged
-    ColumnOJ column = getSelectedColumn();
-    if (column != null) {
-        int old_algorithm = column.getColumnDef().getAlgorithm();
-        if (cbxOperation.getSelectedIndex() > 1) {//0 and 1 are "no algorithm"
-            column.setAlgorithm(cbxOperation.getSelectedIndex() - 1);
-        } else {
-            if (cbxOperation.getSelectedIndex() == 0) {
-                column.setAlgorithm(ColumnDefOJ.ALGORITHM_CALC_LINKED_NUMBER);
+    try {
+        ColumnOJ column = getSelectedColumn();
+        if (column != null) {
+            int old_algorithm = column.getColumnDef().getAlgorithm();
+            if (cbxOperation.getSelectedIndex() > 1) {//0 and 1 are "no algorithm"
+                column.setAlgorithm(cbxOperation.getSelectedIndex() - 1);
+            } else {
+                if (cbxOperation.getSelectedIndex() == 0) {
+                    column.setAlgorithm(ColumnDefOJ.ALGORITHM_CALC_LINKED_NUMBER);
+                }
+                if (cbxOperation.getSelectedIndex() == 1) {
+                    column.setAlgorithm(ColumnDefOJ.ALGORITHM_CALC_LINKED_NUMBER);//8.5.2014
+                }
+
             }
-            if (cbxOperation.getSelectedIndex() == 1) {
-                column.setAlgorithm(ColumnDefOJ.ALGORITHM_CALC_LINKED_NUMBER);//8.5.2014
+            switch (column.getColumnDef().getAlgorithm()) {
+                case ColumnDefOJ.ALGORITHM_CALC_DISTANCE:
+
+                case ColumnDefOJ.ALGORITHM_CALC_ABS_PARTIAL_PATH:
+                case ColumnDefOJ.ALGORITHM_CALC_REL_PARTIAL_PATH:
+                case ColumnDefOJ.ALGORITHM_CALC_ORIENTATION:
+                case ColumnDefOJ.ALGORITHM_CALC_OFFROAD:
+                    column.getColumnDef().setColumnDigits(2);
+                    updateOperands(column.getColumnDef(), 2);
+                    break;
+                case ColumnDefOJ.ALGORITHM_CALC_ANGLE:
+                    column.getColumnDef().setColumnDigits(2);
+                    updateOperands(column.getColumnDef(), 3);
+                    break;
+                case ColumnDefOJ.ALGORITHM_CALC_PATH:
+                case ColumnDefOJ.ALGORITHM_CALC_LENGTH:
+                case ColumnDefOJ.ALGORITHM_CALC_XPOS:
+                case ColumnDefOJ.ALGORITHM_CALC_YPOS:
+                case ColumnDefOJ.ALGORITHM_CALC_ZPOS:
+                case ColumnDefOJ.ALGORITHM_CALC_AREA:
+                    column.getColumnDef().setColumnDigits(2);
+                    updateOperands(column.getColumnDef(), 1);
+                    break;
+                case ColumnDefOJ.ALGORITHM_CALC_COUNT:
+                case ColumnDefOJ.ALGORITHM_CALC_SLICE:
+                case ColumnDefOJ.ALGORITHM_CALC_EXISTS:
+                    column.getColumnDef().setColumnDigits(0);
+                    updateOperands(column.getColumnDef(), 1);
+                    break;
+                case ColumnDefOJ.ALGORITHM_CALC_IMAGE:
+                case ColumnDefOJ.ALGORITHM_CALC_INDEX:
+                case ColumnDefOJ.ALGORITHM_CALC_ID:
+                    column.getColumnDef().setColumnDigits(0);
+                    updateOperands(column.getColumnDef(), 0);
+                    break;
+                case ColumnDefOJ.ALGORITHM_CALC_FILE_NAME:
+                    updateOperands(column.getColumnDef(), 0);
+                    break;
+                case ColumnDefOJ.ALGORITHM_CALC_LINKED_NUMBER:
+                    column.getColumnDef().setColumnDigits(2);
+                    updateOperands(column.getColumnDef(), 0);
+                case ColumnDefOJ.ALGORITHM_CALC_LINKED_TEXT:
+                    column.getColumnDef().setColumnDigits(0);
+                    updateOperands(column.getColumnDef(), 0);
+                case ColumnDefOJ.ALGORITHM_CALC_UNLINKED_NUMBER:
+                    column.getColumnDef().setColumnDigits(2);
+                    updateOperands(column.getColumnDef(), 0);
+                case ColumnDefOJ.ALGORITHM_CALC_UNLINKED_TEXT:
+                    column.getColumnDef().setColumnDigits(0);
+                    updateOperands(column.getColumnDef(), 0);
+                    break;
+                default:
+                    updateOperandsView(0, false, false);
             }
+
+            int alg = column.getColumnDef().getAlgorithm();
+            if ((alg == ColumnDefOJ.ALGORITHM_CALC_UNLINKED_NUMBER)
+                    || (alg == ColumnDefOJ.ALGORITHM_CALC_UNLINKED_TEXT)) {
+                if (!column.getName().startsWith("_")) {
+                    column.setName("_" + column.getName());
+                }
+            } else {
+                if (column.getName().startsWith("_")) {
+                    //column.setName(column.getName().substring(1)); removed 21.1.2015
+                }
+            }
+
+            ColumnsOJ columns = OJ.getData().getResults().getColumns();  //2.2.2014    
+            columns.fixColumnsOrder();
+            int index = columns.indexOfColumn(column);
+            ((ColumnsTableModel) tblColumns.getModel()).fireTableDataChanged();//my guess//2.2.2014    
+
+            if (column.getColumnDef().getAlgorithm() != old_algorithm) {
+                column.init();
+            }
+            OJ.getEventProcessor().fireColumnChangedEvent(column.getName(), column.getName(), ColumnChangedEventOJ.COLUMN_EDITED);
+            tblColumns.getSelectionModel().setSelectionInterval(index, index);
 
         }
-        switch (column.getColumnDef().getAlgorithm()) {
-            case ColumnDefOJ.ALGORITHM_CALC_DISTANCE:
-
-            case ColumnDefOJ.ALGORITHM_CALC_ABS_PARTIAL_PATH:
-            case ColumnDefOJ.ALGORITHM_CALC_REL_PARTIAL_PATH:
-            case ColumnDefOJ.ALGORITHM_CALC_ORIENTATION:
-            case ColumnDefOJ.ALGORITHM_CALC_OFFROAD:
-                column.getColumnDef().setColumnDigits(2);
-                updateOperands(column.getColumnDef(), 2);
-                break;
-            case ColumnDefOJ.ALGORITHM_CALC_ANGLE:
-                column.getColumnDef().setColumnDigits(2);
-                updateOperands(column.getColumnDef(), 3);
-                break;
-            case ColumnDefOJ.ALGORITHM_CALC_PATH:
-            case ColumnDefOJ.ALGORITHM_CALC_LENGTH:
-            case ColumnDefOJ.ALGORITHM_CALC_XPOS:
-            case ColumnDefOJ.ALGORITHM_CALC_YPOS:
-            case ColumnDefOJ.ALGORITHM_CALC_ZPOS:
-            case ColumnDefOJ.ALGORITHM_CALC_AREA:
-                column.getColumnDef().setColumnDigits(2);
-                updateOperands(column.getColumnDef(), 1);
-                break;
-            case ColumnDefOJ.ALGORITHM_CALC_COUNT:
-            case ColumnDefOJ.ALGORITHM_CALC_SLICE:
-            case ColumnDefOJ.ALGORITHM_CALC_EXISTS:
-                column.getColumnDef().setColumnDigits(0);
-                updateOperands(column.getColumnDef(), 1);
-                break;
-            case ColumnDefOJ.ALGORITHM_CALC_IMAGE:
-            case ColumnDefOJ.ALGORITHM_CALC_INDEX:
-            case ColumnDefOJ.ALGORITHM_CALC_ID:
-                column.getColumnDef().setColumnDigits(0);
-                updateOperands(column.getColumnDef(), 0);
-                break;
-            case ColumnDefOJ.ALGORITHM_CALC_FILE_NAME:
-                updateOperands(column.getColumnDef(), 0);
-                break;
-            case ColumnDefOJ.ALGORITHM_CALC_LINKED_NUMBER:
-                column.getColumnDef().setColumnDigits(2);
-                updateOperands(column.getColumnDef(), 0);
-            case ColumnDefOJ.ALGORITHM_CALC_LINKED_TEXT:
-                column.getColumnDef().setColumnDigits(0);
-                updateOperands(column.getColumnDef(), 0);
-            case ColumnDefOJ.ALGORITHM_CALC_UNLINKED_NUMBER:
-                column.getColumnDef().setColumnDigits(2);
-                updateOperands(column.getColumnDef(), 0);
-            case ColumnDefOJ.ALGORITHM_CALC_UNLINKED_TEXT:
-                column.getColumnDef().setColumnDigits(0);
-                updateOperands(column.getColumnDef(), 0);
-                break;
-            default:
-                updateOperandsView(0, false, false);
-        }
-
-        if ((column.getColumnDef().getAlgorithm() == ColumnDefOJ.ALGORITHM_CALC_UNLINKED_NUMBER)
-                || (column.getColumnDef().getAlgorithm() == ColumnDefOJ.ALGORITHM_CALC_UNLINKED_TEXT)) {
-            if (!column.getName().startsWith("_")) {
-                column.setName("_" + column.getName());
-            }
-        } else {
-            if (column.getName().startsWith("_")) {
-                column.setName(column.getName().substring(1));
-            }
-        }
-
-        ColumnsOJ columns = OJ.getData().getResults().getColumns();  //2.2.2014    
-        columns.fixColumnsOrder();
-        int index = columns.indexOfColumn(column);
-        ((ColumnsTableModel) tblColumns.getModel()).fireTableDataChanged();//my guess//2.2.2014    
-
-        if (column.getColumnDef().getAlgorithm() != old_algorithm) {
-            column.init();
-        }
-        OJ.getEventProcessor().fireColumnChangedEvent(column.getName(), column.getName(), ColumnChangedEventOJ.COLUMN_EDITED);
-        tblColumns.getSelectionModel().setSelectionInterval(index, index);
         updateView();
+
+    } catch (Exception eee) {
+        IJ.beep();
+        IJ.showStatus("_Error 8550 " + eee.toString());
     }
 }//GEN-LAST:event_cbxOperationItemStateChanged
 
