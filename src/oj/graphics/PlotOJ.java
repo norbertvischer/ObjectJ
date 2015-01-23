@@ -15,16 +15,11 @@ import java.awt.Dimension;
 import java.awt.Panel;
 import java.awt.Point;
 import java.awt.event.ActionListener;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.Properties;
 import javax.swing.JTextArea;
-import oj.OJ;
 import oj.project.results.ColumnDefOJ;
 import oj.project.results.ColumnOJ;
 import oj.gui.settings.ColumnSettingsOJ;
 import oj.gui.settings.ProjectSettingsOJ;
-import oj.project.results.ColumnsOJ;
 
 /**
  *
@@ -157,7 +152,7 @@ public class PlotOJ {
         int flags = Plot.DEFAULT_FLAGS + Plot.X_FORCE2GRID;
         String plotName = "Histogram of " + column.getName();
         ImagePlus imp;
-        while(WindowManager.getImage(plotName) != null){//2.2.2014
+        while (WindowManager.getImage(plotName) != null) {//2.2.2014
             WindowManager.getImage(plotName).close();
         }
         plot = new Plot(plotName, column.getName(), "count", ((double[]) null), ((double[]) null), flags);
@@ -418,6 +413,10 @@ public class PlotOJ {
                 colSettings.selectColumn(theName);
             } else {
                 ij.IJ.error("Lost connection to coumn");
+            }
+            Dimension size = prSettings.getSize();
+            if (size.height < 500) {
+                prSettings.setSize(size.width, 500);//23.1.2015
             }
             prSettings.setVisible(true);
         }
