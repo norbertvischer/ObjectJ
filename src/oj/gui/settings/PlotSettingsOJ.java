@@ -35,7 +35,7 @@ import oj.util.UtilsOJ;
 
 public class PlotSettingsOJ extends javax.swing.JPanel implements IControlPanelOJ, TextListener, ItemListener, QualifierChangedListenerOJ {
 
-    public static boolean withPlots = false;
+    public static boolean withPlots = true;
     private TextField xMinField, xMaxField, binField, yMinField, yMaxField, titleField;
     private Object fieldWithFocus;
     private Vector fields;

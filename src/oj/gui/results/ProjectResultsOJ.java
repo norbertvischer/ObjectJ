@@ -429,7 +429,7 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
      */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
+        //bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
 
         popStatistics = new javax.swing.JPopupMenu();
         mniShowAll = new javax.swing.JMenuItem();
@@ -843,8 +843,8 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
         linkedScrollPane.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
         linkedScrollPane.setOpaque(false);
 
-        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, linkedHeaderScrollPane, org.jdesktop.beansbinding.ELProperty.create("${columnHeader}"), linkedScrollPane, org.jdesktop.beansbinding.BeanProperty.create("columnHeader"));
-        bindingGroup.addBinding(binding);
+        //org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, linkedHeaderScrollPane, org.jdesktop.beansbinding.ELProperty.create("${columnHeader}"), linkedScrollPane, org.jdesktop.beansbinding.BeanProperty.create("columnHeader"));
+       // bindingGroup.addBinding(binding);
 
         tblLinkedContent.setFont(new java.awt.Font("SansSerif", 0, 12));
         tblLinkedContent.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
@@ -901,8 +901,8 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
         unlinkedScrollPane.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
         unlinkedScrollPane.setOpaque(false);
 
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, unlinkedHeaderScrollPane, org.jdesktop.beansbinding.ELProperty.create("${columnHeader}"), unlinkedScrollPane, org.jdesktop.beansbinding.BeanProperty.create("columnHeader"));
-        bindingGroup.addBinding(binding);
+        //binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, unlinkedHeaderScrollPane, org.jdesktop.beansbinding.ELProperty.create("${columnHeader}"), unlinkedScrollPane, org.jdesktop.beansbinding.BeanProperty.create("columnHeader"));
+        //bindingGroup.addBinding(binding);
 
         tblUnlinkedContent.setBackground(new java.awt.Color(236, 233, 216));
         tblUnlinkedContent.setFont(new java.awt.Font("SansSerif", 0, 12));
@@ -942,7 +942,7 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
         jPanel4.setPreferredSize(new java.awt.Dimension(10, 20));
         getContentPane().add(jPanel4, java.awt.BorderLayout.SOUTH);
 
-        bindingGroup.bind();
+        //bindingGroup.bind();
 
         java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
         setBounds((screenSize.width-735)/2, (screenSize.height-540)/2, 735, 540);
@@ -1606,7 +1606,7 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
     private javax.swing.JScrollPane unlinkedHeaderScrollPane;
     private javax.swing.JPanel unlinkedResultsPanel;
     private javax.swing.JScrollPane unlinkedScrollPane;
-    private org.jdesktop.beansbinding.BindingGroup bindingGroup;
+    //private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 
     public JPopupMenu getColumnPopupMenu(final JTable table) {
