@@ -1,0 +1,75 @@
+
+
+
+05.02.15 12:43
+- pressing space should enter "pan with hand", but doesn't if pistol tool is active
+
+03. 02.02.
+- menu RoiToItem creates a new object, instead of adding another myotome string
+
+
+02.02.15 13:37
+- In Yoesemite, after minimizing ObjectJ Tools (yellow dot),   Tools 
+cannot be recovered except for MObjectJ>Show ObjectJ Tools
+
+
+
+
+13.12.14 1:27
+- save a linked image with shortcut "j":
+ImageJ 1.49n10; Java 1.6.0_65 [64-bit]; Mac OS X 10.9.5; 86MB of 3000MB (2%)
+ 
+java.lang.NullPointerException
+	at ij.gui.ImageWindow.close(ImageWindow.java:376)
+	at ij.ImagePlus.close(ImagePlus.java:346)
+	at oj.project.ImagesOJ.removeImageByName(ImagesOJ.java:146)
+	at oj.project.ImagesOJ.removeAllImages(ImagesOJ.java:168)
+	at oj.project.ImagesOJ.removeAllImages(ImagesOJ.java:158)
+	at oj.gui.menuactions.ProjectActionsOJ.closeProjectData(ProjectActionsOJ.java:235)
+	at oj.gui.menuactions.ProjectActionsOJ.access$500(ProjectActionsOJ.java:29)
+	at oj.gui.menuactions.ProjectActionsOJ$9.actionPerformed(ProjectActionsOJ.java:95)
+	at oj.plugin.QuitOJ.run(QuitOJ.java:18)
+	at ij.IJ.runUserPlugIn(IJ.java:198)
+	at ij.IJ.runPlugIn(IJ.java:162)
+	at ij.Executer.runCommand(Executer.java:131)
+	at ij.Executer.run(Executer.java:64)
+	at java.lang.Thread.run(Thread.java:695)
+
+
+
+
+11.07.14 1:51
+- Renaming a column does not rename it in the results window 11.07.14 1:51
+ojRoiToItem(); does not close the object or item! 15.07.14 0:17
+getCursorLoc(x, y, z, flags);	after ItenToRoi not the same 15.07.14 0:43
+
+Unlink image with red bullet does not work:
+	at oj.project.ImagesOJ.removeImageByName(ImagesOJ.java:146)
+	at oj.project.ImagesOJ.removeAllImages(ImagesOJ.java:168)
+	at oj.project.ImagesOJ.removeAllImages(ImagesOJ.java:158)
+	at oj.gui.menuactions.ProjectActionsOJ.closeProjectData(ProjectActionsOJ.java:231)
+
+
+- Coli-Inspector: check if Find Constrictions takes too long if anything is sorted 23.10.14 2:44
+-  Coli-Inspector: alt-click in the Map to highlight the seelcted object 23.10.14 2:44
+
+-  Coli-Inspector: progress bar for Constrictions
+-  Coli-Inspector:progress bar for map etc (bring ImageJ window to front)
+
+
+
+
+08.11.14 16:02:
+after rename image:
+
+ImageJ 1.49i19; Java 1.6.0_65 [64-bit]; Mac OS X 10.9.2; 124MB of 1300MB (9%)
+ 
+java.lang.NullPointerException
+	at oj.project.ImagesOJ.isLinked(ImagesOJ.java:208)
+	at oj.plugin.SimpleCommandsOJ.rename(SimpleCommandsOJ.java:42)
+	at oj.plugin.SimpleCommandsOJ.run(SimpleCommandsOJ.java:28)
+	at ij.IJ.runUserPlugIn(IJ.java:202)
+	at ij.IJ.runPlugIn(IJ.java:166)
+	at ij.Executer.runCommand(Executer.java:131)
+	at ij.Executer.run(Executer.java:61)
+	at java.lang.Thread.run(Thread.java:695)

@@ -21,13 +21,14 @@ public class ImagesToStack implements PlugIn {
 	private int maxWidth, maxHeight;
 	private int minWidth, minHeight;
 	private int minSize, maxSize;
+	private boolean allInvertedLuts;
 	private Calibration cal2;
 	private int stackType;
 	private ImagePlus[] image;
 	private String name = "Stack";
 
 	public void run(String arg) {
-    	convertImagesToStack();
+		convertImagesToStack();
 	}
 
 	public void convertImagesToStack() {
@@ -39,14 +40,20 @@ public class ImagesToStack implements PlugIn {
 		}
 
 		int count = 0;
+		int stackCount = 0;
 		image = new ImagePlus[wList.length];
 		for (int i=0; i<wList.length; i++) {
 			ImagePlus imp = WindowManager.getImage(wList[i]);
 			if (imp.getStackSize()==1)
 				image[count++] = imp;
+			else
+				stackCount++;
 		}		
 		if (count<2) {
-			IJ.error("Images to Stack", "There must be at least two open images.");
+			String msg = "";
+			if (stackCount>1)
+				msg = "\n \nUse the Image>Stacks>Tools>Concatenate\ncommand to combine stacks.";
+			IJ.error("Images to Stack", "There must be at least two open 2D images."+msg);
 			return;
 		}
 
@@ -112,27 +119,33 @@ public class ImagesToStack implements PlugIn {
 		if (fi!=null && fi.directory==null) fi = null;
 		for (int i=0; i<count; i++) {
 			ImageProcessor ip = image[i].getProcessor();
+			boolean invertedLut = ip.isInvertedLut();
 			if (ip==null) break;
 			if (ip.getMin()<min) min = ip.getMin();
 			if (ip.getMax()>max) max = ip.getMax();
-            String label = titlesAsLabels?image[i].getTitle():null;
-            if (label!=null) {
-            	String info = (String)image[i].getProperty("Info");
+			String label = titlesAsLabels?image[i].getTitle():null;
+			if (label!=null) {
+				String info = (String)image[i].getProperty("Info");
 				if (info!=null) label += "\n" + info;
 			}
-            if (fi!=null) {
+			if (fi!=null) {
 				FileInfo fi2 = image[i].getOriginalFileInfo();
 				if (fi2!=null && !fi.directory.equals(fi2.directory))
 					fi = null;
-            }
-            switch (stackType) {
-            	case 16: ip = ip.convertToShort(false); break;
-            	case 32: ip = ip.convertToFloat(); break;
-            	case rgb: ip = ip.convertToRGB(); break;
-            	default: break;
-            }
-            if (ip.getWidth()!=width||ip.getHeight()!=height) {
- 				switch (method) {
+			}
+			switch (stackType) {
+				case 16: ip = ip.convertToShort(false); break;
+				case 32: ip = ip.convertToFloat(); break;
+				case rgb: ip = ip.convertToRGB(); break;
+				default: break;
+			}
+			if (invertedLut && !allInvertedLuts) {
+				if (keep)
+					ip = ip.duplicate();
+				ip.invert();
+			}
+			if (ip.getWidth()!=width||ip.getHeight()!=height) {
+				switch (method) {
 					case COPY_TOP_LEFT: case COPY_CENTER:
 						ImageProcessor ip2 = null;
 						switch (stackType) {
@@ -146,7 +159,7 @@ public class ImagesToStack implements PlugIn {
 							xoff = (width-ip.getWidth())/2;
 							yoff = (height-ip.getHeight())/2;
 						}
- 						ip2.insert(ip, xoff, yoff);
+						ip2.insert(ip, xoff, yoff);
 						ip = ip2;
 						break;
 					case SCALE_SMALL: case SCALE_LARGE:
@@ -155,10 +168,12 @@ public class ImagesToStack implements PlugIn {
 						ip = ip.resize(width, height);
 						break;
 				}
-            } else if (keep)
-            	ip = ip.duplicate();
-            stack.addSlice(label, ip);
-            if (!keep) {
+			} else if (keep)
+				ip = ip.duplicate();
+			stack.addSlice(label, ip);
+			if (i==0 && invertedLut && !allInvertedLuts)
+				stack.setColorModel(null);
+			if (!keep) {
 				image[i].changes = false;
 				image[i].close();
 			}
@@ -188,11 +203,14 @@ public class ImagesToStack implements PlugIn {
 		minWidth = Integer.MAX_VALUE;
 		minHeight = Integer.MAX_VALUE;
 		minSize = Integer.MAX_VALUE;
+		allInvertedLuts = true;
 		maxSize = 0;
 		for (int i=0; i<count; i++) {
 			if (exclude(image[i].getTitle())) continue;
 			if (image[i].getType()==ImagePlus.COLOR_256)
 				stackType = rgb;
+			if (!image[i].getProcessor().isInvertedLut())
+				allInvertedLuts = false;
 			int type = image[i].getBitDepth();
 			if (type==24) type = rgb;
 			if (type>stackType) stackType = type;

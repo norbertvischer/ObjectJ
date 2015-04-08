@@ -7,6 +7,7 @@ package oj.gui;
 
 import ij.IJ;
 import ij.ImageJ;
+import ij.macro.Interpreter;
 import java.awt.CheckboxMenuItem;
 import java.awt.Menu;
 import java.awt.MenuBar;
@@ -60,7 +61,7 @@ public class MenuManagerOJ implements ItemListener, MacroChangedListenerOJ {
     /**/ private MenuItem itemRoiToObject;
     private Menu menuResults;
     /**/ private MenuItem itemRecalculate;
-     //private MenuItem itemReloadMacros;
+    //private MenuItem itemReloadMacros;
     //---
     private MenuItem itemShowProjectWindow;
     private MenuItem itemShowObjectjTools;
@@ -92,6 +93,7 @@ public class MenuManagerOJ implements ItemListener, MacroChangedListenerOJ {
         subMenus.clear();
     }
     /* Now linearly start to add all menu items and submenus*/
+
     private void installMenu() {
         subMenus.clear();
 
@@ -147,10 +149,6 @@ public class MenuManagerOJ implements ItemListener, MacroChangedListenerOJ {
             /**/ itemCloseProject = new MenuItem("Close Project");
             /**/ itemCloseProject.addActionListener(ProjectActionsOJ.CloseProjectAction);
             /**/ menuProjectFile.add(itemCloseProject);
-
-
-
-
 
             itemSaveProject = new MenuItem("Save Project");
             itemSaveProject.addActionListener(ProjectActionsOJ.SaveProjectAction);
@@ -286,7 +284,6 @@ public class MenuManagerOJ implements ItemListener, MacroChangedListenerOJ {
                 }
             }
 
-
         }
         ArrayList errors = shortcutManager.getErrors();
         if (errors.size() > 0) {
@@ -322,29 +319,28 @@ public class MenuManagerOJ implements ItemListener, MacroChangedListenerOJ {
                 } else {
                     MenuShortcut shortcut = new MenuShortcut(macroItem.getShortcut());
                     String extName = String.format("%s [%s]", theName, KeyEvent.getKeyText(macroItem.getShortcut()));
-                     actionName = extName;
+                    actionName = extName;
                     mnuItem = new MenuItem(indent + extName);
                     macroListeners.put(extName, listener);
                     macroComands.put(extName, theName);
                     shortcutManager.addShortcut(theName, shortcut, listener);
                 }
-                
+
             }
             Menu subMenu = null;
             // is it a submenu?
             String parentStr = null;
             String labelStr = null;
-                            
 
             int pos = theName.indexOf(">");
             if (pos > 1 && theName.startsWith("<")) {
                 parentStr = theName.substring(1, pos);
-                labelStr = actionName.substring(pos +1);
+                labelStr = actionName.substring(pos + 1);
             }
 
             if (parentStr != null) {
                 String indentedParent = indent + parentStr;
-                mnuItem.setActionCommand( actionName);
+                mnuItem.setActionCommand(actionName);
                 mnuItem.setLabel(labelStr);
                 for (int jj = 0; jj < subMenus.size(); jj++) {
 
@@ -372,7 +368,7 @@ public class MenuManagerOJ implements ItemListener, MacroChangedListenerOJ {
     public void macroChanged(MacroChangedEventOJ evt) {
         reloadMacroItems();
     }
-    
+
     public class MacroActionListener implements ActionListener {
 
         public void actionPerformed(ActionEvent evt) {
@@ -381,6 +377,16 @@ public class MenuManagerOJ implements ItemListener, MacroChangedListenerOJ {
             ImageJ.setCommandName(name);
             Object obj = macroListeners.get(name);
             if (obj != null) {
+
+                Interpreter instance = Interpreter.getInstance();//8.4.2015
+                if (instance != null) { // abort any currently running macro
+                    instance.abortMacro();
+                    long t0 = System.currentTimeMillis();
+                    while (Interpreter.getInstance() != null && (System.currentTimeMillis() - t0) < 3000L) {
+                        IJ.wait(10);
+                    }
+                }
+
                 ActionEvent action = new ActionEvent(evt.getSource(), 0, (String) macroComands.get(name));
                 ((ActionListener) obj).actionPerformed(action);
             }

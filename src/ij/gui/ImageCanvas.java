@@ -190,11 +190,12 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 	}
 
     public void paint(Graphics g) {
-		if (IJ.debugMode) IJ.log("paint: "+imp.getImage());
+		if (IJ.debugMode) IJ.log("ImageCanvas.paint: "+imp);
 		painted = true;
 		Roi roi = imp.getRoi();
 		if (roi!=null || overlay!=null || showAllOverlay!=null || Prefs.paintDoubleBuffered) {
-			if (roi!=null) roi.updatePaste();
+			if (roi!=null)
+				roi.updatePaste();
 			if (!IJ.isMacOSX() && imageWidth!=0) {
 				paintDoubleBuffered(g);
 				setPaintPending(false);
@@ -682,8 +683,10 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 	}
 		
 	void setMagnification2(double magnification) {
-		if (magnification>32.0) magnification = 32.0;
-		if (magnification<0.03125) magnification = 0.03125;
+		if (magnification>32.0)
+			magnification = 32.0;
+		if (magnification<zoomLevels[0])
+			magnification = zoomLevels[0];
 		this.magnification = magnification;
 		imp.setTitle(imp.getTitle());
 	}
@@ -761,10 +764,10 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 	public static double getLowerZoomLevel(double currentMag) {
 		double newMag = zoomLevels[0];
 		for (int i=0; i<zoomLevels.length; i++) {
-		if (zoomLevels[i] < currentMag)
-			newMag = zoomLevels[i];
-		else
-			break;
+			if (zoomLevels[i] < currentMag)
+				newMag = zoomLevels[i];
+			else
+				break;
 		}
 		return newMag;
 	}
@@ -854,7 +857,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		larger and centering it on (x,y). If we can't make it larger,  
 		then make the window smaller.*/
 	public void zoomOut(int x, int y) {
-		if (magnification<=0.03125)
+		if (magnification<=zoomLevels[0])
 			return;
 		double oldMag = magnification;
 		double newMag = getLowerZoomLevel(magnification);
@@ -1630,12 +1633,14 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 	
 	public boolean hideZoomIndicator(boolean hide) {
 		boolean hidden = this.hideZoomIndicator;
+		if (!(srcRect.width<imageWidth||srcRect.height<imageHeight))
+			return hidden;
 		this.hideZoomIndicator = hide;
 		setPaintPending(true);
 		repaint();
 		long t0 = System.currentTimeMillis();
-		while(getPaintPending() && (System.currentTimeMillis()-t0)<250L)
-			IJ.wait(1);
+		while(getPaintPending() && (System.currentTimeMillis()-t0)<500L)
+			IJ.wait(10);
 		return hidden;
 	}
 

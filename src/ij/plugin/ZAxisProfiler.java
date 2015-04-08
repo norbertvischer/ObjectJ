@@ -1,4 +1,5 @@
 package ij.plugin;
+import ij.plugin.*;
 import ij.*;
 import ij.process.*;
 import ij.gui.*;
@@ -8,7 +9,7 @@ import ij.util.Tools;
 import java.awt.*;
 
 /** Implements the Image/Stack/Plot Z-axis Profile command. */
-public class ZAxisProfiler implements PlugIn, Measurements, PlotMaker  {
+public class ZAxisProfiler implements PlugIn, Measurements, PlotMaker {
 	private static String[] choices = {"time", "z-axis"};
 	private static String choice = choices[0];
 	private boolean showingDialog;
@@ -24,11 +25,7 @@ public class ZAxisProfiler implements PlugIn, Measurements, PlotMaker  {
 			return;
 		}
 		Roi roi = imp.getRoi();
-		if (roi!=null && roi.isLine()) {
-			IJ.error("ZAxisProfiler", "This command does not work with line selections.");
-			return;
-		}
-		isPlotMaker = roi!=null && !IJ.macroRunning();
+		isPlotMaker = !IJ.macroRunning();
 		Plot plot = getPlot();
 		if (plot!=null) {
 			if (isPlotMaker)
@@ -55,16 +52,26 @@ public class ZAxisProfiler implements PlugIn, Measurements, PlotMaker  {
 		String xAxisLabel = showingDialog&&choice.equals(choices[0])?"Frame":"Slice";
 		Calibration cal = imp.getCalibration();
 		if (cal.scaled()) {
-			float c=1.0f;
+			double c = 1.0f;
+			double origin = 0;
 			if (timeProfile) {
 				c = (float) cal.frameInterval;
-				xAxisLabel = "["+cal.getTimeUnit()+"]";
+				boolean zeroInterval = c==0;
+				if (zeroInterval)
+					c = 1;
+				String timeUnit = zeroInterval?"Frame":"["+cal.getTimeUnit()+"]";
+				xAxisLabel = timeUnit;
 			} else {
 				c = (float) cal.pixelDepth;
-				xAxisLabel = "["+cal.getZUnit()+"]";
+				boolean zeroDepth = c==0;
+				if (zeroDepth)
+					c = 1;
+				origin = cal.zOrigin;
+				String depthUnit = zeroDepth?"Slice":"["+cal.getZUnit()+"]";
+				xAxisLabel = depthUnit;
 			}
 			for (int i=0; i<x.length; i++)
-				x[i] = i*c;
+				x[i] = (float)((i-cal.zOrigin)*c);
 		} else {
 			for (int i=0; i<x.length; i++)
 				x[i] = i+1;
@@ -191,6 +198,7 @@ public class ZAxisProfiler implements PlugIn, Measurements, PlotMaker  {
 			if (!Analyzer.resetCounter())
 				return null;
 		}
+		boolean isLine = roi!=null && roi.isLine();
 		int current = imp.getCurrentSlice();
 		for (int i=1; i<=size; i++) {
 			if (showingLabels)
@@ -199,7 +207,11 @@ public class ZAxisProfiler implements PlugIn, Measurements, PlotMaker  {
 			if (minThreshold!=ImageProcessor.NO_THRESHOLD)
 				ip.setThreshold(minThreshold,maxThreshold,ImageProcessor.NO_LUT_UPDATE);
 			ip.setRoi(roi);
-			ImageStatistics stats = ImageStatistics.getStatistics(ip, measurements, cal);
+			ImageStatistics stats = null;
+			if (isLine)
+				stats = getLineStatistics(roi, ip, measurements, cal);
+			else
+				stats = ImageStatistics.getStatistics(ip, measurements, cal);
 			analyzer.saveResults(stats, roi);
 			values[i-1] = (float)stats.mean;
 		}
@@ -210,6 +222,15 @@ public class ZAxisProfiler implements PlugIn, Measurements, PlotMaker  {
 		if (showingLabels)
 			imp.setSlice(current);
 		return values;
+	}
+	
+	private ImageStatistics getLineStatistics(Roi roi, ImageProcessor ip, int measurements, Calibration cal) {
+		ImagePlus imp = new ImagePlus("", ip);
+		imp.setRoi(roi);
+		ProfilePlot profile = new ProfilePlot(imp);
+		double[] values = profile.getProfile();
+		ImageProcessor ip2 = new FloatProcessor(values.length, 1, values);
+		return ImageStatistics.getStatistics(ip2, measurements, cal);
 	}
 	
 }

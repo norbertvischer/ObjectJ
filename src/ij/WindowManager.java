@@ -97,7 +97,7 @@ public class WindowManager {
 		if (currentWindow!=null)
 			return currentWindow.getImagePlus();
 		else if (frontWindow!=null && (frontWindow instanceof ImageWindow))
-			return ((ImageWindow)frontWindow).getImagePlus();
+			return frontWindow!=null?((ImageWindow)frontWindow).getImagePlus():null;
 		else 	if (imageList.size()>0) {	
 			ImageWindow win = (ImageWindow)imageList.elementAt(imageList.size()-1);
 			return win.getImagePlus();
@@ -131,7 +131,7 @@ public class WindowManager {
 	}
 
 	/** Returns a list of the IDs of open images. Returns
-		null if no windows are open. */
+		null if no image windows are open. */
 	public synchronized static int[] getIDList() {
 		int nWindows = imageList.size();
 		int[] batchModeImages = Interpreter.getBatchModeImageIDs();
@@ -147,6 +147,19 @@ public class WindowManager {
 			list[i] = win.getImagePlus().getID();
 		}
 		return list;
+	}
+
+	/** Returns a list of the titles of all open images. */
+	public synchronized static String[] getImageTitles() {
+		int[] list = getIDList();
+		if (list==null)
+			return new String[0];
+		String[] titles = new String[list.length];
+		for (int i=0; i<list.length; i++) {
+			ImagePlus img = getImage(list[i]);
+			titles[i] = img.getTitle();
+		}
+		return titles;
 	}
 
 	/** Returns an array containing a list of the non-image Frames. */
@@ -373,7 +386,8 @@ public class WindowManager {
 		while (imageList.size()>0) {
 			if (!((ImageWindow)imageList.elementAt(0)).close())
 				return false;
-			IJ.wait(100);
+			if (!quittingViaMacro())
+				IJ.wait(100);
 		}
 		Frame[] nonImages = getNonImageWindows();
 		for (int i=0; i<nonImages.length; i++) {
@@ -382,7 +396,8 @@ public class WindowManager {
 				((Editor)frame).close();
 				if (((Editor)frame).fileChanged())
 					return false;
-				IJ.wait(100);
+				if (!quittingViaMacro())
+					IJ.wait(100);
 			}
 		}
 		ImageJ ij = IJ.getInstance();
@@ -400,6 +415,11 @@ public class WindowManager {
 			}
 		}
 		return true;
+    }
+    
+    private static boolean quittingViaMacro() {
+    	ImageJ ij = IJ.getInstance();
+    	return ij!=null && ij.quittingViaMacro();
     }
     
 	/** Activates the next image window on the window list. */
@@ -501,7 +521,8 @@ public class WindowManager {
 		int start = Menus.WINDOW_MENU_ITEMS+Menus.windowMenuItems2;
 		for (int j=start; j<n; j++) {
 			MenuItem mi = Menus.window.getItem(j);
-			((CheckboxMenuItem)mi).setState((j-start)==index);						
+			if (mi instanceof CheckboxMenuItem)
+				((CheckboxMenuItem)mi).setState((j-start)==index);						
 		}
 	}
     

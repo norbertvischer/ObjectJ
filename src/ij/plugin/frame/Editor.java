@@ -374,6 +374,13 @@ shortcutsBroken = false;
 			text = ta.getText();
 		else
 			text = ta.getSelectedText();
+		Interpreter instance = Interpreter.getInstance();
+		if (instance!=null) { // abort any currently running macro
+			instance.abortMacro();
+			long t0 = System.currentTimeMillis();
+			while (Interpreter.getInstance()!=null && (System.currentTimeMillis()-t0)<3000L)
+				IJ.wait(10);
+		}
 		new MacroRunner(text, debug?this:null);
 	}
 	
@@ -759,11 +766,6 @@ shortcutsBroken = false;
 
 	final void enableDebugging() {
 			step = true;
-			Interpreter interp = Interpreter.getInstance();
-			if (interp!=null && interp.getDebugger()==this) {
-				interp.abort();
-				IJ.wait(100);
-			}
 			int start = ta.getSelectionStart();
 			int end = ta.getSelectionEnd();
 			if (start==debugStart && end==debugEnd)
@@ -822,7 +824,7 @@ shortcutsBroken = false;
 	public void close() {
 		boolean okayToClose = true;
 		ImageJ ij = IJ.getInstance();
-		if (!getTitle().equals("Errors") && changes && !IJ.isMacro() && ij!=null) {
+		if (!getTitle().equals("Errors") && changes && !IJ.isMacro() && ij!=null && !ij.quittingViaMacro()) {
 			String msg = "Save changes to \"" + getTitle() + "\"?";
 			YesNoCancelDialog d = new YesNoCancelDialog(this, "Editor", msg);
 			if (d.cancelPressed())

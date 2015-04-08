@@ -10,14 +10,8 @@ import ij.measure.*;
 import ij.plugin.filter.Analyzer;
 import ij.util.*;
 import ij.macro.Interpreter;
-import ij.plugin.frame.ContrastAdjuster;
-import ij.plugin.frame.RoiManager;
-import ij.plugin.frame.Recorder;
-import ij.plugin.Converter;
-import ij.plugin.Duplicator;
-import ij.plugin.RectToolOptions;
-import ij.plugin.Colors;
-import ij.plugin.ContrastEnhancer;
+import ij.plugin.*;
+import ij.plugin.frame.*;
 
 
 /**
@@ -268,6 +262,42 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		draw();
 	}
 	
+	/** Sets the display mode of composite color images, where 'mode' 
+		 should be IJ.COMPOSITE, IJ.COLOR or IJ.GRAYSCALE. */
+	public void setDisplayMode(int mode) {
+		if (this instanceof CompositeImage) {
+			((CompositeImage)this).setMode(mode);
+			updateAndDraw();
+		}
+	}
+
+	/** Returns the display mode (IJ.COMPOSITE, IJ.COLOR
+		or IJ.GRAYSCALE) if this is a composite color
+		image, or 0 if it not. */
+	public int getDisplayMode() {
+		if (this instanceof CompositeImage)
+			return ((CompositeImage)this).getMode();
+		else
+			return 0;
+	}
+	
+	/** Controls which channels in a composite color image are displayed, 
+		where 'channels' is a list of ones and zeros that specify the channels to
+		display. For example, "101" causes channels 1 and 3 to be displayed. */ 
+	public void setActiveChannels(String channels) {
+		if (!(this instanceof CompositeImage))
+			return;
+		boolean[] active = ((CompositeImage)this).getActiveChannels();
+		for (int i=0; i<active.length; i++) {
+			boolean b = false;
+			if (channels.length()>i && channels.charAt(i)=='1')
+				b = true;
+			active[i] = b;
+		}
+		updateAndDraw();
+		Channels.updateChannels();
+	}
+
 	/** Updates this image from the pixel data in its 
 		associated ImageProcessor, then displays it.
 		The CompositeImage class overrides this method 
@@ -636,7 +666,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			if (resetCurrentSlice) setSlice(currentSlice);
 			return;
 		}
-		boolean invalidDimensions = (isDisplayedHyperStack()||isComposite()) && !((StackWindow)win).validDimensions();
+		boolean invalidDimensions = (isDisplayedHyperStack()||isComposite()) && (win instanceof StackWindow) && !((StackWindow)win).validDimensions();
 		if (newStackSize>1 && !(win instanceof StackWindow)) {
 			if (isDisplayedHyperStack())
 				setOpenAsHyperStack(true);
@@ -1506,7 +1536,16 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 				stack.setPixels(ip.getPixels(),currentSlice);
 			ip = getProcessor();
 			setCurrentSlice(n);
-			Object pixels = stack.getPixels(currentSlice);
+			Object pixels = null;
+			Overlay overlay2 = null;
+			if (stack.isVirtual() && !(stack instanceof FileInfoVirtualStack)) {
+				ImageProcessor ip2 = stack.getProcessor(currentSlice);
+				overlay2 = ip2.getOverlay();
+				if (overlay2!=null || getOverlay()!=null)
+					setOverlay(overlay2);
+				pixels = ip2.getPixels();
+			} else
+				pixels = stack.getPixels(currentSlice);
 			if (ip!=null && pixels!=null) {
 				try {
 					ip.setPixels(pixels);
@@ -1521,13 +1560,10 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 				ContrastAdjuster.update();
 				//IJ.showStatus(n+": min="+ip.getMin()+", max="+ip.getMax());
 			}
-			if (stack.isVirtual()) {
-				Overlay overlay2 = stack.getProcessor(n).getOverlay();
-				if (overlay2!=null)
-					setOverlay(overlay2);
-			}
 			if (imageType==COLOR_RGB)
 				ContrastAdjuster.update();
+			else if (imageType==GRAY16 || imageType==GRAY32)
+				ThresholdAdjuster.update();
 			if (!noUpdateMode)
 				updateAndRepaintWindow();
 			else
@@ -1585,6 +1621,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		}
 		roi.setImage(this);
 		if (updateDisplay) draw();
+		roi.notifyListeners(RoiListener.CREATED);
 	}
 	
 	/** Creates a rectangular selection. */
@@ -1643,7 +1680,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 						IJ.run(this, "Add Selection...", "");
 					Overlay overlay2 = getOverlay();
 					if (overlay2!=null)
-						overlay2.drawLabels(true);
+						overlay2.drawLabels(!Prefs.noPointLabels);
 					Prefs.pointAddToManager = false;
 				}
 				if (Prefs.pointAutoMeasure || (Prefs.pointAutoNextSlice&&!Prefs.pointAddToManager))
@@ -1653,8 +1690,12 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 					ImageCanvas ic = getCanvas();
 					if (ic!=null) {
 						RoiManager rm = RoiManager.getInstance();
-						if (rm!=null)
-							rm.runCommand("show all with labels");
+						if (rm!=null) {
+							if (Prefs.noPointLabels)
+								rm.runCommand("show all without labels");
+							else
+								rm.runCommand("show all with labels");
+						}
 					}
 				}
 				if (Prefs.pointAutoNextSlice && getStackSize()>1) {
@@ -1670,9 +1711,12 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	public void deleteRoi() {
 		if (roi!=null) {
 			saveRoi();
-			RoiManager rm = RoiManager.getInstance();
-			if (rm!=null)
-				rm.deselect(roi);
+			if (!(IJ.altKeyDown()||IJ.shiftKeyDown())) {
+				RoiManager rm = RoiManager.getInstance();
+				if (rm!=null)
+					rm.deselect(roi);
+			}
+			roi.notifyListeners(RoiListener.DELETED);
 			roi = null;
 			if (ip!=null)
 				ip.resetRoi();
@@ -1708,6 +1752,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 				else if (r.width==width && r.height==height) // is it the same size as the image
 					roi.setLocation(0, 0);
 				draw();
+				roi.notifyListeners(RoiListener.CREATED);
 			}
 		}
 	}
@@ -2091,12 +2136,13 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	String getFFTLocation(int x, int y, Calibration cal) {
 		double center = width/2.0;
 		double r = Math.sqrt((x-center)*(x-center) + (y-center)*(y-center));
-		if (r<1.0) r = 1.0;
 		double theta = Math.atan2(y-center, x-center);
 		theta = theta*180.0/Math.PI;
-		if (theta<0) theta = 360.0+theta;
+		if (theta<0) theta=360.0+theta;
 		String s = "r=";
-		if (cal.scaled())
+		if (r<1.0)
+			return s+"Infinity/c (0)"; //origin ('DC offset'), no angle
+		else if (cal.scaled()) 
 			s += IJ.d2s((width/r)*cal.pixelWidth,2) + " " + cal.getUnit() + "/c (" + IJ.d2s(r,0) + ")";
 		else
 			s += IJ.d2s(width/r,2) + " p/c (" + IJ.d2s(r,0) + ")";
@@ -2108,8 +2154,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
     public String getLocationAsString(int x, int y) {
 		Calibration cal = getCalibration();
 		if (getProperty("FHT")!=null)
-			return getFFTLocation(x, height-y-1, cal);
-		//y = Analyzer.updateY(y, height);
+			return getFFTLocation(x, height-y, cal);
 		if (!IJ.altKeyDown()) {
 			String s = " x="+d2s(cal.getX(x)) + ", y=" + d2s(cal.getY(y,height));
 			if (getStackSize()>1) {
@@ -2309,7 +2354,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	public static void removeImageListener(ImageListener listener) {
 		listeners.removeElement(listener);
 	}
-	
+		
 	/** Returns 'true' if the image is locked. */
 	public boolean isLocked() {
 		return locked;
@@ -2371,14 +2416,14 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	}
 	
     /** Set the default 16-bit display range, where 'bitDepth' must be 0 (auto-scaling), 
-    	8 (0-255), 10 (0-1023), 12 (0-4095, 15 (0-32767) or 16 (0-65535). */
+    	8 (0-255), 10 (0-1023), 12 (0-4095, 14 (0-16383), 15 (0-32767) or 16 (0-65535). */
     public static void setDefault16bitRange(int bitDepth) {
-    	if (!(bitDepth==8 || bitDepth==10 || bitDepth==12 || bitDepth==15 || bitDepth==16))
+    	if (!(bitDepth==8 || bitDepth==10 || bitDepth==12 || bitDepth==14 || bitDepth==15 || bitDepth==16))
     		bitDepth = 0;
     	default16bitDisplayRange = bitDepth;
     }
     
-    /** Returns the default 16-bit display range, 0 (auto-scaling), 8, 10, 12, 15 or 16. */
+    /** Returns the default 16-bit display range, 0 (auto-scaling), 8, 10, 12, 14, 15 or 16. */
     public static int getDefault16bitRange() {
     	return default16bitDisplayRange;
     }
@@ -2514,6 +2559,17 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		stack.setPixels(imp2.getProcessor().getPixels(), slice);
 	}
 
+	/** Assigns a LUT (lookup table) to this image.
+	 * @see ij.io.Opener#openLut
+	*/
+	public void setLut(LUT lut) {
+		ImageProcessor ip2 = getProcessor();
+		if (ip2!=null && lut!=null) {
+			ip2.setLut(lut);
+			setProcessor(ip2);
+		}
+	}
+
 	/** Installs a list of ROIs that will be drawn on this image as a non-destructive overlay.
 	 * @see ij.gui.Roi#setStrokeColor
 	 * @see ij.gui.Roi#setStrokeWidth
@@ -2593,7 +2649,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	}
 
     public String toString() {
-    	return "imp["+getTitle()+" ("+width+"x"+height+"x"+getNChannels()+"x"+getNSlices()+"x"+getNFrames()+")]";
+    	return "img["+getTitle()+" ("+width+"x"+height+"x"+getNChannels()+"x"+getNSlices()+"x"+getNFrames()+")]";
     }
     
 }

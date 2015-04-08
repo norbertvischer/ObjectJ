@@ -17,6 +17,8 @@ import java.io.*;
 import java.net.*;
 import java.awt.image.*;
 import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+
 
 /**
 This frame is the main ImageJ class.
@@ -77,8 +79,8 @@ public class ImageJ extends Frame implements ActionListener,
 	MouseListener, KeyListener, WindowListener, ItemListener, Runnable {
 
 	/** Plugins should call IJ.getVersion() or IJ.getFullVersion() to get the version string. */
-	public static final String VERSION = "1.49m";
-	public static final String BUILD = ""; 
+	public static final String VERSION = "1.49r";
+	public static final String BUILD = "13"; 
 	public static Color backgroundColor = new Color(237,237,237);
 	/** SansSerif, 12-point, plain font. */
 	public static final Font SansSerif12 = new Font("SansSerif", Font.PLAIN, 12);
@@ -104,12 +106,13 @@ public class ImageJ extends Frame implements ActionListener,
 	private Toolbar toolbar;
 	private Panel statusBar;
 	private ProgressBar progressBar;
-	private Label statusLine;
+	private JLabel statusLine;
 	private boolean firstTime = true;
 	private java.applet.Applet applet; // null if not running as an applet
 	private Vector classes = new Vector();
 	private boolean exitWhenQuitting;
 	private boolean quitting;
+	private boolean quitMacro;
 	private long keyPressedTime, actionPerformedTime;
 	private String lastKeyCommand;
 	private boolean embedded;
@@ -161,7 +164,7 @@ public class ImageJ extends Frame implements ActionListener,
 		statusBar.setLayout(new BorderLayout());
 		statusBar.setForeground(Color.black);
 		statusBar.setBackground(backgroundColor);
-		statusLine = new Label();
+		statusLine = new JLabel();
 		statusLine.setFont(new Font("SansSerif", Font.PLAIN, 13));
 		statusLine.addKeyListener(this);
 		statusLine.addMouseListener(this);
@@ -609,6 +612,7 @@ public class ImageJ extends Frame implements ActionListener,
 
 	/** Called by ImageJ when the user selects Quit. */
 	public void quit() {
+		quitMacro = IJ.macroRunning();
 		Thread thread = new Thread(this, "Quit");
 		thread.setPriority(Thread.NORM_PRIORITY);
 		thread.start();
@@ -620,6 +624,11 @@ public class ImageJ extends Frame implements ActionListener,
 		return quitting;
 	}
 	
+	/** Returns true if ImageJ is quitting as a result of a run("Quit") macro call. */
+	public boolean quittingViaMacro() {
+		return quitting && quitMacro;
+	}
+
 	/** Called once when ImageJ quits. */
 	public void savePreferences(Properties prefs) {
 		Point loc = getLocation();
