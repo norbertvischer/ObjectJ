@@ -40,7 +40,7 @@ public class CellsOJ extends BaseAdapterOJ implements ImageChangedListener2OJ, C
     }
 
     public void disqualifyAllCells() {
-        for (CellOJ cell: cells) {
+        for (CellOJ cell : cells) {
             cell.setQualified(false);
         }
     }
@@ -252,19 +252,22 @@ public class CellsOJ extends BaseAdapterOJ implements ImageChangedListener2OJ, C
                 for (int obj = 0; obj < nObjects; obj++) {
                     YtemOJ thisYtem = thisCell.getYtemByIndex(obj);
                     int nPoints = thisYtem.getLocationsCount();
-                    for (int pp = 0; pp < nPoints; pp++) {
-                        LocationOJ thisLoc = thisYtem.getLocation(pp);
-                        for (int slc = 0; slc < sliceSet.length; slc++) {
-                            if (Math.round(thisLoc.getZ()) == sliceSet[slc]) {
-                                double dx = thisLoc.getX() - xx;
-                                double dy = thisLoc.getY() - yy;
-                                double dist = Math.sqrt(dx * dx + dy * dy);
-                                if (dist < min && dist < minRad) {
-                                    min = dist;
-                                    closePt[0] = (Object) thisCell;
-                                    closePt[1] = (Object) thisYtem;
-                                    closePt[2] = (Object) thisLoc;
-                                    closePt[3] = (Double) dist;
+
+                    if (OJ.getData().getYtemDefs().getYtemDefByName(thisYtem.getYtemDef()).isVisible()) {//12.4.2015
+                        for (int pp = 0; pp < nPoints; pp++) {
+                            LocationOJ thisLoc = thisYtem.getLocation(pp);
+                            for (int slc = 0; slc < sliceSet.length; slc++) {
+                                if (Math.round(thisLoc.getZ()) == sliceSet[slc]) {
+                                    double dx = thisLoc.getX() - xx;
+                                    double dy = thisLoc.getY() - yy;
+                                    double dist = Math.sqrt(dx * dx + dy * dy);
+                                    if (dist < min && dist < minRad) {
+                                        min = dist;
+                                        closePt[0] = (Object) thisCell;
+                                        closePt[1] = (Object) thisYtem;
+                                        closePt[2] = (Object) thisLoc;
+                                        closePt[3] = (Double) dist;
+                                    }
                                 }
                             }
                         }
