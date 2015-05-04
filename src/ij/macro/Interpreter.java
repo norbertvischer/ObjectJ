@@ -52,13 +52,13 @@ public class Interpreter implements MacroConstants {
 	boolean inPrint;
 	static String additionalFunctions;
 	Debugger debugger;
-	Editor editor;
 	int debugMode = Debugger.NOT_DEBUGGING;
 	boolean showDebugFunctions;
 	static boolean showVariables;
 	boolean wasError;
 	ImagePlus batchMacroImage;
 	boolean inLoop;
+	int loopDepth;
 	static boolean tempShowMode;
 	
 	static TextWindow arrayWindow;
@@ -482,6 +482,7 @@ public class Interpreter implements MacroConstants {
 	void doFor() {
 		boolean saveLooseSyntax = looseSyntax;
 		looseSyntax = false;
+		loopDepth++;
 		inLoop = true;
 		getToken();
 		if (token!='(')
@@ -544,11 +545,14 @@ public class Interpreter implements MacroConstants {
 			pc = condPC;
 		}
 		looseSyntax = saveLooseSyntax;
-		inLoop = false;
+		loopDepth--;
+		if (loopDepth==0)
+			inLoop = false;
 	}
 
 	void doWhile() {
 		looseSyntax = false;
+		loopDepth++;
 		inLoop = true;
 		int savePC = pc;
 		boolean isTrue;
@@ -569,7 +573,9 @@ public class Interpreter implements MacroConstants {
 			} else
 				skipStatement();
 		} while (isTrue && !done);
-		inLoop = false;
+		loopDepth--;
+		if (loopDepth==0)
+			inLoop = false;
 	}
 
 	void doDo() {
@@ -1774,10 +1780,6 @@ public class Interpreter implements MacroConstants {
 	static void setInstance(Interpreter i) {
 		instance = i;
 	}
-
-	//public boolean  inLoop() {
-	//	return !looseSyntax;
-	//}
 
 	static void setBatchMode(boolean b) {
 		batchMode = b;
