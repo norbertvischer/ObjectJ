@@ -49,7 +49,7 @@ public class ProjectSettingsOJ extends javax.swing.JFrame {
         getRootPane().putClientProperty("Window.documentFile", file2);//setTitleBarProxy
         getRootPane().putClientProperty("Window.documentModified", false);
     }
-
+            
     /**
      * returns corresponding panel, e.g. Images Panel when supplying "images"
      */

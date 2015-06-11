@@ -7,6 +7,7 @@
 package oj.gui.menuactions;
 
 import ij.IJ;
+import ij.Prefs;
 import ij.gui.YesNoCancelDialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -207,11 +208,27 @@ public class ProjectActionsOJ {
     }
 
     private static boolean closeProjectData() {
-        if (OJ.getData() != null) {
+       if (OJ.getData() != null) {
             ToolStateOJ state = OJ.getToolStateProcessor().getToolStateObject();
             if (state != null && (state instanceof CreateCellStateOJ)) {
                 ((CreateCellStateOJ) state).closeCell();//2.11.2013        
             }
+    /*    
+            //6.6.2015
+        if (ToolsWindowOJ.getInstance() != null) {
+            int toolsX = ToolsWindowOJ.getInstance().getLocationOnScreen().x;
+            int toolsY = ToolsWindowOJ.getInstance().getLocationOnScreen().y;
+            Prefs.set("objectj.toolsx", "" + toolsX);
+            Prefs.set("objectj.toolsy", "" + toolsY);
+        }
+       if (ProjectSettingsOJ.getInstance() != null) {
+            int projectX = ProjectSettingsOJ.getInstance().getLocationOnScreen().x;
+            int projectY = ProjectSettingsOJ.getInstance().getLocationOnScreen().y;
+            Prefs.set("objectj.projectx", "" + projectX);
+            Prefs.set("objectj.projecty", "" + projectY);
+        }
+        */
+  
         }
         if ((OJ.getData() != null) && (OJ.getData().getChanged() == true)) {
             if (ProjectSettingsOJ.getInstance() != null) {

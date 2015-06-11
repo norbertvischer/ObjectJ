@@ -42,10 +42,11 @@ public class OJ {
     private static VertexCalculatorOJ vcj;
     private static IjImageChangedListenerOJ ilj;
     private static StackChangedListenerOJ slj;
-    public final static int build = 496;
+    public final static int build = 497;
     public final static String releaseVersion = "1.03u";//do not follow Wayne
-    public final static String buildDate = "29-may-2015 22:38";
+    public final static String buildDate = "11-jun-2015 17:54";
     public static final String URL = "https://sils.fnwi.uva.nl/bcb/objectj";
+    public static final String URLcurrent = "https://sils.fnwi.uva.nl/bcb/objectj/download/current/";
     public static final String ICONS = "/oj/gui/icons/";
     public static int bufferStrategy = 2;//10.7.2009
     public static boolean loadedAsBinary = true;
@@ -113,8 +114,8 @@ public class OJ {
         Menus.getCommands().put("Convert Stack to Images", "oj.plugin.StackEditorOJ(\"toimages\")");
         Menus.getCommands().put("Rename...", "oj.plugin.SimpleCommandsOJ(\"rename\")");
 
-        Menus.getCommands().put("Update ImageJ...", "oj.plugin.ImageJUpdaterOJ");
-        Menus.getCommands().put("Update Menus", "oj.plugin.ImageJUpdaterOJ(\"menus\")");
+        //Menus.getCommands().put("Update ImageJ...", "oj.plugin.ImageJUpdaterOJ"); //11.6.2015
+        //Menus.getCommands().put("Update Menus", "oj.plugin.ImageJUpdaterOJ(\"menus\")");
         Menus.getCommands().put("Refresh Menus", "oj.plugin.ImageJUpdaterOJ(\"menus\")");
 
         Menus.getCommands().put("Tiff...", "oj.plugin.WriterOJ(\"tiff\")");
