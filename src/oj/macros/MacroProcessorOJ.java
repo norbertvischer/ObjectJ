@@ -21,10 +21,9 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.ImageCanvas;
 import ij.gui.ImageWindow;
-import ij.gui.Line;
-import ij.gui.PointRoi;
 import ij.gui.PolygonRoi;
 import ij.gui.Toolbar;
+import ij.plugin.Colors;
 import ij.process.FloatPolygon;
 import ij.util.Tools;
 import java.awt.*;
@@ -1069,6 +1068,16 @@ public class MacroProcessorOJ {
         return len;
     }
 
+    public String getYtemColors() {
+        YtemDefsOJ defs = OJ.getData().getYtemDefs();
+        String colors = "";
+
+        for (int jj = 0; jj < defs.getYtemDefsCount(); jj++) {
+            colors += Colors.colorToString(defs.getYtemDefByIndex(jj).getLineColor()) + " ";
+        }
+        return colors;
+    }
+
     public double getImageValue(int n, String key) {
         String theKey = key.toLowerCase();
         double value = 0.0;
@@ -1228,7 +1237,6 @@ public class MacroProcessorOJ {
         return -1;
     }
 
-    
     //Empties a column if title already exists, otherwise creates a new one. 
     public void initColumn(String columnName, boolean isUnlinked, boolean isTextMode) {//10.5.2010synchronized
         newestColumn = OJ.getData().getResults().getColumns().getColumnByName(columnName);//used for subsequent addition of properties like color or algor);
@@ -1260,9 +1268,7 @@ public class MacroProcessorOJ {
                 }
 
             }
-        }
-
-        else if (newestColumn == null) {//column did not exist yet
+        } else if (newestColumn == null) {//column did not exist yet
             newestColumn = new ColumnOJ();
             newestColumn.getColumnDef().setName(columnName);
 
@@ -1429,7 +1435,7 @@ public class MacroProcessorOJ {
                 setMarker(xpoints[0], ypoints[0]);
             }
         }
-        imp.getCanvas().setCursor(-1,-1,-1, -1);//15.7.2014
+        imp.getCanvas().setCursor(-1, -1, -1, -1);//15.7.2014
     }
 
     public void selectClosestItem(double x, double y, double tolerance) {
@@ -1505,9 +1511,18 @@ public class MacroProcessorOJ {
                 if (leftPart.equals("xmax")) {
                     colDef.setHistoXMax(rightVal);
                 }
-
+            } else if (property.startsWith("label")) {
+                if (value == 0) {
+                    colDef.setLabel("");
+                } else {
+                    for (int kk = 0; kk < columns.getLinkedColumnsCount(); kk++) {
+                        ColumnDefOJ cd = columns.getColumnByIndex(kk).getColumnDef();
+                        cd.setLabel("");
+                    }
+                    colDef.setLabel("label");
+                }
             } else {
-                ImageJAccessOJ.InterpreterAccess.interpError("Allowed terms: visible, color, digits, sort, width");
+                ImageJAccessOJ.InterpreterAccess.interpError("Allowed terms: visible, color, digits, sort, width, label");
                 return;
 
             }

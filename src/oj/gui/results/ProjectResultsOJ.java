@@ -15,6 +15,7 @@ import oj.gui.results.linked.LinkedHeaderRendererOJ;
 import ij.IJ;
 import ij.Menus;
 import ij.WindowManager;
+import ij.gui.GenericDialog;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
@@ -28,6 +29,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Vector;
 import javax.swing.JList;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollBar;
@@ -66,6 +68,7 @@ import oj.processor.state.DeleteCellStateOJ;
 import oj.processor.state.SelectCellStateOJ;
 import oj.gui.settings.ProjectSettingsOJ;
 import oj.gui.settings.ColumnSettingsOJ;
+import oj.processor.events.YtemDefChangedEventOJ;
 import oj.project.results.statistics.StatisticsOJ;
 
 /**
@@ -429,7 +432,7 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
      */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        /**/bindingGroup = new org.jdesktop.beansbinding.BindingGroup();//29-5-2015
+        bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
 
         popStatistics = new javax.swing.JPopupMenu();
         mniShowAll = new javax.swing.JMenuItem();
@@ -467,7 +470,7 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
         mncHistogram = new javax.swing.JMenuItem();
         mncEditThisColumn = new javax.swing.JMenuItem();
         jSeparator4 = new javax.swing.JPopupMenu.Separator();
-        mncPlot = new javax.swing.JMenuItem();
+        mncLabel = new javax.swing.JMenuItem();
         splitPaneBig = new javax.swing.JSplitPane();
         splitPaneLeft = new javax.swing.JSplitPane();
         jPanel1 = new javax.swing.JPanel();
@@ -633,12 +636,12 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
         popColumnsLeftList.add(mncDelete);
 
         popUpColumn.addPopupMenuListener(new javax.swing.event.PopupMenuListener() {
-            public void popupMenuCanceled(javax.swing.event.PopupMenuEvent evt) {
+            public void popupMenuWillBecomeVisible(javax.swing.event.PopupMenuEvent evt) {
             }
             public void popupMenuWillBecomeInvisible(javax.swing.event.PopupMenuEvent evt) {
                 popUpColumnPopupMenuWillBecomeInvisible(evt);
             }
-            public void popupMenuWillBecomeVisible(javax.swing.event.PopupMenuEvent evt) {
+            public void popupMenuCanceled(javax.swing.event.PopupMenuEvent evt) {
             }
         });
 
@@ -742,13 +745,13 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
         popUpColumn.add(mncEditThisColumn);
         popUpColumn.add(jSeparator4);
 
-        mncPlot.setText("Plot...");
-        mncPlot.addActionListener(new java.awt.event.ActionListener() {
+        mncLabel.setText("Show as Label...");
+        mncLabel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mncPlotActionPerformed(evt);
+                mncLabelActionPerformed(evt);
             }
         });
-        popUpColumn.add(mncPlot);
+        popUpColumn.add(mncLabel);
 
         setTitle("ObjectJ results"); // NOI18N
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -798,12 +801,12 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
         jPanel1.add(jScrollPane1, java.awt.BorderLayout.CENTER);
 
         jPanel5.setBackground(javax.swing.UIManager.getDefaults().getColor("Desktop.background"));
-        jPanel5.setFont(new java.awt.Font("Lucida Grande", 1, 13));
+        jPanel5.setFont(new java.awt.Font("Lucida Grande", 1, 13)); // NOI18N
         jPanel5.setOpaque(false);
         jPanel5.setLayout(new java.awt.BorderLayout());
 
         labelColumnSelector.setBackground(new java.awt.Color(0, 102, 255));
-        labelColumnSelector.setFont(new java.awt.Font("Lucida Grande", 1, 13));
+        labelColumnSelector.setFont(new java.awt.Font("Lucida Grande", 1, 13)); // NOI18N
         labelColumnSelector.setForeground(new java.awt.Color(51, 51, 51));
         labelColumnSelector.setText("Linked columns"); // NOI18N
         labelColumnSelector.setToolTipText("Result columns where each row entry is connected to an object.  \\n\\r\\pDeleting an object will also delete the linked result.    hhh"); // NOI18N
@@ -843,10 +846,10 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
         linkedScrollPane.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
         linkedScrollPane.setOpaque(false);
 
-        /**/org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, linkedHeaderScrollPane, org.jdesktop.beansbinding.ELProperty.create("${columnHeader}"), linkedScrollPane, org.jdesktop.beansbinding.BeanProperty.create("columnHeader"));
-       /**/ bindingGroup.addBinding(binding);//29-5-2015
+        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, linkedHeaderScrollPane, org.jdesktop.beansbinding.ELProperty.create("${columnHeader}"), linkedScrollPane, org.jdesktop.beansbinding.BeanProperty.create("columnHeader"));
+        bindingGroup.addBinding(binding);
 
-        tblLinkedContent.setFont(new java.awt.Font("SansSerif", 0, 12));
+        tblLinkedContent.setFont(new java.awt.Font("SansSerif", 0, 12)); // NOI18N
         tblLinkedContent.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         tblLinkedContent.setDoubleBuffered(true);
         tblLinkedContent.setFocusable(false);
@@ -883,7 +886,7 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
         linkedHeaderScrollPane.setPreferredSize(new java.awt.Dimension(0, 20));
         linkedHeaderScrollPane.setWheelScrollingEnabled(false);
 
-        tblLinkedHeader.setFont(new java.awt.Font("SansSerif", 0, 12));
+        tblLinkedHeader.setFont(new java.awt.Font("SansSerif", 0, 12)); // NOI18N
         tblLinkedHeader.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         tblLinkedHeader.setDoubleBuffered(true);
         tblLinkedHeader.setFocusable(false);
@@ -901,11 +904,11 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
         unlinkedScrollPane.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
         unlinkedScrollPane.setOpaque(false);
 
-        /**/binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, unlinkedHeaderScrollPane, org.jdesktop.beansbinding.ELProperty.create("${columnHeader}"), unlinkedScrollPane, org.jdesktop.beansbinding.BeanProperty.create("columnHeader"));
-        /**/bindingGroup.addBinding(binding);//29-5-2015
+        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, unlinkedHeaderScrollPane, org.jdesktop.beansbinding.ELProperty.create("${columnHeader}"), unlinkedScrollPane, org.jdesktop.beansbinding.BeanProperty.create("columnHeader"));
+        bindingGroup.addBinding(binding);
 
         tblUnlinkedContent.setBackground(new java.awt.Color(236, 233, 216));
-        tblUnlinkedContent.setFont(new java.awt.Font("SansSerif", 0, 12));
+        tblUnlinkedContent.setFont(new java.awt.Font("SansSerif", 0, 12)); // NOI18N
         tblUnlinkedContent.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         tblUnlinkedContent.setDoubleBuffered(true);
         tblUnlinkedContent.setGridColor(new java.awt.Color(204, 204, 204));
@@ -923,7 +926,7 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
         unlinkedHeaderScrollPane.setPreferredSize(new java.awt.Dimension(0, 20));
         unlinkedHeaderScrollPane.setWheelScrollingEnabled(false);
 
-        tblUnlinkedHeader.setFont(new java.awt.Font("SansSerif", 0, 12));
+        tblUnlinkedHeader.setFont(new java.awt.Font("SansSerif", 0, 12)); // NOI18N
         tblUnlinkedHeader.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         tblUnlinkedHeader.setDoubleBuffered(true);
         tblUnlinkedHeader.setFocusable(false);
@@ -942,10 +945,10 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
         jPanel4.setPreferredSize(new java.awt.Dimension(10, 20));
         getContentPane().add(jPanel4, java.awt.BorderLayout.SOUTH);
 
-        /**/bindingGroup.bind();//29-5-2015
+        bindingGroup.bind();
 
-        java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((screenSize.width-735)/2, (screenSize.height-540)/2, 735, 540);
+        setSize(new java.awt.Dimension(735, 540));
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 //+++exception at bindingGroup.bind(); 4 lines above
     private void mncUnsortedActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mncUnsortedActionPerformed
@@ -1091,30 +1094,39 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
         columnDigitsAction(currentHeader(), 0);
     }//GEN-LAST:event_mncDigits0ActionPerformed
 
+//    private void columnDigitsActionOld(final JTable table, int digits) {
+//        if (popupMenuXPos == -1) {
+//            return;
+//        }
+//        int xpos = popupMenuXPos - (int) ProjectResultsOJ.getInstance().getColumnPopupMenu(table).getInvoker().getLocationOnScreen().getX();
+//        int index = table.getColumnModel().getColumnIndexAtX(xpos) - 1;
+//        if (index >= 0) {
+//            if (table.getModel() instanceof LinkedStatRowsModelOJ) {
+//                ColumnOJ column = ((LinkedStatRowsModelOJ) table.getModel()).getVisibleElementAt(index);
+//                if (column != null) {
+//                    if (column.getColumnDef().getColumnDigits() != digits) {
+//                        column.getColumnDef().setColumnDigits(digits);
+//                    }
+//                }
+//            } else {
+//                ColumnOJ column = ((UnlinkedStatRowsModelOJ) table.getModel()).getVisibleElementAt(index);
+//                if (column != null) {
+//                    if (column.getColumnDef().getColumnDigits() != digits) {
+//                        column.getColumnDef().setColumnDigits(digits);
+//                    }
+//                }
+//            }
+//            ((AbstractTableModel) table.getModel()).fireTableDataChanged();
+//        }
+//    }
     private void columnDigitsAction(final JTable table, int digits) {
-        if (popupMenuXPos == -1) {
-            return;
-        }
-        int xpos = popupMenuXPos - (int) ProjectResultsOJ.getInstance().getColumnPopupMenu(table).getInvoker().getLocationOnScreen().getX();
-        int index = table.getColumnModel().getColumnIndexAtX(xpos) - 1;
-        if (index >= 0) {
-            if (table.getModel() instanceof LinkedStatRowsModelOJ) {
-                ColumnOJ column = ((LinkedStatRowsModelOJ) table.getModel()).getVisibleElementAt(index);
-                if (column != null) {
-                    if (column.getColumnDef().getColumnDigits() != digits) {
-                        column.getColumnDef().setColumnDigits(digits);
-                    }
-                }
-            } else {
-                ColumnOJ column = ((UnlinkedStatRowsModelOJ) table.getModel()).getVisibleElementAt(index);
-                if (column != null) {
-                    if (column.getColumnDef().getColumnDigits() != digits) {
-                        column.getColumnDef().setColumnDigits(digits);
-                    }
-                }
+        ColumnOJ column = rightClickedColumn(table);
+        if (column != null) {
+            if (column.getColumnDef().getColumnDigits() != digits) {
+                column.getColumnDef().setColumnDigits(digits);
             }
-            ((AbstractTableModel) table.getModel()).fireTableDataChanged();
         }
+        ((AbstractTableModel) table.getModel()).fireTableDataChanged();
     }
 
     private void mncColorBlueActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mncColorBlueActionPerformed
@@ -1133,37 +1145,46 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
         columnColorAction(currentHeader(), Color.BLACK);
     }//GEN-LAST:event_mncColorBlackActionPerformed
 
+//    private void columnColorActionOld(final JTable table, Color color) {
+//        if (popupMenuXPos == -1) {
+//            return;
+//        }
+//        //int xpos = popupMenuXPos - (int) ProjectResultsOJ.getInstance().getColumnPopupMenu(table).getInvoker().getLocationOnScreen().getX();
+//
+//        //String name = table.getColumnName(1);
+//        //name = name + "";
+//        JPopupMenu pop = ProjectResultsOJ.getInstance().getColumnPopupMenu(table);
+//        int thatX = (int) pop.getInvoker().getLocationOnScreen().getX();
+//        //int diffX = popupMenuXPos - thatX;
+//        int xpos = popupMenuXPos - (int) ProjectResultsOJ.getInstance().getColumnPopupMenu(table).getInvoker().getLocationOnScreen().getX();
+//        int index = table.getColumnModel().getColumnIndexAtX(xpos) - 1;
+//        if (index >= 0) {
+//            if (table.getModel() instanceof LinkedStatRowsModelOJ) {
+//                ColumnOJ column = ((LinkedStatRowsModelOJ) table.getModel()).getVisibleElementAt(index);
+//                if (column != null) {
+//                    if (column.getColumnDef().getColumnColor() != color) {
+//                        column.getColumnDef().setColumnColor(color);
+//                    }
+//                }
+//            } else {
+//                ColumnOJ column = ((UnlinkedStatRowsModelOJ) table.getModel()).getVisibleElementAt(index);
+//                if (column != null) {
+//                    if (column.getColumnDef().getColumnColor() != color) {
+//                        column.getColumnDef().setColumnColor(color);
+//                    }
+//                }
+//            }
+//            ((AbstractTableModel) table.getModel()).fireTableDataChanged();
+//        }
+//    }
     private void columnColorAction(final JTable table, Color color) {
-        if (popupMenuXPos == -1) {
-            return;
-        }
-        //int xpos = popupMenuXPos - (int) ProjectResultsOJ.getInstance().getColumnPopupMenu(table).getInvoker().getLocationOnScreen().getX();
-
-        String name = table.getColumnName(1);
-        name = name + "";
-        JPopupMenu pop = ProjectResultsOJ.getInstance().getColumnPopupMenu(table);
-        int thatX = (int) pop.getInvoker().getLocationOnScreen().getX();
-        int diffX = popupMenuXPos - thatX;
-        int xpos = popupMenuXPos - (int) ProjectResultsOJ.getInstance().getColumnPopupMenu(table).getInvoker().getLocationOnScreen().getX();
-        int index = table.getColumnModel().getColumnIndexAtX(xpos) - 1;
-        if (index >= 0) {
-            if (table.getModel() instanceof LinkedStatRowsModelOJ) {
-                ColumnOJ column = ((LinkedStatRowsModelOJ) table.getModel()).getVisibleElementAt(index);
-                if (column != null) {
-                    if (column.getColumnDef().getColumnColor() != color) {
-                        column.getColumnDef().setColumnColor(color);
-                    }
-                }
-            } else {
-                ColumnOJ column = ((UnlinkedStatRowsModelOJ) table.getModel()).getVisibleElementAt(index);
-                if (column != null) {
-                    if (column.getColumnDef().getColumnColor() != color) {
-                        column.getColumnDef().setColumnColor(color);
-                    }
-                }
+        ColumnOJ column = rightClickedColumn(table);
+        if (column != null) {
+            if (column.getColumnDef().getColumnColor() != color) {
+                column.getColumnDef().setColumnColor(color);
             }
-            ((AbstractTableModel) table.getModel()).fireTableDataChanged();
         }
+        ((AbstractTableModel) table.getModel()).fireTableDataChanged();
     }
 
     private ColumnOJ rightClickedColumn(final JTable table) {
@@ -1520,9 +1541,48 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
         oj.gui.menuactions.ResultsActionsOJ.exportResultsToText();
     }//GEN-LAST:event_btnCopyExportActionPerformed
 
-    private void mncPlotActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mncPlotActionPerformed
+    private void mncLabelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mncLabelActionPerformed
+        JTable table = currentHeader();
+        if (tblUnlinkedHeader == table) {
+            IJ.showMessage("Cannot use labels from unlinked columns");
+            return;
+        }
+        ColumnOJ column = rightClickedColumn(table);
+        if (column == null) {
+            return;
+        }
+        String title = column.getName();
+        GenericDialog gd = new GenericDialog("Use Column Entry as label");
+        gd.addMessage("Current Label is from Column: " + title);
+        gd.addCheckbox("Show \" " + title + "\" values in Image", rootPaneCheckingEnabled);
+        //gd.addCheckbox("Custom Label Properties:", rootPaneCheckingEnabled);
+        gd.addMessage("Label Properties");
+        gd.addStringField("", "", 40);
+        gd.addMessage("(Press HELP button for customizing examples)");
+        //gd.addHelp("http://simon.bio.uva.nl");
+        gd.showDialog();
+        if (gd.wasCanceled()) {
+            return;
+        }
 
-        columnPlotAction(currentHeader());     }//GEN-LAST:event_mncPlotActionPerformed
+        boolean withLabel = gd.getNextBoolean();
+        String labelProperty = "";
+        if (withLabel) {
+            ColumnsOJ columns = OJ.getData().getResults().getColumns();
+            for (int jj = 0; jj < columns.getLinkedColumnsCount(); jj++) {
+                column.getColumnDef().setLabel("");
+            }
+            labelProperty = gd.getNextString();
+            if (!labelProperty.startsWith("label")) {
+                labelProperty = "label " + labelProperty;
+            }
+        }
+
+        column.getColumnDef().setLabel(labelProperty);
+        OJ.getEventProcessor().fireYtemDefChangedEvent(YtemDefChangedEventOJ.LABEL_VISIBILITY_CHANGED);
+
+
+    }//GEN-LAST:event_mncLabelActionPerformed
 
     private void resetStateMode() {
         stateMode = Mode.SELECT;
@@ -1584,8 +1644,8 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
     private javax.swing.JMenuItem mncHideAll;
     private javax.swing.JMenuItem mncHideOthers;
     private javax.swing.JMenuItem mncHistogram;
+    private javax.swing.JMenuItem mncLabel;
     private javax.swing.JMenuItem mncNew;
-    private javax.swing.JMenuItem mncPlot;
     private javax.swing.JMenuItem mncShowAll;
     private javax.swing.JMenuItem mncSortMaxTop;
     private javax.swing.JMenuItem mncSortMinTop;
@@ -1606,7 +1666,7 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
     private javax.swing.JScrollPane unlinkedHeaderScrollPane;
     private javax.swing.JPanel unlinkedResultsPanel;
     private javax.swing.JScrollPane unlinkedScrollPane;
-    /**/private org.jdesktop.beansbinding.BindingGroup bindingGroup;//29-5-2015
+    private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 
     public JPopupMenu getColumnPopupMenu(final JTable table) {

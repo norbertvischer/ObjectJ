@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<Form version="1.8" maxVersion="1.8" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
+<Form version="1.8" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
   <NonVisualComponents>
     <Container class="javax.swing.JPopupMenu" name="popStatistics">
 
@@ -267,12 +267,12 @@
         </MenuItem>
         <Component class="javax.swing.JPopupMenu$Separator" name="jSeparator4">
         </Component>
-        <MenuItem class="javax.swing.JMenuItem" name="mncPlot">
+        <MenuItem class="javax.swing.JMenuItem" name="mncLabel">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Plot..."/>
+            <Property name="text" type="java.lang.String" value="Show as Label..."/>
           </Properties>
           <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mncPlotActionPerformed"/>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mncLabelActionPerformed"/>
           </Events>
         </MenuItem>
       </SubComponents>

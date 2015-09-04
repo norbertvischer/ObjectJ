@@ -157,6 +157,7 @@ public class ColumnSettingsOJ extends javax.swing.JPanel implements TableColumnM
         cbxOperation.addItem("Exists");
         cbxOperation.addItem("Length");
         cbxOperation.addItem("File Name");
+        cbxOperation.addItem("Item Name");
 
     }
 

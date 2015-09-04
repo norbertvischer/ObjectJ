@@ -48,6 +48,9 @@ public class ColumnDefConverterOJ implements Converter {
         writer.startNode("histoYMax");
         writer.setValue(Integer.toString(columnDef.getHistoYMax()));
         writer.endNode();
+        writer.startNode("label");
+        writer.setValue(columnDef.getLabel());
+        writer.endNode();
 
         writer.startNode("plotProperties");
         writer.setValue(columnDef.getPlotProperties());

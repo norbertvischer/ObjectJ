@@ -46,6 +46,7 @@ public class ColumnDefOJ extends BaseAdapterOJ {
   private int histoYMax = -1;//2.10.2009
   private double histoBinWidth = Double.NaN;//2.10.2009
   private String plotProperties = "";//16.09.2011
+  private String label = "MyLabel";//20.6.2015
 
   public static String getAlgorithmName(int algorithm) {
     switch (algorithm) {
@@ -299,7 +300,13 @@ public class ColumnDefOJ extends BaseAdapterOJ {
   public int getColumnDigits() {
     return columnDigits;
   }
-
+  public String getLabel() {
+  return label;}
+  
+  public void setLabel(String labl) {
+   label = labl;
+  }
+          
   public void setColumnWidth(int columnWidth) {
     this.columnWidth = columnWidth;
     changed = true;

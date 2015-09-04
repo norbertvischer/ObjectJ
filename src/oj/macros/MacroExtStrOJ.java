@@ -129,6 +129,7 @@ public class MacroExtStrOJ {
         buf.append(getIntFunction("ojGetOpenObject"));
         buf.append(getStrFunction("ojGetItemName"));//6.3.2010
         buf.append(getStrFunction("ojGetItemNames"));//revalidate!12-2013
+        buf.append(getStrFunction("ojGetItemColors"));//18.8.2015
         buf.append(getFunction("ojGetPositions", "xArray", "yArray"));
 
         buf.append(getStrFunction("ojGetItemTypes"));//8.6.2011

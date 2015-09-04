@@ -142,6 +142,10 @@ public class FunctionsOJ implements MacroExtension {
         return Double.toString(val);
     }
 
+   public String ojGetItemColors() {
+        return OJ.getMacroProcessor().getYtemColors();
+    }
+
     public String ojGetImageValue(String n, String key) {
         double val = OJ.getMacroProcessor().getImageValue(MacroProcessorOJ.parseInt(n), key);
         return Double.toString(val);

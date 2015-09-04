@@ -46,6 +46,10 @@ import oj.processor.events.DrawCellEventOJ;
 import oj.processor.events.DrawCellListenerOJ;
 import oj.processor.events.YtemDefChangedListenerOJ;
 import oj.project.YtemDefsOJ;
+import oj.project.results.ColumnDefOJ;
+import oj.project.results.ColumnOJ;
+import oj.project.results.ColumnsOJ;
+import oj.project.results.OperandOJ;
 
 public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, CellChangedListenerOJ, YtemChangedListenerOJ, YtemDefChangedListenerOJ {
 
@@ -292,6 +296,19 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
         return active[channel];
     }
 
+    ColumnOJ getLabelColumn() {
+        ColumnsOJ columns = dataOJ.getResults().getColumns();
+        for (int jj = 0; jj < columns.getLinkedColumnsCount(); jj++) {
+            ColumnOJ column = columns.getColumnByIndex(jj);
+            ColumnDefOJ coldef = column.getColumnDef();
+            String labelInfo = coldef.getLabel();
+            if (labelInfo != null && labelInfo.startsWith("label")) {
+                return column;
+            }
+        }
+        return null;
+    }
+
     /**
      * Draws non-destructive markers
      */
@@ -303,6 +320,7 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
         if (IJ.isMacro() && OJ.getMacroProcessor().getTargetImage() != null) {
             return;
         }
+        ColumnOJ labelColumn = getLabelColumn();
         boolean allvisible = true;
         YtemDefsOJ ytemDefs = OJ.getData().getYtemDefs();
         if (ytemDefs != null) {
@@ -339,10 +357,9 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
                         for (int ytemNo = 0; ytemNo < ytemsCount; ytemNo++) {
                             YtemOJ ytem = cell.getYtemByIndex(ytemNo);
                             if (ytem != null) {//11.7.2011
-                                if (ytem.getRoiBytes() != null){//8.10.2014
-                                
-                                    
-                                    Roi roi = ytem.getIJRoi() ;
+                                if (ytem.getRoiBytes() != null) {//8.10.2014
+
+                                    Roi roi = ytem.getIJRoi();
                                     //roi.draw(g);
                                     roi.drawOverlay(g);
                                 }
@@ -478,6 +495,47 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
                                                 layout.draw((Graphics2D) g, (float) x + 1, (float) y);
 
                                             }
+                                        }
+                                    }
+
+                                    if (!EventProcessorOJ.BlockEventsOnDrag && (x_array.length > 0) && labelColumn != null) {
+                                        ColumnDefOJ coldef = labelColumn.getColumnDef();
+                                        int nOperands = coldef.getOperandCount();
+                                        boolean doLabel = ytemNo == 0;
+                                        if (nOperands > 0) {
+                                            doLabel = false;
+                                            OperandOJ operand = coldef.getOperand(0);
+                                            String ytemName = operand.getObjectName();
+                                            int labeledClone = operand.getYtemClone();
+                                            int cloneNo = -1;
+                                            for (int ii = 0; ii < cell.getYtemsCount(); ii++) {
+                                                if (cell.getYtemByIndex(ii).getYtemDef().equals(ytemName)) {
+                                                    cloneNo++;
+                                                    if (cloneNo == labeledClone) {
+                                                        doLabel = true;
+                                                    }
+                                                }
+
+                                            }
+                                        }
+
+                                        if (doLabel) {
+                                            int digits = coldef.getColumnDigits();
+                                            Color color = coldef.getColumnColor();
+                                            boolean isText = coldef.getAlgorithm() == ColumnDefOJ.ALGORITHM_CALC_LINKED_TEXT;
+
+                                            String s = "";
+                                            if (isText) {
+                                                s = labelColumn.getStringResult(i);
+                                            } else {
+                                                s = IJ.d2s(labelColumn.getDoubleResult(i), digits);
+                                            }
+                                            TextLayout layout = new TextLayout(s, fontArial, frc);
+
+                                            g.setColor(color);
+                                            int x = x_array[0];
+                                            int y = y_array[0];
+                                            layout.draw((Graphics2D) g, (float) x, (float) (y));
                                         }
                                     }
                                 }

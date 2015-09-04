@@ -1,13 +1,12 @@
 /*
- * YtemDefSelectionChangedListener.java
+ * YtemDefSelectionChangedListenerOJ.java
  * -- documented
  *
- * Interface that tells other classes that they should contain an ytemDefSelectionChanged method
+ * Interface that tells other classes that they should contain a YtemDefSelectionChangedListenerOJ method
  */
 
 
 package oj.processor.events;
-
 
 public interface YtemDefSelectionChangedListenerOJ {
     
