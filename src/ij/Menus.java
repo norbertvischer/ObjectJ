@@ -111,7 +111,7 @@ public class Menus {
 		Menu importMenu = getMenu("File>Import", true);
 		file.addSeparator();
 		addPlugInItem(file, "Close", "ij.plugin.Commands(\"close\")", KeyEvent.VK_W, false);
-		addPlugInItem(file, "Close All", "ij.plugin.Commands(\"close-all\")", 0, false);
+		addPlugInItem(file, "Close All", "ij.plugin.Commands(\"close-all\")", KeyEvent.VK_W, true);
 		addPlugInItem(file, "Save", "ij.plugin.Commands(\"save\")", KeyEvent.VK_S, false);
 		saveAsMenu = getMenu("File>Save As", true);
 		addPlugInItem(file, "Revert", "ij.plugin.Commands(\"revert\")", KeyEvent.VK_R,  false);
@@ -156,6 +156,7 @@ public class Menus {
 		addPlugInItem(image, "Properties...", "ij.plugin.filter.ImageProperties", KeyEvent.VK_P, true);
 		getMenu("Image>Color", true);
 		getMenu("Image>Stacks", true);
+		getMenu("Image>Stacks>Animation_", true);
 		getMenu("Image>Stacks>Tools_", true);
 		Menu hyperstacksMenu = getMenu("Image>Hyperstacks", true);
 		image.addSeparator();
@@ -227,6 +228,8 @@ public class Menus {
 		addPlugInItem(help, "Plugins...", "ij.plugin.BrowserLauncher(\""+IJ.URL+"/plugins\")", 0, false);
 		addPlugInItem(help, "Macros...", "ij.plugin.BrowserLauncher(\""+IJ.URL+"/macros/\")", 0, false);
 		addPlugInItem(help, "Macro Functions...", "ij.plugin.BrowserLauncher(\""+IJ.URL+"/developer/macro/functions.html\")", 0, false);
+		Menu examplesMenu = getExamplesMenu(ij);
+		help.add(examplesMenu);
 		help.addSeparator();
 		addPlugInItem(help, "Update ImageJ...", "ij.plugin.ImageJ_Updater", 0, false);
 		addPlugInItem(help, "Refresh Menus", "ij.plugin.ImageJ_Updater(\"menus\")", 0, false);
@@ -255,6 +258,70 @@ public class Menus {
 		return error;
 	}
 	
+	public static Menu getExamplesMenu(ActionListener listener) {
+		Menu menu = new Menu("Examples");
+		Menu submenu = new Menu("Macro");
+		addExample(submenu, "Sphere", "Sphere.ijm");
+		addExample(submenu, "Dialog Box", "Dialog_Box.ijm");
+		addExample(submenu, "Example Plot", "Example_Plot.ijm");
+		addExample(submenu, "Semi-log Plot", "Semi-log_Plot.ijm");
+		addExample(submenu, "Arrow Plot", "Arrow_Plot.ijm");
+		addExample(submenu, "Process Folder", "Batch_Process_Folder.ijm");
+		addExample(submenu, "Sine/Cosine Table", "Sine_Cosine_Table.ijm");
+		addExample(submenu, "Non-numeric Table", "Non-numeric_Table.ijm");
+		addExample(submenu, "Overlay", "Overlay.ijm");
+		addExample(submenu, "Stack Overlay", "Stack_Overlay.ijm");
+		addExample(submenu, "Array Functions", "Array_Functions.ijm");
+		addExample(submenu, "Dual Progress Bars", "Dual_Progress_Bars.ijm");
+		addExample(submenu, "Grab Viridis Colormap", "Grab_Viridis_Colormap.ijm");
+		addExample(submenu, "Tool", "Circle_Tool.ijm");
+		submenu.addActionListener(listener);
+		menu.add(submenu);
+		submenu = new Menu("JavaScript");
+		addExample(submenu, "Sphere", "Sphere.js");
+		addExample(submenu, "Example Plot", "Example_Plot.js");
+		addExample(submenu, "Semi-log Plot", "Semi-log_Plot.js");
+		addExample(submenu, "Arrow Plot", "Arrow_Plot.js");
+		addExample(submenu, "Process Folder", "Batch_Process_Folder.js");
+		addExample(submenu, "Sine/Cosine Table", "Sine_Cosine_Table.js");
+		addExample(submenu, "Non-numeric Table", "Non-numeric_Table.js");
+		addExample(submenu, "Overlay", "Overlay.js");
+		addExample(submenu, "Stack Overlay", "Stack_Overlay.js");
+		addExample(submenu, "Dual Progress Bars", "Dual_Progress_Bars.js");
+		submenu.addActionListener(listener);
+		menu.add(submenu);
+		submenu = new Menu("BeanShell");
+		addExample(submenu, "Sphere", "Sphere.bsh");
+		addExample(submenu, "Example Plot", "Example_Plot.bsh");
+		addExample(submenu, "Semi-log Plot", "Semi-log_Plot.bsh");
+		addExample(submenu, "Arrow Plot", "Arrow_Plot.bsh");
+		addExample(submenu, "Sine/Cosine Table", "Sine_Cosine_Table.bsh");
+		submenu.addActionListener(listener);
+		menu.add(submenu);
+		submenu = new Menu("Python");
+		addExample(submenu, "Sphere", "Sphere.py");
+		addExample(submenu, "Animated Gaussian Blur", "Animated_Gaussian_Blur.py");
+		addExample(submenu, "Rotational Animation.py", "Rotational_Animation.py");
+		addExample(submenu, "Overlay", "Overlay.py");
+		submenu.addActionListener(listener);
+		menu.add(submenu);
+		submenu = new Menu("Java");
+		addExample(submenu, "Sphere", "Sphere_.java");
+		addExample(submenu, "Plugin", "My_Plugin.java");
+		addExample(submenu, "Plugin Filter", "Filter_Plugin.java");
+		addExample(submenu, "Plugin Frame", "Plugin_Frame.java");
+		addExample(submenu, "Plugin Tool", "Prototype_Tool.java");
+		submenu.addActionListener(listener);
+		menu.add(submenu);
+		return menu;
+	}
+	
+	private static void addExample(Menu menu, String label, String command) {
+		MenuItem item = new MenuItem(label);
+		menu.add(item);
+		item.setActionCommand(command);
+	}
+
 	void addOpenRecentSubMenu(Menu menu) {
 		openRecentMenu = getMenu("File>Open Recent");
  		for (int i=0; i<MAX_OPEN_RECENT_ITEMS; i++) {
@@ -578,16 +645,14 @@ public class Menus {
 			String jar = (String)jarFiles.elementAt(i);
 			InputStream is = getConfigurationFile(jar);
             if (is==null) continue;
-            int maxEntries = 100;
-            String[] entries = new String[maxEntries];
-            int nEntries=0;
+            ArrayList entries = new ArrayList(20);
             LineNumberReader lnr = new LineNumberReader(new InputStreamReader(is));
             try {
                 while(true) {
                     String s = lnr.readLine();
-                    if (s==null || nEntries==maxEntries-1) break;
+                    if (s==null) break;
 					if (s.length()>=3 && !s.startsWith("#"))
-						entries[nEntries++] = s;
+						entries.add(s);
 	            }
             }
             catch (IOException e) {}
@@ -595,8 +660,8 @@ public class Menus {
 				try {if (lnr!=null) lnr.close();}
 				catch (IOException e) {}
 			}
-			for (int j=0; j<nEntries; j++)
-				installJarPlugin(jar, entries[j]);
+			for (int j=0; j<entries.size(); j++)
+				installJarPlugin(jar, (String)entries.get(j));
 		}		
 	}
     
@@ -1318,14 +1383,8 @@ public class Menus {
 	* @return				returns an error code(NORMAL_RETURN,COMMAND_IN_USE_ERROR, etc.)
 	*/
 	public static int installPlugin(String plugin, char menuCode, String command, String shortcut, ImageJ ij) {
-		if (command.equals("")) { //uninstall
-			//Object o = pluginsPrefs.remove(plugin);
-			//if (o==null)
-			//	return NOT_INSTALLED;
-			//else
-				return NORMAL_RETURN;
-		}
-		
+		if (command.equals("")) //uninstall
+			return NORMAL_RETURN;
 		if (commandInUse(command))
 			return COMMAND_IN_USE;
 		if (!validShortcut(shortcut))
@@ -1368,18 +1427,17 @@ public class Menus {
 		item.addActionListener(ij);
 		pluginsTable.put(command, plugin);
 		shortcut = code>0 && !functionKey?"["+shortcut+"]":"";
-		//IJ.write("installPlugin: "+menuCode+",\""+command+shortcut+"\","+plugin);
 		pluginsPrefs.addElement(menuCode+",\""+command+shortcut+"\","+plugin);
 		return NORMAL_RETURN;
 	}
 	
-	/** Deletes a command installed by installPlugin. */
+	/** Deletes a command installed by Plugins/Shortcuts/Add Shortcut. */
 	public static int uninstallPlugin(String command) {
 		boolean found = false;
 		for (Enumeration en=pluginsPrefs.elements(); en.hasMoreElements();) {
 			String cmd = (String)en.nextElement();
-			if (cmd.indexOf(command)>0) {
-				pluginsPrefs.removeElement((Object)cmd);
+			if (cmd.contains(command)) {
+				boolean ok = pluginsPrefs.removeElement((Object)cmd);
 				found = true;
 				break;
 			}
@@ -1437,14 +1495,6 @@ public class Menus {
 			code = KeyEvent.VK_A+c-97;
 		else if (c>=48&&c<=57) //0-9
 			code = KeyEvent.VK_0+c-48;
-		//else {
-		//	switch (c) {
-		//		case 43: code = KeyEvent.VK_PLUS; break;
-		//		case 45: code = KeyEvent.VK_MINUS; break;
-		//		//case 92: code = KeyEvent.VK_BACK_SLASH; break;
-		//		default: return 0;
-		//	}
-		//}
 		return code;
 	}
 	
@@ -1499,6 +1549,7 @@ public class Menus {
 			return false;
 	}
 
+	/** Returns 'true' if this keyboard shortcut is in use. */
 	public static boolean shortcutInUse(String shortcut) {
 		int code = convertShortcutToCode(shortcut);
 		if (shortcuts.get(new Integer(code))!=null)

@@ -18,7 +18,6 @@ public class Selection implements PlugIn, Measurements {
 	private float[] kernel = {1f, 1f, 1f, 1f, 1f};
 	private float[] kernel3 = {1f, 1f, 1f};
 	private static int bandSize = 15; // pixels
-	private static boolean nonScalable;
 	private static Color linec, fillc;
 	private static int lineWidth = 1;
 	private static boolean smooth;
@@ -527,7 +526,7 @@ public class Selection implements PlugIn, Measurements {
 		boolean useInvertingLut = Prefs.useInvertingLut;
 		Prefs.useInvertingLut = false;
 		boolean selectAll = roi!=null && roi.getType()==Roi.RECTANGLE && roi.getBounds().width==imp.getWidth()
-			&& roi.getBounds().height==imp.getHeight() && imp.getProcessor().getMinThreshold()!=ImageProcessor.NO_THRESHOLD;
+			&& roi.getBounds().height==imp.getHeight() && imp.isThreshold();
 		if (roi==null || !(roi.isArea()||roi.getType()==Roi.POINT) || selectAll) {
 			createMaskFromThreshold(imp);
 			Prefs.useInvertingLut = useInvertingLut;

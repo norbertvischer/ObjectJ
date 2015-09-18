@@ -28,6 +28,7 @@ public class Functions implements MacroConstants, Measurements {
     boolean updateNeeded;
     boolean autoUpdate = true;
     ImageProcessor defaultIP;
+    ImagePlus defaultImp;
     int imageType;
     boolean colorSet, fontSet;
     Color defaultColor;
@@ -519,11 +520,14 @@ public class Functions implements MacroConstants, Measurements {
 	Variable[] getArray() {
 		interp.getToken();
 		boolean newArray = interp.token==ARRAY_FUNCTION && pgm.table[interp.tokenAddress].type==NEW_ARRAY;
-		if (!(interp.token==WORD||newArray))
+		boolean arrayFunction = interp.token==ARRAY_FUNCTION && pgm.table[interp.tokenAddress].type==ARRAY_FUNC;
+		if (!(interp.token==WORD||newArray||arrayFunction))
 			interp.error("Array expected");
 		Variable[] a;
 		if (newArray)
 			a = getArrayFunction(NEW_ARRAY);
+		else if (arrayFunction)
+			a = getArrayFunction(ARRAY_FUNC);
 		else {
 			Variable v = interp.lookupVariable();
 			a= v.getArray();
@@ -784,10 +788,12 @@ public class Functions implements MacroConstants, Measurements {
 		if (imp.getWindow()==null && IJ.getInstance()!=null && !interp.isBatchMode() && WindowManager.getTempCurrentImage()==null)
 			throw new RuntimeException(Macro.MACRO_CANCELED);
 		defaultIP = null;
+		defaultImp = imp;
 		return imp;
 	}
 	
 	void resetImage() {
+		defaultImp = null;
 		defaultIP = null;
 		colorSet = fontSet = false;
 		lineWidth = 1;
@@ -948,7 +954,9 @@ public class Functions implements MacroConstants, Measurements {
 
 	void updateAndDraw() {
 		if (autoUpdate) {
-			ImagePlus imp = getImage();
+			ImagePlus imp = defaultImp;
+			if (imp==null)
+				imp = getImage();
 			imp.updateChannelAndDraw();
 			imp.changes = true;
 		} else
@@ -1966,7 +1974,7 @@ public class Functions implements MacroConstants, Measurements {
 		}
 		Roi roi = null;
 		if (roiType==Roi.LINE) {
-			if (xcoord.length!=2)
+			if (!(xcoord!=null&&xcoord.length==2||xfcoord!=null&&xfcoord.length==2))
 				interp.error("2 element arrays expected");
 			if (floatCoordinates)
 				roi = new Line(xfcoord[0], yfcoord[0], xfcoord[1], yfcoord[1]);
@@ -2051,8 +2059,8 @@ public class Functions implements MacroConstants, Measurements {
 			} else
 				currentPlot.setFrozen(getBooleanArg());
 			return;
-		}  else if (name.equals("setLegend")) {
-			setPlotLegend(currentPlot);
+		}  else if (name.equals("addLegend") || name.equals("setLegend")) {
+			addPlotLegend(currentPlot);
 			return;
 		}  else if (name.equals("makeHighResolution")) {
 			makeHighResolution(currentPlot);
@@ -2106,26 +2114,7 @@ public class Functions implements MacroConstants, Measurements {
 			return;
 		} else if (name.equals("add")) {
 			String arg = getFirstString();
-			arg = arg.toLowerCase(Locale.US);
-			int what = Plot.CIRCLE;
-			if (arg.indexOf("curve")!=-1 || arg.indexOf("line")!=-1)
-				what = Plot.LINE;
-			if (arg.indexOf("connected")!=-1)
-				what = Plot.CONNECTED_CIRCLES;
-			else if (arg.indexOf("box")!=-1)
-				what = Plot.BOX;
-			else if (arg.indexOf("triangle")!=-1)
-				what = Plot.TRIANGLE;
-			else if (arg.indexOf("cross")!=-1)
-				what = Plot.CROSS;		
-			else if (arg.indexOf("dot")!=-1)
-				what = Plot.DOT;		
-			else if (arg.indexOf("xerror")!=-1)
-				what = -2;
-			else if (arg.indexOf("error")!=-1)
-				what = -1;
-			else if (arg.indexOf("x")!=-1)
-				what = Plot.X;
+			int what = Plot.toShape(arg);
 			addToPlot(what); 
 			return;
 		} else
@@ -2304,28 +2293,16 @@ public class Functions implements MacroConstants, Measurements {
 		plot.useTemplate(templatePlot);
 	}
 
-	void setPlotLegend(Plot plot) {
+	void addPlotLegend(Plot plot) {
 		String labels = getFirstString();
-		int flags = Plot.AUTO_POSITION;
-		if (interp.nextToken()!=')') {
-			String options = getLastString().toLowerCase();
-			if (options.indexOf("top-left") >= 0)
-				flags |= Plot.TOP_LEFT;
-			else if (options.indexOf("top-right") >= 0)
-				flags |= Plot.TOP_RIGHT;
-			else if (options.indexOf("bottom-left") >= 0)
-				flags |= Plot.BOTTOM_LEFT;
-			else if (options.indexOf("bottom-right") >= 0)
-				flags |= Plot.BOTTOM_RIGHT;
-			if (options.indexOf("bottom-to-top") >= 0)
-				flags |= Plot.LEGEND_BOTTOM_UP;
-			if (options.indexOf("transparent") >= 0)
-				flags |= Plot.LEGEND_TRANSPARENT;
-		} else
+		String options = null;
+		if (interp.nextToken()!=')')
+			options = getLastString();
+		else
 			interp.getRightParen();
 		plot.setColor(Color.BLACK);
 		plot.setLineWidth(1);
-		plot.setLegend(labels, flags);
+		plot.addLegend(labels, options);
 	}
 
 	void getPlotLimits(Plot plot) {
@@ -2637,16 +2614,22 @@ public class Functions implements MacroConstants, Measurements {
 	}
 	
 	void open() {
+		File f = null;
 		interp.getLeftParen();
 		if (interp.nextToken()==')') {
 			interp.getRightParen();
 			IJ.open();
 		} else {
 			double n = Double.NaN;
+			String options = null;
 			String path = getString();
+			f = new File(path);
 			if (interp.nextToken()==',') {
 				interp.getComma();
-				n = interp.getExpression();
+				if (isStringArg())
+					options = getString();
+				else
+					n = interp.getExpression();
 			}
 			interp.getRightParen();
 			if (!Double.isNaN(n)) {
@@ -2657,10 +2640,17 @@ public class Functions implements MacroConstants, Measurements {
 					if (msg!=null&&msg.indexOf("canceled")==-1)
 						interp.error(""+msg);
 				}
-			} else
-				IJ.open(path);
-			if (path!=null&&!path.equals("")) {
-				File f = new File(path);
+			} else {
+				if (f!=null&&f.isDirectory()) {
+					FolderOpener fo = new FolderOpener();
+					if (options!=null && options.contains("virtual"))
+						fo.openAsVirtualStack(true);
+					ImagePlus imp = fo.openFolder(path);
+					if (imp!=null) imp.show();
+				} else
+					IJ.open(path);
+			}
+			if (path!=null&&!path.equals("")&&f!=null) {
 				OpenDialog.setLastDirectory(f.getParent()+File.separator);
 				OpenDialog.setLastName(f.getName());
 			}
@@ -5151,6 +5141,8 @@ public class Functions implements MacroConstants, Measurements {
 			return getRankPositions();
 		else if (name.equals("getStatistics"))
 			return getArrayStatistics();
+		else if (name.equals("getSequence"))
+			return getSequence();
 		else if (name.equals("fill"))
 			return fillArray();
 		else if (name.equals("reverse")||name.equals("invert"))
@@ -5206,11 +5198,18 @@ public class Functions implements MacroConstants, Measurements {
 	}
 	
 	Variable[] printArray() {
+		String prefix = null;
 		interp.getLeftParen();
+		if (!isArrayArg() && isStringArg()) {
+			prefix = getString();
+			interp.getComma();
+		}
 		Variable[] a = getArray();
 		interp.getRightParen();
 		int len = a.length;
 		StringBuffer sb = new StringBuffer(len);
+		if (prefix!=null)
+			sb.append(prefix+" ");
 		for (int i=0; i<len; i++) {
 			String s = a[i].getString();
 			if (s==null) {
@@ -5412,6 +5411,14 @@ public class Functions implements MacroConstants, Measurements {
 		return a;
 	}
 
+	Variable[] getSequence() {
+		int n = (int)getArg();
+		Variable[] a = new Variable[n];
+		for (int i=0; i<n; i++)
+			a[i] = new Variable(i);
+		return a;
+	}
+	
 	Variable[] fillArray() {
 		interp.getLeftParen();
 		Variable[] a = getArray();

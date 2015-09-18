@@ -178,6 +178,11 @@ public class Recorder extends PlugInFrame implements PlugIn, ActionListener, Ima
 		textArea.append(method+"("+a1+", "+a2+");\n");
 	}
 
+	public static void record(String method, int a1, int a2, String a3) {
+		if (textArea==null) return;
+		textArea.append(method+"("+a1+", "+a2+", \""+a3+"\");\n");
+	}
+
 	public static void record(String method, double a1, double a2) {
 		if (textArea==null) return;
 		int places = Math.abs(a1)<0.0001||Math.abs(a2)<0.0001?9:4;
@@ -472,6 +477,8 @@ public class Recorder extends PlugInFrame implements PlugIn, ActionListener, Ima
 					;
 				else if (name.equals("Run...")) // Plugins>Macros>Run
 					;
+				else if (scriptMode && name.equals("Text Image... ")) // File>Import>Text Image
+					;
 				else {
 					if (name.equals("Calibrate...")&&commandOptions.startsWith("function=None"))
 						commandOptions = commandOptions.substring(0,13);
@@ -484,8 +491,10 @@ public class Recorder extends PlugInFrame implements PlugIn, ActionListener, Ima
 						prefix = addImp?"IJ.run(imp, ":"IJ.run(";
 					}
 					textArea.append(prefix+"\""+name+"\", \""+commandOptions+"\");\n");
-					if (nonAscii(commandOptions))
-						textArea.append("  <<warning: the options string contains one or more non-ascii characters>>\n");
+					if (nonAscii(commandOptions)) {
+						if (commandOptions!=null && !commandOptions.contains("="+IJ.micronSymbol+"m"))
+							textArea.append("  <<warning: the options string contains one or more non-ascii characters>>\n");
+					}
 				}
 			} else {
 				ImagePlus imp = WindowManager.getCurrentImage();
@@ -500,6 +509,8 @@ public class Recorder extends PlugInFrame implements PlugIn, ActionListener, Ima
 						text = "ImagePlus[] " + text;
 					textArea.append(text);
 				} else if (name.equals("Add to Manager"))
+					;
+				else if (name.equals("Find Commands..."))
 					;
 				else if (roi!=null && (roi instanceof TextRoi) && (name.equals("Draw")||name.equals("Add Selection...")))
 					textArea.append(((TextRoi)roi).getMacroCode(name, imp));

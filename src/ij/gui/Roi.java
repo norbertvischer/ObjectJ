@@ -73,6 +73,9 @@ public class Roi extends Object implements Cloneable, java.io.Serializable {
 	private boolean subPixel;
 	private boolean activeOverlayRoi;
 	private Properties props;
+	private boolean isCursor;
+	private double xcenter = Double.NaN;
+	private double ycenter;
 
 
 	/** Creates a rectangular ROI. */
@@ -1939,13 +1942,37 @@ public class Roi extends Object implements Cloneable, java.io.Serializable {
 		bounds = new Rectangle2D.Double(getXBase(), getYBase(), getFloatWidth(), getFloatHeight());
 		subPixel = true;
 	}
+	
+	public void setIsCursor(boolean isCursor) {
+		this.isCursor = isCursor;
+	}
+
+	public boolean isCursor() {
+		return isCursor;
+	}
 
 	public String getDebugInfo() {
 		return "";
 	}
+	
+	public FloatPolygon getRotationCenter() {
+		FloatPolygon p = new FloatPolygon();
+		Rectangle2D r = getFloatBounds();
+		if (Double.isNaN(xcenter)) {
+			xcenter = r.getX()+r.getWidth()/2.0;
+			ycenter = r.getY()+r.getHeight()/2.0;
+		}
+		p.addPoint(xcenter,ycenter);
+		return p;
+	}
+
+	public void setRotationCenter(double x, double y) {
+		xcenter = x;
+		ycenter = y;
+	}
 
 	/** Returns a hashcode for this Roi that typically changes 
-		if it is moved,	 even though it is still the same object. */
+		if it is moved, even though it is still the same object. */
 	public int getHashCode() {
 		return hashCode() ^ (new Double(getXBase()).hashCode()) ^
 			Integer.rotateRight(new Double(getYBase()).hashCode(),16);
