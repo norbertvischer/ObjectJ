@@ -15,16 +15,20 @@ import ij.gui.ImageCanvas;
 import ij.gui.NewImage;
 import ij.gui.Roi;
 import ij.macro.Interpreter;
+import ij.plugin.Colors;
 import ij.util.Java2;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import static java.awt.Color.LIGHT_GRAY;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import oj.OJ;
@@ -56,13 +60,13 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
     public static int hits = 0;
     public static int markerRad = 2;
     public static int markerSize = 4;
-    public static int fontSize = 12;
+    public static int fontSize = 13;
     private String imageName;
     private DataOJ dataOJ;
     private ImageOJ image;
     public BufferStrategy buforowanie;
-    public static Font fontArial = Font.decode("Arial-12");
-    public static Font fontArialItalic = Font.decode("Arial-ITALIC-12");
+    public static Font fontArial = Font.decode("Arial-13");
+    public static Font fontArialItalic = Font.decode("Arial-ITALIC-13");
     private Image offScreenImage;
     private int offScreenWidth = 0;
     private int offScreenHeight = 0;
@@ -321,6 +325,26 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
             return;
         }
         ColumnOJ labelColumn = getLabelColumn();
+        ColumnDefOJ labelColDef = null;
+        String labelProperty;
+        Color backColor = null;
+        if (labelColumn != null) {
+            labelColDef = labelColumn.getColumnDef();
+            if (labelColDef != null) {
+                labelProperty = labelColDef.getLabel();// could be "label background=#ff0000";
+                String assignments[] = labelProperty.split(" ");
+                if (assignments.length > 0) {
+                    for (int jj = 0; jj < assignments.length; jj++) {
+                        String[] words = assignments[jj].split("=");
+                        if (words.length == 2) {
+                            if (words[0].equalsIgnoreCase("background")) {
+                                backColor = Colors.decode(words[1], Color.LIGHT_GRAY);
+                            }
+                        }
+                    }
+                }
+            }
+        }
         boolean allvisible = true;
         YtemDefsOJ ytemDefs = OJ.getData().getYtemDefs();
         if (ytemDefs != null) {
@@ -396,7 +420,8 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
                                 YtemDefOJ ydef = dataOJ.getYtemDefs().getYtemDefByName(ytem.getYtemDef());
                                 if ((ydef != null) && ydef.isVisible()) {
                                     int ydefType = ydef.getLineType();
-                                    g.setColor(ydef.getLineColor());
+                                    Color ytemColor = ydef.getLineColor();
+                                    g.setColor(ytemColor);
                                     double line_width = 1.0;
                                     switch (ydefType) {
                                         case YtemDefOJ.LINE_TYPE_ZEROPT:
@@ -459,83 +484,61 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
                                         } else {
                                             drawMarker((Graphics2D) g, x_array[0], y_array[0], ydef.getMarkerType(), cell.isSelected());
                                         }
-                                    }
 
-                                    if (!EventProcessorOJ.BlockEventsOnDrag && (x_array.length > 0) && show_cell_number && (ytemNo == 0)) {
-                                        int x = x_array[0];
-                                        int y = y_array[0];
-                                        if (x < 8) {
-                                            x = x + 10;
-                                        } else {
-                                            x = x - 10;
-                                        }
-                                        if (y < 8) {
-                                            y = y + 10;
-                                        } else {
-                                            y = y - fontSize / 3 - markerRad + 2;
-                                        }
-                                        if (cell.isOpen()) {
-                                            if (cell.isQualified()) {
-                                                TextLayout layout = new TextLayout("*" + Integer.toString(i + 1) + "*", fontArialItalic, frc);//15.3.2010
-                                                layout.draw((Graphics2D) g, (float) x, (float) y);
-                                            } else {
-                                                g.setColor(Color.GRAY);
-                                                TextLayout layout = new TextLayout("{* " + Integer.toString(i + 1) + "}", fontArialItalic, frc);
-                                                layout.draw((Graphics2D) g, (float) x, (float) y);
+                                        if (!EventProcessorOJ.BlockEventsOnDrag && (x_array.length > 0)) {
+                                            Font theFont = fontArial;
+                                            Color foreColor = ytemColor;
+                                            Color currentBackColor = backColor;
+                                            String numStr = Integer.toString(i + 1);
+
+                                            if (cell.isOpen()) {
+                                                numStr = "*" + numStr + "*";
+                                                theFont = fontArialItalic;
                                             }
-                                        } else {
-                                            if (cell.isQualified()) {
-                                                TextLayout layout = new TextLayout(Integer.toString(i + 1), fontArial, frc);
-                                                layout.draw((Graphics2D) g, (float) x, (float) y);
-                                            } else {
-                                                g.setColor(Color.LIGHT_GRAY);
-                                                TextLayout layout = new TextLayout("{" + Integer.toString(i + 1) + "}", fontArial, frc);
-                                                layout.draw((Graphics2D) g, (float) x, (float) y); //31.8.2009
-                                                g.setColor(Color.DARK_GRAY);
-                                                layout.draw((Graphics2D) g, (float) x + 1, (float) y);
-
+                                            if (!cell.isQualified()) {
+                                                currentBackColor = Color.LIGHT_GRAY;
+                                                foreColor = Color.DARK_GRAY;
+                                                numStr = "{" + numStr + "}";
                                             }
-                                        }
-                                    }
+                                            String labelStr = "";
+                                            String totalStr = "";
+                                            boolean doLabel = (labelColumn != null && ytemNo == 0);
+                                            if (doLabel) {
+                                                ColumnDefOJ coldef = labelColumn.getColumnDef();
+                                                int digits = coldef.getColumnDigits();
+                                                boolean isText = coldef.getAlgorithm() == ColumnDefOJ.ALGORITHM_CALC_LINKED_TEXT;
 
-                                    if (!EventProcessorOJ.BlockEventsOnDrag && (x_array.length > 0) && labelColumn != null) {
-                                        ColumnDefOJ coldef = labelColumn.getColumnDef();
-                                        int nOperands = coldef.getOperandCount();
-                                        boolean doLabel = ytemNo == 0;
-                                        if (nOperands > 0) {
-                                            doLabel = false;
-                                            OperandOJ operand = coldef.getOperand(0);
-                                            String ytemName = operand.getObjectName();
-                                            int labeledClone = operand.getYtemClone();
-                                            int cloneNo = -1;
-                                            for (int ii = 0; ii < cell.getYtemsCount(); ii++) {
-                                                if (cell.getYtemByIndex(ii).getYtemDef().equals(ytemName)) {
-                                                    cloneNo++;
-                                                    if (cloneNo == labeledClone) {
-                                                        doLabel = true;
+                                                if (isText) {
+                                                    labelStr = labelColumn.getStringResult(i);
+                                                } else {
+                                                    double val = labelColumn.getDoubleResult(i);
+                                                    if (Double.isNaN(val)) {
+                                                        labelStr = "";
+                                                    } else {
+                                                        labelStr = IJ.d2s(val, digits);
                                                     }
                                                 }
-
                                             }
-                                        }
-
-                                        if (doLabel) {
-                                            int digits = coldef.getColumnDigits();
-                                            Color color = coldef.getColumnColor();
-                                            boolean isText = coldef.getAlgorithm() == ColumnDefOJ.ALGORITHM_CALC_LINKED_TEXT;
-
-                                            String s = "";
-                                            if (isText) {
-                                                s = labelColumn.getStringResult(i);
-                                            } else {
-                                                s = IJ.d2s(labelColumn.getDoubleResult(i), digits);
+                                            totalStr = labelStr;
+                                            if (show_cell_number) {
+                                                totalStr = numStr + ": " + labelStr;
                                             }
-                                            TextLayout layout = new TextLayout(s, fontArial, frc);
+                                            TextLayout layout = new TextLayout(totalStr, theFont, frc);
+                                            FontMetrics fm = g.getFontMetrics(theFont);
+                                            Rectangle2D rect = fm.getStringBounds(totalStr, g);
 
-                                            g.setColor(color);
                                             int x = x_array[0];
+                                            x -= (int) (rect.getWidth() / 2);
                                             int y = y_array[0];
+                                            y -= (int) (fontSize / 3 - markerRad + 2);
+
+                                            if (backColor != null) {
+                                                g.setColor(currentBackColor);
+                                                g.fillRect(x, y - fm.getAscent(), (int) rect.getWidth(), (int) rect.getHeight());
+                                            }
+                                            g.setColor(foreColor);
                                             layout.draw((Graphics2D) g, (float) x, (float) (y));
+
                                         }
                                     }
                                 }
