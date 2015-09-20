@@ -1552,36 +1552,28 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
             return;
         }
         String title = column.getName();
-        GenericDialog gd = new GenericDialog("Use Column Entry as label");
-        gd.addMessage("Current Label is from Column: " + title);
-        gd.addCheckbox("Show \" " + title + "\" values in Image", rootPaneCheckingEnabled);
-        //gd.addCheckbox("Custom Label Properties:", rootPaneCheckingEnabled);
-        gd.addMessage("Label Properties");
-        gd.addStringField("", "", 40);
-        gd.addMessage("(Press HELP button for customizing examples)");
-        //gd.addHelp("http://simon.bio.uva.nl");
+        GenericDialog gd = new GenericDialog("Label");
+        String radioTitle = "Show '" + title + "' values in Image";
+        String[] items = "Hide Labels,Show As Label".split(",");
+        gd.addRadioButtonGroup(radioTitle, items, 2, 1, "");
         gd.showDialog();
         if (gd.wasCanceled()) {
             return;
         }
-
-        boolean withLabel = gd.getNextBoolean();
-        String labelProperty = "";
-        if (withLabel) {
+        String radio = gd.getNextRadioButton();
+        boolean withLabel = radio.equals("Show As Label");
+        boolean hideLabels = radio.equals("Hide Labels");
+        if (withLabel || hideLabels) {
             ColumnsOJ columns = OJ.getData().getResults().getColumns();
             for (int jj = 0; jj < columns.getLinkedColumnsCount(); jj++) {
-                column.getColumnDef().setLabel("");
-            }
-            labelProperty = gd.getNextString();
-            if (!labelProperty.startsWith("label")) {
-                labelProperty = "label " + labelProperty;
+                ColumnOJ theColumn = columns.getColumnByIndex(jj);
+                theColumn.getColumnDef().setLabel("");
             }
         }
-
-        column.getColumnDef().setLabel(labelProperty);
+        if (withLabel) {
+            column.getColumnDef().setLabel("label");
+        }
         OJ.getEventProcessor().fireYtemDefChangedEvent(YtemDefChangedEventOJ.LABEL_VISIBILITY_CHANGED);
-
-
     }//GEN-LAST:event_mncLabelActionPerformed
 
     private void resetStateMode() {

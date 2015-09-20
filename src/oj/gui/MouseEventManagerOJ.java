@@ -310,7 +310,7 @@ public void mouseEntered(MouseEvent e) {
                 int stackIndex = imp.getStackIndex(imp.getChannel(), imp.getSlice(), imp.getFrame());
                 OJ.getToolStateProcessor().getToolStateObject().mouseMoved(imp.getTitle(), stackIndex, x, y, e.getModifiers());
             } else {
-                if (imp.getCanvas() != null) {
+                if (imp != null && imp.getCanvas() != null) {
                     imp.getCanvas().mouseMoved(e);
                 }
             }

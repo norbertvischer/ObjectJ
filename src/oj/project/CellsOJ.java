@@ -30,6 +30,7 @@ public class CellsOJ extends BaseAdapterOJ implements ImageChangedListener2OJ, C
     private transient int highestID = 0;//"highest" means "most negative"  cellID
     private ArrayList<CellOJ> cells = new ArrayList();//array of CellOJs
     private transient int newestCell = -1;//cell number of last edited cell
+    private transient int newestCellID = 0;//cell ID of last edited cell
 
     public CellsOJ() {
         super();
@@ -129,14 +130,29 @@ public class CellsOJ extends BaseAdapterOJ implements ImageChangedListener2OJ, C
      * index of last edited Cell (0-based)
      */
     public void setNewestCellIndex(int jj) {//16.8.2009
-        newestCell = jj;
+        
+        CellOJ cell = getCellByIndex(jj);
+        if (cell != null) {//20.9.2015
+            newestCellID = cell.getID();
+            newestCell = jj;
+            return;
+        }
+        newestCellID = 0;
+        newestCell = -1;
     }
 
     /**
      * index of last edited Cell (0-based)
      */
     public int getNewestCellIndex() {//16.8.2009
-        return newestCell;
+        CellOJ cell = getCellByIndex(newestCell);
+        if (cell != null && cell.getID() == newestCellID) {
+            return newestCell;
+        } else {
+            newestCell = -1;
+            newestCellID = 0;
+            return - 1;
+        }
     }
 
     private void writeObject(ObjectOutputStream stream) throws IOException {

@@ -1519,7 +1519,7 @@ public class MacroProcessorOJ {
                         ColumnDefOJ cd = columns.getColumnByIndex(kk).getColumnDef();
                         cd.setLabel("");
                     }
-                    colDef.setLabel("label");
+                    colDef.setLabel(property);
                 }
             } else {
                 ImageJAccessOJ.InterpreterAccess.interpError("Allowed terms: visible, color, digits, sort, width, label");

@@ -9,9 +9,9 @@ import oj.processor.events.YtemDefChangedEventOJ;
 import oj.processor.events.YtemDefChangedListenerOJ;
 
 /**
- * A CellProxyOJ is an "unfolded" version of a cell, used e.g.
- * for adding/deleting/editing ytems.
- * An ImageProxyOJ contains a CellProxyOJ which in turn contains an YtemProxyOJ.
+ * A CellProxyOJ is an "unfolded" version of a cell, used e.g. for
+ * adding/deleting/editing ytems. An ImageProxyOJ contains a CellProxyOJ which
+ * in turn contains an YtemProxyOJ.
  */
 public class CellProxyOJ implements YtemDefChangedListenerOJ {
 
@@ -22,7 +22,9 @@ public class CellProxyOJ implements YtemDefChangedListenerOJ {
     private boolean closed;
     private CellOJ cell;
 
-    /** Creates a new instance of CellProxyOJ */
+    /**
+     * Creates a new instance of CellProxyOJ
+     */
     public CellProxyOJ(String imageName, int stackIndex) {
         this.closed = false;
         cell = new CellOJ(imageName, stackIndex);
@@ -77,7 +79,7 @@ public class CellProxyOJ implements YtemDefChangedListenerOJ {
     }
 
     /**
-     *Returns this CellProxy's YtemProxy
+     * Returns this CellProxy's YtemProxy
      */
     public YtemProxyOJ getYtemProxy() {
         return ytemProxy;
@@ -91,8 +93,8 @@ public class CellProxyOJ implements YtemDefChangedListenerOJ {
     }
 
     /**
-     * Uses existing YtemProxy or creates a new one,
-     * then adds location (i.e. a point) to the YtemProxy
+     * Uses existing YtemProxy or creates a new one, then adds location (i.e. a
+     * point) to the YtemProxy
      */
     public boolean addLocation(int sliceIndex, double x, double y, double z) {//8.12.2009
         if (this.stackIndex != sliceIndex) {
@@ -158,6 +160,8 @@ public class CellProxyOJ implements YtemDefChangedListenerOJ {
         }
         if (cell != null) {
             cell.setOpen(false);
+            int index = OJ.getData().getCells().getCellIndex(cell);
+            OJ.getData().getCells().setNewestCellIndex(index);//19.9.2015
         }
         OJ.getEventProcessor().fireCellChangedEvent(OJ.getData().getCells().indexOfCell(cell), CellChangedEventOJ.CELL_CLOSE_EVENT);
         if ((cell != null) && (cell.getYtemsCount() == 0)) {
@@ -228,9 +232,6 @@ public class CellProxyOJ implements YtemDefChangedListenerOJ {
     private void nextYtemDef() {
         int maxYtemDefIndex = OJ.getData().getYtemDefs().getYtemDefsCount() - 1;
         int currentYtemDefIndex = OJ.getData().getYtemDefs().getYtemDefIndexByName(ytemDefName);
-
-
-
 
         if (currentYtemDefIndex == maxYtemDefIndex) {
             close();

@@ -1,8 +1,9 @@
-/*
- * CellStateAdaptorOJ.java
- * is extended by CreateCellStateOj, DeleteCellStateOJ etc.
- * Handles user events from mouse and controls the cursor appearance.
- */
+/**
+ * ToolStateAdaptorOJ.java
+ * Superclass for CreateCellStateOj, DeleteCellStateOJ etc.
+ * E.g. if the user selects the "Marker" tool in ObjectJ Tools,
+ * a CreateCellStateOJ is created as current receiver of mouseclicks etc.
+*/
 package oj.processor.state;
 
 import ij.IJ;

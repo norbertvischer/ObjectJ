@@ -338,7 +338,10 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
                         String[] words = assignments[jj].split("=");
                         if (words.length == 2) {
                             if (words[0].equalsIgnoreCase("background")) {
-                                backColor = Colors.decode(words[1], Color.LIGHT_GRAY);
+                                backColor = Colors.getColor(words[1], null);
+                                if (backColor == null)
+                                    backColor = Colors.decode(words[1], Color.LIGHT_GRAY);
+
                             }
                         }
                     }
@@ -523,21 +526,23 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
                                             if (show_cell_number) {
                                                 totalStr = numStr + ": " + labelStr;
                                             }
-                                            TextLayout layout = new TextLayout(totalStr, theFont, frc);
-                                            FontMetrics fm = g.getFontMetrics(theFont);
-                                            Rectangle2D rect = fm.getStringBounds(totalStr, g);
+                                            if (totalStr.length() > 0) {
+                                                TextLayout layout = new TextLayout(totalStr, theFont, frc);
+                                                FontMetrics fm = g.getFontMetrics(theFont);
+                                                Rectangle2D rect = fm.getStringBounds(totalStr, g);
 
-                                            int x = x_array[0];
-                                            x -= (int) (rect.getWidth() / 2);
-                                            int y = y_array[0];
-                                            y -= (int) (fontSize / 3 - markerRad + 2);
+                                                int x = x_array[0];
+                                                x -= (int) (rect.getWidth() / 2);
+                                                int y = y_array[0];
+                                                y -= (int) (fontSize / 3 - markerRad + 2);
 
-                                            if (backColor != null) {
-                                                g.setColor(currentBackColor);
-                                                g.fillRect(x, y - fm.getAscent(), (int) rect.getWidth(), (int) rect.getHeight());
+                                                if (backColor != null) {
+                                                    g.setColor(currentBackColor);
+                                                    g.fillRect(x, y - fm.getAscent(), (int) rect.getWidth(), (int) rect.getHeight());
+                                                }
+                                                g.setColor(foreColor);
+                                                layout.draw((Graphics2D) g, (float) x, (float) (y));
                                             }
-                                            g.setColor(foreColor);
-                                            layout.draw((Graphics2D) g, (float) x, (float) (y));
 
                                         }
                                     }
@@ -555,7 +560,7 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
      */
     private void drawMarker(Graphics2D g, int xpos, int ypos, int markerType, boolean selected) {
         if (selected) {
-            g.fillRect(xpos - markerRad - 1, ypos - markerRad - 1, 2 * markerSize - 1, 2 * markerSize - 1);
+            g.fillRect(xpos - markerRad - 1, ypos - markerRad - 1, 2 * markerSize - 1, 2 * markerSize - 1);      
         } else {
             ((Graphics2D) g).setStroke(new BasicStroke((float) 1.0));
             switch (markerType) {

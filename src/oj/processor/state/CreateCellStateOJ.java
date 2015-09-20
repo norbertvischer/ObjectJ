@@ -197,17 +197,21 @@ public class CreateCellStateOJ extends ToolStateAdaptorOJ implements YtemDefSele
         xPos = 0;
         yPos = 0;
         CellsOJ cells = OJ.getData().getCells();
-        cells.setNewestCellIndex(cells.getOpenCellIndex());//16.8.2009
-        if ((imageProxy != null) && (imageProxy.getCellProxy() != null)) {
-            imageProxy.getCellProxy().close();
-        } else {
-            if (OJ.getData().getCells().getOpenCellIndex() >= 0) {
-                OJ.getData().getCells().getCellByIndex(OJ.getData().getCells().getOpenCellIndex()).setOpen(false);
-                OJ.getEventProcessor().fireCellChangedEvent(OJ.getData().getCells().getOpenCellIndex(), CellChangedEventOJ.CELL_CLOSE_EVENT);
+        int openIndex = cells.getOpenCellIndex();
+        //groter rotzooi******
+        if (openIndex >= 0) {
+            cells.setNewestCellIndex(cells.getOpenCellIndex());//16.8.2009
+            if ((imageProxy != null) && (imageProxy.getCellProxy() != null)) {
+                imageProxy.getCellProxy().close();
+            } else {
+                if (OJ.getData().getCells().getOpenCellIndex() >= 0) {
+                    OJ.getData().getCells().getCellByIndex(OJ.getData().getCells().getOpenCellIndex()).setOpen(false);
+                    OJ.getEventProcessor().fireCellChangedEvent(OJ.getData().getCells().getOpenCellIndex(), CellChangedEventOJ.CELL_CLOSE_EVENT);
+                }
             }
-        }
-        if (OJ.getData().getYtemDefs().isComposite()) {
-            resetYtemDef();
+            if (OJ.getData().getYtemDefs().isComposite()) {
+                resetYtemDef();
+            }
         }
     }
 
