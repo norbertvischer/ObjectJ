@@ -339,8 +339,9 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
                         if (words.length == 2) {
                             if (words[0].equalsIgnoreCase("background")) {
                                 backColor = Colors.getColor(words[1], null);
-                                if (backColor == null)
+                                if (backColor == null) {
                                     backColor = Colors.decode(words[1], Color.LIGHT_GRAY);
+                                }
 
                             }
                         }
@@ -488,7 +489,7 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
                                             drawMarker((Graphics2D) g, x_array[0], y_array[0], ydef.getMarkerType(), cell.isSelected());
                                         }
 
-                                        if (!EventProcessorOJ.BlockEventsOnDrag && (x_array.length > 0)) {
+                                        if (!EventProcessorOJ.BlockEventsOnDrag && (x_array.length > 0) && ytemNo == 0) {//draw number and value from label column
                                             Font theFont = fontArial;
                                             Color foreColor = ytemColor;
                                             Color currentBackColor = backColor;
@@ -522,9 +523,14 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
                                                     }
                                                 }
                                             }
-                                            totalStr = labelStr;
                                             if (show_cell_number) {
-                                                totalStr = numStr + ": " + labelStr;
+                                                totalStr += numStr;
+                                            }
+                                            if (doLabel && show_cell_number) {
+                                                totalStr += ": ";
+                                            }
+                                            if (doLabel) {
+                                                totalStr += labelStr;
                                             }
                                             if (totalStr.length() > 0) {
                                                 TextLayout layout = new TextLayout(totalStr, theFont, frc);
@@ -560,7 +566,7 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
      */
     private void drawMarker(Graphics2D g, int xpos, int ypos, int markerType, boolean selected) {
         if (selected) {
-            g.fillRect(xpos - markerRad - 1, ypos - markerRad - 1, 2 * markerSize - 1, 2 * markerSize - 1);      
+            g.fillRect(xpos - markerRad - 1, ypos - markerRad - 1, 2 * markerSize - 1, 2 * markerSize - 1);
         } else {
             ((Graphics2D) g).setStroke(new BasicStroke((float) 1.0));
             switch (markerType) {
