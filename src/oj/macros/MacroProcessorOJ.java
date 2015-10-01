@@ -412,7 +412,10 @@ public class MacroProcessorOJ {
         }
 
         String image_name = images.getImageByIndex(imageIndex - one).getName();
-        ImagePlus imp = OJ.getImageProcessor().getOpenLinkedImage(image_name);
+        ImagePlus imp;
+
+        imp = OJ.getImageProcessor().getOpenLinkedImage(image_name);//correlation bug
+
         if (imp != null) {//7.9.2010
             int ID = imp.getID();
             IJ.selectWindow(ID);

@@ -148,11 +148,18 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 
                                 imp.close();
                                 imp = null;
+                                imageOJ.setImagePlus(null);
+                                imageOJ.setID(0);
                                 return;
                             }
+                            imageOJ.setImagePlus(imp);//1.10.2015
+                            imageOJ.setID(imp.getID());
                         }
                     } else {
                         imp = new Opener().openImage(dir, fName);//30.6.2013
+                        imageOJ.setImagePlus(imp);//1.10.2015
+                        imageOJ.setID(imp.getID());
+
                     }
 
                     imp.show();//30.6.2013                  
@@ -957,27 +964,6 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
             return null;
         }
         return img.getImagePlus();//null if not open
-
-//        int[] openImgs = WindowManager.getIDList();
-//        if (openImgs != null) {
-//            for (int jj = 0; jj < openImgs.length; jj++) {
-//                int id = openImgs[jj];
-//                ImagePlus imp = WindowManager.getImage(id);
-//                FileInfo fInfo = imp.getOriginalFileInfo();
-//                String fileName = null;
-//                if (fInfo != null) {
-//                    fileName = fInfo.fileName;
-//                    String dirName = fInfo.directory;
-//                    if (fileName == null || dirName == null) {
-//                        return null;
-//                    }
-//                    if (dirName.equals(OJ.getData().getDirectory()) && fileName.equals(name)) {
-//                        return imp;
-//                    }
-//                }
-//            }
-//        }
-//        return null;
     }
 
     //if linked image is open several times, close all except the first one
@@ -1024,9 +1010,6 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
         return wasClosed;//7.12.2013
     }
 
-    /**
-     * If
-     */
 //    public ImageWindow getImageWindow(int id) {
 //        for (Enumeration e = openedImages.keys(); e.hasMoreElements();) {
 //            ImageWindow imgw = (ImageWindow) openedImages.get(e.nextElement());

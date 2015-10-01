@@ -174,7 +174,7 @@ public class DataProcessorOJ implements QualifierChangedListenerOJ {
 
     //deletes all objects that hit at least one of deleted slices
     //decreases zpositions by deletedSlices.length if z is > deletedSlices[0];
-    public void adjustZPositions(String imageName, int[] deletedSlices ) {//11.4.2009
+    public void adjustZPositions(String imageName, int[] deletedSlices) {//11.4.2009
         int len = deletedSlices.length;
         int first = deletedSlices[0];
         int last = deletedSlices[len - 1];
@@ -203,8 +203,6 @@ public class DataProcessorOJ implements QualifierChangedListenerOJ {
                         }
                     }
                 }
-
-
 
                 for (int i = last_cell; i >= first_cell; i--) {
                     CellOJ cell = OJ.getData().getCells().getCellByIndex(i);
@@ -266,7 +264,6 @@ public class DataProcessorOJ implements QualifierChangedListenerOJ {
                         if (ytem.getStackIndex() == oldZ) {
                             ytem.setStackIndex(newZ);
                         }
-
 
                         int nPoints = ytem.getLocationsCount();
                         for (int pp = 0; pp < nPoints; pp++) {
@@ -332,7 +329,6 @@ public class DataProcessorOJ implements QualifierChangedListenerOJ {
         if ((img != null) && (img.getFirstCell() >= 0)) {
             int first_cell = img.getFirstCell();
             int last_cell = img.getLastCell();
-
 
             if (first_cell >= 0) {
                 for (int i = last_cell; i >= first_cell; i--) {
@@ -489,28 +485,14 @@ public class DataProcessorOJ implements QualifierChangedListenerOJ {
             selectCell(cellNumber);
             CellOJ cell = cells.getCellByIndex(cellNumber);
             String imgName = cell.getImageName();
+            ImagePlus imp;
             ImageOJ img = OJ.getData().getImages().getImageByName(imgName);
-            ImagePlus imp = img.getImagePlus();
+            imp = img.getImagePlus();
             if (imp == null) {//wasn't open
                 OJ.getImageProcessor().openImage(imgName);
                 imp = IJ.getImage();
 
             }
-
-//            ImagePlus imp2 = null;
-//            //String image_name = OJ.getData().getImages().getImageByName(cell.getImageName()).getName();
-//            String image_name = cell.getImageName();
-//            ImageWindow imgw = OJ.getImageProcessor().getOpenLinkedImageWindow(image_name);
-//            if (imgw == null) {
-//                OJ.getImageProcessor().openImage(image_name);
-//                imp2 = IJ.getImage();
-//
-//            } else {
-//                imp2 = imgw.getImagePlus();
-//            }
-//            
-//            
-
 
             if (imp != null) {
                 if (imp.isHyperStack()) {
