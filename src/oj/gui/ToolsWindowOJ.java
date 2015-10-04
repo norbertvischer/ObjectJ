@@ -391,7 +391,9 @@ public class ToolsWindowOJ extends javax.swing.JPanel implements ToolListChanged
     private void butSizesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butSizesActionPerformed
         GenericDialog gd = new GenericDialog("Font and Marker Sizes");
         String[] choices = "12 16 20".split(" ");
-        gd.addCheckbox("Show Object Number", true);
+        
+        boolean showNumber=OJ.getData().getYtemDefs().getShowCellNumber(); 
+        gd.addCheckbox("Show Object Number", showNumber);
       
         gd.addRadioButtonGroup("Font Size", choices, 3, 1, "" + CustomCanvasOJ.fontSize);
 //gd.addMessage("___");
@@ -402,7 +404,7 @@ public class ToolsWindowOJ extends javax.swing.JPanel implements ToolListChanged
         if (gd.wasCanceled()) {
             return;
         }
-        boolean showNumber = gd.getNextBoolean();
+         showNumber = gd.getNextBoolean();
         String fontSize = gd.getNextRadioButton();
         String markerSizeStr = gd.getNextRadioButton();
         int mSize = 2;
