@@ -403,27 +403,60 @@ public class MacroProcessorOJ {
         return (false);
     }
 
-    public void showImage(int imageIndex) {
+    /* 
+     when opening a linked image, its imp is stored in the ImageOJ.
+     ImageOJ does not need to store the id, because it can be retreived via imp.
+     An ImageOJ will be set whenever the image is opened:
+     a) by double-clicking in the Images Panel
+     b) by ojShowObject
+     c) by ojShowImage
 
+     1) look if ImageOJ has an imp
+     2) look if imp's ID is open  and if so select it
+     3) if no success:
+
+     look if any of the open images already has this name and path
+     if yes, select it and set ImageOJ's imp
+     if no image with this name is open	
+     open it from disk, and set ImageOJ's imp
+
+
+     We don't need to do anything when an image is closed.
+    
+     */
+    /**
+     * brings Image to front
+     *
+     * @param imageIndex n-th listed image in Images panel (1-based)
+     */
+    public void showImage(int imageIndex) {
         ImagesOJ images = OJ.getData().getImages();
         if ((imageIndex <= 0) || (imageIndex > images.getImagesCount())) {
             ImageJAccessOJ.InterpreterAccess.interpError("Image number (" + imageIndex + ") out of range (1.." + images.getImagesCount() + ")");
             return;
         }
 
-        String image_name = images.getImageByIndex(imageIndex - one).getName();
-        ImagePlus imp;
+        ImageOJ img = images.getImageByIndex(imageIndex - one);
+        String imgName = img.getName();
+        ImagePlus imp = img.getImagePlus();
 
-        imp = OJ.getImageProcessor().getOpenLinkedImage(image_name);//correlation bug
-
-        if (imp != null) {//7.9.2010
-            int ID = imp.getID();
-            IJ.selectWindow(ID);
-        } else {
-            OJ.getImageProcessor().openImage(image_name);//19.10.2010
+        if (imp != null) {
+            int id = imp.getID();//verify if still open
+            imp = WindowManager.getImage(id);
+        }
+        if (imp == null) {//wasn't open
+            OJ.getImageProcessor().openImage(imgName);
+            imp = IJ.getImage();
 
         }
 
+        if (imp != null) {
+            int ID = imp.getID();
+            IJ.selectWindow(ID);
+        } else {
+            String msg = "Could not open Image '" + imgName + "'";
+            ImageJAccessOJ.InterpreterAccess.interpError(msg);
+        }
     }
 
     public void flatten() {

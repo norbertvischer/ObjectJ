@@ -339,10 +339,7 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
                         if (words.length == 2) {
                             if (words[0].equalsIgnoreCase("background")) {
                                 backColor = Colors.getColor(words[1], null);
-                                if (backColor == null) {
-                                    backColor = Colors.decode(words[1], Color.LIGHT_GRAY);
-                                }
-
+                                if (backColor== null)backColor = Colors.decode(words[1], null);
                             }
                         }
                     }

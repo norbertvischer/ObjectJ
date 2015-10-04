@@ -391,6 +391,8 @@ public class ToolsWindowOJ extends javax.swing.JPanel implements ToolListChanged
     private void butSizesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butSizesActionPerformed
         GenericDialog gd = new GenericDialog("Font and Marker Sizes");
         String[] choices = "12 16 20".split(" ");
+        gd.addCheckbox("Show Object Number", true);
+      
         gd.addRadioButtonGroup("Font Size", choices, 3, 1, "" + CustomCanvasOJ.fontSize);
 //gd.addMessage("___");
         choices = "Small Medium Large".split(" ");
@@ -400,6 +402,7 @@ public class ToolsWindowOJ extends javax.swing.JPanel implements ToolListChanged
         if (gd.wasCanceled()) {
             return;
         }
+        boolean showNumber = gd.getNextBoolean();
         String fontSize = gd.getNextRadioButton();
         String markerSizeStr = gd.getNextRadioButton();
         int mSize = 2;
@@ -416,6 +419,8 @@ public class ToolsWindowOJ extends javax.swing.JPanel implements ToolListChanged
         CustomCanvasOJ.fontArial = Font.decode("Arial-" + fontSize);
         CustomCanvasOJ.fontSize = Integer.parseInt(fontSize);
         OJ.getEventProcessor().fireCellChangedEvent();
+        OJ.getData().getYtemDefs().setShowCellNumber(showNumber);
+        OJ.getEventProcessor().fireYtemDefChangedEvent(YtemDefChangedEventOJ.LABEL_VISIBILITY_CHANGED);       
     }//GEN-LAST:event_butSizesActionPerformed
 
     private void updateScrollPane() {

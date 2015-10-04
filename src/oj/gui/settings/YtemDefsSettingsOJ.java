@@ -102,7 +102,7 @@ public class YtemDefsSettingsOJ extends javax.swing.JPanel implements TableColum
         jPanel1.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 22, 5, 5));
         jPanel1.setLayout(new java.awt.GridLayout(2, 2, 4, 4));
 
-        chkShowObjectLabel.setText("Show Object Label");
+        chkShowObjectLabel.setText("Show Object Number");
         chkShowObjectLabel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 chkShowObjectLabelActionPerformed(evt);

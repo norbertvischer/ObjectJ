@@ -488,6 +488,12 @@ public class DataProcessorOJ implements QualifierChangedListenerOJ {
             ImagePlus imp;
             ImageOJ img = OJ.getData().getImages().getImageByName(imgName);
             imp = img.getImagePlus();
+            
+            
+            if (imp != null){
+                int id = imp.getID();//verify if still open
+                 imp = WindowManager.getImage(id);
+            }
             if (imp == null) {//wasn't open
                 OJ.getImageProcessor().openImage(imgName);
                 imp = IJ.getImage();
@@ -495,13 +501,13 @@ public class DataProcessorOJ implements QualifierChangedListenerOJ {
             }
 
             if (imp != null) {
-                if (imp.isHyperStack()) {
+                 IJ.selectWindow(imp.getID());//however, it was not open at all 3.10.2015
+               if (imp.isHyperStack()) {
                     imp.setPosition(cell.getStackIndex());
                 } else {
                     imp.setSlice(cell.getStackIndex());
                 }
 
-                IJ.selectWindow(imp.getID());
                 OJ.getImageProcessor().addToOpenedImages(imp);
                 ImageWindow thisImgW = imp.getWindow();
                 if (thisImgW != null) {

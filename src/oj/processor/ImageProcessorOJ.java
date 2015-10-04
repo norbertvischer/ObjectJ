@@ -832,7 +832,7 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
         Properties props = new FileOpener(fileInfo).decodeDescriptionString(fileInfo);
         int newWidth = fileInfo.width;
         int newHeight = fileInfo.height;
-        image.setWidth(newHeight);
+        image.setHeight(newHeight);//3.10.2015
         image.setWidth(newWidth);
 
         double newX = ((double) ((int) (fileInfo.pixelWidth * 1E6))) / 1E6;
@@ -963,7 +963,8 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
         if (img == null) {
             return null;
         }
-        return img.getImagePlus();//null if not open
+        ImagePlus imp = ImageWindowUtilsOJ.isOpen(OJ.getData().getDirectory() + name);//1.10.2015
+        return imp;
     }
 
     //if linked image is open several times, close all except the first one

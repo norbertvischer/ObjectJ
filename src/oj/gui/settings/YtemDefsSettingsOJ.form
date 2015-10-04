@@ -39,7 +39,7 @@
       <SubComponents>
         <Component class="javax.swing.JCheckBox" name="chkShowObjectLabel">
           <Properties>
-            <Property name="text" type="java.lang.String" value="Show Object Label"/>
+            <Property name="text" type="java.lang.String" value="Show Object Number"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="chkShowObjectLabelActionPerformed"/>
