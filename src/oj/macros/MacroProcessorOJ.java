@@ -440,10 +440,10 @@ public class MacroProcessorOJ {
         String imgName = img.getName();
         ImagePlus imp = img.getImagePlus();
 
-        if (imp != null) {
-            int id = imp.getID();//verify if still open
-            imp = WindowManager.getImage(id);
-        }
+//        if (imp != null) {
+//            int id = imp.getID();//verify if still open
+//            imp = WindowManager.getImage(id);
+//        }
         if (imp == null) {//wasn't open
             OJ.getImageProcessor().openImage(imgName);
             imp = IJ.getImage();
@@ -1115,9 +1115,28 @@ public class MacroProcessorOJ {
     }
 
     public double getImageValue(int n, String key) {
+        ImagePlus imp1, imp2;
         String theKey = key.toLowerCase();
         double value = 0.0;
         ImageOJ img = OJ.getData().getImages().getImageByIndex(n - one);
+        int ww = img.getWidth();
+        if (ww <= 0 && !theKey.equals("id")) {
+            imp1 = img.getImagePlus();//null if not open
+            if (imp1 == null) {
+                OJ.getImageProcessor().openImage(img.getName());//not testet !!!
+                imp2 = IJ.getImage();
+            } else {
+                imp2 = imp1;
+            }
+            if (imp2 != null) {
+                OJ.getImageProcessor().applyImageProperties(imp2, img);
+            }
+
+            if (imp1 == null && imp2 != null) {
+                imp2.close();
+            }
+        }
+
         if (theKey.equals("channels")) {
             value = img.getNumberOfChannels();
         } else if (theKey.equals("slices")) {
@@ -1133,7 +1152,12 @@ public class MacroProcessorOJ {
         } else if (theKey.equals("frameinterval")) {//29.7.2013
             value = img.getFrameInterval();
         } else if (theKey.equals("id")) {
-            value = img.getID();
+            imp1 = img.getImagePlus();//null if not open
+            if (imp1 != null) {
+                value = imp1.getID();
+            } else {
+                value = 0;
+            }
         } else {
             ImageJAccessOJ.InterpreterAccess.interpError("No valid key: " + key);
         }

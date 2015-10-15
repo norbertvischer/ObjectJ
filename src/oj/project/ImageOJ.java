@@ -5,6 +5,7 @@
 package oj.project;
 
 import ij.ImagePlus;
+import ij.WindowManager;
 import oj.OJ;
 import oj.processor.events.ImageChangedEventOJ;
 
@@ -36,18 +37,18 @@ public class ImageOJ extends BaseAdapterOJ {
     private int frameInterval = 1;//30.7.2013 put this back to int: was this the mistake?
     private double frameIntervalD = 1;//30.7.2013 put this back to int: was this the mistake?
     private String frameRateUnit = "sec";
-    private transient int ID = 0;//negative if image is open, zero if closed
+    //private transient int ID = 0;//negative if image is open, zero if closed
     private transient ImagePlus imagePlus = null;
 
     public ImageOJ() {
         name = "";
-        ID = 0;
+        //ID = 0;
     }
 
     public ImageOJ(String name, ImagePlus imp) {//30.6.2012
-        if (imp != null) {//5.4.2013
-            this.ID = imp.getID();
-        }
+//        if (imp != null) {//5.4.2013
+//            this.ID = imp.getID();
+//        }
         this.imagePlus = imp;
         this.name = name;
     }
@@ -57,21 +58,25 @@ public class ImageOJ extends BaseAdapterOJ {
         return dimensions;
     }
 
-    public int getID() {
-        return ID;
-    }
-
-    public void setID(int ID) {
-        this.ID = ID;
-    }
+//    public int getID() {
+//        return ID;
+//    }
+//
+//    public void setID(int ID) {
+//        this.ID = ID;
+//    }
 
     public void setImagePlus(ImagePlus imp) {
 
         imagePlus = imp;
     }
 
+    //returns imageOJ's ImagePlus, or null if it is not open
     public ImagePlus getImagePlus() {
-
+        if (imagePlus != null) {
+            int id = imagePlus.getID();//verify if still open
+            imagePlus = WindowManager.getImage(id);
+        }
         return imagePlus;
     }
 
@@ -114,8 +119,7 @@ public class ImageOJ extends BaseAdapterOJ {
     }
 
     /**
-     * @return array of cells in this image
-     * not tested yet
+     * @return array of cells in this image not tested yet
      */
     public CellOJ[] getCells() {
         int count = getCellCount();
@@ -297,7 +301,6 @@ public class ImageOJ extends BaseAdapterOJ {
      */
     public void initAfterUnmarshalling(IBaseOJ parent) {
         super.initAfterUnmarshalling(parent);
-
 
         if (width < 0) {
             width = 0;

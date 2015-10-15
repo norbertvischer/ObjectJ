@@ -149,16 +149,16 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
                                 imp.close();
                                 imp = null;
                                 imageOJ.setImagePlus(null);
-                                imageOJ.setID(0);
+                                //imageOJ.setID(0);
                                 return;
                             }
                             imageOJ.setImagePlus(imp);//1.10.2015
-                            imageOJ.setID(imp.getID());
+                            //imageOJ.setID(imp.getID());
                         }
                     } else {
                         imp = new Opener().openImage(dir, fName);//30.6.2013
                         imageOJ.setImagePlus(imp);//1.10.2015
-                        imageOJ.setID(imp.getID());
+                        //imageOJ.setID(imp.getID());
 
                     }
 
@@ -315,7 +315,7 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
                         OJ.getData().getImages().addImage(imj);
 
                         OJ.getImageProcessor().applyImageGraphics(imp, imj, false);//16.3.2013
-                        imj.setID(imp.getID());//16.3.2013
+                        //imj.setID(imp.getID());//16.3.2013
                         imj.setImagePlus(imp);//16.3.2013
 
                     }
@@ -1110,7 +1110,7 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
                             ImageOJ imgOj = OJ.getData().getImages().getImageByName(fName);
                             if (imgOj != null) {
                                 imgOj.setImagePlus(imp);
-                                imgOj.setID(imp.getID());
+                                //imgOj.setID(imp.getID());
                                 applyImageGraphics(imp, imgOj, true);//3.11.2013
                             }
                         }

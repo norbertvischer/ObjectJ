@@ -59,7 +59,7 @@ public class IjImageChangedListenerOJ implements ImageListener {
             boolean showChangedMessage = true;
             OJ.getImageProcessor().applyImageGraphics(imp, imageOJ, showChangedMessage);
 
-            imageOJ.setID(imp.getID());
+            //imageOJ.setID(imp.getID());
             imageOJ.setImagePlus(imp);
             KeyEventManagerOJ.getInstance().replaceKeyListener(imp);
             MouseEventManagerOJ.getInstance().replaceMouseListener(imp);
@@ -81,7 +81,7 @@ public class IjImageChangedListenerOJ implements ImageListener {
 
                 //MenuManagerOJ.getInstance().imageClosed(image_name);
                 OJ.getImageProcessor().removeFromOpenedImages(image_name);
-                imageOJ.setID(0);
+                //imageOJ.setID(0);
                 imageOJ.setImagePlus(null);
 
             }
