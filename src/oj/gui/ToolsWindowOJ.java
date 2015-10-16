@@ -4,8 +4,11 @@
 package oj.gui;
 
 import ij.IJ;
+import ij.ImagePlus;
 import ij.Menus;
+import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
+import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
@@ -50,7 +53,7 @@ import oj.gui.tools.events.ToolListChangedListenerOJ;
 import oj.gui.tools.events.ToolSelectionChangedEventOJ;
 import oj.gui.tools.events.ToolSelectionChangedListenerOJ;
 
-public class ToolsWindowOJ extends javax.swing.JPanel implements ToolListChangedListenerOJ, ToolSelectionChangedListenerOJ, /*ItemListIntfOJ,*/ KeyListener, CellChangedListenerOJ, YtemDefChangedListenerOJ, YtemDefSelectionChangedListenerOJ {
+public class ToolsWindowOJ extends javax.swing.JPanel implements ToolListChangedListenerOJ, ToolSelectionChangedListenerOJ, /*ItemListIntfOJ,*/ KeyListener, CellChangedListenerOJ, YtemDefChangedListenerOJ, YtemDefSelectionChangedListenerOJ, DialogListener {
 
     private static ToolsWindowOJ ytemDefList;
     private static Window instance;
@@ -108,7 +111,7 @@ public class ToolsWindowOJ extends javax.swing.JPanel implements ToolListChanged
         ToolsWindowOJ.instance.setSize(new Dimension(124, 260));
 
         if (instance instanceof JFrame) {
-            instance_type = ToolsWindowOJ.JFRAME_TYPE; 
+            instance_type = ToolsWindowOJ.JFRAME_TYPE;
             ((JFrame) ToolsWindowOJ.instance).getContentPane().add(new ToolsWindowOJ());
         } else if (instance instanceof JDialog) {
             instance_type = ToolsWindowOJ.JDIALOG_TYPE;
@@ -391,38 +394,20 @@ public class ToolsWindowOJ extends javax.swing.JPanel implements ToolListChanged
     private void butSizesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butSizesActionPerformed
         GenericDialog gd = new GenericDialog("Font and Marker Sizes");
         String[] choices = "12 16 20".split(" ");
-        
-        boolean showNumber=OJ.getData().getYtemDefs().getShowCellNumber(); 
+
+        boolean showNumber = OJ.getData().getYtemDefs().getShowCellNumber();
         gd.addCheckbox("Show Object Number", showNumber);
-      
+
         gd.addRadioButtonGroup("Font Size", choices, 3, 1, "" + CustomCanvasOJ.fontSize);
 //gd.addMessage("___");
         choices = "Small Medium Large".split(" ");
         gd.addRadioButtonGroup("Marker Size", choices, 3, 1, choices[CustomCanvasOJ.markerRad - 2]);
+        gd.addDialogListener(this);
 
         gd.showDialog();
         if (gd.wasCanceled()) {
             return;
         }
-         showNumber = gd.getNextBoolean();
-        String fontSize = gd.getNextRadioButton();
-        String markerSizeStr = gd.getNextRadioButton();
-        int mSize = 2;
-        if (markerSizeStr.startsWith("M")) {
-            mSize = 3;
-        }
-        if (markerSizeStr.startsWith("L")) {
-            mSize = 4;
-        }
-
-        CustomCanvasOJ.markerRad = mSize;
-        CustomCanvasOJ.markerSize = mSize * 2;
-
-        CustomCanvasOJ.fontArial = Font.decode("Arial-" + fontSize);
-        CustomCanvasOJ.fontSize = Integer.parseInt(fontSize);
-        OJ.getEventProcessor().fireCellChangedEvent();
-        OJ.getData().getYtemDefs().setShowCellNumber(showNumber);
-        OJ.getEventProcessor().fireYtemDefChangedEvent(YtemDefChangedEventOJ.LABEL_VISIBILITY_CHANGED);       
     }//GEN-LAST:event_butSizesActionPerformed
 
     private void updateScrollPane() {
@@ -753,5 +738,29 @@ public class ToolsWindowOJ extends javax.swing.JPanel implements ToolListChanged
         } else {
             clearOJToolbarSelection();
         }
+    }
+
+    public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
+
+        boolean showNumber = gd.getNextBoolean();
+        String fontSize = gd.getNextRadioButton();
+        String markerSizeStr = gd.getNextRadioButton();
+        int mSize = 2;
+        if (markerSizeStr.startsWith("M")) {
+            mSize = 3;
+        }
+        if (markerSizeStr.startsWith("L")) {
+            mSize = 4;
+        }
+
+        CustomCanvasOJ.markerRad = mSize;
+        CustomCanvasOJ.markerSize = mSize * 2;
+
+        CustomCanvasOJ.fontArial = Font.decode("Arial-" + fontSize);
+        CustomCanvasOJ.fontSize = Integer.parseInt(fontSize);
+        OJ.getEventProcessor().fireCellChangedEvent();
+        OJ.getData().getYtemDefs().setShowCellNumber(showNumber);
+        OJ.getEventProcessor().fireYtemDefChangedEvent(YtemDefChangedEventOJ.LABEL_VISIBILITY_CHANGED);
+        return true;
     }
 }
