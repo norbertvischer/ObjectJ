@@ -118,6 +118,10 @@ public class ExtensionOJ implements MacroExtension {
         return ExtensionOJ.getInstance().handleExtension(name, new Object[]{arg1, arg2, arg3, arg4});
     }
 
+    public static String handleMacroExtension(String name, String arg1, String arg2, String arg3, String arg4, String arg5) {
+        return ExtensionOJ.getInstance().handleExtension(name, new Object[]{arg1, arg2, arg3, arg4, arg5});
+    }
+
     boolean needsProject(String name) {
         for (int jj = 0; jj < noProjectNeeded.length; jj++) {
             if (noProjectNeeded[jj].equalsIgnoreCase(name)) {

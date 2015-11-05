@@ -223,6 +223,56 @@ public class MacroProcessorOJ {
         }
     }
 
+    public void setMarker5D(double x, double y, double z, int channel, int frame) {
+
+        if (targetImageOJ == null) {
+            ImageJAccessOJ.InterpreterAccess.interpError("setMarker5D works only in target mode");
+        }
+
+        if (ytemT == null) {
+            switch (ytemIndexT) {
+                case YtemDefOJ.YTEM_TYPE_POINT:
+                    ytemT = new PointOJ();
+                    break;
+                case YtemDefOJ.YTEM_TYPE_LINE:
+                    ytemT = new LineOJ();
+                    break;
+                case YtemDefOJ.YTEM_TYPE_SEGLINE:
+                    ytemT = new SeglineOJ();
+                    break;
+
+                case YtemDefOJ.YTEM_TYPE_POLYGON:
+                    ytemT = new PolygonOJ();
+                    break;
+                case YtemDefOJ.YTEM_TYPE_ROI:
+                    ytemT = new RoiOJ();
+                    break;
+                case YtemDefOJ.YTEM_TYPE_ANGLE:
+                    ytemT = new AngleOJ();
+                    break;
+            }
+            if (ytemT != null) {
+                ytemT.setObjectDef(ytemNameT);
+                //ytemT.setStackIndex(stackIndexT);
+            }
+        }
+        if (ytemT != null) {
+            int[] stackPosition = new int[3];
+            stackPosition[0] = channel;
+            stackPosition[1] = (int) Math.round(z);
+            stackPosition[2] = frame;
+
+            int myStackIndex = UtilsOJ.convertPositionToIndex(targetDimensions, stackPosition);
+            double rest = z % 1;
+            if (rest >= 0.5) {
+                rest--;
+            }
+            double thisZ = myStackIndex + rest;
+            ytemT.add(new LocationOJ(x, y, thisZ));
+        }
+
+    }
+
     public void closeYtemT() {
         if (ytemT != null && ytemT.getLocationsCount() > 0) {
             if (cellT == null) {

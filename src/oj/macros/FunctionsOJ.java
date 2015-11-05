@@ -503,6 +503,12 @@ public class FunctionsOJ implements MacroExtension {
         return null;
     }
 
+    
+   public String ojSetMarker5D(String x, String y, String z, String channel, String frame) {
+        OJ.getMacroProcessor().setMarker5D(MacroProcessorOJ.parseDouble(x), MacroProcessorOJ.parseDouble(y), MacroProcessorOJ.parseDouble(z), MacroProcessorOJ.parseInt(channel), MacroProcessorOJ.parseInt(frame));
+        return null;
+    }
+
     public String ojSetPlotProperties(String title, String properties) {//17.9.2011
         OJ.getMacroProcessor().setPlotProperties(title, properties);
         return null;

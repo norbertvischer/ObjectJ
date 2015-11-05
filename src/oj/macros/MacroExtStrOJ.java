@@ -40,6 +40,10 @@ public class MacroExtStrOJ {
         return "function " + functionName + "(" + arg1 + "," + arg2 + "," + arg3 + "," + arg4 + "){return call(\"oj.macros.ExtensionOJ.handleMacroExtension\",\"" + functionName + "\"," + arg1 + "," + arg2 + "," + arg3 + "," + arg4 + ");}\n";
     }
 
+   private static String getFunction(String functionName, String arg1, String arg2, String arg3, String arg4, String arg5) {
+        return "function " + functionName + "(" + arg1 + "," + arg2 + "," + arg3 + "," + arg4 + "," + arg5 + "){return call(\"oj.macros.ExtensionOJ.handleMacroExtension\",\"" + functionName + "\"," + arg1 + "," + arg2 + "," + arg3 + "," + arg4 + "," + arg5 + ");}\n";
+    }
+
     /*
      * if function's argument is an array, then the array needs first to be converted into a single string, where all array 
      * elements are separated by newLine "\n". This single string is passed to the "call" function
@@ -201,6 +205,8 @@ public class MacroExtStrOJ {
 
         buf.append(getFunction("ojSetItemVisible", "itemType", "visible"));
         buf.append(getFunction("ojSetMarker", "xPos", "yPos"));
+        buf.append(getFunction("ojSetMarker5D", "xPos", "yPos", "zPos", "channel", "frame"));
+                
         buf.append(getFunction("ojSetPlotProperties", "ColumnTitle", "properties"));
         buf.append(getFunction("ojSetResult", "columnName", "rowIndex", "value"));
         buf.append(getFunction("ojSetTool", "tool"));
