@@ -16,7 +16,6 @@ import java.awt.event.*;
 import java.util.*;
 import java.awt.geom.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-//import javax.swing.JPanel;
 
 
 /** This is a Canvas used to display images in a Window. */
@@ -1073,7 +1072,6 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 	}
 
 	public void mousePressed(MouseEvent e) {
-		//if (ij==null) return;
 		showCursorStatus = true;
 		int toolID = Toolbar.getToolId();
 		ImageWindow win = imp.getWindow();
@@ -1290,7 +1288,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		boolean multiPointMode = roi!=null && (roi instanceof PointRoi) && handle==-1
 			&& Toolbar.getToolId()==Toolbar.POINT && Toolbar.getMultiPointMode();
 		if (multiPointMode) {
-			imp.setRoi(((PointRoi)roi).addPoint(offScreenXD(sx), offScreenYD(sy)));
+			((PointRoi)roi).addPoint(imp, offScreenXD(sx), offScreenYD(sy));
+			imp.setRoi(roi);
 			return;
 		}
 		setRoiModState(e, roi, handle);

@@ -86,6 +86,8 @@ public class PlotDialog {
 				IJ.error("Invalid Input", errorWhat+" Range remains unchanged");
 				return;
 			}
+                        //n__ begin PlotDialog
+                        plot.setLimits(linXMin, linXMax, linYMin, linYMax);
 			if (livePlot) plot.templateFlags = setFlag(plot.templateFlags, Plot.X_RANGE, gd.getNextBoolean());
 			boolean xLog = gd.getNextBoolean();
 			if (livePlot) plot.templateFlags = setFlag(plot.templateFlags, Plot.Y_RANGE, gd.getNextBoolean());
@@ -98,13 +100,16 @@ public class PlotDialog {
 					Recorder.recordCall("//plot = IJ.getImage().getProperty(Plot.PROPERTY_KEY)");
 					Recorder.recordCall("plot.setAxisXLog("+xLog+");");
 					Recorder.recordCall("plot.setAxisYLog("+yLog+");");
-					Recorder.recordCall("plot.setLimits("+IJ.d2s(currentMinMax[0],xDigits)+","+IJ.d2s(currentMinMax[1],xDigits)+","+IJ.d2s(currentMinMax[2],yDigits)+","+IJ.d2s(currentMinMax[3],yDigits)+");");
+					//Recorder.recordCall("plot.setLimits("+IJ.d2s(currentMinMax[0],xDigits)+","+IJ.d2s(currentMinMax[1],xDigits)+","+IJ.d2s(currentMinMax[2],yDigits)+","+IJ.d2s(currentMinMax[3],yDigits)+");");
+					Recorder.recordCall("plot.setLimits("+IJ.d2s(linXMin,xDigits)+","+IJ.d2s(linXMax,xDigits)+","+IJ.d2s(linYMin,yDigits)+","+IJ.d2s(linYMax,yDigits)+");");
 				} else {
 					Recorder.recordString("Plot.setLogScaleX("+xLog+");\n");
 					Recorder.recordString("Plot.setLogScaleY("+yLog+");\n");
-					Recorder.recordString("Plot.setLimits("+IJ.d2s(currentMinMax[0],xDigits)+","+IJ.d2s(currentMinMax[1],xDigits)+","+IJ.d2s(currentMinMax[2],yDigits)+","+IJ.d2s(currentMinMax[3],yDigits)+");\n");
+					//Recorder.recordString("Plot.setLimits("+IJ.d2s(currentMinMax[0],xDigits)+","+IJ.d2s(currentMinMax[1],xDigits)+","+IJ.d2s(currentMinMax[2],yDigits)+","+IJ.d2s(currentMinMax[3],yDigits)+");\n");
+					Recorder.recordString("Plot.setLimits("+IJ.d2s(linXMin,xDigits)+","+IJ.d2s(linXMax,xDigits)+","+IJ.d2s(linYMin,yDigits)+","+IJ.d2s(linYMax,yDigits)+");\n");
 				}
 			}
+                        //n__ end PlotDialog
 		} else if (dialogType == AXIS_OPTIONS) {
 			int flags = plot.getFlags();
 			int columns = 2;
