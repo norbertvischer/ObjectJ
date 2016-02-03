@@ -234,49 +234,20 @@ public class Plot implements Cloneable {
 		return imp == null ? title : imp.getTitle();
 	}
 
-    //n__ begin setLimits
-    /**
-     * Sets the x-axis and y-axis range. Updates the image if existing.
-     */
-    public void setLimits(double xMin, double xMax, double yMin, double yMax) {
-        boolean containsNaN = (Double.isNaN(xMin + xMax + yMin + yMax));
-        if (containsNaN && allPlotObjects.isEmpty())//can't be automatic without data
-            return;
-        boolean[] auto = new boolean[4];
-        defaultMinMax[0] = xMin;
-        defaultMinMax[1] = xMax;
-        defaultMinMax[2] = yMin;
-        defaultMinMax[3] = yMax;
-        if (containsNaN) {
-            double[] extrema = getMinAndMax(true, 0xff);
-            for (int jj = 0; jj < 4; jj++)
-                if (Double.isNaN(defaultMinMax[jj])) {
-                    defaultMinMax[jj] = extrema[jj];
-                    auto[jj] = true;
-                }
-            double extraXLin = (defaultMinMax[1] - defaultMinMax[0]) * 0.03;
-            double extraYLin = (defaultMinMax[3] - defaultMinMax[2]) * 0.03;
-  
-            boolean isLinearX = (flags & X_LOG_NUMBERS) == 0;
-            boolean isLinearY = (flags & Y_LOG_NUMBERS) == 0;
-            if (auto[0] && isLinearX)
-                defaultMinMax[0] -= extraXLin;//add some extra space, if linear
-            if (auto[1] && isLinearX)
-                defaultMinMax[1] += extraXLin;
-            if (auto[2] && isLinearY)
-                defaultMinMax[2] -= extraYLin;
-            if (auto[3] && isLinearY)
-                defaultMinMax[3] += extraYLin;
-        }
-        enlargeRange = null;
-        ignoreForce2Grid = true;
-        if (plotDrawn)
-            setLimitsToDefaults(true);
-    }
-    //n__ end setLimits
+	/** Sets the x-axis and y-axis range. Updates the image if existing. */
 
-    
-    /** Returns the current limits as an array xMin, xMax, yMin, yMax.
+	public void setLimits(double xMin, double xMax, double yMin, double yMax) {
+		defaultMinMax[0] = xMin;
+		defaultMinMax[1] = xMax;
+		defaultMinMax[2] = yMin;
+		defaultMinMax[3] = yMax;
+		enlargeRange = null;
+		ignoreForce2Grid = true;
+		if (plotDrawn)
+			setLimitsToDefaults(true);
+	}
+
+	/** Returns the current limits as an array xMin, xMax, yMin, yMax.
 	 *	Note that future versions might return a longer array (e.g. for y2 axis limits) */
 	public double[] getLimits() {
 		return new double[] {xMin, xMax, yMin, yMax};
@@ -1469,43 +1440,32 @@ public class Plot implements Cloneable {
 		updateImage();
 	}
 
-    //n__ begin zoomOnRangeArrow
-    /**
-     * Zooms in or out when the user clicks one of the overlay arrows at the
-     * axes. Index numbers start with 0 at the 'down' arrow of the lower side of
-     * the x axis and end with the up arrow at the upper side of the y axis.
-     */
-    void zoomOnRangeArrow(int arrowIndex) {
-        if (arrowIndex < 8) {//0..7 = arrows, 8 = Reset Range
-            int axisIndex = (arrowIndex / 4) * 2;  //0 for x, 2 for y
-            double min = axisIndex == 0 ? xMin : yMin;
-            double max = axisIndex == 0 ? xMax : yMax;
-            double range = max - min;
-            boolean isMin = (arrowIndex % 4) < 2;
-            boolean shrinkRange = arrowIndex % 4 == 1 || arrowIndex % 4 == 2;
-            double factor = Math.sqrt(2);
-            if (shrinkRange)
-                factor = 1.0 / factor;
-            if (isMin)
-                min = max - range * factor;
-            else
-                max = min + range * factor;
-            boolean logAxis = axisIndex == 0 ? logXAxis : logYAxis;
-            if (logAxis) {
-                min = Math.pow(10, min);
-                max = Math.pow(10, max);
-            }
-            currentMinMax[axisIndex] = min;
-            currentMinMax[axisIndex + 1] = max;
-        }
+	/** Zooms in or out when the user clicks one of the overlay arrows at the axes.
+	 *	Index numbers start with 0 at the 'down' arrow of the lower side of the x axis
+	 *	and end with the up arrow at the upper side of the y axis. */
+	void zoomOnRangeArrow(int arrowIndex) {
+		int axisIndex = (arrowIndex / 4) * 2;  //0 for x, 2 for y
+		double min = axisIndex==0 ? xMin : yMin;
+		double max = axisIndex==0 ? xMax : yMax;
+		double range = max - min;
+		boolean isMin = (arrowIndex % 4) < 2;
+		boolean shrinkRange = arrowIndex % 4 == 1 || arrowIndex % 4 == 2;
+		double factor = Math.sqrt(2);
+		if (shrinkRange) factor = 1.0/factor;
+		if (isMin)
+			min = max - range*factor;
+		else
+			max = min + range*factor;
+		boolean logAxis = axisIndex==0 ? logXAxis : logYAxis;
+		if (logAxis) {
+			min = Math.pow(10, min);
+			max = Math.pow(10, max);
+		}
+		currentMinMax[axisIndex] = min;
+		currentMinMax[axisIndex+1] = max;
+		updateImage();
+	}
 
-        if (arrowIndex == 8)
-            setLimitsToDefaults(false);
-        updateImage();
-    }
-//n__ end zoomOnRangeArrow
-    
-    
 	/** Zooms in or out on a point x, y in screen coordinates. If x>0, default in both directions,
 	 *	if the cursor is below the x axis, only in x direction, if the cursor is left of the y axis, only in y direction.
 	 *	If x < 0, zooms on center; if x == ZOOM_AS_PREVIOUS, zooms on the center of the previous zoom
