@@ -23,13 +23,13 @@ public abstract class YtemOJ extends BaseAdapterOJ {
     protected String definition;//name of ytem type, e.g. "Axis" in coli project
     protected int stackIndex = 0;
     protected transient boolean open;
-    protected ArrayList <LocationOJ> locations = new ArrayList();
-   protected byte[] roiBytes = null;//13.10.2014 not used yet, but must not be changed
+    protected ArrayList<LocationOJ> locations = new ArrayList();
+    protected byte[] roiBytes = null;//13.10.2014 not used yet, but must not be changed
 
-    public void setIJRoi(Roi theRoi){//15.3.2014 not used yet
+    public void setIJRoi(Roi theRoi) {//15.3.2014 not used yet
         roiBytes = RoiEncoder.saveAsByteArray(theRoi);
     }
-    
+
     public byte[] getRoiBytes() {//13.10.2014 not used yet
         return roiBytes;
     }
@@ -52,7 +52,10 @@ public abstract class YtemOJ extends BaseAdapterOJ {
     public void showIJRoi(Roi theRoi) {//13.10.2014 not used yet
 
     }
-/** @return stack index (1-based ?) */
+
+    /**
+     * @return stack index (1-based ?)
+     */
     public int getStackIndex() {
         return stackIndex;
     }
@@ -62,7 +65,9 @@ public abstract class YtemOJ extends BaseAdapterOJ {
         changed = true;
     }
 
-    /** Initialize if necessary after reading from file */
+    /**
+     * Initialize if necessary after reading from file
+     */
     public void initAfterUnmarshalling(IBaseOJ parent) {
         super.initAfterUnmarshalling(parent);
         if (locations == null) {
@@ -75,12 +80,16 @@ public abstract class YtemOJ extends BaseAdapterOJ {
 
     public abstract int getType();
 
-    /** @return name of ytem type */
+    /**
+     * @return name of ytem type
+     */
     public String getYtemDef() {
         return definition;
     }
 
-    /** set name of item type */
+    /**
+     * set name of item type
+     */
     public void setObjectDef(String definition) {
         this.definition = definition;
         changed = true;
@@ -90,7 +99,9 @@ public abstract class YtemOJ extends BaseAdapterOJ {
 
     public abstract boolean contains(LocationOJ p);
 
-    /** adds a point to this ytem */
+    /**
+     * adds a point to this ytem
+     */
     public boolean add(LocationOJ location) {
         if (locations.add(location)) {
             location.setParent(this);
@@ -100,7 +111,9 @@ public abstract class YtemOJ extends BaseAdapterOJ {
         return false;
     }
 
-    /** @return n-th location of this ytem, 0-based*/
+    /**
+     * @return n-th location of this ytem, 0-based
+     */
     public LocationOJ getLocation(int index) {
         if (UtilsOJ.inRange(0, locations.size() - 1, index)) {
             return locations.get(index);
@@ -109,13 +122,17 @@ public abstract class YtemOJ extends BaseAdapterOJ {
         }
     }
 
-    /** @return roiPoints as array, or null if it is not a roi 15.3.2010*/
+    /**
+     * @return roiPoints as array, or null if it is not a roi 15.3.2010
+     */
 //    public int[] getRoiSteps() {
 //        return roiSteps;
 //    }
-
-    /** replaces old location with new one, and sets new location's parent.
-     * @return old location (if sucessful), otherwise, a NaN location is returned
+    /**
+     * replaces old location with new one, and sets new location's parent.
+     *
+     * @return old location (if sucessful), otherwise, a NaN location is
+     * returned
      */
     public LocationOJ setLocation(int index, LocationOJ newLocation) {
         if (UtilsOJ.inRange(0, locations.size() - 1, index)) {
@@ -128,13 +145,17 @@ public abstract class YtemOJ extends BaseAdapterOJ {
         return new LocationOJ(Double.NaN, Double.NaN, Double.NaN);
     }
 
-    /** removes n-th location from ytem, 0-based */
+    /**
+     * removes n-th location from ytem, 0-based
+     */
     public void removelocationByIndex(int index) {
         locations.remove(index);
         changed = true;
     }
 
-    /** removes location from ytem */
+    /**
+     * removes location from ytem
+     */
     public boolean removeLocation(LocationOJ location) {
         if (locations.remove(location)) {
             changed = true;
@@ -143,24 +164,32 @@ public abstract class YtemOJ extends BaseAdapterOJ {
         return false;
     }
 
-    /** @return number of points owned by ytem */
+    /**
+     * @return number of points owned by ytem
+     */
     public int getLocationsCount() {
         return locations.size();
     }
 
-    /** @return index of location */
+    /**
+     * @return index of location
+     */
     public int indexOf(LocationOJ location) {
         return locations.indexOf(location);
     }
 
-    /** duplicates Arraylist and returns it as an array */
+    /**
+     * duplicates Arraylist and returns it as an array
+     */
     public LocationOJ[] toArray() {
         LocationOJ[] result = new LocationOJ[locations.size()];
         System.arraycopy(locations, 0, result, 0, locations.size());
         return result;
     }
 
-    /** @return ytem's x positions as double array */
+    /**
+     * @return ytem's x positions as double array
+     */
     public double[] toXDArray() {
         int i;
         double[] result = new double[locations.size()];
@@ -170,7 +199,9 @@ public abstract class YtemOJ extends BaseAdapterOJ {
         return result;
     }
 
-    /** @return ytem's y positions as double array */
+    /**
+     * @return ytem's y positions as double array
+     */
     public double[] toYDArray() {
         int i;
         double[] result = new double[locations.size()];
@@ -180,7 +211,9 @@ public abstract class YtemOJ extends BaseAdapterOJ {
         return result;
     }
 
-   /** @return ytem's x positions as double array */
+    /**
+     * @return ytem's x positions as double array
+     */
     public float[] toXFArray() {
         int i;
         float[] result = new float[locations.size()];
@@ -190,7 +223,9 @@ public abstract class YtemOJ extends BaseAdapterOJ {
         return result;
     }
 
-    /** @return ytem's y positions as double array */
+    /**
+     * @return ytem's y positions as double array
+     */
     public float[] toYFArray() {
         int i;
         float[] result = new float[locations.size()];
@@ -200,14 +235,18 @@ public abstract class YtemOJ extends BaseAdapterOJ {
         return result;
     }
 
-    /** @return ytem's z positions as double array */
+    /**
+     * @return ytem's z positions as double array
+     */
     public LocationOJ[] toZDArray() {
         LocationOJ[] result = new LocationOJ[locations.size()];
         System.arraycopy(locations, 0, result, 0, locations.size());
         return result;
     }
 
-    /** @return ytem's x positions as array of integers (rounded)*/
+    /**
+     * @return ytem's x positions as array of integers (rounded)
+     */
     public int[] toXArray() {
         int i;
         int[] result = new int[locations.size()];
@@ -219,7 +258,9 @@ public abstract class YtemOJ extends BaseAdapterOJ {
         return result;
     }
 
-    /** @return ytem's y positions as array of integers (rounded)*/
+    /**
+     * @return ytem's y positions as array of integers (rounded)
+     */
     public int[] toYArray() {
         int i;
         int[] result = new int[locations.size()];
@@ -231,7 +272,9 @@ public abstract class YtemOJ extends BaseAdapterOJ {
         return result;
     }
 
-    /** @return ytem's z positions as array of integers (rounded)*/
+    /**
+     * @return ytem's z positions as array of integers (rounded)
+     */
     public int[] toZArray() {
         int i;
         int[] result = new int[locations.size()];
@@ -243,7 +286,9 @@ public abstract class YtemOJ extends BaseAdapterOJ {
         return result;
     }
 
-    /** @return ytem's x positions with magnification and offset for screen display*/
+    /**
+     * @return ytem's x positions with magnification and offset for screen display
+     */
     public int[] toXArray(int offset, double magnification) {
         int i;
         int[] result = new int[locations.size()];
@@ -255,7 +300,9 @@ public abstract class YtemOJ extends BaseAdapterOJ {
         return result;
     }
 
-    /** @return ytem's y positions with magnification and offset for screen display*/
+    /**
+     * @return ytem's y positions with magnification and offset for screen display
+     */
     public int[] toYArray(int offset, double magnification) {
         int i;
         int[] result = new int[locations.size()];
@@ -267,7 +314,9 @@ public abstract class YtemOJ extends BaseAdapterOJ {
         return result;
     }
 
-    /** @return parent cell */
+    /**
+     * @return parent cell
+     */
     public CellOJ getCell() {
         if (parent != null) {
             return (CellOJ) parent;
@@ -275,11 +324,11 @@ public abstract class YtemOJ extends BaseAdapterOJ {
             return null;
         }
     }
-    
-    
-     /**Creates a roi from the currently selected ytem and cell*/
-    
-      public void ytemToRoi() {//13.5.2014
+
+    /**
+     * Creates a roi from the currently selected ytem and cell
+     */
+    public void ytemToRoi() {//13.5.2014
         int type = getType();
 //        CellOJ cell = OJ.getData().getCells().getSelectedCell();
 //        
@@ -287,12 +336,18 @@ public abstract class YtemOJ extends BaseAdapterOJ {
 //
 //        YtemDefOJ ytem_def = OJ.getData().getYtemDefs().getYtemDefByName(ytm.getYtemDef());
         float[] xcoords = toXFArray();//13.5.2014
-        float[] ycoords =toYFArray();
+        float[] ycoords = toYFArray();
         Roi roi;
-
+        boolean wrong = (xcoords.length < 2 && type != YtemDefOJ.YTEM_TYPE_POINT);
+        wrong = wrong || (xcoords.length < 3 && type == YtemDefOJ.YTEM_TYPE_POLYGON);
+        wrong = wrong || (xcoords.length < 3 && type == YtemDefOJ.YTEM_TYPE_ROI);
+        if (wrong) {//20.1.2016
+            IJ.getImage().killRoi();
+            return;
+        }
         switch (type) {
             case YtemDefOJ.YTEM_TYPE_ANGLE:
-                roi = new PolygonRoi(xcoords, ycoords,  Roi.POLYLINE);
+                roi = new PolygonRoi(xcoords, ycoords, Roi.POLYLINE);
                 IJ.getImage().setRoi(roi);
                 break;
 
@@ -302,7 +357,7 @@ public abstract class YtemOJ extends BaseAdapterOJ {
                 break;
 
             case YtemDefOJ.YTEM_TYPE_POINT:
-                roi = new PointRoi(xcoords[0],ycoords[0]);
+                roi = new PointRoi(xcoords[0], ycoords[0]);
                 IJ.getImage().setRoi(roi);
                 break;
 
@@ -317,7 +372,7 @@ public abstract class YtemOJ extends BaseAdapterOJ {
                 break;
 
             case YtemDefOJ.YTEM_TYPE_SEGLINE:
-                roi = new PolygonRoi(xcoords, ycoords,  Roi.POLYLINE);
+                roi = new PolygonRoi(xcoords, ycoords, Roi.POLYLINE);
                 IJ.getImage().setRoi(roi);
                 break;
 
@@ -325,8 +380,9 @@ public abstract class YtemOJ extends BaseAdapterOJ {
         }
     }
 
-
-    /** @return smallest rectangle containing ytem's points */
+    /**
+     * @return smallest rectangle containing ytem's points
+     */
     public Rectangle getRectangle() {
         if (locations.size() > 0) {
             double x1 = (locations.get(0)).getX();
@@ -345,12 +401,16 @@ public abstract class YtemOJ extends BaseAdapterOJ {
         }
     }
 
-    /** @return open flag */
+    /**
+     * @return open flag
+     */
     public boolean isOpen() {
         return open;
     }
 
-    /** set open flag true or false*/
+    /**
+     * set open flag true or false
+     */
     public void setOpen(boolean open) {
         this.open = open;
     }

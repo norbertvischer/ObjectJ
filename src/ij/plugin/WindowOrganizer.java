@@ -35,10 +35,15 @@ public class WindowOrganizer implements PlugIn {
 		int width=0, height=0;
 		double totalWidth = 0;
 		double totalHeight = 0;
+		Plot[] unfrozenPlots = new Plot[wList.length];
 		for (int i=0; i<wList.length; i++) {
 			ImageWindow win = getWindow(wList[i]);
 			if (win==null)
 				continue;
+			if (win instanceof PlotWindow && !((PlotWindow)win).getPlot().isFrozen()) {
+				unfrozenPlots[i]=((PlotWindow)win).getPlot();
+				unfrozenPlots[i].setFrozen(true);
+			}
 			Dimension d = win.getSize();
 			int w = d.width;
 			int h = d.height + titlebarHeight;
@@ -109,8 +114,14 @@ public class WindowOrganizer implements PlugIn {
 				while (win.getSize().width*0.85>=tileWidth && canvas.getMagnification()>0.03125)
 					canvas.zoomOut(0, 0);
 				win.toFront();
+				ImagePlus imp = win.getImagePlus();
+				if (imp!=null) imp.setIJMenuBar(i==nPics-1);
 			}
 			hloc += tileWidth + GAP;
+		}
+		for (int i=0; i<wList.length; i++) {
+			if(unfrozenPlots[i] != null)
+				unfrozenPlots[i].setFrozen(false);
 		}
 	}
 
@@ -149,6 +160,8 @@ public class WindowOrganizer implements PlugIn {
 			win.toFront();
 				x += XOFFSET;
 			y += YOFFSET;
+			ImagePlus imp = win.getImagePlus();
+			if (imp!=null) imp.setIJMenuBar(i==wList.length-1);
 		}
 	}
 	

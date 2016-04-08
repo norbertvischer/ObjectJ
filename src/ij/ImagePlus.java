@@ -90,6 +90,8 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	private static int default16bitDisplayRange;
 	private boolean antialiasRendering = true;
 	private boolean ignoreGlobalCalibration;
+	public boolean setIJMenuBar = true;
+	public boolean typeSet;
 	
 
     /** Constructs an uninitialized ImagePlus. */
@@ -156,6 +158,8 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		if (locked) {
 			IJ.beep();
 			IJ.showStatus("\"" + title + "\" is locked");
+			if (IJ.macroRunning())
+				IJ.wait(500);
 			return false;
         } else {
         	locked = true;
@@ -917,7 +921,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			return;
     	if (win!=null) {
     		if (ij!=null)
-				Menus.updateWindowMenuItem(this.title, title);
+				Menus.updateWindowMenuItem(this, this.title, title);
 			String virtual = stack!=null && stack.isVirtual()?" (V)":"";
 			String global = getGlobalCalibration()!=null?" (G)":"";
 			String scale = "";
@@ -1080,8 +1084,11 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
     	return imageType;
     }
 
-    /** Returns the bit depth, 8, 16, 24 (RGB) or 32. RGB images actually use 32 bits per pixel. */
+    /** Returns the bit depth, 8, 16, 24 (RGB) or 32, or 0 if the bit depth 
+    	is unknown. RGB images actually use 32 bits per pixel. */
     public int getBitDepth() {
+    	if (imageType==GRAY8 && ip==null && img==null && !typeSet)
+    		return 0;
     	int bitDepth = 0;
     	switch (imageType) {
 	    	case GRAY8: case COLOR_256: bitDepth=8; break;
@@ -1101,17 +1108,18 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
     	}
 	}
 
-    protected void setType(int type) {
-    	if ((type<0) || (type>COLOR_RGB))
-    		return;
-    	int previousType = imageType;
-    	imageType = type;
+	protected void setType(int type) {
+		if ((type<0) || (type>COLOR_RGB))
+			return;
+		int previousType = imageType;
+		imageType = type;
+		typeSet = true;
 		if (imageType!=previousType) {
 			if (win!=null)
 				Menus.updateMenus();
 			getLocalCalibration().setImage(this);
 		}
-    }
+	}
 		
  	/** Returns the string value from the "Info" property string  
 	 * associated with 'key', or null if the key is not found. 
@@ -1373,8 +1381,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		}
 	}
 
-	/** Returns the current stack index (one-based) or 1 if
-		this is a single image. */
+	/** Returns the current stack index (one-based) or 1 if this is a single image. */
 	public int getCurrentSlice() {
 		if (currentSlice<1) setCurrentSlice(1);
 		if (currentSlice>getStackSize())
@@ -1621,7 +1628,8 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 				ip.resetRoi();
 		}
 		roi.setImage(this);
-		if (updateDisplay) draw();
+		if (updateDisplay)
+			draw();
 		//roi.notifyListeners(RoiListener.CREATED);
 	}
 	
@@ -1714,6 +1722,8 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 					rm.deselect(roi);
 			}
 			roi.notifyListeners(RoiListener.DELETED);
+			if (roi instanceof PointRoi)
+				((PointRoi)roi).resetCounters();
 			roi = null;
 			if (ip!=null)
 				ip.resetRoi();
@@ -1726,7 +1736,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		deleteRoi();
 	}
 
-	public void saveRoi() {
+	public synchronized void saveRoi() {
 		if (roi!=null) {
 			roi.endPaste();
 			Rectangle r = roi.getBounds();
@@ -2079,7 +2089,6 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 
    /** Sets this image's calibration. */
     public void setCalibration(Calibration cal) {
-		//IJ.write("setCalibration: "+cal);
 		if (cal==null)
 			calibration = null;
 		else {
@@ -2658,6 +2667,14 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 
     public String toString() {
     	return "img["+getTitle()+" ("+width+"x"+height+"x"+getNChannels()+"x"+getNSlices()+"x"+getNFrames()+")]";
+    }
+    
+    public void setIJMenuBar(boolean b) {
+    	setIJMenuBar = b;
+    }
+    
+    public boolean setIJMenuBar() {
+    	return setIJMenuBar;
     }
     
 }

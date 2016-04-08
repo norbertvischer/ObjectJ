@@ -32,17 +32,13 @@ public class PlotWindow extends ImageWindow implements ActionListener,	ItemListe
 	public static final int CROSS = Plot.CROSS;
 	/** Connect points with solid lines. */
 	public static final int LINE = Plot.LINE;
-	/** Save x-values only. To set, use Edit/Options/
-		Profile Plot Options. */
-	public static boolean saveXValues;
-	/** Automatically close window after saving values. To
-		set, use Edit/Options/Profile Plot Options. */
+	/** Write first X column when listing or saving. */
+	public static boolean saveXValues = true;
+	/** Automatically close window after saving values. To set, use Edit/Options/Plots. */
 	public static boolean autoClose;
-	/** Display the XY coordinates in a separate window. To
-		set, use Edit/Options/Profile Plot Options. */
+	/** Display the XY coordinates in a separate window. To set, use Edit/Options/Plots. */
 	public static boolean listValues;
-	/** Interpolate line profiles. To
-		set, use Edit/Options/Profile Plot Options. */
+	/** Interpolate line profiles. To set, use Edit/Options/Plots. */
 	public static boolean interpolate;
 	// default values for new installations; values will be then saved in prefs
 	private static final int WIDTH = 450;
@@ -100,7 +96,6 @@ public class PlotWindow extends ImageWindow implements ActionListener,	ItemListe
 	// static initializer
 	static {
 		options = Prefs.getInt(OPTIONS, SAVE_X_VALUES);
-		saveXValues = (options&SAVE_X_VALUES)!=0;
 		autoClose = (options&AUTO_CLOSE)!=0;
 		listValues = (options&LIST_VALUES)!=0;
 		plotWidth = Prefs.getInt(PREFS_WIDTH, WIDTH);
@@ -291,7 +286,7 @@ public class PlotWindow extends ImageWindow implements ActionListener,	ItemListe
 		menuItems[FREEZE] = addPopupItem(popupMenu, "Freeze Plot", true);
 		menuItems[HI_RESOLUTION] = addPopupItem(popupMenu, "High-Resolution Plot...");
 		popupMenu.addSeparator();
-		menuItems[PROFILE_PLOT_OPTIONS] = addPopupItem(popupMenu, "Profile & Plot Options...");
+		menuItems[PROFILE_PLOT_OPTIONS] = addPopupItem(popupMenu, "Plot Options...");
 		return popupMenu;
 	}
 
@@ -355,7 +350,7 @@ public class PlotWindow extends ImageWindow implements ActionListener,	ItemListe
 		} else if (b==menuItems[HI_RESOLUTION])
 			new PlotDialog(plot, PlotDialog.HI_RESOLUTION).showDialog(this);
 		else if (b==menuItems[PROFILE_PLOT_OPTIONS])
-			IJ.doCommand("Profile Plot Options...");
+			IJ.doCommand("Plots...");
 		ic.requestFocus();	//have focus on the canvas, not the button, so that pressing the space bar allows panning
 	}
 
@@ -635,7 +630,6 @@ public class PlotWindow extends ImageWindow implements ActionListener,	ItemListe
 			prefs.put(PREFS_FONT_SIZE, Integer.toString(fontSize));
 		}
 		int options = 0;
-		if (saveXValues) options |= SAVE_X_VALUES;
 		if (autoClose && !listValues) options |= AUTO_CLOSE;
 		if (listValues) options |= LIST_VALUES;
 		if (!interpolate) options |= INTERPOLATE; // true=0, false=1
@@ -756,6 +750,13 @@ public class PlotWindow extends ImageWindow implements ActionListener,	ItemListe
 	/** Returns the Plot associated with this PlotWindow. */
 	public Plot getPlot() {
 		return plot;
+	}
+	
+	/** Freezes the active plot window. */
+	public static void freeze() {
+		Window win = WindowManager.getActiveWindow();
+		if (win!=null && (win instanceof PlotWindow))
+			((PlotWindow)win).getPlot().setFrozen(true);
 	}
 	
 }

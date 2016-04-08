@@ -42,9 +42,9 @@ public class OJ {
     private static VertexCalculatorOJ vcj;
     private static IjImageChangedListenerOJ ilj;
     private static StackChangedListenerOJ slj;
-    public final static int build = 506;//dropbox problems
-    public final static String releaseVersion = "1.03w";//do not follow Wayne
-    public final static String buildDate = "04-nov-2015 22:20";
+    public final static int build = 507;//dropbox problems
+    public final static String releaseVersion = "1.03x";//do not follow Wayne
+    public final static String buildDate = "08-apr-2016 23:18";
     public static final String URL = "https://sils.fnwi.uva.nl/bcb/objectj";
     public static final String URLcurrent = "https://sils.fnwi.uva.nl/bcb/objectj/download/current/";
     public static final String ICONS = "/oj/gui/icons/";
@@ -54,7 +54,9 @@ public class OJ {
     public static boolean useProjectMenu = true;//13.4.2010
     public static boolean addMagicBytes = true;//23.4.2010
     public static Editor editor = null;//
+    public static Editor plotEditor = null;//23.1.2016
     public static Window editorWindow = null;//23.4.2010
+    public static Window plotEditorWindow = null;
     public static Color headerBackground = new Color(80, 80, 80);//17.5.2010
     public static boolean isProjectOpen = false;//17.5.2010
     public static boolean doubleBuffered = true;// for Windows only 10.2.2011

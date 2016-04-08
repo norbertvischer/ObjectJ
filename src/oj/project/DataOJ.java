@@ -2,12 +2,13 @@ package oj.project;
 
 import java.io.Serializable;
 import java.util.Date;
+import oj.gui.settings.PlotManagerOJ;
 import oj.macros.MacroSetOJ;
 
 /**
  * The collection of all information (i.e. what is saved in the .ojj file.
- * Mainly housekeeping, getting and setting Cells, Images, Macros, Results, YtemDefs,
- * as well as reading and writing the entire data stream.
+ * Mainly housekeeping, getting and setting Cells, Images, Macros, Results,
+ * YtemDefs, as well as reading and writing the entire data stream.
  */
 public class DataOJ implements Cloneable, IBaseOJ, Serializable {
 
@@ -30,6 +31,7 @@ public class DataOJ implements Cloneable, IBaseOJ, Serializable {
     private transient String directory = "";
     private transient boolean changed = false;
     private transient String linkedMacroText = null;
+    private transient String linkedPlotText = null;
 
     public DataOJ(String name, String description) {
         this.setName(name);
@@ -52,6 +54,14 @@ public class DataOJ implements Cloneable, IBaseOJ, Serializable {
 
     public void setLinkedMacroText(String txt) {
         linkedMacroText = txt;
+    }
+
+    public String getLinkedPlotText() {
+        return linkedPlotText;
+    }
+
+    public void setLinkedPlotText(String txt) {
+        linkedPlotText = txt;
     }
 
     public void init() {
@@ -181,7 +191,7 @@ public class DataOJ implements Cloneable, IBaseOJ, Serializable {
 
     /**
      * ?????
-     * 
+     *
      */
     public Object clone() {
         try {
@@ -212,7 +222,7 @@ public class DataOJ implements Cloneable, IBaseOJ, Serializable {
         if (images == null) {
             images = new ImagesOJ();
         }
-        
+
         if (results == null) {
             results = new ResultsOJ();
         }

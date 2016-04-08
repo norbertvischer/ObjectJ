@@ -15,7 +15,6 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import oj.project.ResultsOJ;
 import oj.project.results.ColumnsOJ;
-import oj.project.results.PlotsOJ;
 import oj.project.results.QualifiersOJ;
 import oj.project.results.statistics.IStatisticsOJ;
 import oj.project.results.statistics.StatisticsMacroOJ;
@@ -62,12 +61,6 @@ public class ResultsConverterOJ implements Converter {
         if (results.getQualifiers() != null) {
             writer.startNode("qualifiers");
             context.convertAnother(results.getQualifiers());
-            writer.endNode();
-        }
-        
-        if (results.getPlots() != null) {
-            writer.startNode("plots");
-            context.convertAnother(results.getPlots());
             writer.endNode();
         }
     }
@@ -154,14 +147,6 @@ public class ResultsConverterOJ implements Converter {
                 }
             }
             
-            else if ("plots".equals(reader.getNodeName())) {
-                try {
-                    PlotsOJ plots = (PlotsOJ) context.convertAnother(results, PlotsOJ.class);
-                    results.plots = plots;
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            }
             
             
             reader.moveUp();

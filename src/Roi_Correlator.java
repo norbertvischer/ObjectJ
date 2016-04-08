@@ -34,10 +34,12 @@ public class Roi_Correlator implements PlugIn {
     private static int nBins;
     private static boolean withPlot;
     private int plotID;
-    private int z1, z2;
+    private int z1, z2, thrX, thrY, aboveX, aboveY, aboveBoth;
     private Roi roi;
     ImagePlus thisImp;
     static double pearson;
+   static double manders1;
+   static double manders2;
 
     public void run(String arg) {
         String msg = "";
@@ -109,6 +111,13 @@ public class Roi_Correlator implements PlugIn {
         gd.addMessage("Use Max=0 for automatic scaling");
         gd.addNumericField("MaxX: ", 0, 0);
         gd.addNumericField("MaxY: ", 0, 0);
+
+        
+        gd.addMessage("Use Thresholds>0 for Manders coeffs");
+        gd.addNumericField("ThresholdX: ", 0, 0);
+        gd.addNumericField("ThresholdY: ", 0, 0);
+
+        
         gd.showDialog();
         if (gd.wasCanceled()) {
             return false;
@@ -120,6 +129,8 @@ public class Roi_Correlator implements PlugIn {
         nBins = (int) gd.getNextNumber();
         maxX = (int) gd.getNextNumber();
         maxY = (int) gd.getNextNumber();
+        thrX = (int) gd.getNextNumber();
+        thrY = (int) gd.getNextNumber();
         return true;
     }
 
@@ -180,9 +191,19 @@ public class Roi_Correlator implements PlugIn {
                     if (z2 > max2) {
                         max2 = z2;
                     }
-                    v1[index] = z1;
+                                 v1[index] = z1;
                     v2[index] = z2;
-
+      
+                    if (z1 > thrX) {
+                        aboveX++;
+                    }
+                   if (z2 > thrY) {
+                        aboveY++;
+                    }
+                   if (z1 > thrX && z2 > thrY) {
+                        aboveBoth++;
+                    }
+ 
                     index++;
                 }
             }
@@ -202,6 +223,8 @@ public class Roi_Correlator implements PlugIn {
             }
         }
         pearson = calculateCorrelation(v1, v2, index);
+        manders1 = aboveX/aboveBoth;
+        manders2 = aboveY/aboveBoth;
         IJ.showStatus("PearsonC = " + (float) pearson);
         return pearson;
     }
@@ -240,6 +263,12 @@ public class Roi_Correlator implements PlugIn {
 
     public static String getPearson() {
         return "" + pearson;
+    }
+ public static String getManders1() {
+        return "" + manders1;
+    }
+ public static String getManders2() {
+        return "" + manders2;
     }
 
     ImagePlus getPlotImage(int id) {

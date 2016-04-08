@@ -329,7 +329,8 @@ is divided into following sections:
         <j2seproject3:javac/>
 
         <!--<copy file="build/classes/SipChart_.class" tofile="plugins/SipChart_.class" />   14.4.2013 -->  
-        <!--<copy file="build/classes/EFA_.class" tofile="plugins/EFA_.class" />  28.2.2011. -->
+       <copy file="build/classes/EFA_.class" tofile="plugins/EFA_.class" />  <!--28.2.2011. -->
+       <copy file="build/classes/Roi_Correlator.class" tofile="plugins/Roi_Correlator.class" />  <!--28.2.2011. -->
        
         <copy todir="${build.classes.dir}">
             <fileset dir="${src.dir}" excludes="${build.classes.excludes},${excludes}" includes="${includes}"/>
@@ -448,6 +449,25 @@ is divided into following sections:
     
     <jar jarfile="SIPchart_.jar" basedir="SIPchart_" />
     <copy todir = "plugins" file="SIPchart_.jar" />
+    -->
+
+         <!--
+                =========
+                EFA
+                =========
+      <copy todir = "EFA_" file="build/classes/EFA_.class" />
+    
+    <jar jarfile="EFA_.jar" basedir="EFA_" />
+    <copy todir = "plugins" file="EFA_.jar" />
+    -->
+       <!--
+                =========
+                Roi_Correlator
+                =========
+      <copy todir = "Image_CorrelatorRoi" file="build/classes/Image_CorrelatorRoi.class" />
+    
+    <jar jarfile="Roi_Correlator.jar" basedir="Roi_Correlator" />
+    <copy todir = "plugins" file="Roi_Correlator.jar" />
     -->
     
     

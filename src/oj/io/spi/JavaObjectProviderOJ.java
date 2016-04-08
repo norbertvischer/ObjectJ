@@ -7,11 +7,7 @@
 package oj.io.spi;
 
 import ij.IJ;
-import ij.ImagePlus;
-import ij.VirtualStack;
 import ij.io.FileInfo;
-import ij.io.FileSaver;
-import ij.io.RoiEncoder;
 import ij.io.TiffEncoder;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -30,6 +26,7 @@ import java.util.jar.JarInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
+import oj.gui.settings.PlotManagerOJ;
 import oj.project.DataOJ;
 import oj.io.InputOutputOJ.ProjectIOExceptionOJ;
 import oj.util.UtilsOJ;
@@ -49,120 +46,122 @@ public class JavaObjectProviderOJ implements IIOProviderOJ {
 
     public void saveProject(DataOJ data, String directory, String filename) throws ProjectIOExceptionOJ {
 
-        
-        
-       oj.OJ.addMagicBytes=!ij.IJ.altKeyDown();//23.12.2012
-        
-        
+        oj.OJ.addMagicBytes = !ij.IJ.altKeyDown();//23.12.2012
+
         FileInfo fi = null;
         DataOutputStream out = null;
         boolean testFlag = false;
         String title = null;
 
-            Calendar date = Calendar.getInstance();
-            String tmpName = "tmp-" + date.get(Calendar.HOUR_OF_DAY) + "-" + date.get(Calendar.MINUTE) + "-" + date.get(Calendar.SECOND) + ".ojj";
-            File oldOjjFile = new File(directory, filename);
-            File newOjjFile = new File(directory, tmpName);
+        Calendar date = Calendar.getInstance();
+        String tmpName = "tmp-" + date.get(Calendar.HOUR_OF_DAY) + "-" + date.get(Calendar.MINUTE) + "-" + date.get(Calendar.SECOND) + ".ojj";
+        File oldOjjFile = new File(directory, filename);
+        File newOjjFile = new File(directory, tmpName);
 
+        byte[] magicBytes = new byte[]{'o', 'j', 'j', 0};
+        FileOutputStream fileOut = null;
 
+        ZipOutputStream zipOut = null;
+        BufferedOutputStream bufferedOut = null;
 
+        ObjectOutputStream objOut = null;
+        boolean ok = true;
+        try {
+            fileOut = new FileOutputStream(newOjjFile);
 
-            byte[] magicBytes = new byte[]{'o', 'j', 'j', 0};
-            FileOutputStream fileOut = null;
+            bufferedOut = new BufferedOutputStream(fileOut);
+            if (oj.OJ.addMagicBytes && !testFlag) {
+                bufferedOut.write(magicBytes);
+            }
 
-            ZipOutputStream zipOut = null;
-            BufferedOutputStream bufferedOut = null;
+            zipOut = new ZipOutputStream(bufferedOut);
+            zipOut.putNextEntry(new ZipEntry("objectj-data"));
 
-            ObjectOutputStream objOut = null;
-            boolean ok = true;
-            try {
-                fileOut = new FileOutputStream(newOjjFile);
+            ByteArrayOutputStream byteArrOut = new ByteArrayOutputStream();
 
-                bufferedOut = new BufferedOutputStream(fileOut);
-                if (oj.OJ.addMagicBytes && !testFlag) {
-                    bufferedOut.write(magicBytes);
+            // try {
+            objOut = new ObjectOutputStream(byteArrOut);
+            String mText = data.getLinkedMacroText();
+            data.setLinkedMacroText(null);//temp remove macro, because we put it in a separate zip entry
+            objOut.writeObject(data);
+            data.setLinkedMacroText(mText);//--2.6.2010
+            byteArrOut.writeTo(zipOut);
+
+            ByteArrayOutputStream myMacroStream = new ByteArrayOutputStream();
+            byte[] macroBytes = null;
+            if (mText != null) {
+                zipOut.putNextEntry(new ZipEntry("objectj-macro"));
+                macroBytes = mText.getBytes();
+                myMacroStream.write(macroBytes);
+                myMacroStream.writeTo(zipOut);
+                zipOut.closeEntry();
+            }
+            if (PlotManagerOJ.withPlots) {
+                ByteArrayOutputStream myPlotStream = new ByteArrayOutputStream();
+                String pText = data.getLinkedPlotText();
+                if (pText != null && pText.length() > 0) {
+                    byte[] plotBytes = null;
+                    if (mText != null) {
+                        zipOut.putNextEntry(new ZipEntry("objectj-plots"));
+                        plotBytes = pText.getBytes();
+                        myPlotStream.write(plotBytes);
+                        myPlotStream.writeTo(zipOut);
+                        zipOut.closeEntry();
+                    }
                 }
-
-                zipOut = new ZipOutputStream(bufferedOut);
-                zipOut.putNextEntry(new ZipEntry("objectj-data"));
-
-                ByteArrayOutputStream byteArrOut = new ByteArrayOutputStream();
-
-                // try {
-                objOut = new ObjectOutputStream(byteArrOut);
-//            } catch (IOException iOException) {
-//                ok = false;
-//                ij.IJ.showMessage("Error binary output (7678");//29.8.2010
-//            }
-
-                String mText = data.getLinkedMacroText();
-                data.setLinkedMacroText(null);//temp remove macro, because we put it in a separate zip entry
-                objOut.writeObject(data);
-                data.setLinkedMacroText(mText);//--2.6.2010
-                byteArrOut.writeTo(zipOut);
-
-                ByteArrayOutputStream myMacroStream = new ByteArrayOutputStream();
-
-                byte[] macroBytes = null;
-                if (mText != null) {
-                    zipOut.putNextEntry(new ZipEntry("objectj-macro"));
-                    macroBytes = mText.getBytes();
-                    myMacroStream.write(macroBytes);
-                    myMacroStream.writeTo(zipOut);
-                }
-
-
-                if (testFlag) {
-                    out = new DataOutputStream(new BufferedOutputStream(zipOut));
-                    zipOut.putNextEntry(new ZipEntry(title));
-                    TiffEncoder te = new TiffEncoder(fi);
-
-                    te.write(out);
-
-                    out.close();
-
-                }
-
-            } catch (IOException ex) {
-                ok = false;
-                throw new ProjectIOExceptionOJ("Can't save project (a):  " + ex.getMessage());
-
-            } finally {
             }
 
-            try {
-                objOut.close();
-            } catch (IOException ex) {
-                ok = false;
+            if (testFlag) {
+                out = new DataOutputStream(new BufferedOutputStream(zipOut));
+                zipOut.putNextEntry(new ZipEntry(title));
+                TiffEncoder te = new TiffEncoder(fi);
 
-                throw new ProjectIOExceptionOJ("Can't save project (c): " + ex.getMessage());
-            }
-            try {
-                zipOut.close();
-            } catch (IOException ex) {
-                ok = false;
+                te.write(out);
 
-                throw new ProjectIOExceptionOJ("Can't save project (d): " + ex.getMessage());
-            }
-            try {
-                fileOut.close();
-            } catch (IOException ex) {
-                ok = false;
-
-                throw new ProjectIOExceptionOJ("Can't save project (e): " + ex.getMessage());
-            }
-            try {
-                bufferedOut.close();
-            } catch (IOException ex) {
-                ok = false;
-                throw new ProjectIOExceptionOJ("Can't save project (b): " + ex.getMessage());
+                out.close();
 
             }
-            if (ok) {
-                oldOjjFile.delete();//1.10.2010 for Windows
-                newOjjFile.renameTo(oldOjjFile);
 
-            }
+        } catch (IOException ex) {
+            ok = false;
+            throw new ProjectIOExceptionOJ("Can't save project (a):  " + ex.getMessage());
+
+        } finally {
+        }
+
+        try {
+            objOut.close();
+        } catch (IOException ex) {
+            ok = false;
+
+            throw new ProjectIOExceptionOJ("Can't save project (c): " + ex.getMessage());
+        }
+        try {
+            zipOut.close();
+        } catch (IOException ex) {
+            ok = false;
+
+            throw new ProjectIOExceptionOJ("Can't save project (d): " + ex.getMessage());
+        }
+        try {
+            fileOut.close();
+        } catch (IOException ex) {
+            ok = false;
+
+            throw new ProjectIOExceptionOJ("Can't save project (e): " + ex.getMessage());
+        }
+        try {
+            bufferedOut.close();
+        } catch (IOException ex) {
+            ok = false;
+            throw new ProjectIOExceptionOJ("Can't save project (b): " + ex.getMessage());
+
+        }
+        if (ok) {
+            oldOjjFile.delete();//1.10.2010 for Windows
+            newOjjFile.renameTo(oldOjjFile);
+
+        }
 
         //}
     }
@@ -185,6 +184,7 @@ public class JavaObjectProviderOJ implements IIOProviderOJ {
                 ZipInputStream zipInStream = null;
                 ZipEntry ze = null;
                 String macroText = null;
+                String plotText = null;
                 try {
                     zipInStream = new ZipInputStream(fis);
                     ze = zipInStream.getNextEntry();
@@ -227,6 +227,38 @@ public class JavaObjectProviderOJ implements IIOProviderOJ {
                         macroText = macroText.replace("\r\n", "\r");
                         macroText = macroText.replace("\r", "\n");//21.6.2010 only use newLine as line terminator
                     }
+
+                    ze = zipInStream.getNextEntry();
+                    if (ze != null) {
+                        if (!ze.getName().equals("objectj-plots")) {
+                            throw new ProjectIOExceptionOJ("ObjectJ plots expected");
+                        }
+
+                        int size = 33 * 1024 * 1024;//33 MB
+                        byte[] bytes = new byte[(int) size];
+                        int loadedBytes = 0;
+                        int chunk = 0;
+                        while (((int) size - loadedBytes) > 0) {
+
+                            chunk = zipInStream.read(bytes, loadedBytes, (int) size - loadedBytes);
+                            if (chunk == -1) {
+                                break;
+                            }
+                            loadedBytes += chunk;
+                            if (loadedBytes >= size) {
+                                IJ.showMessage("file is larger than " + (size / 1024 / 1024) + " MB");
+                                return null;
+                            }
+                        }
+                        byte[] bytesTrimmed = new byte[loadedBytes];
+                        for (int jj = 0; jj < loadedBytes; jj++) {
+                            bytesTrimmed[jj] = bytes[jj];
+                        }
+                        plotText = new String(bytesTrimmed);
+                        plotText = plotText.replace("\r\n", "\r");
+                        plotText = plotText.replace("\r", "\n");//21.6.2010 only use newLine as line terminator
+                    }
+
                     if (data != null) {
                         data.initAfterUnmarshalling();
                         data.setChanged(false);
@@ -234,14 +266,11 @@ public class JavaObjectProviderOJ implements IIOProviderOJ {
                         data.setDirectory(directory);
                         data.setFilename(filename);
                         data.setLinkedMacroText(macroText);
-
+                        data.setLinkedPlotText(plotText);
                         data.getYtemDefs().setCellLayerVisible(true);//13.4.2010
-
 
                         //MacroInstaller mi = new MacroInstaller();
                         //mi.install(macroText);//23.4.2010
-
-
                     }
                 } catch (IOException ex) {
                     throw new ProjectIOExceptionOJ("Cannot read project (f): " + ex.getMessage());
@@ -338,7 +367,6 @@ public class JavaObjectProviderOJ implements IIOProviderOJ {
             return false;
         }
         return true;
-
 
     }
 

@@ -34,9 +34,8 @@ public class PlotOJ {
      */
     public void makeHistoFromColumn(ColumnOJ column) {
 
-        if (column == null) {
+        if (column == null)
             return;
-        }
         Plot plot = null;
         final String theName = column.getName();//for action
         ColumnDefOJ coldef = column.getColumnDef();
@@ -63,12 +62,10 @@ public class PlotOJ {
                 cnt++;
                 sum += value;
                 sum2 += value * value;
-                if (value < allXMin) {
+                if (value < allXMin)
                     allXMin = value;
-                }
-                if (value > allXMax) {
+                if (value > allXMax)
                     allXMax = value;
-                }
             }
         }
         if (cnt == 0) {
@@ -106,12 +103,10 @@ public class PlotOJ {
         binWidth = coldef.getHistoBinWidth();
         yMax = coldef.getHistoYMax();
 
-        if (Double.isNaN(xLeft)) {
+        if (Double.isNaN(xLeft))
             xLeft = allXMin;
-        }
-        if (Double.isNaN(xRight)) {
+        if (Double.isNaN(xRight))
             xRight = allXMax;
-        }
         range = xRight - xLeft;
         if (!(range > 0)) {
             ij.IJ.showMessage("No histogram is possible");
@@ -119,12 +114,10 @@ public class PlotOJ {
         }
 
         if (!(binWidth > 0.0)) {
-            if (cnt > 1) {
+            if (cnt > 1)
                 binWidth = (3.5 * allStdDev / Math.pow(cnt, 1.0 / 3));//Scott's choice
-            }
-            if (cnt == 1) {
+            if (cnt == 1)
                 binWidth = 1;//9.2.2010 to be checked
-            }
         }
 
         nBins = (int) (Math.floor((range) / binWidth)) + 1;
@@ -152,34 +145,31 @@ public class PlotOJ {
         int flags = Plot.DEFAULT_FLAGS + Plot.X_FORCE2GRID;
         String plotName = "Histogram of " + column.getName();
         ImagePlus imp;
-        while (WindowManager.getImage(plotName) != null) {//2.2.2014
+        while (WindowManager.getImage(plotName) != null)//2.2.2014
             WindowManager.getImage(plotName).close();
-        }
         plot = new Plot(plotName, column.getName(), "count", ((double[]) null), ((double[]) null), flags);
         double[] xxAll = null;
         double[] yyAll = null;
         double[] xxQual = null;
         double[] yyQual = null;
         for (int pass = 1; pass <= 2; pass++) {//first pass is "all", which defines limits;
-            if (pass == 2) {
+            if (pass == 2)
                 values = qualifiedValues;
-            }
             len = values.length;
 
 //Calculate  histogram of this column
             double[] xx = new double[arrSize];
             double[] yy = new double[arrSize];
 
-            for (int jj = 0; jj < nBins; jj++) {
+            for (int jj = 0; jj < nBins; jj++)
                 xx[jj] = 0;
-            }
             int bin;
             for (int jj = 0;
                     jj < len;
                     jj++) {
-                if (values[jj] == xRight) {
+                if (values[jj] == xRight)
                     bin = nBins - 1;
-                } else {
+                else {
                     double realBin = (values[jj] - xLeft) / range * nBins;
                     bin = (int) Math.round(Math.floor(realBin));
                 }
@@ -194,11 +184,9 @@ public class PlotOJ {
             }
             if (yMax <= 0) {
                 yMax = 1;
-                for (int nn = 0; nn < yy.length; nn++) {
-                    if (yy[nn] > yMax) {
+                for (int nn = 0; nn < yy.length; nn++)
+                    if (yy[nn] > yMax)
                         yMax = (int) yy[nn] + 1;
-                    }
-                }
                 yMax *= 1.05;
             }
             plot.setLimits(xLeft, xRight, 0, yMax);
@@ -236,9 +224,8 @@ public class PlotOJ {
         String statText = "";
         for (int jj = 0;
                 jj < statArr.length;
-                jj++) {
+                jj++)
             statText += statArr[jj] + "\n";
-        }
         JTextArea txtArea = new JTextArea(statText, 5, 40);
 
         txtArea.setSize(dim.width, 100);
@@ -260,15 +247,13 @@ public class PlotOJ {
                     Component cmp = panel.getComponent(kk);
                     if (cmp instanceof Button) {
                         Button btn = (Button) cmp;
-                        if (btn.getLabel().startsWith("Save")) {
+                        if (btn.getLabel().startsWith("Save"))
                             saveButton = btn;
-                        }
                         if (kk == 2) {
                             btn.setLabel("Modify");
                             ActionListener[] al = btn.getActionListeners();
-                            for (int ll = 0; ll < al.length; ll++) {
+                            for (int ll = 0; ll < al.length; ll++)
                                 btn.removeActionListener(al[ll]);
-                            }
                             btn.addActionListener(new java.awt.event.ActionListener() {
 
 //                                public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -381,15 +366,12 @@ public class PlotOJ {
     private String statAsString(ColumnOJ col, String statName) {
         double value = col.getStatistics().getStatisticsValueByName(statName);
         int digits = 2;
-        if (statName.equals("Count")) {
+        if (statName.equals("Count"))
             digits = 0;
-        } else {
-            if (Math.abs(value) < 3.0) {
-                digits = 3;
-                if (Math.abs(value) < 0.3) {
-                    digits = 4;
-                }
-            }
+        else if (Math.abs(value) < 3.0) {
+            digits = 3;
+            if (Math.abs(value) < 0.3)
+                digits = 4;
         }
         String st = ij.IJ.d2s(value, digits);
         return st;
@@ -400,24 +382,21 @@ public class PlotOJ {
      * settings
      */
     private void changeHistoActionPerformed(String theName) {
-        if (!oj.OJ.isProjectOpen) {
+        if (!oj.OJ.isProjectOpen)
             return;
-        }
         ProjectSettingsOJ prSettings = ProjectSettingsOJ.getInstance();
         if (prSettings != null) {
             prSettings.setVisible(true);
             prSettings.selectColumnsPanel();
             ColumnSettingsOJ colSettings = prSettings.getColumnsPanel();
             colSettings.selectPresentationTab();
-            if (null != oj.OJ.getData().getResults().getColumns().getColumnByName(theName)) {
+            if (null != oj.OJ.getData().getResults().getColumns().getColumnByName(theName))
                 colSettings.selectColumn(theName);
-            } else {
+            else
                 ij.IJ.error("Lost connection to coumn");
-            }
             Dimension size = prSettings.getSize();
-            if (size.height < 500) {
+            if (size.height < 500)
                 prSettings.setSize(size.width, 500);//23.1.2015
-            }
             prSettings.setVisible(true);
         }
     }

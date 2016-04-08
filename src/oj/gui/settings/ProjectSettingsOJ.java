@@ -87,8 +87,8 @@ public class ProjectSettingsOJ extends javax.swing.JFrame {
         settingsPanels.put(ProjectSettingsOJ.QUALIFIERS_PANEL, new QualifiersSettingsOJ());
         settingsPanels.put(ProjectSettingsOJ.YTEM_DEFS_PANEL, new YtemDefsSettingsOJ());
         settingsPanels.put(ProjectSettingsOJ.IMAGE_DEFS_PANEL, new ImageDefsSettingsOJ());
-        if (PlotSettingsOJ.withPlots) {
-            settingsPanels.put(ProjectSettingsOJ.PLOTS_PANEL, new PlotSettingsOJ());
+        if (PlotManagerOJ.withPlots) {
+            settingsPanels.put(ProjectSettingsOJ.PLOTS_PANEL, new PlotManagerOJ());
         }
         pnlSettings.add((javax.swing.JPanel) settingsPanels.get(ProjectSettingsOJ.COLUMNS_PANEL), ProjectSettingsOJ.COLUMNS_PANEL);
         pnlSettings.add((javax.swing.JPanel) settingsPanels.get(ProjectSettingsOJ.QUALIFIERS_PANEL), ProjectSettingsOJ.QUALIFIERS_PANEL);
@@ -97,7 +97,7 @@ public class ProjectSettingsOJ extends javax.swing.JFrame {
         
         new DropTarget(lblImageDefs, ImageProcessorOJ.dropOperations, OJ.getImageProcessor());//18.11.2014
 
-        if (PlotSettingsOJ.withPlots) {
+        if (PlotManagerOJ.withPlots) {
             pnlSettings.add((javax.swing.JPanel) settingsPanels.get(ProjectSettingsOJ.PLOTS_PANEL), ProjectSettingsOJ.PLOTS_PANEL);
         }
         if (IJ.isWindows()) {
@@ -134,7 +134,7 @@ public class ProjectSettingsOJ extends javax.swing.JFrame {
             lblPlots.setBorder(unselectedBorder);
             lblPlots.setBackground(Color.WHITE);
         }
-        if (!PlotSettingsOJ.withPlots && lblPlots != null) {
+        if (!PlotManagerOJ.withPlots && lblPlots != null) {
             lblPlots.hide();
         }
     }
@@ -397,7 +397,7 @@ private void formComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRS
 
   private void lblPlotsMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblPlotsMousePressed
 
-      if (PlotSettingsOJ.withPlots) {
+      if (PlotManagerOJ.withPlots) {
           updateLabels(lblPlots);
           selectedPanelKey = ProjectSettingsOJ.PLOTS_PANEL;
           resizeControlPanel();

@@ -1577,6 +1577,10 @@ public class MacroProcessorOJ {
         }
     }
 
+	
+	
+	
+	
     public void setColumnProperty(String columnName, String property, String valueS) {
         valueS = valueS.toLowerCase();//24.1.2010
         String leftPart = "";
@@ -1589,8 +1593,7 @@ public class MacroProcessorOJ {
         int value = Integer.parseInt(valueS);
         ColumnsOJ columns = OJ.getData().getResults().getColumns();
         ArrayList matchingColumns = columns.getColumnsByWildcard(columnName);
-        for (int jj = 0; jj
-                < matchingColumns.size(); jj++) {
+        for (int jj = 0; jj < matchingColumns.size(); jj++) {
             ColumnOJ col = (ColumnOJ) matchingColumns.get(jj);
             ColumnDefOJ colDef = col.getColumnDef();
             if (property.equalsIgnoreCase("visible")) {
@@ -1803,7 +1806,7 @@ public class MacroProcessorOJ {
     public void deleteMap(String pattern) {
         ij.IJ.showStatus("deleteMap " + pattern);
     }
-
+   
     public int ojMapCount(String pattern) {
         ij.IJ.showStatus("ojMapCount " + pattern);
         return -999;

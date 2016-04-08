@@ -573,31 +573,6 @@ public class UtilsOJ {
         return sb.toString();
     }
 
-    public static String showInFinderOrExplorerStringOld(String dir) {//before java 1.6 ?
-        String macroLine = "";
-
-        if (ij.IJ.isWindows()) {
-            dir = dir.substring(0, dir.length() - 1);//exec on Windows doesn't want the trailing file separator for a folder
-        }
-        String path = "\"" + dir + "\"";//add quotes
-        if (ij.IJ.isMacintosh()) {
-            macroLine = "a_9 = exec(\"open\", " + path + ");\n";
-        }
-
-        if (ij.IJ.isWindows()) {
-            char[] chars = path.toCharArray();// double backslashes
-            String winPath = "";
-            for (char cc : chars) {
-                winPath += cc;
-                if (cc == '\\') {
-                    winPath += cc;
-                }
-            }
-            macroLine = "a_9 = exec(\"cmd\", \"/c\", \"start\", \"explorer\", " + winPath + ");";
-        }
-        return macroLine;
-    }
-
     public static String getFileType(String directory, String filename) {
 
         File file = new File(directory, filename);

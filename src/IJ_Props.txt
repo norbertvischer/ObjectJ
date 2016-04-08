@@ -5,7 +5,7 @@
 
 # Note that commands must be unique.
 
-# Version 1.49
+# Version 1.50
 
 # Commands installed in the right-click popup menu
 # Overridden in StartupMacros
@@ -97,7 +97,7 @@ selection24="Add to Manager[t]",ij.plugin.Selection("add")
 options01="Line Width...",ij.plugin.Options("line")
 options02="Input/Output...",ij.plugin.Options("io")
 options03="Fonts...",ij.plugin.SimpleCommands("fonts")
-options04="Profile Plot Options...",ij.plugin.Profiler("set")
+options04="Plots...",ij.plugin.Profiler("set")
 options05="Rounded Rect Tool...",ij.plugin.RectToolOptions
 options06="Arrow Tool...",ij.plugin.ArrowToolOptions
 options07="Point Tool...",ij.plugin.PointToolOptions
@@ -155,6 +155,11 @@ stacks14="Plot Z-axis Profile",ij.plugin.ZAxisProfiler
 stacks15="Label...",ij.plugin.filter.StackLabeler
 stacks16="Statistics",ij.plugin.Stack_Statistics
 
+# Plugins installed in the Image/Stacks/Animation submenu
+animation_01="Start Animation [\\]",ij.plugin.Animator("start")
+animation_02="Stop Animation",ij.plugin.Animator("stop")
+animation_03="Animation Options...",ij.plugin.Animator("options")
+
 # Plugins installed in the Image/Stacks/Tools submenu
 tools_01="Combine...",ij.plugin.StackCombiner
 tools_02="Concatenate...",ij.plugin.Concatenator
@@ -166,10 +171,6 @@ tools_07="Make Substack...",ij.plugin.SubstackMaker
 tools_08="Grouped Z Project...",ij.plugin.GroupedZProjector
 tools_09="Set Label...",ij.plugin.SimpleCommands("set")
 tools_10="Remove Slice Labels",ij.plugin.SimpleCommands("remove")
-tools_11=-
-tools_12="Start Animation [\\]",ij.plugin.Animator("start")
-tools_13="Stop Animation",ij.plugin.Animator("stop")
-tools_14="Animation Options...",ij.plugin.Animator("options")
 
 # Plugins installed in the Image/Hyperstacks submenu
 hyperstacks01="New Hyperstack...",ij.plugin.HyperStackMaker
@@ -211,7 +212,7 @@ overlay07="Remove Overlay",ij.plugin.OverlayCommands("remove")
 overlay08="List Elements",ij.plugin.OverlayCommands("list")
 overlay09="Flatten[F]",ij.plugin.OverlayCommands("flatten")
 overlay10="Labels...",ij.plugin.OverlayLabels
-overlay11="Overlay Options...",ij.plugin.OverlayCommands("options")
+overlay11="Overlay Options...[Y]",ij.plugin.OverlayCommands("options")
 
 # Plugins installed in the Image/Lookup Tables submenu
 lookup01="Invert LUT",ij.plugin.LutLoader("invert")
@@ -303,6 +304,7 @@ fft06="Bandpass Filter...",ij.plugin.filter.FFTFilter
 fft07="Custom Filter...",ij.plugin.filter.FFTCustomFilter
 fft08="FD Math...",ij.plugin.FFTMath
 fft09="Swap Quadrants",ij.plugin.FFT("swap")
+fft09="Make Circular Selection...",ij.plugin.CircularRoiMaker
 
 # Plugins installed in the Process/Filters submenu
 filters01="Convolve...",ij.plugin.filter.Convolver
@@ -348,6 +350,7 @@ tools05="ROI Manager...",ij.plugin.frame.RoiManager
 tools06="Scale Bar...",ij.plugin.ScaleBar
 tools07="Calibration Bar...",ij.plugin.CalibrationBar
 tools08="Synchronize Windows",ij.plugin.frame.SyncWindows
+tools09="Grid...",ij.plugin.Grid
 
 # Plugins installed in the Plugins menu
 plug-in01=>"Macros"
@@ -374,11 +377,12 @@ macros05="Record...",ij.plugin.frame.Recorder
 macros06=-
 
 # Plugins installed in the Plugins/Shortcuts submenu
-shortcuts01="List Shortcuts...",ij.plugin.CommandLister("shortcuts")
-shortcuts02="Create Shortcut... ",ij.plugin.Hotkeys("install")
-shortcuts03="Install Plugin...",ij.plugin.Installer
-shortcuts04="Remove...",ij.plugin.Hotkeys("remove")
-shortcuts05=-
+shortcuts01="Add Shortcut... ",ij.plugin.Hotkeys("install")
+shortcuts02="Add Shortcut by Name... ",ij.plugin.Hotkeys("install2")
+shortcuts03="Remove Shortcut...",ij.plugin.Hotkeys("remove")
+shortcuts04="List Shortcuts",ij.plugin.CommandLister("shortcuts")
+shortcuts05="List Commands",ij.plugin.Hotkeys("list")
+shortcuts06=-
 
 # Plugins installed in the Plugins/Utilities submenu
 utilities01="Control Panel...[U]",ij.plugin.ControlPanel
@@ -390,8 +394,8 @@ utilities06=-
 utilities07="Capture Screen[G]",ij.plugin.ScreenGrabber
 utilities08="Capture Image",ij.plugin.ScreenGrabber("image")
 utilities09=-
-utilities10="ImageJ Properties...",ij.plugin.JavaProperties
-utilities11="Threads...",ij.plugin.ThreadLister
+utilities10="ImageJ Properties",ij.plugin.JavaProperties
+utilities11="Threads",ij.plugin.ThreadLister
 utilities12="Benchmark",ij.plugin.filter.Benchmark
 utilities13="Reset...",ij.plugin.SimpleCommands("reset")
 
@@ -436,18 +440,19 @@ open14="Fluorescent Cells (400K)",ij.plugin.URLOpener("FluorescentCells.zip")
 open15="Fly Brain (1MB)",ij.plugin.URLOpener("flybrain.zip")
 open16="Gel (105K)",ij.plugin.URLOpener("gel.gif")
 open17="HeLa Cells (1.3M, 48-bit RGB)",ij.plugin.URLOpener("hela-cells.zip")
-open18="Leaf (36K)",ij.plugin.URLOpener("leaf.jpg")
-open19="Lena (68K)",ij.plugin.URLOpener("lena-std.tif")
-open20="Line Graph (21K)",ij.plugin.URLOpener("LineGraph.jpg")
-open21="Mitosis (26MB, 5D stack)",ij.plugin.URLOpener("Spindly-GFP.zip")
-open22="MRI Stack (528K)",ij.plugin.URLOpener("mri-stack.zip")
-open23="M51 Galaxy (177K, 16-bits)",ij.plugin.URLOpener("m51.zip")
-open24="Neuron (1.6M, 5 channels)",ij.plugin.URLOpener("Rat_Hippocampal_Neuron.zip")
-open25="Nile Bend (1.9M)",ij.plugin.URLOpener("NileBend.jpg")
-open26="Organ of Corti (2.8M, 4D stack)",ij.plugin.URLOpener("organ-of-corti.zip")
-open27="Particles (75K)",ij.plugin.URLOpener("particles.gif")
-open28="T1 Head (2.4M, 16-bits)",ij.plugin.URLOpener("t1-head.zip")
-open29="T1 Head Renderings (736K)",ij.plugin.URLOpener("t1-rendering.zip")
-open30="TEM Filter (112K)",ij.plugin.URLOpener("TEM_filter_sample.jpg")
-open31="Tree Rings (48K)",ij.plugin.URLOpener("Tree_Rings.jpg")
+open18="Image with Overlay",ij.plugin.URLOpener("ImageWithOverlay.zip")
+open19="Leaf (36K)",ij.plugin.URLOpener("leaf.jpg")
+open20="Lena (68K)",ij.plugin.URLOpener("lena-std.tif")
+open21="Line Graph (21K)",ij.plugin.URLOpener("LineGraph.jpg")
+open22="Mitosis (26MB, 5D stack)",ij.plugin.URLOpener("Spindly-GFP.zip")
+open23="MRI Stack (528K)",ij.plugin.URLOpener("mri-stack.zip")
+open24="M51 Galaxy (177K, 16-bits)",ij.plugin.URLOpener("m51.zip")
+open25="Neuron (1.6M, 5 channels)",ij.plugin.URLOpener("Rat_Hippocampal_Neuron.zip")
+open26="Nile Bend (1.9M)",ij.plugin.URLOpener("NileBend.jpg")
+open27="Organ of Corti (2.8M, 4D stack)",ij.plugin.URLOpener("organ-of-corti.zip")
+open28="Particles (75K)",ij.plugin.URLOpener("particles.gif")
+open29="T1 Head (2.4M, 16-bits)",ij.plugin.URLOpener("t1-head.zip")
+open30="T1 Head Renderings (736K)",ij.plugin.URLOpener("t1-rendering.zip")
+open31="TEM Filter (112K)",ij.plugin.URLOpener("TEM_filter_sample.jpg")
+open32="Tree Rings (48K)",ij.plugin.URLOpener("Tree_Rings.jpg")
 

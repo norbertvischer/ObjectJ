@@ -142,7 +142,7 @@ public class FunctionsOJ implements MacroExtension {
         return Double.toString(val);
     }
 
-   public String ojGetItemColors() {
+    public String ojGetItemColors() {
         return OJ.getMacroProcessor().getYtemColors();
     }
 
@@ -503,9 +503,9 @@ public class FunctionsOJ implements MacroExtension {
         return null;
     }
 
-    
-   public String ojSetMarker5D(String x, String y, String z, String channel, String frame) {
-        OJ.getMacroProcessor().setMarker5D(MacroProcessorOJ.parseDouble(x), MacroProcessorOJ.parseDouble(y), MacroProcessorOJ.parseDouble(z), MacroProcessorOJ.parseInt(channel), MacroProcessorOJ.parseInt(frame));
+    public String ojSetMarker5D(String x, String y, String z, String channel, String frame) {
+        ImageJAccessOJ.InterpreterAccess.interpError("Not supported");
+        //OJ.getMacroProcessor().setMarker5D(MacroProcessorOJ.parseDouble(x), MacroProcessorOJ.parseDouble(y), MacroProcessorOJ.parseDouble(z), MacroProcessorOJ.parseInt(channel), MacroProcessorOJ.parseInt(frame));
         return null;
     }
 
@@ -787,11 +787,6 @@ public class FunctionsOJ implements MacroExtension {
 
     public String ojvPushVertex(String vertex) {
         OJ.getMacroProcessor().pushVertex(stringToFloatArray2(vertex));
-        return null;
-    }
-
-    public String ojTestOld(String arg) {
-        Functions.registerExtensions(this);
         return null;
     }
 

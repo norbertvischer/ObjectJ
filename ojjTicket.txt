@@ -1,8 +1,23 @@
+05.04.16 01.04.16 
+Ticket idea:
+set buttons at the top of linked results for browsing. Includes: Entire panel 
+can be "active", in this case up-button performs "show next".
+One button for "show Selected", which has the number in it.
+
+
+
+opening a different ojj file does not remove current markers, unless you refresh image
+
+31.3.2016
+setTool("pistol") does not change the cursor, unless I move it out and in the window
+
+ojSelectClosestItem does nothing
 
 
 
 05.02.15 12:43
 - pressing space should enter "pan with hand", but doesn't if pistol tool is active
+--> only if toos window is active, so leave this for now
 
 03. 02.02.
 - menu RoiToItem creates a new object, instead of adding another myotome string
@@ -11,6 +26,8 @@
 02.02.15 13:37
 - In Yoesemite, after minimizing ObjectJ Tools (yellow dot),   Tools 
 cannot be recovered except for MObjectJ>Show ObjectJ Tools
+--> could not reproduce
+
 
 
 
@@ -18,7 +35,8 @@ cannot be recovered except for MObjectJ>Show ObjectJ Tools
 13.12.14 1:27
 - save a linked image with shortcut "j":
 ImageJ 1.49n10; Java 1.6.0_65 [64-bit]; Mac OS X 10.9.5; 86MB of 3000MB (2%)
- 
+ --> could not reproduce
+
 java.lang.NullPointerException
 	at ij.gui.ImageWindow.close(ImageWindow.java:376)
 	at ij.ImagePlus.close(ImagePlus.java:346)

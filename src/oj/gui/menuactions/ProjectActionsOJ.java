@@ -7,8 +7,9 @@
 package oj.gui.menuactions;
 
 import ij.IJ;
-import ij.Prefs;
+import ij.WindowManager;
 import ij.gui.YesNoCancelDialog;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import oj.OJ;
@@ -19,6 +20,7 @@ import oj.macros.EmbeddedMacrosOJ;
 import oj.gui.results.ProjectResultsOJ;
 import oj.gui.MenuManagerOJ;
 import oj.gui.ToolsWindowOJ;
+import oj.gui.settings.PlotManagerOJ;
 import oj.io.InputOutputOJ;
 import oj.gui.settings.ProjectSettingsOJ;
 import oj.gui.tools.ToolManagerOJ;
@@ -208,12 +210,12 @@ public class ProjectActionsOJ {
     }
 
     private static boolean closeProjectData() {
-       if (OJ.getData() != null) {
+        if (OJ.getData() != null) {
             ToolStateOJ state = OJ.getToolStateProcessor().getToolStateObject();
             if (state != null && (state instanceof CreateCellStateOJ)) {
                 ((CreateCellStateOJ) state).closeCell();//2.11.2013        
             }
-    /*    
+            /*    
             //6.6.2015
         if (ToolsWindowOJ.getInstance() != null) {
             int toolsX = ToolsWindowOJ.getInstance().getLocationOnScreen().x;
@@ -227,8 +229,8 @@ public class ProjectActionsOJ {
             Prefs.set("objectj.projectx", "" + projectX);
             Prefs.set("objectj.projecty", "" + projectY);
         }
-        */
-  
+             */
+
         }
         if ((OJ.getData() != null) && (OJ.getData().getChanged() == true)) {
             if (ProjectSettingsOJ.getInstance() != null) {
@@ -251,12 +253,21 @@ public class ProjectActionsOJ {
                 if (imgs != null) {
                     imgs.removeAllImages();
                 }
+                PlotManagerOJ plotSettings = PlotManagerOJ.getInstance();
+                if (plotSettings != null) {
+                    String plotTitles[] = plotSettings.getPlotTitles();                 
+                    for (String title : plotTitles) {
+                        Window window = WindowManager.getWindow(title);
+                        if (window != null) {
+                            window.dispose();
+                            WindowManager.removeWindow(window);
+                        }
+                    }
+                }
             }
             OJ.isProjectOpen = false;
         }
-
         return true;
-
     }
 
     static boolean resetProjectData() {
