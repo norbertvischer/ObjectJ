@@ -77,8 +77,9 @@ public class PlotDialogOJ {//implements DialogListener {
 	 */
 	String composePlotMacro(String plotType, String fromExistinMacro) {
 		multiPlot.clear();
-		PlotDialog plotDialog = new PlotDialog("New " + plotType);
+		PlotDialog2 plotDialog = new PlotDialog2("New " + plotType);
 
+		
 		//Top panel with buttons
 		Panel buttonPanel = new Panel(new GridLayout(1, 3, 0, 0));
 		buttonPanel.add(new Label("Curves:"));
@@ -92,6 +93,8 @@ public class PlotDialogOJ {//implements DialogListener {
 		buttonPanel.add(plusButton);
 		buttonPanel.add(new Label(""));//create distance
 
+		//IJ.wait(1000);
+		
 		previewBox = new Checkbox("Preview");
 		previewBox.addItemListener(plotDialog);
 		buttonPanel.add(previewBox);
@@ -137,16 +140,25 @@ public class PlotDialogOJ {//implements DialogListener {
 			macroToGui(fromExistinMacro);
 			createPreview();
 		}
+		
+		plotDialog.setCancelLabel("Cancel") ;
+		
 		plotDialog.showDialog();//---- show Dialog -----
+		
 
 		IJ.runMacro("close('Preview*');");
 		if (plotDialog.wasCanceled()) {
 			return null;
 		}
+		
 		//All settings are already recorded via events, except plotTitle?
 		plotDialog.getNextString();//advance counter; bins are cought by event
 		String plotTitle = plotDialog.getNextString();
+		if (!plotDialog.wasOKed())
+		    plotTitle = IJ.getString("Duplicate As:", plotTitle);
 		String macroText = makeMultiplotText(plotTitle);
+
+
 		return macroText;
 	}
 
@@ -339,7 +351,9 @@ public class PlotDialogOJ {//implements DialogListener {
 
 		((Choice) choices.get(LIMITS)).select(plotLimit);
 		((TextField) (stringFields.get(1))).setText(multiPlotTitle);
+		//IJ.log("Putting plot title back:  [" +multiPlotTitle + "]");
 		previewBox.setState(previewFlag);
+		//IJ.beep();
 
 	}
 
@@ -433,9 +447,9 @@ public class PlotDialogOJ {//implements DialogListener {
 	/**
 	 * This class extends GenericDialog in order to catch the events.
 	 */
-	class PlotDialog extends GenericDialog {
+	class PlotDialog2 extends GenericDialog {
 
-		public PlotDialog(String title) {
+		public PlotDialog2(String title) {
 			super(title);
 			IJ.wait(100);
 			//super.revalidate();// will it help?
@@ -561,13 +575,14 @@ public class PlotDialogOJ {//implements DialogListener {
 		public void focusLost(FocusEvent e) {
 			Component c = e.getComponent();
 			if (c == stringField.get(0)) {
-				IJ.beep();
+				//IJ.beep();
 				if (previewFlag) {
 					createPreview();
 				}
 			}
 			if (c instanceof TextField) {
 				((TextField) c).select(0, 0);
+				multiPlotTitle = ((TextField) c).getText();
 			}
 			super.focusLost(e);
 		}

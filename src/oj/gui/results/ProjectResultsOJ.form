@@ -637,6 +637,9 @@
                           <TableHeader reorderingAllowed="false" resizingAllowed="true"/>
                         </Property>
                       </Properties>
+                      <Events>
+                        <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="tblLinkedHeaderMouseClicked"/>
+                      </Events>
                       <AuxValues>
                         <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new javax.swing.JTable(new oj.gui.results.linked.LinkedStatRowsModelOJ())"/>
                         <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="tblLinkedHeader.getColumnModel().addColumnModelListener(this);&#xa;tblLinkedHeader.getModel().addTableModelListener(tblLinkedContent);"/>

@@ -205,7 +205,7 @@ public class ImagesOJ extends BaseAdapterOJ {
             return false;
         }
         String dir = imp.getOriginalFileInfo().directory;
-        if (dir.equals(OJ.getData().getDirectory())) {
+        if (dir != null && dir.equals(OJ.getData().getDirectory())) {//22.6.2016
             String name = imp.getTitle();
             ImageOJ img = getImageByName(name);
             if (img != null) {

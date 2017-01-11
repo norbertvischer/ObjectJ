@@ -43,8 +43,8 @@ public class OJ {
     private static IjImageChangedListenerOJ ilj;
     private static StackChangedListenerOJ slj;
     public final static int build = 507;//dropbox problems
-    public final static String releaseVersion = "1.03x";//do not follow Wayne
-    public final static String buildDate = "08-apr-2016 23:18";
+    public final static String releaseVersion = "1.03y";//do not follow Wayne
+    public final static String buildDate = "11-jan-2017 22:22";
     public static final String URL = "https://sils.fnwi.uva.nl/bcb/objectj";
     public static final String URLcurrent = "https://sils.fnwi.uva.nl/bcb/objectj/download/current/";
     public static final String ICONS = "/oj/gui/icons/";

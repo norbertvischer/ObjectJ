@@ -893,6 +893,11 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
         tblLinkedHeader.setOpaque(false);
         tblLinkedHeader.setRowSelectionAllowed(false);
         tblLinkedHeader.getTableHeader().setReorderingAllowed(false);
+        tblLinkedHeader.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblLinkedHeaderMouseClicked(evt);
+            }
+        });
         linkedHeaderScrollPane.setViewportView(tblLinkedHeader);
 
         linkedResultsPanel.add(linkedHeaderScrollPane, java.awt.BorderLayout.NORTH);
@@ -1575,6 +1580,10 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
         }
         OJ.getEventProcessor().fireYtemDefChangedEvent(YtemDefChangedEventOJ.LABEL_VISIBILITY_CHANGED);
     }//GEN-LAST:event_mncLabelActionPerformed
+
+    private void tblLinkedHeaderMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblLinkedHeaderMouseClicked
+        IJ.showMessage("clicked");//14.4.2016
+    }//GEN-LAST:event_tblLinkedHeaderMouseClicked
 
     private void resetStateMode() {
         stateMode = Mode.SELECT;
