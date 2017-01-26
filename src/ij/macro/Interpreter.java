@@ -1179,7 +1179,7 @@ public class Interpreter implements MacroConstants {
 		WindowManager.setTempCurrentImage(null);
 		wasError = true;
 		instance = null;
-		if (showMessage) {
+		if (showMessage && message!=null) {
 			String line = getErrorLine();
 			done = true;
 			if (line.length()>120)
@@ -1870,7 +1870,7 @@ public class Interpreter implements MacroConstants {
 	/** Returns the batch mode RoiManager instance. */
 	public static RoiManager getBatchModeRoiManager() {
 		Interpreter interp = getInstance();
-		if (interp!=null && isBatchMode() && RoiManager.getInstance()==null) {
+		if (interp!=null && isBatchMode() && RoiManager.getRawInstance()==null) {
 			if (interp.func.roiManager==null)
 				interp.func.roiManager = new RoiManager(true);
 			return interp.func.roiManager;

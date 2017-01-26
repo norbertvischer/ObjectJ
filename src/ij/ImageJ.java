@@ -79,8 +79,8 @@ public class ImageJ extends Frame implements ActionListener,
 	MouseListener, KeyListener, WindowListener, ItemListener, Runnable {
 
 	/** Plugins should call IJ.getVersion() or IJ.getFullVersion() to get the version string. */
-	public static final String VERSION = "1.50i";
-	public static final String BUILD = "8";
+	public static final String VERSION = "1.51i";
+	public static final String BUILD = "";
 	public static Color backgroundColor = new Color(237,237,237);
 	/** SansSerif, 12-point, plain font. */
 	public static final Font SansSerif12 = new Font("SansSerif", Font.PLAIN, 12);
@@ -189,6 +189,7 @@ public class ImageJ extends Frame implements ActionListener,
 			if (IJ.isWindows()) try {setIcon();} catch(Exception e) {}
 			setLocation(loc.x, loc.y);
 			setResizable(false);
+			setAlwaysOnTop(Prefs.alwaysOnTop);
 			pack();
 			setVisible(true);
 		}
@@ -386,7 +387,6 @@ public class ImageJ extends Frame implements ActionListener,
 	public void mouseEntered(MouseEvent e) {}
 
  	public void keyPressed(KeyEvent e) {
- 		//if (e.isConsumed()) return;
 		int keyCode = e.getKeyCode();
 		IJ.setKeyDown(keyCode);
 		hotkey = false;
@@ -462,6 +462,8 @@ public class ImageJ extends Frame implements ActionListener,
 				case KeyEvent.VK_TAB: WindowManager.putBehind(); return;
 				case KeyEvent.VK_BACK_SPACE: // delete
 					if (deleteOverlayRoi(imp))
+						return;
+					if (imp!=null&&imp.getOverlay()!=null&&imp==GelAnalyzer.getGelImage())
 						return;
 					cmd="Clear";
 					hotkey=true;
@@ -610,6 +612,7 @@ public class ImageJ extends Frame implements ActionListener,
 			if (mb!=null && mb!=getMenuBar()) {
 				setMenuBar(mb);
 				Menus.setMenuBarCount++;
+				if (IJ.debugMode) IJ.log("setMenuBar: "+Menus.setMenuBarCount);
 			}
 		}
 	}
@@ -691,7 +694,8 @@ public class ImageJ extends Frame implements ActionListener,
 		}
   		// If existing ImageJ instance, pass arguments to it and quit.
   		boolean passArgs = mode==STANDALONE && !noGUI;
-		if (IJ.isMacOSX() && !commandLine) passArgs = false;
+		if (IJ.isMacOSX() && !commandLine)
+			passArgs = false;
 		if (passArgs && isRunning(args)) 
   			return;
  		ImageJ ij = IJ.getInstance();    	

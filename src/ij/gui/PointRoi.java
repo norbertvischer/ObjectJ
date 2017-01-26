@@ -1,6 +1,4 @@
 package ij.gui;
-import java.awt.*;
-import java.awt.image.*;
 import ij.*;
 import ij.process.*;
 import ij.measure.*;
@@ -9,8 +7,11 @@ import ij.plugin.PointToolOptions;
 import ij.plugin.filter.Analyzer;
 import ij.plugin.frame.Recorder;
 import ij.util.Java2; 
+import java.awt.*;
+import java.awt.image.*;
 import java.awt.event.KeyEvent;
-import java.util.Random;
+import java.util.*;
+import java.awt.geom.Point2D;
 
 /** This class represents a collection of points. */
 public class PointRoi extends PolygonRoi {
@@ -42,6 +43,8 @@ public class PointRoi extends PolygonRoi {
 	private int[] counts = new int[MAX_COUNTERS];
 	private ResultsTable rt;
 	private long lastPointTime;
+	private double scale;
+	private int[] counterInfo;
 	
 	static {
 		setDefaultType((int)Prefs.get(TYPE_KEY, HYBRID));
@@ -90,6 +93,7 @@ public class PointRoi extends PolygonRoi {
 	/** Creates a new PointRoi using the specified screen coordinates. */
 	public PointRoi(int sx, int sy, ImagePlus imp) {
 		super(makeXArray(sx, imp), makeYArray(sy, imp), 1, POINT);
+		defaultCounter = 0;
 		setImage(imp);
 		width=1; height=1;
 		type = defaultType;
@@ -143,11 +147,17 @@ public class PointRoi extends PolygonRoi {
 	/** Draws the points on the image. */
 	public void draw(Graphics g) {
 		updatePolygon();
-		if (ic!=null) mag = ic.getMagnification();
+		//scale = ic!=null?ic.getMagnification():1.0;
+		//if (type!=CIRCLE) scale=1.0;
+		scale = 1.0;
 		if (showLabels && nPoints>1) {
 			fontSize = 8;
 			fontSize += convertSizeToIndex(size);
-			if (fontSize>18) fontSize = 18;
+			if (fontSize>18)
+				fontSize = 18;
+			double scale2 = 0.7*scale;
+			if (scale2<1.0) scale2=1.0;
+			fontSize = (int)Math.round(fontSize*scale2);
 			font = new Font("SansSerif", Font.PLAIN, fontSize);
 			g.setFont(font);
 			if (fontSize>9)
@@ -178,7 +188,7 @@ public class PointRoi extends PolygonRoi {
 			else
 				color = Color.cyan;
 		}
-		if (nCounters>1 && counters!=null)
+		if (nCounters>1 && counters!=null && n<=counters.length)
 			color = getColor(counters[n-1]);
 		if (type==HYBRID || type==CROSSHAIR) {
 			if (type==HYBRID)
@@ -211,13 +221,16 @@ public class PointRoi extends PolygonRoi {
 				g.fillRect(x-size2, y-size2, size, size);
 		}
 		if (showLabels && nPoints>1) {
+			int offset = (int)Math.round(0.4*size*scale);
+			if (offset<1) offset=1;
+			offset++;
 			if (nCounters==1) {
 				if (!colorSet)
 					g.setColor(color);
-				g.drawString(""+n, x+4, y+fontSize+2);
+				g.drawString(""+n, x+offset, y+offset+fontSize);
 			} else if (counters!=null) {
 				g.setColor(getColor(counters[n-1]));
-				g.drawString(""+counters[n-1], x+4, y+fontSize+2);
+				g.drawString(""+counters[n-1], x+offset, y+offset+fontSize);
 			}
 		}
 		if ((size>TINY||type==DOT) && (type==HYBRID||type==DOT)) {
@@ -230,12 +243,13 @@ public class PointRoi extends PolygonRoi {
 				g.drawOval(x-(size2+1), y-(size2+1), size+1, size+1);
 		}
 		if (type==CIRCLE) {
-			int csize = size + 2;
-			int csize2 = csize/2;
+			int scaledSize = (int)Math.round((size+1)*scale);
 			g.setColor(color);
-			if (size>LARGE)
+			if (scale!=1.0)
+				g2d.setStroke(new BasicStroke((float)scale*(size>LARGE?2:1)));
+			else if (size>LARGE)
 				g2d.setStroke(twoPixelsWide);
-			g.drawOval(x-(csize2+1), y-(csize2+1), csize+1, csize+1);
+			g.drawOval(x-scaledSize/2, y-scaledSize/2, scaledSize, scaledSize);
 		}
 	}
 	
@@ -252,6 +266,8 @@ public class PointRoi extends PolygonRoi {
 		if (nPoints==xpf.length)
 			enlargeArrays();
 		addPoint2(imp, ox, oy);
+		resetBoundingRect();
+		width+=1; height+=1;
 	}
 	
 	private void addPoint2(ImagePlus imp, double ox, double oy) {
@@ -286,9 +302,10 @@ public class PointRoi extends PolygonRoi {
 	}
 
 	private synchronized void incrementCounter(ImagePlus imp) {
+		//IJ.log("incrementCounter: "+nPoints+" "+counter+" "+(counters!=null?""+counters.length:"null"));
 		counts[counter]++;
 		boolean isStack = imp!=null && imp.getStackSize()>1;
-		if (counter!=0 || isStack) {
+		if (counter!=0 || isStack || counters!=null) {
 			if (counters==null) {
 				counters = new short[nPoints*2];
 				positions = new short[nPoints*2];
@@ -339,9 +356,8 @@ public class PointRoi extends PolygonRoi {
 		if (cachedMask!=null && cachedMask.getPixels()!=null)
 			return cachedMask;
 		ImageProcessor mask = new ByteProcessor(width, height);
-		for (int i=0; i<nPoints; i++) {
-			mask.putPixel((int)xpf[i], (int)ypf[i], 255);
-		}
+		for (int i=0; i<nPoints; i++)
+			mask.putPixel((int)Math.round(xpf[i]), (int)Math.round(ypf[i]), 255);
 		cachedMask = mask;
 		return mask;
 	}
@@ -489,13 +505,20 @@ public class PointRoi extends PolygonRoi {
 			return counts[counter];
 	}
 	
+	/** Returns the counter assocated with the specified point. */
+	public int getCounter(int index) {
+		if (counters==null || index>=counters.length)
+			return 0;
+		else
+			return counters[index];
+	}
+
 	public int[] getCounters() {
 		if (counters==null)
 			return null;
 		int[] temp = new int[nPoints];
-		for (int i=0; i<nPoints; i++) {
+		for (int i=0; i<nPoints; i++)
 			temp[i] = (counters[i]&0xff) + ((positions[i]&0xffff)<<8);
-		}
 		return temp;
 	}
 
@@ -667,6 +690,49 @@ public class PointRoi extends PolygonRoi {
 		}
 		return handle;
 	}
+	
+	/** Returns the points as an array of Points. */
+	public Point[] getContainedPoints() {
+		Polygon p = getPolygon();
+		Point[] points = new Point[p.npoints];
+		for (int i=0; i<p.npoints; i++)
+			points[i] = new Point(p.xpoints[i],p.ypoints[i]);
+		return points;
+	}
+
+	/** Returns the points as a FloatPolygon. */
+	public FloatPolygon getContainedFloatPoints() {
+		return getFloatPolygon();
+	}
+
+	/**
+	 * Custom iterator for points contained in a {@link PointRoi}.
+	 * @author W. Burger
+	 */
+	public Iterator<Point> iterator() {	
+		return new Iterator<Point>() {
+			final Point[] pnts = getContainedPoints();
+			final int n = pnts.length;
+			int next = (n == 0) ? 1 : 0;
+			@Override
+			public boolean hasNext() {
+				return next < n;
+			}
+			@Override
+			public Point next() {
+				if (next >= n) {
+					throw new NoSuchElementException();
+				}
+				Point pnt = pnts[next];
+				next = next + 1;
+				return pnt;
+			}
+			@Override
+			public void remove() {
+				throw new UnsupportedOperationException();
+			}
+		};
+	}
 
 	/** Returns a copy of this PointRoi. */
 	public synchronized Object clone() {
@@ -687,6 +753,14 @@ public class PointRoi extends PolygonRoi {
 				r.counts[i] = counts[i];
 		}
 		return r;
+	}
+	
+	public void setCounterInfo(int[] info) {
+		counterInfo = info;
+	}
+
+	public int[] getCounterInfo() {
+		return counterInfo;
 	}
 
 	/** @deprecated */

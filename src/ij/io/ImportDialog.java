@@ -82,7 +82,7 @@ public class ImportDialog {
 		if (choiceSelection>=types.length)
 			choiceSelection = 0;
 		getDimensionsFromName(fileName);
-		GenericDialog gd = new GenericDialog("Import>Raw...", IJ.getInstance());
+		GenericDialog gd = new GenericDialog("Import>Raw...");
 		gd.addChoice("Image type:", types, types[choiceSelection]);
 		gd.addNumericField("Width:", width, 0, 6, "pixels");
 		gd.addNumericField("Height:", height, 0, 6, "pixels");
@@ -97,15 +97,16 @@ public class ImportDialog {
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;
-		gd.setSmartRecording(true);
 		choiceSelection = gd.getNextChoiceIndex();
-		gd.setSmartRecording(false);
 		width = (int)gd.getNextNumber();
 		height = (int)gd.getNextNumber();
-		gd.setSmartRecording(true);
+		gd.setSmartRecording(offset==0);
 		offset = (long)gd.getNextNumber();
+		gd.setSmartRecording(nImages==1);
 		nImages = (int)gd.getNextNumber();
+		gd.setSmartRecording(gapBetweenImages==0);
 		gapBetweenImages = (int)gd.getNextNumber();
+		gd.setSmartRecording(false);
 		whiteIsZero = gd.getNextBoolean();
 		intelByteOrder = gd.getNextBoolean();
 		openAll = gd.getNextBoolean();
@@ -140,7 +141,7 @@ public class ImportDialog {
 			if (list[i].startsWith("."))
 				continue;
 			fi.fileName = list[i];
-			imp = new FileOpener(fi).open(false);
+			imp = new FileOpener(fi).openImage();
 			if (imp==null)
 				IJ.log(list[i] + ": unable to open");
 			else {
@@ -200,7 +201,7 @@ public class ImportDialog {
 			new FileInfoVirtualStack(fi);
 		else {
 			FileOpener fo = new FileOpener(fi);
-			ImagePlus imp = fo.open(false);
+			ImagePlus imp = fo.openImage();
 			if (imp!=null) {
 				imp.show();
 				int n = imp.getStackSize();

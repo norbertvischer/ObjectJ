@@ -377,6 +377,15 @@ public class ResultsTable implements Cloneable {
 		//IJ.log("col: "+col+" "+(col==COLUMN_NOT_FOUND?"not found":""+columns[col]));
 		return getValueAsDouble(col,row);
 	}
+	
+	/** Returns 'true' if the specified column exists and is not emptly. */
+	public boolean columnExists(String column) {
+		int col = getColumnIndex(column);
+		if (col==COLUMN_NOT_FOUND)
+			return false;
+		else
+			return (col<columns.length && columns[col]!=null);
+	}
 
 	/** Returns the string value of the given column and row,
 		where row must be greater than or equal zero
@@ -651,7 +660,7 @@ public class ResultsTable implements Cloneable {
 		if (precision>9) precision=9;
 		this.precision = (short)precision;
 		for (int i=0; i<decimalPlaces.length; i++) {
-			if (!(decimalPlaces[i]==AUTO_FORMAT||decimalPlaces[i]==0))
+			if (decimalPlaces[i]!=AUTO_FORMAT)
 				decimalPlaces[i] = (short)precision;
 		}
 	}
@@ -1120,5 +1129,5 @@ public class ResultsTable implements Cloneable {
 	public String toString() {
 		return ("ctr="+counter+", hdr="+getColumnHeadings());
 	}
-	
+		
 }

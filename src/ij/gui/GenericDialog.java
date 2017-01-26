@@ -79,14 +79,28 @@ FocusListener, ItemListener, KeyListener, AdjustmentListener, WindowListener {
     private String helpURL;
     private String yesLabel, noLabel;
     private boolean smartRecording;
+    private Vector imagePanels;
+    private static GenericDialog instance;
 
     /** Creates a new GenericDialog with the specified title. Uses the current image
     	image window as the parent frame or the ImageJ frame if no image windows
     	are open. Dialog parameters are recorded by ImageJ's command recorder but
     	this requires that the first word of each label be unique. */
 	public GenericDialog(String title) {
-		this(title, WindowManager.getCurrentImage()!=null?
-			(Frame)WindowManager.getCurrentImage().getWindow():IJ.getInstance()!=null?IJ.getInstance():new Frame());
+		this(title, getParentFrame());
+	}
+	
+	private static Frame getParentFrame() {
+		Frame parent = WindowManager.getCurrentImage()!=null?
+			(Frame)WindowManager.getCurrentImage().getWindow():IJ.getInstance()!=null?IJ.getInstance():new Frame();
+		if (IJ.isMacOSX() && IJ.isJava18()) {
+			ImageJ ij = IJ.getInstance();
+			if (ij!=null && ij.isActive())
+				parent = ij;
+			else
+				parent = null;
+		}
+		return parent;
 	}
 
     /** Creates a new GenericDialog using the specified title and parent frame. */
@@ -549,15 +563,18 @@ FocusListener, ItemListener, KeyListener, AdjustmentListener, WindowListener {
 	* @param columns	the number of columns
 	*/
     public void addTextAreas(String text1, String text2, int rows, int columns) {
-    	if (textArea1!=null) return;
-    	Panel panel = new Panel();
+		if (textArea1!=null) return;
+		Panel panel = new Panel();
+		Font font = new Font("SansSerif", Font.PLAIN, 14);
 		textArea1 = new TextArea(text1,rows,columns,TextArea.SCROLLBARS_NONE);
 		if (IJ.isLinux()) textArea1.setBackground(Color.white);
+		textArea1.setFont(font);
 		textArea1.addTextListener(this);
 		panel.add(textArea1);
 		if (text2!=null) {
 			textArea2 = new TextArea(text2,rows,columns,TextArea.SCROLLBARS_NONE);
 			if (IJ.isLinux()) textArea2.setBackground(Color.white);
+			textArea2.setFont(font);
 			panel.add(textArea2);
 		}
 		c.gridx = 0; c.gridy = y;
@@ -684,7 +701,11 @@ FocusListener, ItemListener, KeyListener, AdjustmentListener, WindowListener {
     
 	/** Adds an image to the dialog. */
     public void addImage(ImagePlus image) {
-    	addPanel(new ImagePanel(image));
+    	ImagePanel imagePanel = new ImagePanel(image);
+    	addPanel(imagePanel);
+    	if (imagePanels==null)
+    		imagePanels = new Vector();
+    	imagePanels.add(imagePanel);
     }
 
     
@@ -1148,6 +1169,8 @@ FocusListener, ItemListener, KeyListener, AdjustmentListener, WindowListener {
 			add(buttons);
 			if (IJ.isMacintosh())
 				setResizable(false);
+			if (IJ.isMacOSX()&&IJ.isJava18())
+				instance = this;
 			pack();
 			setup();
 			if (centerDialog) GUI.center(this);
@@ -1261,6 +1284,11 @@ FocusListener, ItemListener, KeyListener, AdjustmentListener, WindowListener {
     	super.setLocation(x, y);
     	centerDialog = false;
     }
+    
+    public void setDefaultString(int index, String str) {
+    	if (defaultStrings!=null && index>=0 && index<defaultStrings.size())
+    		defaultStrings.set(index, str);
+    }
 
     protected void setup() {
 	}
@@ -1323,7 +1351,7 @@ FocusListener, ItemListener, KeyListener, AdjustmentListener, WindowListener {
 	public void keyPressed(KeyEvent e) { 
 		int keyCode = e.getKeyCode(); 
 		IJ.setKeyDown(keyCode); 
-		if (keyCode==KeyEvent.VK_ENTER && textArea1==null) {
+		if (keyCode==KeyEvent.VK_ENTER && textArea1==null && okay!=null && okay.isEnabled()) {
 			wasOKed = true;
 			if (IJ.isMacOSX())
 				accessTextFields();
@@ -1411,6 +1439,14 @@ FocusListener, ItemListener, KeyListener, AdjustmentListener, WindowListener {
         	repaint(); // OSX 10.4 bug delays update of enabled until the next input
     }
 
+	public void repaint() {
+		super.repaint();
+		if (imagePanels!=null) {
+			for (int i=0; i<imagePanels.size(); i++)
+				((ImagePanel)imagePanels.get(i)).repaint();
+		}
+	}
+
 	public void paint(Graphics g) {
 		super.paint(g);
 		if (firstPaint) {
@@ -1453,6 +1489,15 @@ FocusListener, ItemListener, KeyListener, AdjustmentListener, WindowListener {
 		return macro;
 	}
     
+	public static GenericDialog getInstance() {
+		return instance;
+	}
+
+	public void dispose() {
+		super.dispose();
+		instance = null;
+	}
+
     public void windowActivated(WindowEvent e) {}
     public void windowOpened(WindowEvent e) {}
     public void windowClosed(WindowEvent e) {}

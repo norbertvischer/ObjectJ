@@ -11,6 +11,7 @@ import ij.gui.Roi;
 import ij.gui.ShapeRoi;
 import ij.gui.Overlay;
 import ij.Prefs;
+import ij.measure.Measurements;
 
 /**
 This abstract class is the superclass for classes that process
@@ -539,7 +540,7 @@ public abstract class ImageProcessor implements Cloneable {
 			ip2.setMask(mask);
 			ip2.setRoi(rect);	
 		}
-		ImageStatistics stats = ip2.getStatistics();
+		ImageStatistics stats = ip2.getStats();
 		AutoThresholder thresholder = new AutoThresholder();
 		int threshold = thresholder.getThreshold(method, stats.histogram);
 		double lower, upper;
@@ -586,7 +587,7 @@ public abstract class ImageProcessor implements Cloneable {
 			ip2.setMask(mask);
 			ip2.setRoi(rect);	
 		}
-		ImageStatistics stats = ip2.getStatistics();
+		ImageStatistics stats = ip2.getStats();
 		int[] histogram = stats.histogram;
 		int originalModeCount = histogram[stats.mode];
 		if (method==ISODATA2) {
@@ -1204,6 +1205,7 @@ public abstract class ImageProcessor implements Cloneable {
 		double r = lineWidth/2.0;
 		int xmin=(int)(xcenter-r+0.5), ymin=(int)(ycenter-r+0.5);
 		int xmax=xmin+lineWidth, ymax=ymin+lineWidth;
+		//if (xcenter<clipXMin || ycenter<clipYMin || xcenter>clipXMax || ycenter>clipYMax ) {
 		if (xmin<clipXMin || ymin<clipYMin || xmax>clipXMax || ymax>clipYMax ) {
 			// draw edge dot
 			double r2 = r*r;
@@ -1224,6 +1226,9 @@ public abstract class ImageProcessor implements Cloneable {
 			}
 			setRoi(xmin, ymin, lineWidth, lineWidth);
 			fill(dotMask);
+			roiX=0; roiY=0; roiWidth=width; roiHeight=height;
+			xMin=1; xMax=width-2; yMin=1; yMax=height-2;
+			mask=null;
 		}
 	}
 	
@@ -2162,6 +2167,20 @@ public abstract class ImageProcessor implements Cloneable {
 	*/
 	public abstract int[] getHistogram();
 	
+	/** Returns the histogram of the image or ROI, using the specified number of bins. */
+	public int[] getHistogram(int nBins) {
+		ImageProcessor ip;
+		if (((this instanceof ByteProcessor)||(this instanceof ColorProcessor)) && nBins!=256)
+			ip = convertToShort(false);
+		else
+			ip = this;
+		ip.setHistogramSize(nBins);
+		ip.setHistogramRange(0.0, 0.0);
+		ImageStatistics stats = ImageStatistics.getStatistics(ip);
+		ip.setHistogramSize(256);
+		return stats.histogram;
+	}
+	
 	/** Erodes the image or ROI using a 3x3 maximum filter. Requires 8-bit or RGB image. */
 	public abstract void erode();
 	
@@ -2346,10 +2365,10 @@ public abstract class ImageProcessor implements Cloneable {
 		The clipping rectangle is reset by passing a null argument or by calling resetRoi(). */
 	public void setClipRect(Rectangle clipRect) {
 		if (clipRect==null) {
-			clipXMin=0; 
-			clipXMax=width-1; 
-			clipYMin=0; 
-			clipYMax=height-1; 
+			clipXMin = 0; 
+			clipXMax = width-1; 
+			clipYMin = 0; 
+			clipYMax = height-1; 
 		} else {
 			clipXMin = clipRect.x; 
 			clipXMax = clipRect.x + clipRect.width - 1; 
@@ -2525,22 +2544,38 @@ public abstract class ImageProcessor implements Cloneable {
 		return false;
 	}
 
+	/** Returns 'true' if this is a signed 16-bit image. */
+	public boolean isSigned16Bit() {
+		return false;
+	}
+
 	/* This method is experimental and may be removed. */
 	public static void setUseBicubic(boolean b) {
 		useBicubic = b;
 	}
 	
-	/** Calculates and returns statistics (area, mean, std-dev, mode, min, max,
-	 * centroid, center of mass, 256 bin histogram) for this image or ROI. Use the
-	 * setRoi(Roi) method to limit statistics to a non-rectangular area.
-	 * @see ImageProcessor#setRoi	
+	/** Calculates and returns uncalibrated statistics for this image or ROI,
+	 * including histogram, area, mean, min and max, standard deviation,
+	 * and mode. Use the setRoi(Roi) method to limit statistics to
+	 * a non-rectangular area.
+	 * @see #setRoi	
+	 * @see #getStatistics	
+	 * @see ImageStatistics	
+	*/
+	public ImageStatistics getStats() {
+		return ImageStatistics.getStatistics(this);
+	}
+		
+	/** This method calculates and returns complete uncalibrated statistics for
+	 * this image or ROI but it is up to 70 times slower than getStats().
+	 * @see #setRoi	
+	 * @see #getStats	
 	 * @see ImageStatistics	
 	*/
 	public ImageStatistics getStatistics() {
-		// 127 = AREA+MEAN+STD_DEV+MODE+MIN_MAX+CENTROID+CENTER_OF_MASS
-		return ImageStatistics.getStatistics(this, 127, null);
+		return ImageStatistics.getStatistics(this, Measurements.ALL_STATS, null);
 	}
-	
+
 	/** Blurs the image by convolving with a Gaussian function. */
 	public void blurGaussian(double sigma) {
 		resetRoi();

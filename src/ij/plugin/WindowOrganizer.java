@@ -35,14 +35,13 @@ public class WindowOrganizer implements PlugIn {
 		int width=0, height=0;
 		double totalWidth = 0;
 		double totalHeight = 0;
-		Plot[] unfrozenPlots = new Plot[wList.length];
 		for (int i=0; i<wList.length; i++) {
 			ImageWindow win = getWindow(wList[i]);
 			if (win==null)
 				continue;
 			if (win instanceof PlotWindow && !((PlotWindow)win).getPlot().isFrozen()) {
-				unfrozenPlots[i]=((PlotWindow)win).getPlot();
-				unfrozenPlots[i].setFrozen(true);
+				IJ.error("Tile", "Unfrozen plot windows cannot be tiled.");
+				return;
 			}
 			Dimension d = win.getSize();
 			int w = d.width;
@@ -118,10 +117,6 @@ public class WindowOrganizer implements PlugIn {
 				if (imp!=null) imp.setIJMenuBar(i==nPics-1);
 			}
 			hloc += tileWidth + GAP;
-		}
-		for (int i=0; i<wList.length; i++) {
-			if(unfrozenPlots[i] != null)
-				unfrozenPlots[i].setFrozen(false);
 		}
 	}
 

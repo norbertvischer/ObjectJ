@@ -83,7 +83,7 @@ public class Prefs {
 	public static boolean requireControlKey;
 	/** Open 8-bit images with inverting LUT so 0 is white and 255 is black. */
 	public static boolean useInvertingLut;
-	/** Draw tool icons using antialiasing. */
+	/** Draw tool icons using antialiasing (always true). */
 	public static boolean antialiasedTools = true;
 	/** Export TIFF and Raw using little-endian byte order. */
 	public static boolean intelByteOrder;
@@ -157,6 +157,13 @@ public class Prefs {
 	public static boolean autoRunExamples = true;
 	/** Ignore stack positions when displaying points. */
 	public static boolean showAllPoints;
+	/** Set MenuBar on Macs running Java 8. */
+	public static boolean setIJMenuBar = IJ.isMacOSX();
+	/** "ImageJ" window is always on top. */
+	public static boolean alwaysOnTop;
+	/** Automatically spline fit line selections */
+	public static boolean splineFitLines;
+
 	
 
 	static Properties ijPrefs = new Properties();
@@ -178,12 +185,6 @@ public class Prefs {
 			return loadAppletProps(f, applet);
 		if (homeDir==null)
 			homeDir = System.getProperty("user.dir");
-		String userHome = System.getProperty("user.home");
-		prefsDir = userHome; // User's home directory
-		if (IJ.isMacOSX())
-			prefsDir += "/Library/Preferences";
-		else
-			prefsDir += File.separator+".imagej";
 		if (f==null) {
 			try {f = new FileInputStream(homeDir+"/"+PROPS_NAME);}
 			catch (FileNotFoundException e) {f=null;}
@@ -252,9 +253,17 @@ public class Prefs {
 			return path;
 	}
 
-	/** Gets the path to the directory where the 
+	/** Returns the path to the directory where the 
 		preferences file (IJPrefs.txt) is saved. */
 	public static String getPrefsDir() {
+		if (prefsDir==null) {
+			String dir = System.getProperty("user.home");
+			if (IJ.isMacOSX())
+				dir += "/Library/Preferences";
+			else
+				dir += File.separator+".imagej";
+			prefsDir = dir;
+		}
 		return prefsDir;
 	}
 
@@ -342,7 +351,7 @@ public class Prefs {
 
 	/** Opens the IJ_Prefs.txt file. */
 	static void loadPreferences() {
-		String path = prefsDir+separator+PREFS_NAME;
+		String path = getPrefsDir()+separator+PREFS_NAME;
 		boolean ok =  loadPrefs(path);
 		if (!ok) { // not found
 			if (IJ.isWindows())
@@ -394,6 +403,7 @@ public class Prefs {
 			ImportDialog.savePreferences(prefs);
 			PlotWindow.savePreferences(prefs);
 			NewImage.savePreferences(prefs);
+			String prefsDir = getPrefsDir();
 			path = prefsDir+separator+PREFS_NAME;
 			if (prefsDir.endsWith(".imagej")) {
 				File f = new File(prefsDir);

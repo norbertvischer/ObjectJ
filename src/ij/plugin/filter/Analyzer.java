@@ -15,11 +15,13 @@ import ij.macro.Interpreter;
 /** This plugin implements ImageJ's Analyze/Measure and Analyze/Set Measurements commands. */
 public class Analyzer implements PlugInFilter, Measurements {
 	
+	private static boolean drawLabels = true;
 	private String arg;
 	private ImagePlus imp;
 	private ResultsTable rt;
 	private int measurements;
 	private StringBuffer min,max,mean,sd;
+	private boolean disableReset;
 	
 	// Order must agree with order of checkboxes in Set Measurements dialog box
 	private static final int[] list = {AREA,MEAN,STD_DEV,MODE,MIN_MAX,
@@ -83,7 +85,8 @@ public class Analyzer implements PlugInFilter, Measurements {
 		else if (arg.equals("sum"))
 			{summarize(); return DONE;}
 		else if (arg.equals("clear")) {
-			if (IJ.macroRunning()) unsavedMeasurements = false;
+			if (IJ.macroRunning())
+				unsavedMeasurements = false;
 			resetCounter();
 			return DONE;
 		} else
@@ -115,6 +118,8 @@ public class Analyzer implements PlugInFilter, Measurements {
 		Overlay overlay = imp.getOverlay();
 		if (overlay==null)
 			overlay = new Overlay();
+		if (drawLabels)
+			overlay.drawLabels(true);
 		if (!overlay.getDrawNames())
 			overlay.drawNames(true);
 		overlay.setLabelColor(Color.white);
@@ -148,7 +153,7 @@ public class Analyzer implements PlugInFilter, Measurements {
 		if (macroOptions!=null && macroOptions.indexOf("slice ")!=-1)
 			Macro.setOptions(macroOptions.replaceAll("slice ", "stack "));
 
- 		GenericDialog gd = new GenericDialog("Set Measurements", IJ.getInstance());
+ 		GenericDialog gd = new GenericDialog("Set Measurements");
 		String[] labels = new String[18];
 		boolean[] states = new boolean[18];
 		labels[0]="Area"; states[0]=(systemMeasurements&AREA)!=0;
@@ -278,7 +283,7 @@ public class Analyzer implements PlugInFilter, Measurements {
 	
 	boolean reset() {
 		boolean ok = true;
-		if (rt.size()>0)
+		if (rt.size()>0 && !disableReset)
 			ok = resetCounter();
 		if (ok && rt.getColumnHeading(ResultsTable.LAST_HEADING)==null)
 			rt.setDefaultHeadings();
@@ -369,10 +374,11 @@ public class Analyzer implements PlugInFilter, Measurements {
 		ImageStack stack = null;
 		if (imp2.getStackSize()>1)
 			stack = imp2.getStack();
+		PointRoi pointRoi = roi instanceof PointRoi?(PointRoi)roi:null;
 		for (int i=0; i<p.npoints; i++) {
 			int position = 0;
-			if (roi instanceof PointRoi)
-				position = ((PointRoi)roi).getPointPosition(i);
+			if (pointRoi!=null)
+				position = pointRoi.getPointPosition(i);
 			ImageProcessor ip = null;
 			if (stack!=null && position>0 && position<=stack.size())
 				ip = stack.getProcessor(position);
@@ -382,6 +388,17 @@ public class Analyzer implements PlugInFilter, Measurements {
 			ImageStatistics stats = ImageStatistics.getStatistics(ip, measurements, imp2.getCalibration());
 			PointRoi point = new PointRoi(p.xpoints[i], p.ypoints[i]);
 			point.setPosition(position);
+			if (pointRoi!=null) {
+				int[] counters = pointRoi.getCounters();
+				if (counters!=null && i<counters.length) {
+					int counter = counters[i]&0xff;
+					int count = pointRoi.getCount(counter);
+					int[] info = new int[2];
+					info[0] = counter;
+					info[1] = count;
+					point.setCounterInfo(info);
+				}
+			}
 			saveResults(stats, point);
 			if (i!=p.npoints-1) displayResults();
 		}
@@ -486,7 +503,7 @@ public class Analyzer implements PlugInFilter, Measurements {
 			if (imp2!=null) {
 				Calibration cal = imp.getCalibration();
 				stats.xCentroid = cal.getX(stats.xCentroid);
-				stats.yCentroid = cal.getY(stats.yCentroid);
+				stats.yCentroid = cal.getY(stats.yCentroid, imp2.getHeight());
 			}
 		}
 		saveResults(stats, roi);
@@ -573,7 +590,7 @@ public class Analyzer implements PlugInFilter, Measurements {
 				Calibration cal = imp!=null?imp.getCalibration():null;
 				if (cal!=null) {
 					rx = cal.getX(rx);
-					ry = cal.getY(ry);
+					ry = cal.getY(ry, imp.getHeight());
 					rw *= cal.pixelWidth;
 					rh *= cal.pixelHeight;
 				}
@@ -664,8 +681,8 @@ public class Analyzer implements PlugInFilter, Measurements {
 				double angle = ((PolygonRoi)roi).getAngle();
 				if (Prefs.reflexAngle) angle = 360.0-angle;
 				rt.addValue("Angle", angle);
-			} else if (roi.getType()==Roi.POINT)
-				savePoints(roi);
+			} else if (roi instanceof PointRoi)
+				savePoints((PointRoi)roi);
 		}
 		if ((measurements&LIMIT)!=0 && imp!=null && imp.getBitDepth()!=24) {
 			rt.addValue(ResultsTable.MIN_THRESHOLD, stats.lowerThreshold);
@@ -694,7 +711,7 @@ public class Analyzer implements PlugInFilter, Measurements {
 		return (Math.abs(carea/2.0));
 	}
 		
-	void savePoints(Roi roi) {
+	void savePoints(PointRoi roi) {
 		if (imp==null) {
 			rt.addValue("X", 0.0);
 			rt.addValue("Y", 0.0);
@@ -742,6 +759,11 @@ public class Analyzer implements PlugInFilter, Measurements {
 			if (position==0)
 				position = imp.getCurrentSlice();
 			rt.addValue("Slice", position);
+		}
+		int[] info = roi.getCounterInfo();
+		if (info!=null) {
+			rt.addValue("Counter", info[0]);
+			rt.addValue("Count", info[1]);
 		}
 		if (imp.getProperty("FHT")!=null) {
 			double center = imp.getWidth()/2.0;
@@ -822,7 +844,6 @@ public class Analyzer implements PlugInFilter, Measurements {
 	}
 		
 	void incrementCounter() {
-		//counter++;
 		if (rt==null) rt = systemRT;
 		rt.incrementCounter();
 		unsavedMeasurements = true;
@@ -920,9 +941,11 @@ public class Analyzer implements PlugInFilter, Measurements {
 
 	/** Sets the specified system-wide measurement option. */
 	public static void setMeasurement(int option, boolean state) {
-			if (state)
+			if (state) {
 				systemMeasurements |= option;
-			else
+				if ((option&ADD_TO_OVERLAY)!=0)
+					drawLabels = true;
+			} else
 				systemMeasurements &= ~option;
 	}
 
@@ -997,5 +1020,14 @@ public class Analyzer implements PlugInFilter, Measurements {
 		unsavedMeasurements = false;
 	}
 	
+	public static void drawLabels(boolean b) {
+		drawLabels = b;
+	}
+	
+	/** Used by RoiManager.multiMeasure() to suppress save as dialogs. */
+	public void disableReset(boolean b) {
+		disableReset = b;
+	}
+
 }
 	

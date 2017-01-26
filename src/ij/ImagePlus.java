@@ -90,7 +90,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	private static int default16bitDisplayRange;
 	private boolean antialiasRendering = true;
 	private boolean ignoreGlobalCalibration;
-	public boolean setIJMenuBar = true;
+	public boolean setIJMenuBar = Prefs.setIJMenuBar;
 	public boolean typeSet;
 	
 
@@ -444,6 +444,8 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 				if (c>1 || z>1 || t>1)
 					setPosition(c, z, t);
 			}
+			if (setIJMenuBar)
+				IJ.wait(25);
 			notifyListeners(OPENED);
 		}
 	}
@@ -820,42 +822,47 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		return mask;
 	}
 
-	/** Returns an ImageStatistics object generated using the standard
-		measurement options (area, mean, mode, min and max).
-		This plugin demonstrates how get the area, mean and max of the
-		current image or selection:
+	/** Get calibrated statistics for this image or ROI, including 
+		 histogram, area, mean, min and max, standard
+		 deviation and mode.
+		This code demonstrates how to get the area, mean
+		max and median of the current image or selection:
 		<pre>
-   public class Get_Statistics implements PlugIn {
-      public void run(String arg) {
-         ImagePlus imp = IJ.getImage();
-         ImageStatistics stats = imp.getStatistics();
+         imp = IJ.getImage();
+         stats = imp.getStatistics();
          IJ.log("Area: "+stats.area);
          IJ.log("Mean: "+stats.mean);
          IJ.log("Max: "+stats.max);
-      }
-   }
 		</pre>
+		@see #getAllStatistics
+		@see #getRawStatistics
+		@see ij.process.ImageProcessor#getStats
 		@see ij.process.ImageStatistics
 		@see ij.process.ImageStatistics#getStatistics
 		*/
 	public ImageStatistics getStatistics() {
-		return getStatistics(AREA+MEAN+MODE+MIN_MAX);
+		return getStatistics(AREA+MEAN+STD_DEV+MODE+MIN_MAX+RECT);
 	}
 	
+	/** This method returns complete calibrated statistics for this image or ROI
+		(with "Limit to threshold"), but it is up to 70 times slower than getStatistics().*/
+	public ImageStatistics getAllStatistics() {
+		return getStatistics(ALL_STATS+LIMIT);
+	}
+
+	/* Returns uncalibrated statistics for this image or ROI, including
+		256 bin histogram, pixelCount, mean, mode, min and max. */
+	public ImageStatistics getRawStatistics() {
+		setupProcessor();
+		if (roi!=null && roi.isArea())
+			ip.setRoi(roi);
+		else
+			ip.resetRoi();
+		return ImageStatistics.getStatistics(ip, AREA+MEAN+MODE+MIN_MAX, null);
+	}
+
 	/** Returns an ImageStatistics object generated using the
-		specified measurement options. This plugin demonstrates how
-		get the area and centroid of the current selection:
-		<pre>
-   public class Get_Statistics implements PlugIn, Measurements {
-      public void run(String arg) {
-         ImagePlus imp = IJ.getImage();
-         ImageStatistics stats = imp.getStatistics(MEDIAN+CENTROID);
-         IJ.log("Median: "+stats.median);
-         IJ.log("xCentroid: "+stats.xCentroid);
-         IJ.log("yCentroid: "+stats.yCentroid);
-      }
-   }
-		</pre>
+		specified measurement options.
 		@see ij.process.ImageStatistics
 		@see ij.measure.Measurements
 	*/
@@ -1541,10 +1548,10 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			setCurrentSlice(n);
 			Object pixels = null;
 			Overlay overlay2 = null;
-			if (stack.isVirtual() && !(stack instanceof FileInfoVirtualStack)) {
+			if (stack.isVirtual() && !((stack instanceof FileInfoVirtualStack)||(stack instanceof AVI_Reader))) {
 				ImageProcessor ip2 = stack.getProcessor(currentSlice);
 				overlay2 = ip2.getOverlay();
-				if (overlay2!=null || getOverlay()!=null)
+				if (overlay2!=null)
 					setOverlay(overlay2);
 				pixels = ip2.getPixels();
 			} else
@@ -1564,7 +1571,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			if (win!=null && win instanceof StackWindow)
 				((StackWindow)win).updateSliceSelector();
 			if ((Prefs.autoContrast||IJ.shiftKeyDown()) && nChannels==1 && imageType!=COLOR_RGB) {
-				(new ContrastEnhancer()).stretchHistogram(ip,0.35,ip.getStatistics());
+				(new ContrastEnhancer()).stretchHistogram(ip,0.35,ip.getStats());
 				ContrastAdjuster.update();
 				//IJ.showStatus(n+": min="+ip.getMin()+", max="+ip.getMax());
 			}
@@ -1993,9 +2000,20 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	}
 	
 
-	/** Returns a copy (clone) of this ImagePlus. */
+	/** Returns a copy of this image or stack, cropped if there is an ROI.
+	* @see #crop
+	* @see ij.plugin.Duplicator#run
+	*/
 	public ImagePlus duplicate() {
 		return (new Duplicator()).run(this);
+	}
+
+	/** Returns a copy this image or stack slice, cropped if there is an ROI.
+	* @see #duplicate
+	* @see ij.plugin.Duplicator#crop
+	*/
+	public ImagePlus crop() {
+		return (new Duplicator()).crop(this);
 	}
 
 	/** Returns a new ImagePlus with this image's attributes
@@ -2108,6 +2126,11 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
     
     /** Returns the system-wide calibration, or null. */
     public Calibration getGlobalCalibration() {
+			return globalCalibration;
+    }
+
+    /** This is a version of getGlobalCalibration() that can be called from a static context. */
+    public static Calibration getStaticGlobalCalibration() {
 			return globalCalibration;
     }
 
@@ -2674,7 +2697,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
     }
     
     public boolean setIJMenuBar() {
-    	return setIJMenuBar;
+    	return setIJMenuBar && Prefs.setIJMenuBar;
     }
     
 }

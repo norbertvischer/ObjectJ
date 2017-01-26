@@ -404,6 +404,8 @@ public class Opener {
 	 * @see ij.IJ#openImage(String)
 	*/
 	public ImagePlus openURL(String url) {
+		url = updateUrl(url);
+		if (IJ.debugMode) IJ.log("OpenURL: "+url);
 		ImagePlus imp = openCachedImage(url);
 		if (imp!=null)
 			return imp;
@@ -454,8 +456,18 @@ public class Opener {
 		} 
 	}
 	
+	/** Can't open imagej.nih.gov URLs due to encryption so redirect to mirror.nih.net. */
+	public static String updateUrl(String url) {
+		if (url==null || !url.contains("nih.gov"))
+			return url;
+		url = url.replace("imagej.nih.gov/ij", "mirror.imagej.net");
+		url = url.replace("rsb.info.nih.gov/ij", "mirror.imagej.net");
+		url = url.replace("rsbweb.nih.gov/ij", "mirror.imagej.net");
+		return url;
+	}
+	
 	private ImagePlus openCachedImage(String url) {
-		if (url==null || !url.contains("ij/images"))
+		if (url==null || !url.contains("/images"))
 			return null;
 		String ijDir = IJ.getDirectory("imagej");
 		if (ijDir==null)
@@ -707,7 +719,7 @@ public class Opener {
 			return null;
 		FileInfo fi = info[0];
 		if (fi.nImages>1)
-			return new FileOpener(fi).open(false); // open contiguous images as stack
+			return new FileOpener(fi).openImage(); // open contiguous images as stack
 		else {
 			ColorModel cm = createColorModel(fi);
 			ImageStack stack = new ImageStack(fi.width, fi.height, cm);
@@ -864,7 +876,7 @@ public class Opener {
 			fi.stripLengths = info[n-1].stripLengths; 
 		}
 		FileOpener fo = new FileOpener(fi);
-		return fo.open(false);
+		return fo.openImage();
 	}
 
 	/** Returns the FileInfo of the specified TIFF file. */
@@ -968,7 +980,7 @@ public class Opener {
 			return null;
 		}
 		FileOpener opener = new FileOpener(info[0]);
-		ImagePlus imp = opener.open(false);
+		ImagePlus imp = opener.openImage();
 		if (imp==null)
 			return null;
 		imp.setTitle(info[0].fileName);
@@ -1025,7 +1037,7 @@ public class Opener {
 				return imp;
 		}
 		FileOpener fo = new FileOpener(info[0]);
-		imp = fo.open(false);
+		imp = fo.openImage();
 		if (imp==null) return null;
 		int[] offsets = info[0].stripOffsets;
 		if (offsets!=null&&offsets.length>1 && offsets[offsets.length-1]<offsets[0])

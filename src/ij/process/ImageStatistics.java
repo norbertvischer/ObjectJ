@@ -64,6 +64,12 @@ public class ImageStatistics implements Measurements {
 	EllipseFitter ef;
 
 	
+	/* Get uncalibrated statistics, including histogram, area, mean, 
+		min and max, standard deviation and mode. */
+	public static ImageStatistics getStatistics(ImageProcessor ip) {
+		return getStatistics(ip, AREA+MEAN+STD_DEV+MODE+MIN_MAX+RECT, null);
+	}
+
 	public static ImageStatistics getStatistics(ImageProcessor ip, int mOptions, Calibration cal) {
 		Object pixels = ip.getPixels();
 		if (pixels instanceof byte[])

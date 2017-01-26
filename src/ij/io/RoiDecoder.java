@@ -329,6 +329,8 @@ public class RoiDecoder {
 		// read stroke width, stroke color and fill color (1.43i or later)
 		if (version>=218) {
 			getStrokeWidthAndColor(roi, hdr2Offset);
+			if (type==point)
+				roi.setStrokeWidth(0);
 			boolean splineFit = (options&SPLINE_FIT)!=0;
 			if (splineFit && roi instanceof PolygonRoi)
 				((PolygonRoi)roi).fitSpline();
@@ -543,6 +545,8 @@ public class RoiDecoder {
 	/** Opens an ROI from a byte array. */
 	public static Roi openFromByteArray(byte[] bytes) {
 		Roi roi = null;
+		if (bytes==null || bytes.length==0)
+			return roi;
 		try {
 			RoiDecoder decoder = new RoiDecoder(bytes, null);
 			roi = decoder.getRoi();

@@ -755,6 +755,7 @@ public class Functions implements MacroConstants, Measurements {
 		if (previousRoi!=null && roi!=null)
 			updateRoi(roi);
 		resetImage();
+		shiftKeyDown = altKeyDown = false;
 	}
 	
 	void makeRectangle() {
@@ -780,6 +781,7 @@ public class Functions implements MacroConstants, Measurements {
 		if (previousRoi!=null && roi!=null)
 			updateRoi(roi);
 		resetImage();
+		shiftKeyDown = altKeyDown = false;
 		IJ.setKeyUp(IJ.ALL_KEYS);
 	}
 	
@@ -2016,6 +2018,7 @@ public class Functions implements MacroConstants, Measurements {
 				updateRoi(roi); 
 		}
 		updateNeeded = false;
+		shiftKeyDown = altKeyDown = false;
 	}
 
 	void doPlot() {
@@ -3776,6 +3779,7 @@ public class Functions implements MacroConstants, Measurements {
 		if (previousRoi!=null && roi!=null)
 			updateRoi(roi); 
 		resetImage(); 
+		shiftKeyDown = altKeyDown = false;
 	}
 	
 	void updateRoi(Roi roi) {
@@ -4196,6 +4200,8 @@ public class Functions implements MacroConstants, Measurements {
 			Prefs.useJFileChooser = state;
 		else if (arg1.startsWith("auto"))
 			Prefs.autoContrast = state;
+		else if (arg1.equals("antialiasedtext"))
+			TextRoi.setAntialiasedText(state);
 		else
 			interp.error("Invalid option");
 	}
@@ -4282,6 +4288,8 @@ public class Functions implements MacroConstants, Measurements {
 			state = getProcessor().isBinary();
 		else if (arg.indexOf("grayscale")!=-1)
 			state = getProcessor().isGrayscale();
+		else if (arg.startsWith("global"))
+			state = ImagePlus.getStaticGlobalCalibration()!=null;
 		else if (arg.indexOf("animated")!=-1) {
 			ImageWindow win = getImage().getWindow();
 			state = win!=null && (win instanceof StackWindow) && ((StackWindow)win).getAnimate();
@@ -4940,13 +4948,18 @@ public class Functions implements MacroConstants, Measurements {
 	}
 
 	void setMeasurements() {
-		interp.getParens();
+		String arg = "";
+		if (interp.nextToken()=='(') {
+			interp.getLeftParen();
+			if (interp.nextToken() != ')')
+				arg = getString().toLowerCase(Locale.US);
+			interp.getRightParen();
+		}
 		props.clear();
 		ImagePlus imp = getImage();
-		int measurements = AREA+MEAN+STD_DEV+MODE+MIN_MAX+
-			CENTROID+CENTER_OF_MASS+PERIMETER+RECT+
-			ELLIPSE+SHAPE_DESCRIPTORS+FERET+INTEGRATED_DENSITY+
-			MEDIAN+SKEWNESS+KURTOSIS+AREA_FRACTION;
+		int measurements = ALL_STATS;
+		if (arg.contains("limit"))
+			measurements += LIMIT;
 		ImageStatistics stats = imp.getStatistics(measurements);
 		ResultsTable rt = new ResultsTable();
 		Analyzer analyzer = new Analyzer(imp, measurements, rt);
@@ -4997,7 +5010,8 @@ public class Functions implements MacroConstants, Measurements {
 			IJ.makePoint((int)x, (int)y);
 		else
 			IJ.makePoint(x, y);
-		resetImage(); 
+		resetImage();
+		shiftKeyDown = altKeyDown = false;
 	}
 
 	void makeText() {
@@ -5030,6 +5044,7 @@ public class Functions implements MacroConstants, Measurements {
 		if (previousRoi!=null && roi!=null)
 			updateRoi(roi);
 		resetImage();
+		shiftKeyDown = altKeyDown = false;
 	}
 	
 	double fit() {
@@ -5786,6 +5801,8 @@ public class Functions implements MacroConstants, Measurements {
 			int index = (int)getArg();
 			checkIndex(index, 0, size-1);
 			Roi roi = overlay.get(index);
+			if (roi==null)
+				return Double.NaN;;
 			if (imp.getStackSize()>1) {
 				if (imp.isHyperStack()) {
 					int c = roi.getCPosition();
@@ -6172,6 +6189,9 @@ public class Functions implements MacroConstants, Measurements {
 		} else if (name.equals("getCoordinates")) {
 			getCoordinates();
 			return null;
+		} else if (name.equals("getContainedPoints")) {
+			getContainedPoints(roi);
+			return null;
 		} else if (name.equals("getName")) {
 			interp.getParens();
 			String roiName = roi.getName();
@@ -6225,6 +6245,20 @@ public class Functions implements MacroConstants, Measurements {
 		return null;
 	}
 	
+	private void getContainedPoints(Roi roi) {
+		Variable xCoordinates = getFirstArrayVariable();
+		Variable yCoordinates = getLastArrayVariable();
+		FloatPolygon points = roi.getContainedFloatPoints();
+		Variable[] xa = new Variable[points.npoints];
+		Variable[] ya = new Variable[points.npoints];
+		for (int i=0; i<points.npoints; i++) {
+			xa[i] = new Variable(points.xpoints[i]);
+			ya[i] = new Variable(points.ypoints[i]);
+		}
+		xCoordinates.setArray(xa);
+		yCoordinates.setArray(ya);
+	}
+
 	private String getSplineAnchors(Roi roi) {
 		Variable xCoordinates = getFirstArrayVariable();
 		Variable yCoordinates = getLastArrayVariable();
@@ -6268,6 +6302,6 @@ public class Functions implements MacroConstants, Measurements {
 		imp.setRoi(roi);
 		return null;
 	}
-
+	
 } // class Functions
 
