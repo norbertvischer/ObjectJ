@@ -1545,6 +1545,7 @@ public class MacroProcessorOJ {
                 setMarker(xpoints[0], ypoints[0]);
             }
         }
+	closeYtem();//11.1.2017
         imp.getCanvas().setCursor(-1, -1, -1, -1);//15.7.2014
     }
 

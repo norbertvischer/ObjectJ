@@ -24,7 +24,7 @@ import oj.macros.EmbeddedMacrosOJ;
  */
 public class PlotManagerOJ extends javax.swing.JPanel implements IControlPanelOJ {
 
-    public static boolean withPlots = false;//enable this when it works
+    public static boolean withPlots = true;//enable this when it works
     private static PlotManagerOJ instance;
 
     Dimension panelSize = new Dimension(580, 580);
@@ -236,7 +236,7 @@ public class PlotManagerOJ extends javax.swing.JPanel implements IControlPanelOJ
         });
         titlesPane.setViewportView(tbl_PlotTitles);
 
-        btn_EditCode.setText("Edit Code");
+        btn_EditCode.setText("Modify Code");
         btn_EditCode.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btn_EditCodeActionPerformed(evt);
@@ -264,7 +264,7 @@ public class PlotManagerOJ extends javax.swing.JPanel implements IControlPanelOJ
             }
         });
 
-        btn_ModifyPlot.setText("Modify");
+        btn_ModifyPlot.setText("Modify via Dialog");
         btn_ModifyPlot.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btn_ModifyPlotActionPerformed(evt);

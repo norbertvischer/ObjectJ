@@ -114,7 +114,7 @@
     </Container>
     <Component class="javax.swing.JButton" name="btn_EditCode">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Edit Code"/>
+        <Property name="text" type="java.lang.String" value="Modify Code"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btn_EditCodeActionPerformed"/>
@@ -146,7 +146,7 @@
     </Component>
     <Component class="javax.swing.JButton" name="btn_ModifyPlot">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Modify"/>
+        <Property name="text" type="java.lang.String" value="Modify via Dialog"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btn_ModifyPlotActionPerformed"/>

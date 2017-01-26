@@ -44,7 +44,7 @@ import oj.project.results.ColumnDefOJ;
 public class PlotDialogOJ {//implements DialogListener {
 
 	final int MAXCURVES = 9;
-	final int XCOL = 1, YCOL = 0, COLOR = 2, TYP = 3, QUALIFIED = 4, BINWIDTH = 5;
+	final int XCOL = 0, YCOL = 1, COLOR = 2, TYP = 3, QUALIFIED = 4, BINWIDTH = 5;
 	final int LIMITS = 5;
 	int currentCurve = 0;
 	int nCurves = 1;
@@ -60,7 +60,7 @@ public class PlotDialogOJ {//implements DialogListener {
 	Checkbox[] multiPlotBoxes;
 	boolean previewFlag = false;
 	String plotLimit = "";
-	String[] limitStrings = "Fit all,Left = zero,Bottom = zero,BottomLeft = origin".split(",");
+	String[] limitStrings = "Automatic,Left = zero,Bottom = zero,BottomLeft = zero".split(",");
 	final String[] plotColors = "red blue green orange magenta cyan black gray other".split(" ");
 
 	/**
@@ -121,16 +121,17 @@ public class PlotDialogOJ {//implements DialogListener {
 		if (plotType.equalsIgnoreCase("Histogram")) {
 		}//not implemented
 
-		plotDialog.addChoice("y-Axis:", columnTitles, columnTitles[0]);
 		plotDialog.addChoice("x-Axis:", columnTitles, columnTitles[0]);
+		plotDialog.addChoice("y-Axis:", columnTitles, columnTitles[0]);
 		plotDialog.addChoice("Color:", plotColors, "red");
 		plotDialog.addChoice("Marker type:", "circles,line,boxes,triangles,crosses,dots,x,connected,error_bars".split(","), "circles");
 		plotDialog.addChoice("Qualification:", "all,qualified,unqualified".split(","), "all");
 		plotDialog.addStringField("Bin Width:", "0", 8);
-		plotDialog.addChoice("Limits:", limitStrings, limitStrings[0]);
+		plotDialog.addChoice("Ranges:", limitStrings, limitStrings[0]);
 		plotDialog.addStringField("Title *:", "", 32);
 		String note = "* Leave empty for automatic title";
 		plotDialog.addMessage(note, Font.decode("Arial-12"));
+		plotDialog.addCheckbox("Redraw this Dialog", false);
 
 		choices = plotDialog.getChoices();
 		stringFields = plotDialog.getStringFields();
