@@ -24,7 +24,7 @@ import oj.macros.EmbeddedMacrosOJ;
  */
 public class PlotManagerOJ extends javax.swing.JPanel implements IControlPanelOJ {
 
-    public static boolean withPlots = true;//enable this when it works
+    public static boolean withPlots = false;//enable this when it works
     private static PlotManagerOJ instance;
 
     Dimension panelSize = new Dimension(580, 580);

@@ -9,6 +9,7 @@ package oj.io.spi;
 import ij.IJ;
 import ij.io.FileInfo;
 import ij.io.TiffEncoder;
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -302,7 +303,11 @@ public class JavaObjectProviderOJ implements IIOProviderOJ {
 
         ObjectInputStream ois = null;
         try {
-            ois = new ObjectInputStream(is);
+			
+						
+			BufferedInputStream bis = new BufferedInputStream(is);//20.2.2017
+            ois = new ObjectInputStream(bis);
+            //ois = new ObjectInputStream(is);
             data = (DataOJ) ois.readObject();
             data.initAfterUnmarshalling();
             data.setChanged(false);

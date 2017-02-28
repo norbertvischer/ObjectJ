@@ -1262,7 +1262,7 @@ public class ColumnSettingsOJ extends javax.swing.JPanel implements TableColumnM
                         ij.IJ.showMessage(newName + ": column already exists");
                         return;
                     }
-                    String notAllowed = ("* \t,\n");//20.7.2009
+                    String notAllowed = ("* \t,\n?");//2017 added question mark
                     for (int jj = 0; jj < notAllowed.length(); jj++) {
                         if (newName.indexOf(notAllowed.charAt(jj)) >= 0) {
                             ij.IJ.showMessage(newName + ": illegal character");

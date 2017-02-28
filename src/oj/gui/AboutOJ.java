@@ -18,44 +18,46 @@ import oj.project.DataOJ;
  */
 public class AboutOJ extends javax.swing.JDialog {
 
-    public AboutOJ(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
-        initComponents();
-        DataOJ data = OJ.getData();
-        textAreaAbout.setTabSize(12);
+	public AboutOJ(java.awt.Frame parent, boolean modal) {
+		super(parent, modal);
+		initComponents();
+		DataOJ data = OJ.getData();
+		textAreaAbout.setTabSize(12);
 
-        String thisVersion = OJ.releaseVersion;
-        String aboutText = "";
-        aboutText = aboutText + "ObjectJ plugin:";
-        aboutText = aboutText + "\n   Version:\t" + thisVersion;
-        aboutText = aboutText + "\n   Build:\t" + OJ.build;
-        aboutText = aboutText + "\n   Date:\t" + OJ.buildDate;
-        if (data == null) {
-            aboutText = aboutText + "\n\nFile:\tNo project is loaded";
+		String thisVersion = OJ.releaseVersion;
+		String aboutText = "";
+		aboutText = aboutText + "ObjectJ plugin:";
+		aboutText = aboutText + "\n   Version:\t" + thisVersion;
+		aboutText = aboutText + "\n   Build:\t" + OJ.build;
+		aboutText = aboutText + "\n   Date:\t" + OJ.buildDate;
+		if (data == null) {
+			aboutText = aboutText + "\n\nFile:\tNo project is loaded";
 
-        } else {
-            aboutText = aboutText + "\n\nProject file:";
-            aboutText = aboutText + "\n   File:\t" + data.getFilename();
+		} else {
+			aboutText = aboutText + "\n\nProject file:";
+			aboutText = aboutText + "\n   File:\t" + data.getFilename();
 
-            aboutText = aboutText + "\n   Linked Images:\t" + data.getImages().getImagesCount();
-            CellsOJ cells = data.getCells();
-            int ptCount = 0;
-            for (int cell = 0; cell < cells.getCellsCount(); cell++) {
-                ptCount += cells.getCellByIndex(cell).getTotalPointsCount();
-            }
-            int mCount = 0;
-            if (data.macroSet != null) {
-                mCount = data.macroSet.getMacrosCount();
-            }
-            aboutText = aboutText + "\n   Objects:\t" + data.getCells().getCellsCount();
-            aboutText = aboutText + "\n   Points:\t" + ptCount;
-            aboutText = aboutText + "\n   Macros:\t" + mCount;
+			aboutText = aboutText + "\n   Dir:\t" + data.getDirectory();
 
-        }
-        textAreaAbout.setText(aboutText);
-        textAreaAbout.setEditable(false);
-        textAreaAbout.revalidate();
-    }
+			aboutText = aboutText + "\n   Linked Images:\t" + data.getImages().getImagesCount();
+			CellsOJ cells = data.getCells();
+			int ptCount = 0;
+			for (int cell = 0; cell < cells.getCellsCount(); cell++) {
+				ptCount += cells.getCellByIndex(cell).getTotalPointsCount();
+			}
+			int mCount = 0;
+			if (data.macroSet != null) {
+				mCount = data.macroSet.getMacrosCount();
+			}
+			aboutText = aboutText + "\n   Objects:\t" + data.getCells().getCellsCount();
+			aboutText = aboutText + "\n   Points:\t" + ptCount;
+			aboutText = aboutText + "\n   Macros:\t" + mCount;
+
+		}
+		textAreaAbout.setText(aboutText);
+		textAreaAbout.setEditable(false);
+		textAreaAbout.revalidate();
+	}
 
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -101,8 +103,8 @@ public class AboutOJ extends javax.swing.JDialog {
             .add(jPanel1Layout.createSequentialGroup()
                 .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING, false)
                     .add(org.jdesktop.layout.GroupLayout.LEADING, jScrollPane2)
-                    .add(org.jdesktop.layout.GroupLayout.LEADING, jScrollPane1)
-                    .add(org.jdesktop.layout.GroupLayout.LEADING, jLabel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 558, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                    .add(org.jdesktop.layout.GroupLayout.LEADING, jLabel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 558, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(org.jdesktop.layout.GroupLayout.LEADING, jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 457, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -171,24 +173,24 @@ public class AboutOJ extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void buttOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttOkActionPerformed
-        setVisible(false);
+		setVisible(false);
     }//GEN-LAST:event_buttOkActionPerformed
 
     private void jButtonCheckUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCheckUpdateActionPerformed
 
-   try {
-            BrowserLauncher.openURL(OJ.URLcurrent);
-        } catch (IOException e) {
-        }
-        this.dispose();
+		try {
+			BrowserLauncher.openURL(OJ.URLcurrent);
+		} catch (IOException e) {
+		}
+		this.dispose();
     }//GEN-LAST:event_jButtonCheckUpdateActionPerformed
 
     private void jButtonWebSiteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonWebSiteActionPerformed
-        try {
-            BrowserLauncher.openURL(OJ.URL);
-        } catch (IOException e) {
-        }
-        this.dispose();
+		try {
+			BrowserLauncher.openURL(OJ.URL);
+		} catch (IOException e) {
+		}
+		this.dispose();
     }//GEN-LAST:event_jButtonWebSiteActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton buttOk;

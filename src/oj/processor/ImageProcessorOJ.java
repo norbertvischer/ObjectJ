@@ -757,8 +757,7 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 
 	public void updateImagesProperties() {
 		String dirname = OJ.getData().getDirectory();
-		for (int i = 0; i
-				< OJ.getData().getImages().getImagesCount(); i++) {
+		for (int i = 0; i  < OJ.getData().getImages().getImagesCount(); i++) {
 			ImageOJ image = OJ.getData().getImages().getImageByIndex(i);
 			updateImageProperties(dirname, image);
 		}
