@@ -1162,6 +1162,13 @@ public abstract class ImageProcessor implements Cloneable {
 			lineTo(x, y);
 		}
 	}
+	
+	/** Fills a rectangle. */
+	public void fillRect(int x, int y, int width, int height) {
+		setRoi(x, y, width, height);
+		fill();
+		resetRoi();
+	}
 
 	/** Draws an elliptical shape. */
 	public void drawOval(int x, int y, int width, int height) {
@@ -1365,7 +1372,7 @@ public abstract class ImageProcessor implements Cloneable {
 	/** Sets the font used by drawString(). */
 	public void setFont(Font font) {
 		this.font = font;
-		fontMetrics	= null;
+		fontMetrics = null;
 		boldFont = font.isBold();
 	}
 	
