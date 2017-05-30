@@ -5,7 +5,7 @@
 
 # Note that commands must be unique.
 
-# Version 1.50
+# Version 1.51
 
 # Commands installed in the right-click popup menu
 # Overridden in StartupMacros
@@ -123,6 +123,8 @@ adjust05="Color Threshold...",ij.plugin.frame.ColorThresholder
 adjust06="Size...",ij.plugin.Resizer
 adjust07="Canvas Size...",ij.plugin.CanvasResizer
 adjust08="Line Width... ",ij.plugin.frame.LineWidthAdjuster
+adjust09="Coordinates...",ij.plugin.Coordinates
+
 
 # Plugins installed in the Image/Color submenu
 color01="Split Channels",ij.plugin.ChannelSplitter
@@ -199,7 +201,7 @@ zoom04="View 100%[5]",ij.plugin.Zoom("100%")
 zoom05="To Selection",ij.plugin.Zoom("to")
 zoom06="Scale to Fit",ij.plugin.Zoom("scale")
 zoom07="Set... ",ij.plugin.Zoom("set")
-#zoom07="Maximize",ij.plugin.Zoom("max")
+zoom08="Maximize",ij.plugin.Zoom("max")
 
 # Plugins installed in the Image/Overlay submenu
 overlay01="Add Selection...[b]",ij.plugin.OverlayCommands("add")
@@ -304,7 +306,7 @@ fft06="Bandpass Filter...",ij.plugin.filter.FFTFilter
 fft07="Custom Filter...",ij.plugin.filter.FFTCustomFilter
 fft08="FD Math...",ij.plugin.FFTMath
 fft09="Swap Quadrants",ij.plugin.FFT("swap")
-fft09="Make Circular Selection...",ij.plugin.CircularRoiMaker
+fft10="Make Circular Selection...",ij.plugin.CircularRoiMaker
 
 # Plugins installed in the Process/Filters submenu
 filters01="Convolve...",ij.plugin.filter.Convolver
@@ -392,12 +394,13 @@ utilities04="Monitor Events...",ij.plugin.EventListener
 utilities05="Monitor Memory...",ij.plugin.frame.MemoryMonitor
 utilities06=-
 utilities07="Capture Screen[G]",ij.plugin.ScreenGrabber
-utilities08="Capture Image",ij.plugin.ScreenGrabber("image")
-utilities09=-
-utilities10="ImageJ Properties",ij.plugin.JavaProperties
-utilities11="Threads",ij.plugin.ThreadLister
-utilities12="Benchmark",ij.plugin.filter.Benchmark
-utilities13="Reset...",ij.plugin.SimpleCommands("reset")
+utilities08="Capture Delayed...",ij.plugin.ScreenGrabber("delay")
+utilities09="Capture Image",ij.plugin.ScreenGrabber("image")
+utilities10=-
+utilities11="ImageJ Properties",ij.plugin.JavaProperties
+utilities12="Threads",ij.plugin.ThreadLister
+utilities13="Benchmark",ij.plugin.filter.Benchmark
+utilities14="Reset...",ij.plugin.SimpleCommands("reset")
 
 # Plugins installed in the Plugins/New submenu
 new_01="Macro",ij.plugin.NewPlugin("macro")
@@ -419,7 +422,8 @@ about02=-
 # URL of directory containing the sample images
 # Used when ImageJ is running as an application,
 # otherwise applet.getDocumentBase()+"/images" is used.
-images.location=http://imagej.nih.gov/ij/images/
+#images.location=http://imagej.nih.gov/ij/images/
+images.location=http://wsr.imagej.net/images/
 
 # Images installed in the Open Samples submenu
 # RawReader expects a string with "name width height nImages bitsPerPixel offset [white]"
