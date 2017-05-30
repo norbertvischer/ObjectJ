@@ -5,7 +5,7 @@ import java.awt.event.*;
 import java.io.File;
 import java.util.*;
 import ij.*;
-import ij.plugin.frame.Recorder; 
+import ij.plugin.frame.Recorder;
 import ij.plugin.frame.Editor; 
 import ij.plugin.MacroInstaller;
 import ij.plugin.RectToolOptions;
@@ -52,14 +52,16 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 	private static final int MAX_EXTRA_TOOLS = 8;
 	private static final int MAX_TOOLS = NUM_TOOLS+MAX_EXTRA_TOOLS;
 	private static final int NUM_BUTTONS = 21;
-	private static final int SIZE = 28;
+	private static final int BUTTON_WIDTH = 28;
+	private static final int BUTTON_HEIGHT = 29;
+	private static final int SIZE = 28;  // no longer used
 	private static final int GAP_SIZE = 9;
 	private static final int OFFSET = 6;
 	private static final String BRUSH_SIZE = "toolbar.brush.size";
 	public static final String CORNER_DIAMETER = "toolbar.arc.size";
 	public static String TOOL_KEY = "toolbar.tool";
 		
-	private Dimension ps = new Dimension(SIZE*NUM_BUTTONS-(SIZE-GAP_SIZE), SIZE);
+	private Dimension ps = new Dimension(BUTTON_WIDTH*NUM_BUTTONS-(BUTTON_WIDTH-GAP_SIZE), BUTTON_HEIGHT);
 	private boolean[] down;
 	private static int current;
 	private int previous;
@@ -98,6 +100,7 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 	private static int arcSize = (int)Prefs.get(CORNER_DIAMETER, 20);
 	private int lineType = LINE;
 	private static boolean legacyMode;
+	//private static BasicStroke widerLine = new BasicStroke(1.5f);
 	
 	private Color gray = new Color(228,228,228);
 	private Color brighter = gray.brighter();
@@ -121,7 +124,7 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 		addMouseMotionListener(this);
 		instance = this;
 		names[getNumTools()-1] = "\"More Tools\" menu (switch toolsets or add tools)";
-		icons[getNumTools()-1] = "C900T1c13>T7c13>"; // ">>"
+		icons[getNumTools()-1] = "C900T1e15>T7e15>"; // ">>"
 		addPopupMenus();
 	}
 
@@ -225,6 +228,7 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 			Graphics2D g2d = (Graphics2D)g;
 			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+			//g2d.setStroke(widerLine);
 		}
 		for (int i=0; i<LINE; i++)
 			drawButton(g, i);
@@ -259,31 +263,31 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 				return;
 		}
         int index = toolIndex(tool);
-        int x = index*SIZE + 1;
+        int x = index*BUTTON_WIDTH + 1;
         if (tool>=CUSTOM1)
-        	x -= SIZE-GAP_SIZE;
+        	x -= BUTTON_WIDTH-GAP_SIZE;
         if (tool!=UNUSED)
-        	fill3DRect(g, x, 1, SIZE, SIZE-1, !down[tool]);
+        	fill3DRect(g, x, 1, BUTTON_WIDTH, BUTTON_HEIGHT-1, !down[tool]);
         g.setColor(toolColor);
-        x = index*SIZE + OFFSET;
+        x = index*BUTTON_WIDTH + OFFSET;
         if (tool>=CUSTOM1)
-        	x -= SIZE-GAP_SIZE;
+        	x -= BUTTON_WIDTH-GAP_SIZE;
 		int y = OFFSET;
 		if (down[tool]) { x++; y++;}
 		this.g = g;
 		if (tool>=CUSTOM1 && tool<=getNumTools() && icons[tool]!=null) {
-			drawIcon(g, tool, x, y);
+			drawIcon(g, tool, x+1, y+1);
 			return;
 		}
 		switch (tool) {
 			case RECTANGLE:
 				xOffset = x; yOffset = y;
 				if (rectType==ROUNDED_RECT_ROI)
-					g.drawRoundRect(x, y+1, 17, 13, 8, 8);
+					g.drawRoundRect(x-1, y+1, 17, 13, 8, 8);
 				else if (rectType==ROTATED_RECT_ROI)
 					polyline(0,10,7,0,15,6,8,16,0,10); 
 				else
-					g.drawRect(x, y+1, 17, 13);
+					g.drawRect(x-1, y+1, 17, 13);
 				drawTriangle(16,15);
 				return;
 			case OVAL:
@@ -292,6 +296,7 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 					yOffset = y - 1;
 					polyline(6,4,8,2,12,1,15,2,16,4,15,7,12,8,9,11,9,14,6,16,2,16,0,13,1,10,4,9,6,7,6,4);
 				} else if (ovalType==ELLIPSE_ROI) {
+					xOffset = x - 1;
 					yOffset = y + 1;
 					polyline(11,0,13,0,14,1,15,1,16,2,17,3,17,7,12,12,11,12,10,13,8,13,7,14,4,14,3,13,2,13,1,12,1,11,0,10,0,9,1,8,1,7,6,2,7,2,8,1,10,1,11,0);
 				} else
@@ -300,10 +305,10 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 				return;
 			case POLYGON:
 				xOffset = x+1; yOffset = y+2;
-				polyline(4,0,15,0,15,1,11,5,11,6,14,10,14,11,0,11,0,4,4,0);
+				polyline(4,0,15,0,15,1,11,5,11,6,14,11,14,12,0,12,0,4,4,0);
 				return;
 			case FREEROI:
-				xOffset = x; yOffset = y+2;
+				xOffset = x; yOffset = y+3;
 				polyline(2,0,5,0,7,3,10,3,12,0,15,0,17,2,17,5,16,8,13,10,11,11,6,11,4,10,1,8,0,6,0,2,2,0); 
 				return;
 			case LINE:
@@ -314,17 +319,17 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 					m(0,12); d(17,3);
 					drawDot(0,11); drawDot(17,2);
 				}
-				drawTriangle(12,14);
+				drawTriangle(15,15);
 				return;
 			case POLYLINE:
 				xOffset = x; yOffset = y;
 				polyline(15,6,11,2,1,2,1,3,7,9,2,14);
-				drawTriangle(12,14);
+				drawTriangle(13,15);
 				return;
 			case FREELINE:
 				xOffset = x; yOffset = y;
 				polyline(16,4,14,6,12,6,9,3,8,3,6,7,2,11,1,11);
-				drawTriangle(12,14);
+				drawTriangle(13,15);
 				return;
 			case POINT:
 				xOffset = x; yOffset = y;
@@ -338,7 +343,7 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 					g.setColor(Roi.getColor());
 					g.fillRect(x+7, y+7, 3, 3);
 				}
-				drawTriangle(14,14);
+				drawTriangle(15,15);
 				return;
 			case WAND:
 				xOffset = x+2; yOffset = y+1;
@@ -376,7 +381,7 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 				polyline(10,7,12,7,12,9);
 				polyline(8,7,2,13,2,15,4,15,11,8);
 				g.setColor(backgroundColor);
-				polyline(-1,-1,18,-1,18,17,-1,17,-1,-1);
+				polyline(-1,-1,18,-1,18,18,-1,18,-1,-1);
 				return;
 			case ANGLE:
 				xOffset = x; yOffset = y+2;
@@ -469,7 +474,7 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 		}
 		if (menus[tool]!=null && menus[tool].getItemCount()>0) { 
 			xOffset = x; yOffset = y;
-			drawTriangle(14, 14);
+			drawTriangle(15, 15);
 		}
 	}
 	
@@ -897,8 +902,9 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 		return ovalType;
 	}
 
+	/** Returns the button width (button spacing). */
 	public static int getButtonSize() {
-		return SIZE;
+		return BUTTON_WIDTH;
 	}
 	
 	static void repaintTool(int tool) {
@@ -912,8 +918,6 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 			tb.drawButton(g, tool);
 			if (g!=null) g.dispose();
 		}
-		//Toolbar tb = getInstance();
-		//tb.repaint(tool * SIZE , 0, SIZE, SIZE);
 	}
 	
 	// Returns the toolbar position index of the specified tool
@@ -940,9 +944,9 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 
 	// Returns the tool corresponding to the specified x coordinate
 	private int toolID(int x) {
-		if (x>SIZE*12+GAP_SIZE)
+		if (x>BUTTON_WIDTH*12+GAP_SIZE)
 			x -= GAP_SIZE;
-		int index = x/SIZE;
+		int index = x/BUTTON_WIDTH;
     	switch (index) {
 			case 0: return RECTANGLE;
 			case 1: return OVAL;
@@ -961,7 +965,7 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
     }
     
 	private boolean inGap(int x) {
-		return x>=(SIZE*12) && x<(SIZE*12+GAP_SIZE);
+		return x>=(BUTTON_WIDTH*12) && x<(BUTTON_WIDTH*12+GAP_SIZE);
  	}
 
 	public void mousePressed(MouseEvent e) {
@@ -1371,7 +1375,7 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 			nExtraTools = 0;
 			names[getNumTools()-1] = name;
 			icons[getNumTools()-1] = icon;
-			ps = new Dimension(SIZE*NUM_BUTTONS-(SIZE-GAP_SIZE)+nExtraTools*SIZE, SIZE);
+			ps = new Dimension(BUTTON_WIDTH*NUM_BUTTONS-(BUTTON_WIDTH-GAP_SIZE)+nExtraTools*BUTTON_WIDTH, BUTTON_HEIGHT);
 			IJ.getInstance().pack();
 		}
 	}
@@ -1472,7 +1476,7 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 			icons[getNumTools()-1] = icons[getNumTools()-2];
 			names[getNumTools()-2] = null;
 			icons[getNumTools()-2] = null;
-			ps = new Dimension(SIZE*NUM_BUTTONS-(SIZE-GAP_SIZE)+nExtraTools*SIZE, SIZE);
+			ps = new Dimension(BUTTON_WIDTH*NUM_BUTTONS-(BUTTON_WIDTH-GAP_SIZE)+nExtraTools*BUTTON_WIDTH, BUTTON_HEIGHT);
 			IJ.getInstance().pack();
 			tool = getNumTools()-2;
 		}
