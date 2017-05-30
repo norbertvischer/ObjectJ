@@ -158,7 +158,7 @@ public class JavaObjectProviderOJ implements IIOProviderOJ {
             throw new ProjectIOExceptionOJ("Can't save project (b): " + ex.getMessage());
 
         }
-         if (ok) {
+        if (ok) {
             oldOjjFile.delete();//1.10.2010 for Windows
             newOjjFile.renameTo(oldOjjFile);
 
