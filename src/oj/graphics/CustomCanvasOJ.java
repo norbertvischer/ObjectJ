@@ -149,7 +149,7 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
      * first ImageJ repaints image, then markers are superimposed
      */
     @Override
-    public void resetDoubleBuffer() {
+    public void resetDoubleBuffer() { 
         super.resetDoubleBuffer();
         offScreenImage = null;
 
@@ -161,18 +161,14 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
     //then take the original graphport and draw the complete offscreen image onto it.
     // problem: the entire image is
     public void paint(Graphics g) {
-        hits++;
-        if (!IJ.isWindows() || !OJ.doubleBuffered) {
-            super.paint(g);
-            drawOverlayoj(g);
+		hits++;
 
-        } else {
-            Graphics g2 = getOffscreenGraphics();//3.2.2011
-            super.paint(g2);
-            drawOverlayoj(g2);
-            g.drawImage(offScreenImage, 0, 0, null);
-        }
-    }
+		Graphics g2 = getOffscreenGraphics();//3.2.2011
+		super.paint(g2);
+		drawOverlayoj(g2);
+		g.drawImage(offScreenImage, 0, 0, null);
+
+	}
 
     Graphics getOffscreenGraphics() {
         final int srcRectWidthMag = (int) (srcRect.width * magnification);

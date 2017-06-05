@@ -34,21 +34,6 @@ public class FunctionsOJ implements MacroExtension {
         return null;
     }
 
-//    public String ojBuild(String s) {
-//        String title = OJ.getData().getImages().getImageByIndex(0).getName();
-//        int slc = 1;
-//        CellOJ cell = new CellOJ(title, slc);
-//        LineOJ line = new LineOJ();
-//        line.setObjectDef("Axis");
-//        LocationOJ loc = new LocationOJ((double) (Math.random() * 300), (double) (Math.random() * 300), 1.0);
-//        line.add(loc);
-//        LocationOJ loc2 = new LocationOJ((double) (Math.random() * 300), (double) (Math.random() * 300), 1.0);
-//        line.add(loc2);
-//        cell.add(line);
-//        OJ.getDataProcessor().addCell(cell);
-//
-//        return null;
-//    }
     public String ojCloseItem() {
         OJ.getMacroProcessor().closeYtem();
         return null;
@@ -113,7 +98,15 @@ public class FunctionsOJ implements MacroExtension {
         return null;
     }
 
-    public String ojFlatten() {
+  public String ojFindClosestPoint(String sx, String sy, String maxDistance, String ytemName) {
+		int x = MacroProcessorOJ.parseInt(sx);
+		int y = MacroProcessorOJ.parseInt(sy);
+		int maxDist = MacroProcessorOJ.parseInt(maxDistance);
+		int pointNo = OJ.getMacroProcessor().findClosestPoint(x, y, maxDist, ytemName);
+		return "" + pointNo;
+	}
+    
+   public String ojFlatten() {
         OJ.getMacroProcessor().flatten();
         return null;
     }
@@ -125,10 +118,6 @@ public class FunctionsOJ implements MacroExtension {
 
     public String ojGetGlassDimensions() {
         double[] val = OJ.getMacroProcessor().getGlass();
-//        val[0]=110;
-//        val[1]=111;
-//        val[2]=112;
-//        val[3]=113;
         return floatArrayToString(val);
     }
 
@@ -155,11 +144,6 @@ public class FunctionsOJ implements MacroExtension {
     public String ojLastObject(String imageIndex) {
         int objectIndex = OJ.getMacroProcessor().getLastCell(MacroProcessorOJ.parseInt(imageIndex));
         return Integer.toString(objectIndex);
-    }
-
-    public String ojSelectClosestItem(String x, String y, String tolerance) {
-        OJ.getMacroProcessor().selectClosestItem(MacroProcessorOJ.parseInt(x), MacroProcessorOJ.parseInt(y), MacroProcessorOJ.parseInt(tolerance));
-        return null;
     }
 
     public String ojGetOpenObject() {

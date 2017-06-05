@@ -115,20 +115,16 @@ public class MacroExtStrOJ {
         buf.append(getFunction("ojCloseItem"));
         buf.append(getFunction("ojCloseResults"));
         buf.append(getFunction("ojCloseObject"));
-        //buf.append(getFunction("ojCloseImages", "conditions")); not used
         buf.append(getIntFunction("ojColumnNumber", "columnName"));
-        //buf.append(getFunction("ojCopyFromScreen", "left", "top", "width", "height"));//2.3.2012
         buf.append(getFunction("ojDeleteAllObjects"));
         buf.append(getFunction("ojDeleteColumn", "columnName"));
         buf.append(getFunction("ojDeleteItem", "itemType", "itemNumber"));
         buf.append(getFunction("ojDeleteObject", "objectIndex"));
-        //buf.append(getFunction("ojDisposeAllImages"));26.9.2010
-        //buf.append(getFunction("ojDisposeImage", "imageName"));
         buf.append(getFunction("ojExtendVisibilityDepth", "lowValue", "highValue"));
         buf.append(getIntFunction("ojFirstObject", "imageIndex"));
         buf.append(getFunction("ojFlatten"));//18.10.2011    
 
-        buf.append(getFunction("ojSelectClosestItem", "x", "y", "tolerance"));//5.11.2009
+        buf.append(getFunction("ojFindClosestPoint", "x", "y", "maxDistance", "itemName"));
         buf.append(getStrFunction("ojGetColumnTitle", "columnIndex"));//18.4.2009
         buf.append(getIntFunction("ojGetOpenObject"));
         buf.append(getStrFunction("ojGetItemName"));//6.3.2010
