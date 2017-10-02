@@ -2,6 +2,8 @@ package ij.process;
 import java.util.*;
 import java.awt.*;
 import java.awt.image.*;
+import java.awt.geom.Rectangle2D;
+import java.awt.font.GlyphVector;
 import ij.gui.*;
 import ij.util.*;
 import ij.plugin.filter.GaussianBlur;
@@ -95,6 +97,7 @@ public abstract class ImageProcessor implements Cloneable {
 	protected WritableRaster raster;
 	protected BufferedImage image;
 	protected BufferedImage fmImage;
+	protected Graphics2D fmGraphics;
 	protected ColorModel cm2;
 	protected SampleModel sampleModel;
 	protected static IndexColorModel defaultColorModel;
@@ -243,9 +246,15 @@ public abstract class ImageProcessor implements Cloneable {
 		int minDistance = Integer.MAX_VALUE;
 		int distance;
 		int minIndex = 0;
-		int r1=c.getRed();
-		int g1=c.getGreen();
-		int b1=c.getBlue();
+		int r1 = c.getRed();
+		int g1 = c.getGreen();
+		int b1 = c.getBlue();	
+		if (!(r1==g1&&g1==b1&&r1==b1) && icm==defaultColorModel) {
+			double[] w = ColorProcessor.getWeightingFactors();
+			r1 = (int)Math.round(3*r1*w[0]);
+			g1 = (int)Math.round(3*g1*w[1]);
+			b1 = (int)Math.round(3*b1*w[2]);
+		}		
 		int r2,b2,g2;
     	for (int i=0; i<mapSize; i++) {
 			r2 = rLUT[i]&0xff; g2 = gLUT[i]&0xff; b2 = bLUT[i]&0xff;
@@ -559,14 +568,7 @@ public abstract class ImageProcessor implements Cloneable {
 				{lower=0.0; upper=threshold;}
 		}
 		if (lower>255) lower = 255;
-		if (notByteData) {
-			if (max>min) {
-				lower = min + (lower/255.0)*(max-min);
-				upper = min + (upper/255.0)*(max-min);
-			} else
-				lower = upper = min;
-		}
-		setThreshold(lower, upper, lutUpdate);
+		scaleAndSetThreshold(lower, upper, lutUpdate);
 	}
 
 	/** Automatically sets the lower and upper threshold levels, where 'method'
@@ -578,14 +580,12 @@ public abstract class ImageProcessor implements Cloneable {
 			throw new IllegalArgumentException("Invalid thresholding method");
 		if (this instanceof ColorProcessor)
 			return;
-		double min=0.0, max=0.0;
 		boolean notByteData = !(this instanceof ByteProcessor);
 		ImageProcessor ip2 = this;
 		if (notByteData) {
 			ImageProcessor mask = ip2.getMask();
 			Rectangle rect = ip2.getRoi();
 			resetMinAndMax();
-			min = getMin(); max = getMax();
 			ip2 = convertToByte(true);
 			ip2.setMask(mask);
 			ip2.setRoi(rect);	
@@ -636,16 +636,33 @@ public abstract class ImageProcessor implements Cloneable {
 			else
 				{lower=0.0; upper=threshold;}
 		}
-		if (notByteData) {
+		scaleAndSetThreshold(lower, upper, lutUpdate);
+
+	}
+	
+	/** Set the threshold using a 0-255 range. */
+	public void scaleAndSetThreshold(double lower, double upper, int lutUpdate) {
+		int bitDepth = getBitDepth();
+		if (bitDepth!=8 && lower!=NO_THRESHOLD) {
+			double min = getMin();
+			double max = getMax();
 			if (max>min) {
-				lower = min + (lower/255.0)*(max-min);
-				upper = min + (upper/255.0)*(max-min);
+				if (bitDepth==16 && lower==0.0)
+					lower = 0.0;
+				else if (bitDepth==32 && lower==0.0)
+					lower = -Float.MAX_VALUE;
+				else
+					lower = min + (lower/255.0)*(max-min);
+				if (bitDepth==16 && upper==255.0)
+					upper = 65535;
+				else if (bitDepth==32 && upper==255.0)
+					upper = Float.MAX_VALUE;
+				else
+					upper = min + (upper/255.0)*(max-min);
 			} else
 				lower = upper = min;
 		}
 		setThreshold(lower, upper, lutUpdate);
-		//if (notByteData && lutUpdate!=NO_LUT_UPDATE)
-		//	setLutAnimation(true);
 	}
 
 	/** Disables thresholding. */
@@ -966,10 +983,16 @@ public abstract class ImageProcessor implements Cloneable {
 
 	/**
 	 * Returns an array containing the pixel values along the
-	 * line starting at (x1,y1) and ending at (x2,y2). For byte
-	 * and short images, returns calibrated values if a calibration
-	 * table has been set using setCalibrationTable().
+	 * line starting at (x1,y1) and ending at (x2,y2). Pixel
+	 * values are sampled using getInterpolatedValue(double,double)
+	 * if interpolatiion is enabled or getPixelValue(int,int) if it is not.
+	 * For byte and short images, returns calibrated values if a 
+	 * calibration table has been set using setCalibrationTable().
+	 * The length of the returned array, minus one, is approximately 
+	 * equal to the length of the line.
 	 * @see ImageProcessor#setInterpolate
+	 * @see ImageProcessor#getPixelValue
+	 * @see ImageProcessor#getInterpolatedValue
 	*/
 	public double[] getLine(double x1, double y1, double x2, double y2) {
 		double dx = x2-x1;
@@ -989,8 +1012,9 @@ public abstract class ImageProcessor implements Cloneable {
 				ry += yinc;
 			}
 		} else {
+			rx-=0.5; ry-=0.5; 
 			for (int i=0; i<n; i++) {
-				data[i] = getPixelValue((int)(rx+0.5), (int)(ry+0.5));
+				data[i] = getPixelValue((int)Math.round(rx), (int)Math.round(ry));
 				rx += xinc;
 				ry += yinc;
 			}
@@ -1245,20 +1269,27 @@ public abstract class ImageProcessor implements Cloneable {
     private ImageProcessor dotMask;
 
 	private void setupFontMetrics() {
-		if (fmImage==null)
-			fmImage=new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
 		if (fontMetrics==null) {
-			Graphics g = fmImage.getGraphics();
-			fontMetrics = g.getFontMetrics(font);
+			fmImage=new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
+			fmGraphics = (Graphics2D)fmImage.getGraphics();
+			fmGraphics.setFont(font);
+			Java2.setAntialiasedText(fmGraphics, antialiasedText);
+			fontMetrics = fmGraphics.getFontMetrics(font);
 		}
 	}
 
-	/** Draws a string at the current location using the current fill/draw value.
-        Draws multiple lines if the string contains newline characters. */
+	/** Draws a string at the current drawing location using the current fill/draw value.
+	 *  Draws multiple lines if the string contains newline characters.
+	 *  The current x coordinate is the left/center/right end of the string for
+	 *  left/center/right justification.
+	 *  The current y coordinate determines the bottommost position of the string,
+	 *  including the descent of the font (i.e., characters reaching below the baseline)
+	 *  For multi-line strings, the y coordinate applies to the first line.
+	 *  The y of the drawing position is incremented by the height of one text line,
+	 *  i.e. points at the drawing position for the next text line */
 	public void drawString(String s) {
 		if (s==null || s.equals("")) return;
 		setupFontMetrics();
-		if (ij.IJ.isMacOSX()) s += " ";
 		if (s.indexOf("\n")==-1)
 			drawString2(s);
 		else {
@@ -1268,6 +1299,8 @@ public abstract class ImageProcessor implements Cloneable {
 		}
 	}
 
+	/** Draws a single-line string at the current drawing location cx, cy and
+	 *  adds the line height (FontMetrics.getHeight) to the current y coordinate 'cy' */
 	private void drawString2(String s) {
 		int w =  getStringWidth(s);
 		int cxx = cx;
@@ -1326,7 +1359,13 @@ public abstract class ImageProcessor implements Cloneable {
 		cy += h;
 	}
 
-	/** Draws a string at the specified location using the current fill/draw value. */
+	/** Draws a string at the specified location using the current fill/draw value.
+	 *  Draws multiple lines if the string contains newline characters.
+	 *  The x coordinate is the left/center/right end of the string for left/center/right
+	 *  justification.
+	 *  The y coordinate determines the bottommost position of the string,
+	 *  including the descent of the font (i.e., characters reaching below the baseline)
+	 *  For multi-line strings, the y coordinate applies to the first line. */
 	public void drawString(String s, int x, int y) {
 		moveTo(x, y);
 		drawString(s);
@@ -1375,42 +1414,51 @@ public abstract class ImageProcessor implements Cloneable {
 	/** Sets the font used by drawString(). */
 	public void setFont(Font font) {
 		this.font = font;
-		fontMetrics = null;
 		boldFont = font.isBold();
+		setupFontMetrics();
+		fmGraphics.setFont(font);
+		Java2.setAntialiasedText(fmGraphics, antialiasedText);
+		fontMetrics = fmGraphics.getFontMetrics(font);
 	}
 	
 	/** Specifies whether or not text is drawn using antialiasing. Antialiased
 		test requires an 8 bit or RGB image. Antialiasing does not
 		work with 8-bit images that are not using 0-255 display range. */
 	public void setAntialiasedText(boolean antialiasedText) {
+		setupFontMetrics();
 		if (antialiasedText && (((this instanceof ByteProcessor)&&getMin()==0.0&&getMax()==255.0) || (this instanceof ColorProcessor)))
 			this.antialiasedText = true;
 		else
 			this.antialiasedText = false;
+		Java2.setAntialiasedText(fmGraphics, this.antialiasedText);
+		fontMetrics = fmGraphics.getFontMetrics(font);
 	}
 	
-	/** Returns the width in pixels of the specified string. */
+	/** Returns the width in pixels of the specified string, including any background
+	 *  space (whitespace) between the x drawing coordinate and the string, not necessarily
+	 *  including all whitespace at the right. */
 	public int getStringWidth(String s) {
-		setupFontMetrics();
-		int w;
-		if (antialiasedText) {
-			Graphics g = fmImage.getGraphics();
-			if (g==null) {
-				fmImage = null;
-				setupFontMetrics();
-				g = fmImage.getGraphics();
-			}
-			Java2.setAntialiasedText(g, true);
-			w = Java2.getStringWidth(s, fontMetrics, g);
-			g.dispose();
-		} else
-			w =  fontMetrics.stringWidth(s);
-		return w;
+		// Note that fontMetrics.getStringBounds often underestimates the width (worst for italic fonts on Macs)
+		// On the other hand, GlyphVector.getPixelBounds (returned by this.getStringBounds)
+		// does not include the full character width of e.g. the '1' character, which would make
+		// lists of right-justified numbers such as the y axis of plots look ugly.
+		// Thus, the maximum of both methods is returned.
+		Rectangle2D rect = getStringBounds(s);
+		return (int)Math.max(fontMetrics.getStringBounds(s, fmGraphics).getWidth(), rect.getX()+rect.getWidth());
 	}
-	
+
+	/** Returns a rectangle enclosing the pixels affected by drawString 
+	 *  assuming it is drawn at (x=0, y=0). As drawString draws above the drawing location,
+	 *  the y coordinate of the rectangle is negative. */
+	public Rectangle getStringBounds(String s) {
+		setupFontMetrics();
+		GlyphVector gv = font.createGlyphVector(fmGraphics.getFontRenderContext(), s);
+		Rectangle2D rect = gv.getPixelBounds(null, 0.f, -fontMetrics.getDescent());
+		return new Rectangle((int)rect.getX(), (int)rect.getY(), (int)rect.getWidth(), (int)rect.getHeight());
+	}
+
 	/** Returns the current font. */
 	public Font getFont() {
-		setupFontMetrics();
 		return font;
 	}
 
@@ -1562,7 +1610,7 @@ public abstract class ImageProcessor implements Cloneable {
 
 	/** Draws the specified ROI on this image using the stroke
 		width, stroke color and fill color defined by roi.setStrokeWidth,
-		roi.setStrokeColor() and roi.setFillColor(). Works best with RGB
+		roi.setStrokeColor() and roi.setFillColor(). Works   with RGB
 		images. Does not work with 16-bit and float images.
 		Requires Java 1.6.
 		@see ImageProcessor#draw

@@ -581,10 +581,9 @@ public class AutoThresholder {
 			Tprev = threshold;
 			temp = (w1+Math.sqrt(sqterm))/w0;
 
-			if (Double.isNaN(temp)) {
-				IJ.log ("MinError(I): NaN, not converging.");
+			if (Double.isNaN(temp))
 				threshold = Tprev;
-			} else
+			else
 				threshold =(int) Math.floor(temp);
 		}
 		return threshold;
@@ -650,7 +649,6 @@ public class AutoThresholder {
 		}
 		// The threshold is the minimum between the two peaks.
 		for (int i=1; i<255; i++) {
-			//IJ.log(" "+i+"  "+iHisto[i]);
 			if (iHisto[i-1] > iHisto[i] && iHisto[i+1] >= iHisto[i]) {
 				threshold = i;
 				break;

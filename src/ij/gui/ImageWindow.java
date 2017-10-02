@@ -135,7 +135,6 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 				GUI.center(this);
 			nextLocation = null;
 			centerOnScreen = false;
-			//ic.setScaleToFit(true);
 			if (Interpreter.isBatchMode() || (IJ.getInstance()==null&&this instanceof HistogramWindow)) {
 				WindowManager.setTempCurrentImage(imp);
 				Interpreter.addBatchModeImage(imp);
@@ -394,6 +393,8 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 	public boolean close() {
 		boolean isRunning = running || running2;
 		running = running2 = false;
+		if (imp==null)
+			return true;
 		boolean virtual = imp.getStackSize()>1 && imp.getStack().isVirtual();
 		if (isRunning) IJ.wait(500);
 		if (ij==null || ij.quittingViaMacro() || IJ.getApplet()!=null || Interpreter.isBatchMode() || IJ.macroRunning() || virtual)
