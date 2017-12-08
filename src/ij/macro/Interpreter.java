@@ -39,6 +39,7 @@ public class Interpreter implements MacroConstants {
 	static Interpreter instance, previousInstance;
 	public static boolean batchMode;
 	static Vector imageTable; // images opened in batch mode
+	static Vector imageActivations; // images ordered by activation time
 	boolean done;
 	Program pgm;
 	Functions func;
@@ -106,7 +107,7 @@ public class Interpreter implements MacroConstants {
 		instance = this;
 		if (!calledMacro) {
 			batchMode = false;
-			imageTable = null;
+			imageTable = imageActivations = null;
 		}
 		pushGlobals();
 		if (func==null)
@@ -171,7 +172,9 @@ public class Interpreter implements MacroConstants {
 
 	/** Saves global variables. */
 	public void saveGlobals(Program pgm) {
+		Interpreter saveInstance = instance;
 		saveGlobals2(pgm);
+		instance = saveInstance; 
 	}
 	
 	void saveGlobals2(Program pgm) {
@@ -444,7 +447,12 @@ public class Interpreter implements MacroConstants {
 		String str = null;
 		Variable[] array = null;
 		int arraySize = 0;
-		getToken();
+		getToken();		
+		if (token=='(') {
+			int next = pgm.code[pc+1];
+			if ((next&TOK_MASK)==STRING_CONSTANT || (next&TOK_MASK)==STRING_FUNCTION || isString(next))
+				error("String enclosed in parens");
+		}		
 		if (token!=';') {
 			boolean isString = token==STRING_CONSTANT || token==STRING_FUNCTION;
 			boolean isArrayFunction = token==ARRAY_FUNCTION;
@@ -1189,7 +1197,7 @@ public class Interpreter implements MacroConstants {
 		IJ.showStatus("");
 		IJ.showProgress(0, 0);
 		batchMode = false;
-		imageTable = null;
+		imageTable = imageActivations = null;
 		WindowManager.setTempCurrentImage(null);
 		wasError = true;
 		if (!evaluating)
@@ -1732,7 +1740,7 @@ public class Interpreter implements MacroConstants {
 			if (batchMode)
 				showingProgress = true;
 			batchMode = false;
-			imageTable = null;
+			imageTable = imageActivations = null;
 			WindowManager.setTempCurrentImage(null);
 		}
 		if (func.plot!=null) {
@@ -1788,7 +1796,7 @@ public class Interpreter implements MacroConstants {
 	public void abortMacro() {
 		if (!calledMacro || batchMacro) {
 			batchMode = false;
-			imageTable = null;
+			imageTable = imageActivations = null;
 		}
 		done = true;
 		if (func!=null && !(macroName!=null&&macroName.indexOf(" Tool")!=-1))
@@ -1807,7 +1815,7 @@ public class Interpreter implements MacroConstants {
 	static void setBatchMode(boolean b) {
 		batchMode = b;
 		if (b==false)
-			imageTable = null;
+			imageTable = imageActivations = null;
 	}
 
 	public static boolean isBatchMode() {
@@ -1818,25 +1826,39 @@ public class Interpreter implements MacroConstants {
 		if (!batchMode || imp==null) return;
 		if (imageTable==null)
 			imageTable = new Vector();
+		imageTable.add(imp);
 		//IJ.log("add: "+imp+"  "+imageTable.size());
-		imageTable.addElement(imp);
+		activateImage(imp);
 	}
 
 	public static void removeBatchModeImage(ImagePlus imp) {
 		if (imageTable!=null && imp!=null) {
 			int index = imageTable.indexOf(imp);
-			if (index!=-1)
-				imageTable.removeElementAt(index);
+			if (index!=-1) {
+				imageTable.remove(index);
+				imageActivations.remove(imp);
+				WindowManager.setTempCurrentImage(getLastBatchModeImage());
+			}
 		}
 	}
 	
+	public static void activateImage(ImagePlus imp) {
+		if (imageTable!=null && imp!=null) {
+			if (imageActivations==null)
+				imageActivations = new Vector();
+			imageActivations.remove(imp);
+			imageActivations.add(imp);
+			//IJ.log("activateImage: "+imp+"  "+imageActivations.size());
+		}
+	}
+
 	public static int[] getBatchModeImageIDs() {
 		if (!batchMode || imageTable==null)
 			return new int[0];
 		int n = imageTable.size();
 		int[] imageIDs = new int[n];
 		for (int i=0; i<n; i++) {
-			ImagePlus imp = (ImagePlus)imageTable.elementAt(i);
+			ImagePlus imp = (ImagePlus)imageTable.get(i);
 			imageIDs[i] = imp.getID();
 		}
 		return imageIDs;
@@ -1868,7 +1890,10 @@ public class Interpreter implements MacroConstants {
 			int size = imageTable.size(); 
 			if (size==0)
 				return null;
-			imp2 = (ImagePlus)imageTable.elementAt(size-1);
+			if (imageActivations!=null && imageActivations.size()>0)
+				imp2 =  (ImagePlus)imageActivations.get(imageActivations.size()-1);
+			if (imp2==null)
+				imp2 = (ImagePlus)imageTable.get(size-1);
 		} catch(Exception e) { }
 		return imp2;
 	} 
