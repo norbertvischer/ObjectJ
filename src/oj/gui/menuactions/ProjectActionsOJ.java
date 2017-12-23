@@ -31,191 +31,201 @@ import oj.project.ImagesOJ;
 
 public class ProjectActionsOJ {
 
-    public static ActionListener NewProjectAction = new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-            if (resetProjectData()) {
-                OJ.setData(new DataOJ("Untitled"));
-                boolean pathMayChange = true;
-                if (new InputOutputOJ().saveProjectAs(OJ.getData(), true, pathMayChange)) {
-                    MenuManagerOJ.getInstance().setEnabled(true);
-                    ViewActionsOJ.SettingsAction.actionPerformed(e);
-                    ViewActionsOJ.YtemListAction.actionPerformed(e);
-                } else {
-                    OJ.setData(null);
-                }
-            }
-        }
-    };
-    public static ActionListener OpenProjectAction = new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-            if (resetProjectData()) {
-                OJ.setData(new InputOutputOJ().loadProjectWithDialog());
-                if (OJ.getData() != null) {
-                    OJ.getData().getCells().killBadCells();
-                    OJ.getData().getCells().sortCells();
-                    OJ.getData().setChanged(false);
-                    ProjectActionsOJ.initProject();
-                }
-            }
-        }
-    };
-    public static ActionListener CloseProjectAction = new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-            resetProjectData();
-            Runtime rt = Runtime.getRuntime();
-            rt.gc();
-        }
-    };
-    public static ActionListener AboutObjectJAction = new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-            new AboutOJ(IJ.getInstance(), true).setVisible(true);
-        }
-    };
-    public static ActionListener SaveProjectAction = new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-            saveProjectData();
-        }
-    };
-    public static ActionListener SaveEmptyCopyAction = new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-            saveEmptyCopy();
-        }
-    };
-    public static ActionListener SaveCopyAction = new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-            saveACopy();
-        }
-    };
-    public static ActionListener SaveProjectAsAction = new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-            saveProjectDataAs();
-            //OJ.getEventProcessor().fireImageChangedEvent(ImageChangedEventOJ.IMAGES_SORT);//20.3.2010
+	public static ActionListener NewProjectAction = new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			if (resetProjectData()) {
+				OJ.setData(new DataOJ("Untitled"));
+				boolean pathMayChange = true;
+				if (new InputOutputOJ().saveProjectAs(OJ.getData(), true, pathMayChange)) {
+					MenuManagerOJ.getInstance().setEnabled(true);
+					ViewActionsOJ.SettingsAction.actionPerformed(e);
+					ViewActionsOJ.YtemListAction.actionPerformed(e);
+				} else {
+					OJ.setData(null);
+				}
+			}
+		}
+	};
+	public static ActionListener OpenProjectAction = new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			if (resetProjectData()) {
+				OJ.setData(new InputOutputOJ().loadProjectWithDialog());
+				if (OJ.getData() != null) {
+					OJ.getData().getCells().killBadCells();
+					OJ.getData().getCells().sortCells();
+					OJ.getData().setChanged(false);
+					ProjectActionsOJ.initProject();
+				}
+			}
+		}
+	};
+	public static ActionListener CloseProjectAction = new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			resetProjectData();
+			Runtime rt = Runtime.getRuntime();
+			rt.gc();
+		}
+	};
+	public static ActionListener AboutObjectJAction = new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			new AboutOJ(IJ.getInstance(), true).setVisible(true);
+		}
+	};
+	public static ActionListener ExportEmbeddedMacrosAction = new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+		     InputOutputOJ.exportEmbeddedMacros();
+		}
+	};
+	public static ActionListener ImportEmbeddedMacrosAction = new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+		     InputOutputOJ.importEmbeddedMacros();
+		}
+	};
+	public static ActionListener SaveProjectAction = new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			saveProjectData();
+		}
+	};
+	public static ActionListener SaveEmptyCopyAction = new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			saveEmptyCopy();
+		}
+	};
+	public static ActionListener SaveCopyAction = new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			saveACopy();
+		}
+	};
+	public static ActionListener SaveProjectAsAction = new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			saveProjectDataAs();
+			//OJ.getEventProcessor().fireImageChangedEvent(ImageChangedEventOJ.IMAGES_SORT);//20.3.2010
 
-        }
-    };
-    public static ActionListener ForceCloseProjectAction = new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-            closeProjectData();
-        }
-    };
-    public static ActionListener DummyProjectAction = new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-            IJ.showStatus("dummy");
+		}
+	};
+	public static ActionListener ForceCloseProjectAction = new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			closeProjectData();
+		}
+	};
+	public static ActionListener DummyProjectAction = new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			IJ.showStatus("dummy");
 
-        }
-    };
-    /**
-     * saves data (without macros) as old XML file
-     */
-    public static ActionListener ExportAsXMLAction = new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-            oj.OJ.saveAsBinary = false;//29.4.2010
-            saveProjectDataAsXML();
-            oj.OJ.saveAsBinary = true;
-            IJ.showStatus("Exporting as XML");
-        }
-    };
-    public static ActionListener ExportLinkedResultsAction = new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-            ResultsActionsOJ.exportResultsToText();
-        }
-    };
+		}
+	};
+	/**
+	 * saves data (without macros) as old XML file
+	 */
+//	public static ActionListener ExportAsXMLAction = new ActionListener() {
+//		public void actionPerformed(ActionEvent e) {
+//			oj.OJ.saveAsBinary = false;//29.4.2010
+//			saveProjectDataAsXML();
+//			oj.OJ.saveAsBinary = true;
+//			IJ.showStatus("Exporting as XML");
+//		}
+//	};
+	public static ActionListener ExportLinkedResultsAction = new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			ResultsActionsOJ.exportResultsToText();
+		}
+	};
 
-    public static boolean openProjectData(String directory, String filename) {
-        if (!resetProjectData()) {
-            return false;
-        }
-        DataOJ data = new InputOutputOJ().loadAProject(directory, filename);
-        ij.IJ.showStatus("Loading ObjectJ project " + filename);//4.9.2010
+	public static boolean openProjectData(String directory, String filename) {
+		if (!resetProjectData()) {
+			return false;
+		}
+		DataOJ data = new InputOutputOJ().loadAProject(directory, filename);
+		ij.IJ.showStatus("Loading ObjectJ project " + filename);//4.9.2010
 
-        OJ.setData(data);
-        if (OJ.getData() != null) {
-            OJ.getData().getCells().killBadCells();//19.4.2009
-            OJ.getData().getCells().sortCells();
-            OJ.getData().setChanged(false);
-            ProjectActionsOJ.initProject();
-            ij.IJ.showStatus("Loaded project: " + data.getCells().getCellsCount() + " objects in " + data.getImages().getImagesCount() + " image(s)");//24.2.2010
-            return true;
-        }
-        return false;
-    }
+		OJ.setData(data);
+		if (OJ.getData() != null) {
+			OJ.getData().getCells().killBadCells();//19.4.2009
+			OJ.getData().getCells().sortCells();
+			OJ.getData().setChanged(false);
+			ProjectActionsOJ.initProject();
+			ij.IJ.showStatus("Loaded project: " + data.getCells().getCellsCount() + " objects in " + data.getImages().getImagesCount() + " image(s)");//24.2.2010
+			return true;
+		}
+		return false;
+	}
 
-    private static void initProject() {
-        OJ.getImageProcessor().updateImagesProperties();
+	private static void initProject() {
+		OJ.getImageProcessor().updateImagesProperties();
 
-        ViewActionsOJ.SettingsAction.actionPerformed(null);
-        ViewActionsOJ.YtemListAction.actionPerformed(null);
-        try {
-            EmbeddedMacrosOJ emb = new EmbeddedMacrosOJ();
-            emb.loadEmbeddedMacros();
-        } catch (Exception ex) {
-            IJ.error("Load macros failed. " + ex.getMessage());
-        }
+		ViewActionsOJ.SettingsAction.actionPerformed(null);
+		ViewActionsOJ.YtemListAction.actionPerformed(null);
+		try {
+			EmbeddedMacrosOJ emb = new EmbeddedMacrosOJ();
+			emb.loadEmbeddedMacros();
+		} catch (Exception ex) {
+			IJ.error("Load macros failed. " + ex.getMessage());
+		}
 
-        MenuManagerOJ.getInstance().setEnabled(true);
+		MenuManagerOJ.getInstance().setEnabled(true);
 
-        CustomCanvasOJ.markerRad = 2;
-        CustomCanvasOJ.markerSize = 4;
-        CustomCanvasOJ.fontSize = 12;
+		CustomCanvasOJ.markerRad = 2;
+		CustomCanvasOJ.markerSize = 4;
+		CustomCanvasOJ.fontSize = 12;
 
-        OJ.getDataProcessor().qualifyCells();
-        OJ.getImageProcessor().applyImageMarkers();
-    }
+		OJ.getDataProcessor().qualifyCells();
+		OJ.getImageProcessor().applyImageMarkers();
+	}
 
-    private static void saveProjectData() {
-        new InputOutputOJ().saveProject(OJ.getData(), true);//20.8.2010
-        ij.IJ.showStatus("Done...");
+	private static void saveProjectData() {
+		new InputOutputOJ().saveProject(OJ.getData(), true);//20.8.2010
+		ij.IJ.showStatus("Done...");
 
-        OJ.getData().setChanged(false);
-    }
+		OJ.getData().setChanged(false);
+	}
 
-    private static void saveEmptyCopy() {
-        new InputOutputOJ().saveEmptyProject(OJ.getData());
-        //OJ.getData().setChanged(false);
-    }
+	private static void saveEmptyCopy() {
+		new InputOutputOJ().saveEmptyProject(OJ.getData());
+		//OJ.getData().setChanged(false);
+	}
 
-    private static void saveACopy() {
-        new InputOutputOJ().saveACopy(OJ.getData());
-        //OJ.getData().setChanged(false);
-    }
+	private static void saveACopy() {
+		new InputOutputOJ().saveACopy(OJ.getData());
+		//OJ.getData().setChanged(false);
+	}
 
-    private static void saveProjectDataAs() {
-        boolean pathMayChange = true;
-        if (new InputOutputOJ().saveProjectAs(OJ.getData(), true, pathMayChange)) {//, true
-            if (ProjectSettingsOJ.getInstance() != null) {
-                ProjectSettingsOJ.getInstance().setTitle(OJ.getData().getName());
-            }
-            OJ.getData().setChanged(false);
-        }
-    }
+	private static void saveProjectDataAs() {
+		boolean pathMayChange = true;
+		if (new InputOutputOJ().saveProjectAs(OJ.getData(), true, pathMayChange)) {//, true
+			if (ProjectSettingsOJ.getInstance() != null) {
+				ProjectSettingsOJ.getInstance().setTitle(OJ.getData().getName());
+			}
+			OJ.getData().setChanged(false);
+		}
+	}
 
-    private static void saveProjectDataAsXML() {
-        DataOJ data = OJ.getData();
+	private static void saveProjectDataAsXML() {
+		DataOJ data = OJ.getData();
 
-        if (data != null) {
-            String tmpDir = data.getDirectory();
-            String tmpFileName = data.getFilename();
-            String tmpProjectName = data.getName();
-            boolean pathMayChange = true;
-            if (new InputOutputOJ().saveProjectAs(OJ.getData(), false, pathMayChange)) {//20.8.2010
-                if (ProjectSettingsOJ.getInstance() != null) {
-                    ProjectSettingsOJ.getInstance().setTitle(OJ.getData().getName());
-                }
-            }
+		if (data != null) {
+			String tmpDir = data.getDirectory();
+			String tmpFileName = data.getFilename();
+			String tmpProjectName = data.getName();
+			boolean pathMayChange = true;
+			if (new InputOutputOJ().saveProjectAs(OJ.getData(), false, pathMayChange)) {//20.8.2010
+				if (ProjectSettingsOJ.getInstance() != null) {
+					ProjectSettingsOJ.getInstance().setTitle(OJ.getData().getName());
+				}
+			}
 
-            data.setDirectory(tmpDir);
-            data.setFilename(tmpFileName);
-            data.setName(tmpProjectName);
-        }
-    }
+			data.setDirectory(tmpDir);
+			data.setFilename(tmpFileName);
+			data.setName(tmpProjectName);
+		}
+	}
 
-    private static boolean closeProjectData() {
-        if (OJ.getData() != null) {
-            ToolStateOJ state = OJ.getToolStateProcessor().getToolStateObject();
-            if (state != null && (state instanceof CreateCellStateOJ)) {
-                ((CreateCellStateOJ) state).closeCell();//2.11.2013        
-            }
-            /*    
+	private static boolean closeProjectData() {
+		if (OJ.getData() != null) {
+			ToolStateOJ state = OJ.getToolStateProcessor().getToolStateObject();
+			if (state != null && (state instanceof CreateCellStateOJ)) {
+				((CreateCellStateOJ) state).closeCell();//2.11.2013        
+			}
+			/*    
             //6.6.2015
         if (ToolsWindowOJ.getInstance() != null) {
             int toolsX = ToolsWindowOJ.getInstance().getLocationOnScreen().x;
@@ -229,67 +239,67 @@ public class ProjectActionsOJ {
             Prefs.set("objectj.projectx", "" + projectX);
             Prefs.set("objectj.projecty", "" + projectY);
         }
-             */
+			 */
 
-        }
-        if ((OJ.getData() != null) && (OJ.getData().getChanged() == true)) {
-            if (ProjectSettingsOJ.getInstance() != null) {
-                ProjectSettingsOJ.getInstance().setVisible(true);
-            }
-            String filename = OJ.getData().getFilename();
-            YesNoCancelDialog d = new YesNoCancelDialog(IJ.getInstance(), "Closing Project ", "Save Changes to Project \n\"" + filename + "\" ?");
+		}
+		if ((OJ.getData() != null) && (OJ.getData().getChanged() == true)) {
+			if (ProjectSettingsOJ.getInstance() != null) {
+				ProjectSettingsOJ.getInstance().setVisible(true);
+			}
+			String filename = OJ.getData().getFilename();
+			YesNoCancelDialog d = new YesNoCancelDialog(IJ.getInstance(), "Closing Project ", "Save Changes to Project \n\"" + filename + "\" ?");
 
-            if (d.cancelPressed()) {
-                return false;
-            }
+			if (d.cancelPressed()) {
+				return false;
+			}
 
-            if (d.yesPressed()) {
-                saveProjectData();
-            }
+			if (d.yesPressed()) {
+				saveProjectData();
+			}
 
-            DataOJ data = OJ.getData();
-            if (data != null) {
-                ImagesOJ imgs = data.getImages();
-                if (imgs != null) {
-                    imgs.removeAllImages();
-                }
-                PlotManagerOJ plotSettings = PlotManagerOJ.getInstance();
-                if (plotSettings != null) {
-                    String plotTitles[] = plotSettings.getPlotTitles();                 
-                    for (String title : plotTitles) {
-                        Window window = WindowManager.getWindow(title);
-                        if (window != null) {
-                            window.dispose();
-                            WindowManager.removeWindow(window);
-                        }
-                    }
-                }
-            }
-            OJ.isProjectOpen = false;
-        }
-        return true;
-    }
+			DataOJ data = OJ.getData();
+			if (data != null) {
+				ImagesOJ imgs = data.getImages();
+				if (imgs != null) {
+					imgs.removeAllImages();
+				}
+				PlotManagerOJ plotSettings = PlotManagerOJ.getInstance();
+				if (plotSettings != null) {
+					String plotTitles[] = plotSettings.getPlotTitles();
+					for (String title : plotTitles) {
+						Window window = WindowManager.getWindow(title);
+						if (window != null) {
+							window.dispose();
+							WindowManager.removeWindow(window);
+						}
+					}
+				}
+			}
+			OJ.isProjectOpen = false;
+		}
+		return true;
+	}
 
-    static boolean resetProjectData() {
-        if (GlassWindowOJ.exists()) {
-            IJ.runMacro("ojGlassWindow(\"hide\");");//15.10.2012
-        }
-        if (closeProjectData()) {
-            if (OJ.editorWindow != null) {
-                OJ.editorWindow.dispose();//24.6.2010
-            }
-            OJ.editorWindow = null;//26.1.2012
-            MenuManagerOJ.close();
-            ToolsWindowOJ.close();
-            ToolManagerOJ.close();
+	static boolean resetProjectData() {
+		if (GlassWindowOJ.exists()) {
+			IJ.runMacro("ojGlassWindow(\"hide\");");//15.10.2012
+		}
+		if (closeProjectData()) {
+			if (OJ.editorWindow != null) {
+				OJ.editorWindow.dispose();//24.6.2010
+			}
+			OJ.editorWindow = null;//26.1.2012
+			MenuManagerOJ.close();
+			ToolsWindowOJ.close();
+			ToolManagerOJ.close();
 
-            ProjectResultsOJ.close();
-            ProjectSettingsOJ.close();
+			ProjectResultsOJ.close();
+			ProjectSettingsOJ.close();
 
-            OJ.setData(null);
-            OJ.isProjectOpen = false;
-            return true;
-        }
-        return false;
-    }
+			OJ.setData(null);
+			OJ.isProjectOpen = false;
+			return true;
+		}
+		return false;
+	}
 }

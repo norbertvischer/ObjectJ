@@ -478,7 +478,13 @@ public class UtilsOJ {
 
     public static void showInFinderOrExplorer() {
         String dir = OJ.getData().getDirectory();
-        String fullPath = dir + OJ.getData().getFilename();
+        //String fullPath = dir + OJ.getData().getFilename();
+		showInFinderOrExplorer(dir, OJ.getData().getFilename());
+	}
+		
+	 public static void showInFinderOrExplorer( String dir, String fName) {
+        //String dir = OJ.getData().getDirectory();
+        String fullPath = dir + fName;
         if (IJ.isMacOSX()) {
             fullPath = fullPath.replaceAll("/", ":");
             if (fullPath.startsWith(":")) {

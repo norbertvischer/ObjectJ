@@ -1,6 +1,7 @@
 macro " "{//don't change macro name
 	plotTitle = "";
-	limits = split("");//(left right bottom top); NaN = automatic)
+	xRange = split("");//(left right); NaN = automatic)
+	yRange = split("");//(bottom top); NaN = automatic)
 	xColumns = split("");
 	yColumns = split("");
 	colors = split("");
@@ -73,8 +74,8 @@ macro " "{//don't change macro name
 			legend2 += legendParts[plot] + "\n";
 		}
 	}
-	if(limits.length ==4){
-		Plot.setLimits(limits[0], limits[1], limits[2], limits[3]);
+	if(xRange.length == 2 && yRange.length ==2){
+		Plot.setLimits(xRange[0], xRange[1], yRange[0], yRange[1]);
 	}
 	else
 		Plot.setLimitsToFit();
