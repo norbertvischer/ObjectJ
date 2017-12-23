@@ -1086,6 +1086,7 @@ public class Functions implements MacroConstants, Measurements {
 					if (seed!=dseed)
 						interp.error("Seed not integer");
 					ran = new Random(seed);
+					ImageProcessor.seed = seed;//n__ enable seed
 				} else if (arg.equals("gaussian"))
 					gaussian = true;
 				else
@@ -1094,6 +1095,7 @@ public class Functions implements MacroConstants, Measurements {
 			interp.getRightParen();
 			if (!Double.isNaN(dseed)) return Double.NaN;
 		}
+		ImageProcessor.seed = Double.NaN;//n__ disable seed
 		interp.getParens();
  		if (ran==null)
 			ran = new Random();
@@ -5636,8 +5638,7 @@ public class Functions implements MacroConstants, Measurements {
 			a2[i] = new Variable(d2[i]);
 		return a2;
 	}
-
-	private static double[] resampleArray(double[] y1, int len2) {
+ static double[] resampleArray(double[] y1, int len2) {
 		int len1 = y1.length;
 		double factor =  (double)(len2-1)/(len1-1);
 		double[] y2 = new double[len2];
@@ -6521,6 +6522,4 @@ public class Functions implements MacroConstants, Measurements {
 		imp.setRoi(roi);
 		return null;
 	}
-
-} // class Functions
-
+}

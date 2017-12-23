@@ -679,7 +679,7 @@ public class ColorProcessor extends ImageProcessor {
 		
 		showProgress(0.15);
 		switch (type) {
-			case RGB_NOISE:
+			case RGB_NOISE:			
 				r.noise(arg); showProgress(0.40);
 				g.noise(arg); showProgress(0.65);
 				b.noise(arg); showProgress(0.90);

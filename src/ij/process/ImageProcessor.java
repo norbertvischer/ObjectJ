@@ -53,7 +53,8 @@ public abstract class ImageProcessor implements Cloneable {
 	static final int INVERT=0, FILL=1, ADD=2, MULT=3, AND=4, OR=5,
 		XOR=6, GAMMA=7, LOG=8, MINIMUM=9, MAXIMUM=10, SQR=11, SQRT=12, EXP=13, ABS=14, SET=15;
 	static final String WRONG_LENGTH = "width*height!=pixels.length";
-	
+	public static double seed = Double.NaN; //n__
+	static Random rnd;//n__
 	int fgColor = 0;
 	protected int lineWidth = 1;
 	protected int cx, cy; //current drawing coordinates
