@@ -328,32 +328,28 @@ public class EmbeddedMacrosOJ {
 		if (intp != null) {
 			Interpreter.getInstance().abortMacro();//11.8.2013
 		}
-		//ImageJAccessOJ.InterpreterAccess.
 		OJ.initMacroProcessor();//4.7.2013
-		//OJ.getMacroProcessor().setTarget("exit");//4.7.2013
-
 		macros_text = UtilsOJ.fixLineFeeds(macros_text);
-		// }
 		String clean_macro_text = UtilsOJ.maskComments(macros_text);
 		clean_macro_text = clean_macro_text.replaceAll("macro\"", "macro \"");//19.10.2010
-		if ((clean_macro_text != null) && (!clean_macro_text.equals(""))) {
-			boolean leadingPart = !clean_macro_text.startsWith("macro");
-			String[] macros = clean_macro_text.split("macro ");//
-			int numMacros = macros.length;
-			if (leadingPart) {
-				numMacros--;
-			}
-			String project_name = OJ.getData().getName();
-			if (numMacros > 0) {//7.9.2010
-				MacroSetOJ macroSet = OJ.getData().getMacroSet();
-				macroSet = new MacroSetOJ();
-				macroSet.setName(project_name);
-				macroSet.installText(macros_text);
-				OJ.getData().setMacroSet(macroSet);
-				OJ.getEventProcessor().fireMacroChangedEvent(project_name, MacroChangedEventOJ.MACROSET_EDITED);
-				ij.IJ.showStatus("" + numMacros + " embedded macros have been loaded");
-			}
+		if (clean_macro_text == null) {
+			clean_macro_text = "";//21.1.2018
 		}
+
+		boolean leadingPart = !clean_macro_text.startsWith("macro");
+		String[] macros = clean_macro_text.split("macro ");//
+		int numMacros = macros.length;
+		if (leadingPart) {
+			numMacros--;
+		}
+		String project_name = OJ.getData().getName();
+		MacroSetOJ macroSet = new MacroSetOJ();
+		macroSet.setName(project_name);
+
+		macroSet.installText(macros_text);
+		OJ.getData().setMacroSet(macroSet);
+		OJ.getEventProcessor().fireMacroChangedEvent(project_name, MacroChangedEventOJ.MACROSET_EDITED);
+		ij.IJ.showStatus("" + numMacros + " embedded macros have been loaded");
 		ToolManagerOJ.getInstance().reload();
 	}
 	public ActionListener itemAction = new ActionListener() {

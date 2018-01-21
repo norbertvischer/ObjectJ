@@ -203,17 +203,15 @@ public class InputOutputOJ {
 					String projectDir = fromPath.substring(0, separatorIndex);
 
 					if (fromPath.endsWith(".txt")) {
-						IJ.showMessage("Was Text " + fromPath);
 						xPath = fromPath;
-						xExists = true;
+						fromTxt = true;
 						newMacroText = IJ.openAsString(xPath);
 
 					} else if (fromPath.endsWith(".ojj")) {
-						//IJ.showMessage("Was Ojj " + fromPath);
 						newMacroText = extractEmbeddedMacros(projectDir, name);
 						fromOjj = true;
 					} else {
-						IJ.showMessage("Was other :" + fromPath);
+						IJ.showMessage("Extension must be  '.txt' or '.ojj' :   \n" + fromPath);
 					}
 
 				}
