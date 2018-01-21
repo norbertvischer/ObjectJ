@@ -222,4 +222,9 @@ public class XmlStreamProviderOJ implements IIOProviderOJ {
         }
         return true;
     }
+
+    @Override
+    public String extractMacros(String directory, String filename) throws ProjectIOExceptionOJ {
+	throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

@@ -46,7 +46,7 @@ public class MenuManagerOJ implements ItemListener, MacroChangedListenerOJ {
 	/**/ private MenuItem itemExportXML;
 	/**/ private MenuItem itemCloseProject;
 	/**/ private MenuItem itemExportEmbeddedMacros;
-	/**/ private MenuItem itemImportEmbeddedMacros;
+	/**/ private MenuItem replaceEmbeddedMacros;
 	private MenuItem itemSaveProject;
 	//---
 	private Menu menuLinkedImages;
@@ -157,9 +157,9 @@ public class MenuManagerOJ implements ItemListener, MacroChangedListenerOJ {
 			/**/ itemExportEmbeddedMacros.addActionListener(ProjectActionsOJ.ExportEmbeddedMacrosAction);
 			/**/ menuProjectFile.add(itemExportEmbeddedMacros);
 
-			/**/ itemImportEmbeddedMacros = new MenuItem("Import Embedded Macros", new MenuShortcut(KeyEvent.VK_F7, true));
-			/**/ itemImportEmbeddedMacros.addActionListener(ProjectActionsOJ.ImportEmbeddedMacrosAction);
-			/**/ menuProjectFile.add(itemImportEmbeddedMacros);
+			/**/ replaceEmbeddedMacros = new MenuItem("Import Embedded Macros", new MenuShortcut(KeyEvent.VK_F7, true));
+			/**/ replaceEmbeddedMacros.addActionListener(ProjectActionsOJ.ReplaceEmbeddedMacrosAction);
+			/**/ menuProjectFile.add(replaceEmbeddedMacros);
 
 			
 			itemSaveProject = new MenuItem("Save Project");

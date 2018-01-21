@@ -76,9 +76,10 @@ public class ProjectActionsOJ {
 		     InputOutputOJ.exportEmbeddedMacros();
 		}
 	};
-	public static ActionListener ImportEmbeddedMacrosAction = new ActionListener() {
+	public static ActionListener ReplaceEmbeddedMacrosAction = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
-		     InputOutputOJ.importEmbeddedMacros();
+		    boolean altKey = (e.getModifiers() & 8)>0;
+		     InputOutputOJ.replaceEmbeddedMacros(altKey);
 		}
 	};
 	public static ActionListener SaveProjectAction = new ActionListener() {

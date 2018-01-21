@@ -9,8 +9,11 @@ package oj.io;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ij.IJ;
+import ij.gui.GenericDialog;
 import ij.io.OpenDialog;
 import ij.plugin.frame.Editor;
+import java.awt.Color;
+import java.awt.Font;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.CharArrayReader;
@@ -18,6 +21,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Date;
+import mmcorej.Metadata;
 import oj.OJ;
 import oj.util.UtilsOJ;
 import oj.project.*;
@@ -84,28 +89,153 @@ public class InputOutputOJ {
 		}
 	}
 
+	static String ago(File file) {
+		String date = "";
+		if (!file.exists()) {
+			return date;
+		}
+		long now = new Date().getTime();
+		long modified = file.lastModified();
+		long mSecs = now - modified;
+		double minutes = ((double) (mSecs)) / 1000 / 60;
+		String ago = "  (" + IJ.d2s(minutes, 1) + " minutes ago)";
+		if (minutes > 99) {
+			ago = "  (" + IJ.d2s(minutes / 60, 1) + " hours ago)";
+		}
+		if (minutes > 48 * 60) {
+			ago = "  (" + IJ.d2s(minutes / 60 / 24, 0) + " days ago)";
+		}
+		date += (new Date(file.lastModified())).toString() + ago;
+		return date;
+	}
+
 	/**
 	 * Load text file (project name + .txt from project folder and install it as
 	 * embedded macros.
 	 */
-	public static void importEmbeddedMacros() {//23-12-2017
+	public static void replaceEmbeddedMacros(boolean withAltKey) {//23-12-2017
+
 		String dir = getCurrentDirectory();
 		String fName = OJ.getData().getName() + ".txt";
-		String path = dir + fName;
-		File f = new File(path);
-		if (!f.exists()) {
-			IJ.showMessage("Import Embedded Macros", "    File:\n" + fName + "\n    not found in folder:\n" + dir);
+		String xPath = dir + fName;//exchangePath
+		File xFile = new File(xPath);//exchangeFile
+		String newMacroText = "";
+		boolean xExists = xFile.exists();
+		boolean fromOjj = false;
+		boolean fromTxt = false;
+
+		if (withAltKey) {
+			if (!xExists) {
+				IJ.showMessage("Alt key was down, but 'Exchange file' does not exist");
+				return;
+			}
+			newMacroText = IJ.openAsString(xPath);
+		}
+
+		if (!withAltKey) {
+//			String date = "";
+//			long now = new Date().getTime();
+//			long modified = exchangeFile.lastModified();
+//			long mSecs = now - modified;
+//			double minutes = ((double) (mSecs)) / 1000 / 60;
+//			String ago = "  (" + IJ.d2s(minutes, 1) + " minutes ago)";
+//			if (minutes > 99) ago = "  (" + IJ.d2s(minutes / 60, 1) + " hours ago)";
+//			if (minutes > 24 * 60) ago = "  (" + IJ.d2s(minutes / 60 / 24, 1) + " days ago)";
+//			long fSize = 0;
+//			if (exchangeFileExists) {
+//				date = (new Date(exchangeFile.lastModified())).toString();
+//				fSize = exchangeFile.length();
+//			}
+			String multiLinePath = xPath;
+			if (multiLinePath.length() > 80) {
+				multiLinePath = multiLinePath.replace("/", "/\n");
+			}
+			if (!withAltKey) {
+				int index = 0;
+				Color color = Color.decode("#aa0000");
+				if (xExists) {
+					index = 1;
+					color = Color.decode("#008800");
+
+				}
+				GenericDialog gd = new GenericDialog("Replace embedded macro text");
+				String[] radios = ("From any .txt or .ojj file;From 'Exchange File' *").split(";");
+				gd.addRadioButtonGroup("\nReplace and install embedded macros :", radios, 2, 1, radios[index]);
+				int sizeEmbeddedMacros = OJ.getData().getLinkedMacroText().length();
+
+				String msg2 = "";
+				if (xExists) {
+					msg2 += "\n *'Exchange File' exists:\n";
+
+				} else {
+					msg2 += "\n *'Exchange File' does not exist:";
+				}
+				msg2 += "\n " + multiLinePath;
+
+				if (xExists) {
+					msg2 += "\n \nModified:  " + ago(xFile);
+					msg2 += "\nSize (bytes): " + xFile.length();;
+
+				}
+
+				gd.addMessage(msg2, Font.decode("Arial-12"), color);
+
+				gd.addMessage("\nEmbedded macros:\nSize (bytes): " + sizeEmbeddedMacros, Font.decode("Arial-12"));
+
+				String msg4 = "\n \n* Note: ";
+				msg4 += "\n 'Exchange File' has same name and location as ";
+				msg4 += "\n the .ojj project file, but extension is .txt instead .ojj ";
+				msg4 += "\n \n It simplifies the installation of embedded macros that were ";
+				msg4 += "\n edited elsewhere, but has no function otherwise";
+				msg4 += "\n \n This dialog is skipped when the Alt key was down";
+				gd.addMessage(msg4, Font.decode("Arial-12"));
+				//gd.setOKLabel("Replace");
+				gd.showDialog();
+				if (gd.wasCanceled()) {
+					return;
+				}
+				String radioStr = gd.getNextRadioButton();
+				if (radioStr.equals(radios[0])) {
+					String fromPath = IJ.getFilePath("Select .txt or .ojj file");
+					int separatorIndex = fromPath.lastIndexOf(File.separator);
+					int len = fromPath.length();
+					String name = fromPath.substring(separatorIndex + 1, len);
+					String projectDir = fromPath.substring(0, separatorIndex);
+
+					if (fromPath.endsWith(".txt")) {
+						IJ.showMessage("Was Text " + fromPath);
+						xPath = fromPath;
+						xExists = true;
+						newMacroText = IJ.openAsString(xPath);
+
+					} else if (fromPath.endsWith(".ojj")) {
+						//IJ.showMessage("Was Ojj " + fromPath);
+						newMacroText = extractEmbeddedMacros(projectDir, name);
+						fromOjj = true;
+					} else {
+						IJ.showMessage("Was other :" + fromPath);
+					}
+
+				}
+				if (radioStr.equals(radios[1])) {
+					newMacroText = IJ.openAsString(xPath);
+				}
+			}
+		}
+
+		if (!xExists && !fromOjj && !fromTxt) {
+			IJ.showMessage("Cancelled");
 			return;
 		}
 
-		String macroText = IJ.openAsString(path);
-		OJ.getData().setLinkedMacroText(macroText);
-		EmbeddedMacrosOJ.getInstance().doInstall(macroText);
+		OJ.getData().setLinkedMacroText(newMacroText);
+		EmbeddedMacrosOJ.getInstance().doInstall(newMacroText);
 		Editor ed = OJ.editor;
 		if (ed != null) {
-			ed.getTextArea().setText(macroText);
+			ed.getTextArea().setText(newMacroText);
 		}
-		IJ.showStatus("Installed Embedded Macros, checksum = 933521");
+		int nMacros = OJ.getData().getMacroSet().getMacrosCount();
+		IJ.showStatus("*** Installed " + nMacros + " Embedded Macros");
 	}
 //   
 
@@ -430,6 +560,22 @@ public class InputOutputOJ {
 
 	}
 
+	public static String extractEmbeddedMacros(String directory, String filename) {
+		String macros = null;
+		String theType = UtilsOJ.getFileType(directory, filename);
+		try {
+			if (theType.startsWith("isZipped")) {
+				IIOProviderOJ ioProvider = IOFactoryOJ.getFactory().getProvider("javaobject");
+				macros = ioProvider.extractMacros(directory, filename);
+			}
+		} catch (ProjectIOExceptionOJ ex) {
+			Logger.getLogger(InputOutputOJ.class.getName()).log(Level.SEVERE, null, ex);
+			IJ.showMessage(ex.getMessage());
+			return null;
+		}
+		return macros;
+	}
+
 	/**
 	 * Depending on file type, selects either the "xmlstream" or the "javaobject
 	 * provider, then calls that provider's "loadProject" method.
@@ -495,6 +641,7 @@ public class InputOutputOJ {
 		} catch (Exception e) {
 		}
 		return dataOj;
+
 	}
 
 	/**
@@ -507,4 +654,5 @@ public class InputOutputOJ {
 			super(message);
 		}
 	}
+
 }

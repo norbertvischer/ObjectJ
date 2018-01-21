@@ -14,12 +14,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import oj.OJ;
+import oj.gui.tools.ToolManagerOJ;
 import oj.processor.events.ColumnChangedEventOJ;
 import oj.processor.events.ColumnChangedListenerOJ;
 import oj.processor.events.ImageChangedEventOJ;
 import oj.processor.events.ImageChangedListener2OJ;
 import oj.processor.events.YtemDefChangedEventOJ;
 import oj.processor.events.YtemDefChangedListenerOJ;
+import oj.processor.state.CreateCellStateOJ;
 
 /**
  * collection of all cells
@@ -445,12 +447,16 @@ public class CellsOJ extends BaseAdapterOJ implements ImageChangedListener2OJ, C
         return result;
     }
 
-    public void removeAllCells() {
-        cells.clear();
-        changed = true;
-        setNewestCellIndex(-1);
+ public void removeAllCells() {
+		if (OJ.getToolStateProcessor().getToolStateObject() instanceof CreateCellStateOJ) {
+			((CreateCellStateOJ) OJ.getToolStateProcessor().getToolStateObject()).closeCell();
+		}
+		ToolManagerOJ.getInstance().selectTool("");//20.1.2018
+		cells.clear();
+		changed = true;
+		setNewestCellIndex(-1);
 
-    }
+	}
 
     /**
      * both indexes are inclusive

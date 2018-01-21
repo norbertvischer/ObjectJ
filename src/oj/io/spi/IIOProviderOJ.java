@@ -24,5 +24,7 @@ public interface IIOProviderOJ {
 
     public DataOJ loadProject(String directory, String filename) throws ProjectIOExceptionOJ ;
 
+    public String extractMacros(String directory, String filename) throws ProjectIOExceptionOJ ;
+
     public void saveProject(DataOJ data, String directory, String filename) throws ProjectIOExceptionOJ ;
 }
