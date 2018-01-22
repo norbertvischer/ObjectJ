@@ -679,7 +679,7 @@ public class ColorProcessor extends ImageProcessor {
 		
 		showProgress(0.15);
 		switch (type) {
-			case RGB_NOISE:			
+			case RGB_NOISE:
 				r.noise(arg); showProgress(0.40);
 				g.noise(arg); showProgress(0.65);
 				b.noise(arg); showProgress(0.90);
@@ -769,9 +769,9 @@ public class ColorProcessor extends ImageProcessor {
 		return null;
 	}
 
-   public void noise(double range) {
-    	filterRGB(RGB_NOISE, range);
-    }
+	public void noise(double range) {
+		filterRGB(RGB_NOISE, range);
+	}
 
 	public void medianFilter() {
     	filterRGB(RGB_MEDIAN, 0.0);

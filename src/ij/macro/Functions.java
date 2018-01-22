@@ -1086,7 +1086,7 @@ public class Functions implements MacroConstants, Measurements {
 					if (seed!=dseed)
 						interp.error("Seed not integer");
 					ran = new Random(seed);
-					ImageProcessor.seed = seed;//n__ enable seed
+					ImageProcessor.setRandomSeed(seed);
 				} else if (arg.equals("gaussian"))
 					gaussian = true;
 				else
@@ -1095,7 +1095,7 @@ public class Functions implements MacroConstants, Measurements {
 			interp.getRightParen();
 			if (!Double.isNaN(dseed)) return Double.NaN;
 		}
-		ImageProcessor.seed = Double.NaN;//n__ disable seed
+		ImageProcessor.setRandomSeed(Double.NaN);
 		interp.getParens();
  		if (ran==null)
 			ran = new Random();
@@ -1104,14 +1104,6 @@ public class Functions implements MacroConstants, Measurements {
 		else
 			return ran.nextDouble();
 	}
-
-	//void setSeed() {
-	//	long seed = (long)getArg();
-	//	if (ran==null)
-	//		ran = new Random(seed);
-	//	else
-	//		ran.setSeed(seed);
-	//}
 
 	double getResult() {
 		interp.getLeftParen();
@@ -1381,26 +1373,6 @@ public class Functions implements MacroConstants, Measurements {
 			return new Variable(array).getArray();
 	}
 
-	Variable[] newArray() {
-		if (interp.nextToken()!='(' || interp.nextNextToken()==')') {
-			interp.getParens();
-			return new Variable[0];
-		}
-		interp.getLeftParen();
-		int next = interp.nextToken();
-		int nextNext = interp.nextNextToken();
-		if (next==STRING_CONSTANT || nextNext==','
-		|| nextNext=='[' || next=='-' || next==PI)
-			return initNewArray();
-		int size = (int)interp.getExpression();
-		if (size<0) interp.error("Negative array size");
-		interp.getRightParen();
-    	Variable[] array = new Variable[size];
-    	for (int i=0; i<size; i++)
-    		array[i] = new Variable();
-    	return array;
-	}
-
 	Variable[] split() {
 		String s1 = getFirstString();
 		String s2 = null;
@@ -1432,8 +1404,8 @@ public class Functions implements MacroConstants, Measurements {
 		String[] list = f.list();
 		if (list==null)
 			return new Variable[0];
-		if (System.getProperty("os.name").indexOf("Linux")!=-1)
-			ij.util.StringSorter.sort(list);
+		if (!IJ.isWindows())
+			Arrays.sort(list);
     	File f2;
     	int hidden = 0;
     	for (int i=0; i<list.length; i++) {
@@ -1464,7 +1436,14 @@ public class Functions implements MacroConstants, Measurements {
     	return array;
 	}
 
-	Variable[] initNewArray() {
+	Variable[] newArray() {
+		if (interp.nextToken()!='(' || interp.nextNextToken()==')') {
+			interp.getParens();
+			return new Variable[0];
+		}
+		interp.getLeftParen();
+		int next = interp.nextToken();
+		int nextNext = interp.nextNextToken();
 		Vector vector = new Vector();
 		int size = 0;
 		do {
@@ -2167,6 +2146,9 @@ public class Functions implements MacroConstants, Measurements {
 			String arg = getFirstString();
 			int what = Plot.toShape(arg);
 			addToPlot(what, arg);
+			return;
+		} else if (name.equals("appendToStack")) {
+			plot.appendToStack();
 			return;
 		} else
 			interp.error("Unrecognized plot function");
@@ -3029,10 +3011,10 @@ public class Functions implements MacroConstants, Measurements {
 			displayBatchModeImage(imp2);
 		} else if (sarg.equalsIgnoreCase("show")) {
 			if (imp2!=null) {
+				Interpreter.removeBatchModeImage(imp2);
 				Interpreter.setTempShowMode(true);
 				displayBatchModeImage(imp2);
 				Interpreter.setTempShowMode(false);
-				Interpreter.removeBatchModeImage(imp2);
 			}
 		} else if (sarg.equalsIgnoreCase("hide")) {
 			interp.setBatchMode(true);
@@ -5632,40 +5614,11 @@ public class Functions implements MacroConstants, Measurements {
 		double[] d1 = new double[len1];
 		for (int i=0; i<len1; i++)
 			d1[i] = a1[i].getValue();
-		double[] d2 = resampleArray(d1, len2);
+		double[] d2 = Tools.resampleArray(d1, len2);
 		Variable[] a2 = new Variable[len2];
 		for (int i=0; i<len2; i++)
 			a2[i] = new Variable(d2[i]);
 		return a2;
-	}
- static double[] resampleArray(double[] y1, int len2) {
-		int len1 = y1.length;
-		double factor =  (double)(len2-1)/(len1-1);
-		double[] y2 = new double[len2];
-		if(len1 == 0){
-		    return y2;
-		}
-		if(len1 == 1){
-		    for (int jj=0; jj<len2; jj++)
-			    y2[jj] = y1[0];
-		    return(y2);
-		}
-		double[] f1 = new double[len1];//fractional positions
-		double[] f2 = new double[len2];
-		for (int jj=0; jj<len1; jj++)
-			f1[jj] = jj*factor;
-		for (int jj=0; jj<len2; jj++)
-			f2[jj] = jj/factor;
-		for (int jj=0; jj<len2-1; jj++) {
-			double pos = f2[jj];
-			int leftPos = (int)Math.floor(pos);
-			int rightPos = (int)Math.floor(pos)+1;
-			double fraction = pos-Math.floor(pos);
-			double value = y1[leftPos] + fraction*(y1[rightPos]-y1[leftPos]);
-			y2[jj] = value;
-		}
-		y2[len2-1] = y1[len1-1];
-		return y2;
 	}
 
 	Variable[] reverseArray() {
@@ -6522,4 +6475,6 @@ public class Functions implements MacroConstants, Measurements {
 		imp.setRoi(roi);
 		return null;
 	}
-}
+
+} // class Functions
+
