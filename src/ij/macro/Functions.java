@@ -2136,6 +2136,12 @@ public class Functions implements MacroConstants, Measurements {
 		} else if (name.equals("drawVectors")) {
 			drawPlotVectors();
 			return;
+		} else if (name.equals("drawShapes")) {
+			drawShapes();
+			return;
+		} else if (name.equals("drawGrid")) {
+			plot.drawShapes("redraw_grid", null);	
+			return;
 		} else if (name.startsWith("setLineWidth")) {
 			plot.setLineWidth((float)getArg());
 			return;
@@ -2277,6 +2283,52 @@ public class Functions implements MacroConstants, Measurements {
 		plot.drawVectors(x1, y1, x2, y2);
 	}
 
+	void drawShapes() {
+		String type  = getFirstString().toLowerCase(); 
+		if(type.contains("boxes")){
+			double[] x1 = getNextArray();//variable names apply for vertical boxes
+			double[] y1 = getNextArray();
+			double[] y2 = getNextArray();
+			double[] y3 = getNextArray();
+			double[] y4 = getNextArray();
+			double[] y5 = getLastArray();
+			int len = x1.length;
+			if (len != y1.length ||len != y2.length ||len != y3.length ||len != y4.length ||len != y5.length || len==0 ){
+				interp.error("Arrays must have same length");
+				return;
+			}
+			float[][] floatArr = new float[6][len];
+			floatArr[0] = Tools.toFloat(x1);
+			floatArr[1] = Tools.toFloat(y1);
+			floatArr[2] = Tools.toFloat(y2);
+			floatArr[3] = Tools.toFloat(y3);
+			floatArr[4] = Tools.toFloat(y4);
+			floatArr[5] = Tools.toFloat(y5);
+			plot.drawShapes(type, floatArr);	
+		}
+
+		if(type.contains("rectangles")){
+			double[] x1 = getNextArray();
+			double[] y1 = getNextArray();
+			double[] x2 = getNextArray();
+			double[] y2 = getLastArray();
+			int len = x1.length;
+			if (len != y1.length ||len != x2.length ||len != y2.length ){
+				interp.error("Arrays must have same length");
+				return;
+			}
+			float[][] floatArr = new float[4][len];
+			floatArr[0] = Tools.toFloat(x1);
+			floatArr[1] = Tools.toFloat(y1);
+			floatArr[2] = Tools.toFloat(x2);
+			floatArr[3] = Tools.toFloat(y2);
+			plot.drawShapes(type, floatArr);	
+		}
+	}
+
+		
+
+	
 	void setPlotColor(Plot plot) {
 		interp.getLeftParen();
 		Color color = getColor();

@@ -55,18 +55,20 @@ public class Plot implements Cloneable {
 	public static final int CONNECTED_CIRCLES = 7;
 	/** Display points using an diamond-shaped mark. */
 	public static final int DIAMOND = 8;
-	/** Fill area between line plot and x-axis at y=0. */
-	public static final int FILLED = 9;
 	/** Draw shape using macro code */
-	public static final int CUSTOM = 10;
+	public static final int CUSTOM = 9;
+	/** Fill area between line plot and x-axis at y=0. */
+	public static final int FILLED = 10;
+	/** Draw a bar for each point. */
+	public static final int BAR = 11;
 	
 	/** Names for the shapes as an array */
 	final static String[] SHAPE_NAMES = new String[] {
-			"Circle", "X", "Line", "Box", "Triangle", "+", "Dot", "Connected Circles", "Diamond", "Filled", "Custom"};
+			"Circle", "X", "Line", "Box", "Triangle", "+", "Dot", "Connected Circles", "Diamond", "Filled", "Bar", "Custom"};
 	/** Names in nicely sorting order for menus */
 	final static String[] SORTED_SHAPES = new String[] {
 			SHAPE_NAMES[LINE], SHAPE_NAMES[CONNECTED_CIRCLES], SHAPE_NAMES[FILLED], SHAPE_NAMES[CIRCLE], SHAPE_NAMES[BOX], SHAPE_NAMES[TRIANGLE],
-			SHAPE_NAMES[CROSS], SHAPE_NAMES[DIAMOND], SHAPE_NAMES[X], SHAPE_NAMES[DOT]};
+			SHAPE_NAMES[CROSS], SHAPE_NAMES[DIAMOND], SHAPE_NAMES[X], SHAPE_NAMES[DOT], SHAPE_NAMES[BAR]};
 	/** flag for numeric labels of x-axis ticks */
 	public static final int X_NUMBERS = 0x1;
 	/** flag for numeric labels of x-axis ticks */
@@ -700,6 +702,8 @@ public class Plot implements Cloneable {
 			shape = -1;
 		else if (str.contains("x"))
 			shape = Plot.X;
+		else if (str.contains("bar"))
+			shape = Plot.BAR;
 		if (str.startsWith("code:"))
 			shape = CUSTOM;
 		return shape;
@@ -745,9 +749,14 @@ public class Plot implements Cloneable {
 				Tools.toFloat(x2), Tools.toFloat(y2), currentLineWidth, currentColor));
 	}
 
-	public void drawBoxes(int boxWidth, double[] x1, double[] y1, double[] y2, double[] y3, double[] y4, double[] y5) {
-		allPlotObjects.add(new PlotObject(boxWidth, Tools.toFloat(x1), Tools.toFloat(y1),
-				Tools.toFloat(y2), Tools.toFloat(y3), Tools.toFloat(y4), Tools.toFloat(y5), currentLineWidth, currentColor, currentColor2));
+
+	/**
+	 * Adds a set of 'shapes' such as boxes and whiskers
+	 * @param shapeType e.g. "boxes width=20"
+	 * @param floatCoords eg[3][6] for 3 boxes with 1 X and 5 ascending Y coordinates per box
+	 */
+	public void drawShapes(String shapeType, float[][] floatCoords) {
+		allPlotObjects.add(new PlotObject(shapeType, floatCoords, currentLineWidth, currentColor, currentColor2));
 	}
 	
 	public static double calculateDistance(int x1, int y1, int x2, int y2) {
@@ -1049,7 +1058,7 @@ public class Plot implements Cloneable {
 		String[] legendLabels = null;
 		if (pp.legend != null && pp.legend.label != null)
 			legendLabels = pp.legend.label.split("[\t\n]");
-		int iData = 1, iArrow = 1, iLine = 1, iText = 1,  iBox = 1; //Human readable counters of each object type
+		int iData = 1, iArrow = 1, iLine = 1, iText = 1,  iBox = 1, iShape = 1; //Human readable counters of each object type
 		int firstObject = allPlotObjects.get(0).hasFlag(PlotObject.CONSTRUCTOR_DATA) ? 1 : 0; //PlotObject passed with constructor is plotted last
 		for (int i=0, p=firstObject; i<nObjects; i++, p++) {
 			if (p >= allPlotObjects.size())                             //the PlotObject passed with Constructor comes last
@@ -1082,9 +1091,11 @@ public class Plot implements Cloneable {
 					names[i] = "Text "+iText+": \""+text+'"';
 					iText++;
 					break;
-				case PlotObject.BOXES:
-					names[i] = "Boxes " + iBox;
-					iBox++;
+				case PlotObject.SHAPES://n__ shape
+					String s = plotObject.shapeType;
+					String[] words = s.split(" ");
+					names[i] = "Shapes (" + words[0] +") " + iShape;
+					iShape++;
 					break;
 			}
 		}
@@ -1625,10 +1636,10 @@ public class Plot implements Cloneable {
 		bottomMargin = sc(BOTTOM_MARGIN*marginScale);
 		//IJ.log("marginScale="+marginScale+" left margin="+leftMargin);
 	}
-
+	double[] steps;//n__
 	/** Calculate the actual range, major step interval and set variables for data <-> pixels scaling */
 	double[] makeRangeGetSteps() {
-		double[] steps = new double[2];
+		steps = new double[2];
 		logXAxis = hasFlag(X_LOG_NUMBERS);
 		logYAxis = hasFlag(Y_LOG_NUMBERS);
 
@@ -1732,6 +1743,13 @@ public class Plot implements Cloneable {
 		return steps;
 	}
 
+
+	public void redrawGrid(){//n__
+		if(ip != null){
+			drawAxesTicksGridNumbers(steps);
+			ip.setColor(Color.black);
+		}
+	}
 	void getInitialMinAndMax() {
 		int axisRangeFlags = 0;
 		if (Double.isNaN(defaultMinMax[0])) axisRangeFlags |= X_RANGE;
@@ -2327,25 +2345,22 @@ public class Plot implements Cloneable {
 					ip.setColor(plotObject.color2 == null ? Color.black : plotObject.color2);
 				if (drawLine) {
 					int shortLen = Math.min(plotObject.xValues.length, plotObject.yValues.length);
-					if(plotObject.shape == FILLED){
+					if (plotObject.shape == FILLED) {
 						//ip.setColor(plotObject.color);
 						boolean twoColors = plotObject.color2 != null;
-						if(twoColors){
+						if (twoColors) {
 							ip.setColor(plotObject.color2);
 							ip.setLineWidth(1);
-						}
-						else
+						} else
 							ip.setColor(plotObject.color);
-
 						drawFloatPolyLineFilled(ip, plotObject.xValues, plotObject.yValues, shortLen);
-						if(twoColors){
+						if (twoColors){
 							ip.setColor(plotObject.color);
 							ip.setClipRect(frame);
 							ip.setLineWidth(sc(plotObject.lineWidth));
 							drawFloatPolyline(ip, plotObject.xValues, plotObject.yValues, shortLen);
 						}
-					}
-					else
+					} else
 					    drawFloatPolyline(ip, plotObject.xValues, plotObject.yValues, shortLen);
 				}
 				if (drawMarker) {
@@ -2370,6 +2385,8 @@ public class Plot implements Cloneable {
 					if (plotObject.shape==CUSTOM)
 						ip.setFont(saveFont);
 				}
+				if (plotObject.shape==BAR)
+					drawBarChart(plotObject);
 				ip.setClipRect(null);
 				break;
 			case PlotObject.ARROWS:
@@ -2393,62 +2410,110 @@ public class Plot implements Cloneable {
 				}
 				ip.setClipRect(null);
 				break;
-			case PlotObject.BOXES:
-				ip.setClipRect(frame);
-				float boxWidth = plotObject.boxWidth;
-				boolean swapXY = plotObject.boxWidth < 0;
-				if (!swapXY) {
-					for (int i = 0; i < plotObject.xValues.length; i++) {
-						int x = scaleX(plotObject.xValues[i]);
-						int y1 = scaleY(plotObject.boxesQ1[i]);
-						int y2 = scaleY(plotObject.boxesQ2[i]);
-						int y3 = scaleY(plotObject.boxesQ3[i]);
-						int y4 = scaleY(plotObject.boxesQ4[i]);
-						int y5 = scaleY(plotObject.boxesQ5[i]);
-						ip.setLineWidth(sc(plotObject.lineWidth));
 
-						int halfWidth = Math.round(sc(plotObject.boxWidth / 2));
-						Rectangle r1 = new Rectangle(x - halfWidth, y4, halfWidth * 2, y2 - y4);
-						Rectangle cBox = frame.intersection(r1);
-						if(y1 !=y2 || y4 != y5)//otherwise omit whiskers
-							ip.drawLine(x, y1, x, y5);//whiskers
-						if (plotObject.color2 != null) {
-							ip.setColor(plotObject.color2);
-							ip.fillRect(cBox.x, cBox.y, cBox.width, cBox.height);
-						}
-						ip.setColor(plotObject.color);
-						ip.drawRect(cBox.x, cBox.y, cBox.width, cBox.height);
-						ip.setClipRect(frame);
-						ip.drawLine(x - halfWidth, y3, x + halfWidth-1, y3);
-					}
-				}
-				if (swapXY) {
-					boxWidth = -boxWidth;
-					for (int i = 0; i < plotObject.xValues.length; i++) {
-						int y = scaleY(plotObject.xValues[i]);
-						int x1 = scaleX(plotObject.boxesQ1[i]);
-						int x2 = scaleX(plotObject.boxesQ2[i]);
-						int x3 = scaleX(plotObject.boxesQ3[i]);
-						int x4 = scaleX(plotObject.boxesQ4[i]);
-						int x5 = scaleX(plotObject.boxesQ5[i]);
+			//n__ shape
+			case PlotObject.SHAPES:
+				int iBoxWidth = 20;
+				ip.setClipRect(frame);
+				String shType = plotObject.shapeType.toLowerCase();						
+				if (shType.contains("rectangles")) {
+					int nShapes = plotObject.shapeData[0].length;				
+				
+						for (int i = 0; i < nShapes; i++) {
+							int x1 = scaleX(plotObject.shapeData[0][i]);
+							int y1 = scaleY(plotObject.shapeData[1][i]);
+							int x2 = scaleX(plotObject.shapeData[2][i]);
+							int y2 = scaleY(plotObject.shapeData[3][i]);
+						
 						ip.setLineWidth(sc(plotObject.lineWidth));
-						int halfWidth = Math.round(sc(boxWidth / 2));
-						if(x1 !=x2 || x4 != x5)//otherwise omit whiskers
-							ip.drawLine(x1, y, x5, y);//whiskers
-						Rectangle r1 = new Rectangle(x2, y - halfWidth, x4 - x2, halfWidth * 2);
-						Rectangle cBox = frame.intersection(r1);
-						if (plotObject.color2 != null) {
-							ip.setColor(plotObject.color2);
-							ip.fillRect(cBox.x, cBox.y, cBox.width, cBox.height);
+							int left = Math.min(x1, x2);
+							int right = Math.max(x1, x2);
+							int top = Math.min(y1, y2);
+							int bottom = Math.max(y1, y2);
+							
+							Rectangle r1 = new Rectangle(left, top, right-left, bottom - top);
+							Rectangle cBox = frame.intersection(r1);
+							if (plotObject.color2 != null) {
+								ip.setColor(plotObject.color2);
+								ip.fillRect(cBox.x, cBox.y, cBox.width, cBox.height);
+							}
+							ip.setColor(plotObject.color);
+							ip.drawRect(cBox.x, cBox.y, cBox.width, cBox.height);						
 						}
-						ip.setColor(plotObject.color);
-						ip.drawRect(cBox.x, cBox.y, cBox.width, cBox.height);
-						ip.setClipRect(frame);
-						ip.drawLine(x3, y - halfWidth, x3, y + halfWidth - 1);
-					}
+					ip.setClipRect(null);
+					break;
 				}
-				ip.setClipRect(null);
-				break;
+				if (shType.equals("redraw_grid")) {
+					
+					redrawGrid();
+					ip.setClipRect(null);
+					break;
+				}
+				if (shType.contains("boxes")) {
+
+					String[] parts = Tools.split(shType);
+					for (int jj = 0; jj < parts.length; jj++) {
+						String[] pairs = parts[jj].split("=");
+						if ((pairs.length == 2) && pairs[0].equals("width")) {
+							iBoxWidth = Integer.parseInt(pairs[1]);
+						}
+					}
+					boolean horizontal = shType.contains("boxesx");
+					int nShapes = plotObject.shapeData[0].length;
+					int halfWidth = Math.round(sc(iBoxWidth / 2));
+
+					if (!horizontal) {
+						for (int i = 0; i < nShapes; i++) {
+							int x = scaleX(plotObject.shapeData[0][i]);
+							int y1 = scaleY(plotObject.shapeData[1][i]);
+							int y2 = scaleY(plotObject.shapeData[2][i]);
+							int y3 = scaleY(plotObject.shapeData[3][i]);
+							int y4 = scaleY(plotObject.shapeData[4][i]);
+							int y5 = scaleY(plotObject.shapeData[5][i]);
+							ip.setLineWidth(sc(plotObject.lineWidth));
+
+							Rectangle r1 = new Rectangle(x - halfWidth, y4, halfWidth * 2, y2 - y4);
+							Rectangle cBox = frame.intersection(r1);
+							if (y1 != y2 || y4 != y5)//otherwise omit whiskers
+							{
+								ip.drawLine(x, y1, x, y5);//whiskers
+							}
+							if (plotObject.color2 != null) {
+								ip.setColor(plotObject.color2);
+								ip.fillRect(cBox.x, cBox.y, cBox.width, cBox.height);
+							}
+							ip.setColor(plotObject.color);
+							ip.drawRect(cBox.x, cBox.y, cBox.width, cBox.height);
+							ip.setClipRect(frame);
+							ip.drawLine(x - halfWidth, y3, x + halfWidth - 1, y3);
+						}
+					}
+					if (horizontal) {
+						for (int i = 0; i < nShapes; i++) {
+							int y = scaleY(plotObject.shapeData[0][i]);
+							int x1 = scaleX(plotObject.shapeData[1][i]);
+							int x2 = scaleX(plotObject.shapeData[2][i]);
+							int x3 = scaleX(plotObject.shapeData[3][i]);
+							int x4 = scaleX(plotObject.shapeData[4][i]);
+							int x5 = scaleX(plotObject.shapeData[5][i]);
+							ip.setLineWidth(sc(plotObject.lineWidth));
+							if(x1 !=x2 || x4 != x5)//otherwise omit whiskers
+								ip.drawLine(x1, y, x5, y);//whiskers
+							Rectangle r1 = new Rectangle(x2, y - halfWidth, x4 - x2, halfWidth * 2);
+							Rectangle cBox = frame.intersection(r1);
+							if (plotObject.color2 != null) {
+								ip.setColor(plotObject.color2);
+								ip.fillRect(cBox.x, cBox.y, cBox.width, cBox.height);
+							}
+							ip.setColor(plotObject.color);
+							ip.drawRect(cBox.x, cBox.y, cBox.width, cBox.height);
+							ip.setClipRect(frame);
+							ip.drawLine(x3, y - halfWidth, x3, y + halfWidth - 1);
+						}
+					}
+					ip.setClipRect(null);
+					break;
+				}
 			case PlotObject.LINE:
 				ip.setClipRect(frame);
 				ip.drawLine(scaleX(plotObject.x), scaleY(plotObject.y), scaleX(plotObject.xEnd), scaleY(plotObject.yEnd));
@@ -2487,6 +2552,24 @@ public class Plot implements Cloneable {
 			case PlotObject.LEGEND:
 				drawLegend(plotObject, ip);
 				break;
+		}
+	}
+	
+	/** Draw a bar at each point */
+	void drawBarChart(PlotObject plotObject) {
+		ip.setColor(plotObject.color);
+		plotObject.pointIndex = 0;
+		int n = Math.min(plotObject.xValues.length, plotObject.yValues.length);
+		int frameWidth = (int)Math.round(getDrawingFrame().width*xScale);
+		int width = n>1?(int)Math.round((plotObject.xValues[1]-plotObject.xValues[0])*xScale):frameWidth;
+		ip.setLineWidth(1);
+		for (int i=0; i<n; i++) {
+			int x = scaleX(plotObject.xValues[i]);
+			int y = scaleY(plotObject.yValues[i]);
+			int y0 = scaleY(0);
+			//IJ.log(i+" "+scaleX(plotObject.xValues[1])+" "+scaleX(plotObject.xValues[0])+" "+(x-width/2)+" "+y+" "+width+" "+scaleY(0)+" "+y);
+			for (int x2=x; x2<=x+width; x2++)
+				ip.drawLine(x2,y0,x2,y);
 		}
 	}
 
@@ -3164,7 +3247,7 @@ class PlotObject implements Cloneable, Serializable {
 	static final long serialVersionUID = 1L;
 	/** constants for the type of objects */
 	public final static int XY_DATA = 0, ARROWS = 1, LINE = 2, NORMALIZED_LINE = 3, DOTTED_LINE = 4,
-			LABEL = 5, NORMALIZED_LABEL = 6, LEGEND = 7, AXIS_LABEL = 8, FRAME = 9, BOXES = 10;
+			LABEL = 5, NORMALIZED_LABEL = 6, LEGEND = 7, AXIS_LABEL = 8, FRAME = 9, SHAPES = 10;
 	/** mask for recovering font style from the flags */
 	final static int FONT_STYLE_MASK = 0x0f;
 	/** flag for the data set passed with the constructor. Note that 0 to 0x0f are reserved for fonts modifiers, 0x010-0x800 are reserved for legend modifiers */
@@ -3178,11 +3261,9 @@ class PlotObject implements Cloneable, Serializable {
 	/** The x and y data arrays and the error bars (if non-null). These arrays also serve as x0, y0, x1, y1
 	 *	arrays for plotting arrays of arrows */
 	public float[] xValues, yValues, xEValues, yEValues;
-	/** For Boxes and whiskers. boxesQ1..boxesQ5 hold ascending values
-	 */
-	public float[] boxesQ1, boxesQ2, boxesQ3, boxesQ4, boxesQ5;
-	public float boxWidth;
-	
+	/** For Shapes such as boxplots */
+	public float[][] shapeData;
+	public String shapeType;//e.g. "boxes width=20"	
 	/** Type of the points, such as Plot.LINE, Plot.CROSS etc. (for type = XY_DATA) */
 	public int shape;
 	/** The line width in pixels for 'small' plots */
@@ -3244,16 +3325,11 @@ class PlotObject implements Cloneable, Serializable {
 		this.color = color;
 	}
 
-	/** Constructor for a set of boxes */
-	PlotObject(float boxWidth, float[] x1, float[] y1, float[] y2, float[] y3, float[] y4, float[] y5, float lineWidth,  Color color, Color color2) {
-		this.type = BOXES;
-		this.boxWidth = boxWidth;
-		this.xValues = x1;
-		this.boxesQ1 = y1;
-		this.boxesQ2 = y2;
-		this.boxesQ3 = y3;//median
-		this.boxesQ4 = y4;
-		this.boxesQ5 = y5;
+	/** Constructor for a set of shapes */
+	PlotObject(String shapeType, float[][] shapeData, float lineWidth,  Color color, Color color2) {
+		this.type = SHAPES;
+		this.shapeData = shapeData;
+		this.shapeType = shapeType;
 		this.lineWidth = lineWidth;
 		this.color = color;
 		this.color2 = color2;
@@ -3321,8 +3397,9 @@ class PlotObject implements Cloneable, Serializable {
 
 	/** Whether an XY_DATA object has markers to draw */
 	boolean hasMarker() {
-		return type == XY_DATA && (shape == Plot.CIRCLE || shape == Plot.X || shape == Plot.BOX || shape == Plot.TRIANGLE ||
-				shape == Plot.CROSS || shape == Plot.DIAMOND || shape == Plot.DOT || shape == Plot.CONNECTED_CIRCLES || shape == Plot.CUSTOM);
+		return type == XY_DATA && (shape == Plot.CIRCLE || shape == Plot.X || shape == Plot.BOX || shape == Plot.TRIANGLE
+				|| shape == Plot.CROSS || shape == Plot.DIAMOND || shape == Plot.DOT || shape == Plot.CONNECTED_CIRCLES
+				|| shape == Plot.CUSTOM);
 	}
 
 	/** Whether an XY_DATA object has markers that can be filled */
