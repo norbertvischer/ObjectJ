@@ -2283,50 +2283,51 @@ public class Functions implements MacroConstants, Measurements {
 		plot.drawVectors(x1, y1, x2, y2);
 	}
 
+	//floatCoords eg[6][3] for 3 boxes, each with  with 1 X and 5 ascending Y coordinates
 	void drawShapes() {
-		String type  = getFirstString().toLowerCase(); 
-		if(type.contains("boxes")){
-			double[] x1 = getNextArray();//variable names apply for vertical boxes
-			double[] y1 = getNextArray();
-			double[] y2 = getNextArray();
-			double[] y3 = getNextArray();
-			double[] y4 = getNextArray();
-			double[] y5 = getLastArray();
-			int len = x1.length;
-			if (len != y1.length ||len != y2.length ||len != y3.length ||len != y4.length ||len != y5.length || len==0 ){
-				interp.error("Arrays must have same length");
-				return;
-			}
-			float[][] floatArr = new float[6][len];
-			floatArr[0] = Tools.toFloat(x1);
-			floatArr[1] = Tools.toFloat(y1);
-			floatArr[2] = Tools.toFloat(y2);
-			floatArr[3] = Tools.toFloat(y3);
-			floatArr[4] = Tools.toFloat(y4);
-			floatArr[5] = Tools.toFloat(y5);
-			plot.drawShapes(type, floatArr);	
+		String type = getFirstString().toLowerCase();
+		double[][] arr2D = null;
+		int nBoxes = 0;
+		int nCoords = 0;
+		if (type.contains("rectangles")) {
+			nCoords = 4;//lefts, tops, rights, bottoms
+		} else if (type.contains("boxes")) {
+			nCoords = 6;//centers, Q1s, Q2s, Q3s, Q4s, Q5s (Q= quartile border)
+		} else {
+			interp.error("Must contain 'rectangles' or 'boxes'");
+			return;
 		}
-
-		if(type.contains("rectangles")){
-			double[] x1 = getNextArray();
-			double[] y1 = getNextArray();
-			double[] x2 = getNextArray();
-			double[] y2 = getLastArray();
-			int len = x1.length;
-			if (len != y1.length ||len != x2.length ||len != y2.length ){
-				interp.error("Arrays must have same length");
-				return;
+		double[] arr = null;
+		for (int jj = 0; jj < nCoords; jj++) {
+			interp.getToken();
+			if (interp.token == ',') {
+				if (!isArrayArg()) {
+					interp.putTokenBack();
+					double singleVal = getNextArg();
+					arr = new double[]{singleVal};//only 1 box
+				} else {
+					arr = getNextArray();//>= 2 boxes
+				}
+				nBoxes = arr.length;
+				if (jj > 0 && arr2D[0].length != nBoxes) {
+					interp.error("Arrays must have same length (" + nBoxes + ")");
+					return;
+				}
+				if (arr2D == null) {
+					arr2D = new double[nCoords][nBoxes];
+				}
+				for (int boxNo = 0; boxNo < nBoxes; boxNo++) {
+					arr2D[jj][boxNo] = arr[boxNo];
+				}
 			}
-			float[][] floatArr = new float[4][len];
-			floatArr[0] = Tools.toFloat(x1);
-			floatArr[1] = Tools.toFloat(y1);
-			floatArr[2] = Tools.toFloat(x2);
-			floatArr[3] = Tools.toFloat(y2);
-			plot.drawShapes(type, floatArr);	
 		}
+		interp.getRightParen();
+		float[][] floatArr = new float[nCoords][nBoxes];
+		for (int row = 0; row < nCoords; row++) {
+			floatArr[row] = Tools.toFloat(arr2D[row]);
+		}
+		plot.drawShapes(type, floatArr);//example: floatArr[6][3] for 3 'boxes and whiskers'
 	}
-
-		
 
 	
 	void setPlotColor(Plot plot) {
