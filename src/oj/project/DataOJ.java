@@ -92,6 +92,9 @@ public class DataOJ implements Cloneable, IBaseOJ, Serializable {
     }
 
     public void setChanged(boolean changed) {
+		if(changed){
+			this.changed = changed;//for breakpoint
+		}
         this.changed = changed;
         cells.setChanged(changed);
         images.setChanged(changed);
@@ -132,7 +135,7 @@ public class DataOJ implements Cloneable, IBaseOJ, Serializable {
 
     public void setResults(ResultsOJ results) {
         this.results = results;
-        changed = true;
+        setChanged(true);
     }
 
     public ResultsOJ getResults() {
@@ -141,7 +144,7 @@ public class DataOJ implements Cloneable, IBaseOJ, Serializable {
 
     public void setMacroSet(MacroSetOJ macroset) {
         this.macroSet = macroset;
-        changed = true;
+        setChanged(true);
     }
 
     public ImagesOJ getImages() {
@@ -150,7 +153,7 @@ public class DataOJ implements Cloneable, IBaseOJ, Serializable {
 
     public void setImages(ImagesOJ images) {
         this.images = images;
-        changed = true;
+        setChanged(true);
     }
 
     public CellsOJ getCells() {
@@ -159,7 +162,7 @@ public class DataOJ implements Cloneable, IBaseOJ, Serializable {
 
     public void setCells(CellsOJ cells) {
         this.cells = cells;
-        changed = true;
+        setChanged(true);
     }
 
     public String getName() {

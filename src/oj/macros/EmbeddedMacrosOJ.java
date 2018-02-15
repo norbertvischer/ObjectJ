@@ -269,53 +269,16 @@ public class EmbeddedMacrosOJ {
 			IJ.log("alt=" + altDown + "   shift=" + shiftDown);
 		}
 		String macros_text = null;
-		String macroFileName = null;
+		//String macroFileName = null;
 		if (OJ.isProjectOpen) {
 			DataOJ data = OJ.getData();
 			String project_name = data.getName();
 
-			String directory = data.getDirectory();
-			macroFileName = project_name + ".txt";
-//File macros_file = new File(directory, macroFileName);
-//MacroInstaller mi = new MacroInstaller();
-//mechanism to remove manually loaded project files
+//			String directory = data.getDirectory();
+			//macroFileName = project_name + ".txt";
 			macros_text = OJ.getData().getLinkedMacroText();//18.3.2010
-
-//boolean externalMacroExists = macros_file.exists() && macros_file.isFile();
-			boolean internalMacroExists = (macros_text != null);
-			if (!internalMacroExists) {
+			if (macros_text == null)
 				return;
-			}
-			if (!internalMacroExists) //mi.install(macros_text);16.9.2010
-			{
-				return;
-			}
-			//removed automatic loading of text-macro beside .ojj file
-//			if (externalMacroExists && internalMacroExists) {
-//				IJ.showMessage("Project has internal macro, so external macro is ignored");
-//			}
-//			if (externalMacroExists && !internalMacroExists) {
-//				String thisVersion = IJ.getVersion();
-//				boolean is143d = thisVersion.compareToIgnoreCase("1.43d") >= 0;
-//				if (is143d) {
-//					String oldMacroName = ij.plugin.MacroInstaller.getFileName();
-//					if (oldMacroName != null && oldMacroName.equalsIgnoreCase(macroFileName)) {
-//						oldMacroName = oldMacroName + "";
-//						String macro = "macro 'Dummy Tool-Cf00O8822' {}\n";  //kill old tools
-//						mi.install(macro);
-//
-//						String dir = IJ.getDirectory("macros") + "StartupMacros.txt";
-//						File startup_file = new File(IJ.getDirectory("macros"), "StartupMacros.txt");
-//						if (startup_file.exists()) {
-//							IJ.showMessage("Macros in \"" + macroFileName + "\" will appear under ObjectJ menu");
-//							mi.installFile(dir);
-//						}
-//						mi.setFileName("");//15.7.2009
-//					}
-//				}
-//
-//				macros_text = UtilsOJ.readStringFromFile(macros_file);
-//			}
 			OJ.getData().setLinkedMacroText(macros_text);
 			doInstall(macros_text);
 
@@ -351,6 +314,8 @@ public class EmbeddedMacrosOJ {
 		OJ.getEventProcessor().fireMacroChangedEvent(project_name, MacroChangedEventOJ.MACROSET_EDITED);
 		ij.IJ.showStatus("" + numMacros + " embedded macros have been loaded");
 		ToolManagerOJ.getInstance().reload();
+		//setEditorUnchanged(OJ.editor);
+
 	}
 	public ActionListener itemAction = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
