@@ -231,6 +231,7 @@ public class Menus {
 		addPlugInItem(help, "Macros...", "ij.plugin.BrowserLauncher(\""+IJ.URL+"/macros/\")", 0, false);
 		addPlugInItem(help, "Macro Functions...", "ij.plugin.BrowserLauncher(\""+IJ.URL+"/developer/macro/functions.html\")", 0, false);
 		Menu examplesMenu = getExamplesMenu(ij);
+		addPlugInItem(examplesMenu, "Open as Panel", "ij.plugin.SimpleCommands(\"opencp\")", 0, false);
 		help.add(examplesMenu);
 		help.addSeparator();
 		addPlugInItem(help, "Update ImageJ...", "ij.plugin.ImageJ_Updater", 0, false);
@@ -273,6 +274,7 @@ public class Menus {
 		addExample(submenu, "Dynamic Plot 2D", "Dynamic_Plot_2D.ijm");
 		addExample(submenu, "Custom Plot Symbols", "Custom_Plot_Symbols.ijm");
 		addExample(submenu, "Histograms", "Histograms.ijm");
+		addExample(submenu, "Bar Charts", "Bar_Charts.ijm");
 		addExample(submenu, "Shapes", "Plot_Shape_Macros.ijm");
 		submenu.addActionListener(listener);
 		menu.add(submenu);
@@ -297,7 +299,6 @@ public class Menus {
 		addExample(submenu, "Star Tool", "Star_Tool.ijm");
 		submenu.addActionListener(listener);
 		menu.add(submenu);
-
 
 		submenu = new Menu("JavaScript");
 		addExample(submenu, "Sphere", "Sphere.js");
@@ -347,7 +348,7 @@ public class Menus {
 		submenu.addActionListener(listener);
 		menu.add(submenu);
 		menu.addSeparator();
-		CheckboxMenuItem item = new CheckboxMenuItem("Autorun");
+		CheckboxMenuItem item = new CheckboxMenuItem("Autorun Examples");
 		menu.add(item);
 		item.addItemListener(ij);
 		item.setState(Prefs.autoRunExamples);
