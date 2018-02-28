@@ -133,19 +133,6 @@ public class InputOutputOJ {
 		}
 
 		if (!withAltKey) {
-//			String date = "";
-//			long now = new Date().getTime();
-//			long modified = exchangeFile.lastModified();
-//			long mSecs = now - modified;
-//			double minutes = ((double) (mSecs)) / 1000 / 60;
-//			String ago = "  (" + IJ.d2s(minutes, 1) + " minutes ago)";
-//			if (minutes > 99) ago = "  (" + IJ.d2s(minutes / 60, 1) + " hours ago)";
-//			if (minutes > 24 * 60) ago = "  (" + IJ.d2s(minutes / 60 / 24, 1) + " days ago)";
-//			long fSize = 0;
-//			if (exchangeFileExists) {
-//				date = (new Date(exchangeFile.lastModified())).toString();
-//				fSize = exchangeFile.length();
-//			}
 			String multiLinePath = xPath;
 			if (multiLinePath.length() > 80) {
 				multiLinePath = multiLinePath.replace("/", "/\n");
