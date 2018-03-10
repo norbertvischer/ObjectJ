@@ -2582,11 +2582,11 @@ public class Functions implements MacroConstants, Measurements {
 		if (tok!=WORD) return false;
 		Variable v = interp.lookupVariable(nextToken>>TOK_SHIFT);
 		if (v==null) return false;
-		int type = v.getType();
+		int type = v.getType();	
 		if (type!=Variable.ARRAY)
 			return v.getType()==Variable.STRING;
 		Variable[] array = v.getArray();
-		if (array.length==0) return false;
+		if (array.length==0 || interp.nextNextToken()=='.') return false;
 		return array[0].getType()==Variable.STRING;
 	}
 
@@ -3015,8 +3015,7 @@ public class Functions implements MacroConstants, Measurements {
 		if (pattern != null) {//Norbert
 			WildcardMatch wm = new WildcardMatch();
 			wm.setCaseSensitive(false);
-			//Frame frontWindow = WindowManager.getFrontWindow();
-			String otherStr = "\\\\Others";
+			String otherStr = "\\Others";
 			boolean others = pattern.equals(otherStr);
 			boolean hasWildcard = pattern.contains("*") || pattern.contains("?");
 			if (!others) {
@@ -3065,10 +3064,9 @@ public class Functions implements MacroConstants, Measurements {
 							}
 
 						}
-						if (thisWin instanceof RoiManager) {//ROI Manager
+						if (thisWin instanceof RoiManager && pattern.equalsIgnoreCase("roi manager")) {//ROI Manager
 							RoiManager rm = (RoiManager) thisWin;
 							rm.close();
-
 						}
 					}
 				}
@@ -3753,6 +3751,9 @@ public class Functions implements MacroConstants, Measurements {
 				gd.addChoice(prompt, choices, defaultChoice);
 			} else if (name.equals("setInsets")) {
 				gd.setInsets((int)getFirstArg(), (int)getNextArg(), (int)getLastArg());
+			} else if (name.equals("addToSameRow")) {
+				interp.getParens();
+				gd.addToSameRow();
 			} else if (name.equals("setLocation")) {
 				gd.setLocation((int)getFirstArg(), (int)getLastArg());
 			} else if (name.equals("show")) {
