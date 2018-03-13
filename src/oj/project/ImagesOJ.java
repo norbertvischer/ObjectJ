@@ -20,212 +20,221 @@ import oj.processor.state.ToolStateOJ;
  */
 public class ImagesOJ extends BaseAdapterOJ {
 
-    private static final long serialVersionUID = 3040918068273392705L;
-    private Hashtable images = new Hashtable();//filename -> ImageOJ
-    private ArrayList imagesKeys = new ArrayList();//filenames only
+	private static final long serialVersionUID = 3040918068273392705L;
+	private Hashtable images = new Hashtable();//filename -> ImageOJ
+	private ArrayList imagesKeys = new ArrayList();//filenames only
+	private boolean virtual;
 
-    /**
-     * @return change flag, e.g. true if an image has been added
-     */
-    public boolean getChanged() {
-        if (super.getChanged()) {
-            return true;
-        } else {
-            for (int i = 0; i < images.size(); i++) {
-                if (getImageByIndex(i).getChanged()) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+	/**
+	 * @return change flag, e.g. true if an image has been added
+	 */
+	public boolean getVirtualFlag() {
+		return virtual;
+	}
 
-    /**
-     * propagate changed = true to all linked images (why?)
-     */
-    public void setChanged(boolean changed) {
-        super.setChanged(changed);
-        for (int i = 0; i < images.size(); i++) {
-            getImageByIndex(i).setChanged(changed);
-        }
-    }
+	public void setVirtualFlag(boolean virtualFlag) {
+		virtual = virtualFlag;
+	}
 
-    /**
-     * add an image to the list and update hashtable
-     */
-    public boolean addImage(ImageOJ imgd) {
-        images.put(imgd.getFilename(), imgd);
-        imagesKeys.add(imgd.getFilename());
-        imgd.setParent(this);
-        changed = true;
-        OJ.getEventProcessor().fireImageChangedEvent(imgd.getName(), ImageChangedEventOJ.IMAGE_ADDED);
-        return true;
-    }
+	public boolean getChanged() {
+		if (super.getChanged()) {
+			return true;
+		} else {
+			for (int i = 0; i < images.size(); i++) {
+				if (getImageByIndex(i).getChanged()) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
-    /**
-     * renaming an image: updating hashtable and arraylist of names
-     */
-    public void updateImageName(String oldName, String newName) {
-        ImageOJ image = getImageByName(oldName);
-        if (image != null) {
-            images.remove(oldName);//10.4.2009
-            images.put(newName, image);
-            int index = imagesKeys.indexOf(oldName);
-            imagesKeys.add(index, newName);
-            imagesKeys.remove(oldName);
-        }
-    }
+	/**
+	 * propagate changed = true to all linked images (why?)
+	 */
+	public void setChanged(boolean changed) {
+		super.setChanged(changed);
+		for (int i = 0; i < images.size(); i++) {
+			getImageByIndex(i).setChanged(changed);
+		}
+	}
 
-    /**
-     * sort arraylist of filenames only
-     */
-    public void sortImages() {
-        Collections.sort(imagesKeys);
-    }
+	/**
+	 * add an image to the list and update hashtable
+	 */
+	public boolean addImage(ImageOJ imgd) {
+		images.put(imgd.getFilename(), imgd);
+		imagesKeys.add(imgd.getFilename());
+		imgd.setParent(this);
+		changed = true;
+		OJ.getEventProcessor().fireImageChangedEvent(imgd.getName(), ImageChangedEventOJ.IMAGE_ADDED);
+		return true;
+	}
 
-    /**
-     * change sequence of arraylist of image names
-     */
-    public void swapImages(int firstImageIndex, int secondImageIndex) {
-        Collections.swap(imagesKeys, firstImageIndex, firstImageIndex);
-    }
+	/**
+	 * renaming an image: updating hashtable and arraylist of names
+	 */
+	public void updateImageName(String oldName, String newName) {
+		ImageOJ image = getImageByName(oldName);
+		if (image != null) {
+			images.remove(oldName);//10.4.2009
+			images.put(newName, image);
+			int index = imagesKeys.indexOf(oldName);
+			imagesKeys.add(index, newName);
+			imagesKeys.remove(oldName);
+		}
+	}
 
-    /**
-     * @return number of linked images
-     */
-    public int getImagesCount() {
-        return images.size();
-    }
+	/**
+	 * sort arraylist of filenames only
+	 */
+	public void sortImages() {
+		Collections.sort(imagesKeys);
+	}
 
-    /**
-     * @return n-th ImageOJ, 0-based
-     */
-    public ImageOJ getImageByIndex(int index) {
-        if (index < 0 || index >= imagesKeys.size()) {//28.10.2011
-            return null;
-        }
-        return getImageByName((String) imagesKeys.get(index));
-    }
+	/**
+	 * change sequence of arraylist of image names
+	 */
+	public void swapImages(int firstImageIndex, int secondImageIndex) {
+		Collections.swap(imagesKeys, firstImageIndex, firstImageIndex);
+	}
 
-    /**
-     * @return index of ImageOJ, 0-based
-     */
-    public int getIndex(ImageOJ img) {
-        if (img == null) {
-            return -1;
-        }
-        for (int jj = 0; jj < images.size(); jj++) {
-            if (getImageByIndex(jj) == img) {
-                return jj;
-            }
-        }
-        return -1;
-    }
+	/**
+	 * @return number of linked images
+	 */
+	public int getImagesCount() {
+		return images.size();
+	}
 
-    /**
-     * @return ImageOJ with this name
-     */
-    public ImageOJ getImageByName(String name) {
-        return (ImageOJ) images.get(name);
-    }
+	/**
+	 * @return n-th ImageOJ, 0-based
+	 */
+	public ImageOJ getImageByIndex(int index) {
+		if (index < 0 || index >= imagesKeys.size()) {//28.10.2011
+			return null;
+		}
+		return getImageByName((String) imagesKeys.get(index));
+	}
 
-    /**
-     * remove image from hashtable and list of image names
-     */
-    public void removeImageByName(String name) {
+	/**
+	 * @return index of ImageOJ, 0-based
+	 */
+	public int getIndex(ImageOJ img) {
+		if (img == null) {
+			return -1;
+		}
+		for (int jj = 0; jj < images.size(); jj++) {
+			if (getImageByIndex(jj) == img) {
+				return jj;
+			}
+		}
+		return -1;
+	}
 
-        if (OJ.getData() != null) {
-            ToolStateOJ state = OJ.getToolStateProcessor().getToolStateObject();
-            if (state != null && (state instanceof CreateCellStateOJ)) {
-                ((CreateCellStateOJ) state).closeCell();//3.11.2013        
-            }
-        }
+	/**
+	 * @return ImageOJ with this name
+	 */
+	public ImageOJ getImageByName(String name) {
+		return (ImageOJ) images.get(name);
+	}
 
-        ImageOJ img = (ImageOJ) images.get(name);
-        if (img != null && img.getImagePlus() != null) {
-            img.getImagePlus().close();//3.11.2013
-        }
-        imagesKeys.remove(name);
-        images.remove(name);
-        changed = true;
-        OJ.getEventProcessor().fireImageChangedEvent(name, ImageChangedEventOJ.IMAGE_DELETED);
-    }
+	/**
+	 * remove image from hashtable and list of image names
+	 */
+	public void removeImageByName(String name) {
 
-    /**
-     * removes all linked images from list
-     */
-    public void removeAllImages() {
-        removeAllImages(false);
-    }
+		if (OJ.getData() != null) {
+			ToolStateOJ state = OJ.getToolStateProcessor().getToolStateObject();
+			if (state != null && (state instanceof CreateCellStateOJ)) {
+				((CreateCellStateOJ) state).closeCell();//3.11.2013        
+			}
+		}
 
-    /**
-     * removes unmarked or all images from list
-     */
-    public void removeAllImages(boolean unmarkedOnly) {
-        for (int i = getImagesCount() - 1; i >= 0; i--) {
-            ImageOJ img = getImageByIndex(i);
-            if ((!unmarkedOnly) || (img.getLastCell() < 0)) {
-                removeImageByName(img.getName());
-            }
-        }
-    }
+		ImageOJ img = (ImageOJ) images.get(name);
+		if (img != null && img.getImagePlus() != null) {
+			img.getImagePlus().close();//3.11.2013
+		}
+		imagesKeys.remove(name);
+		images.remove(name);
+		changed = true;
+		OJ.getEventProcessor().fireImageChangedEvent(name, ImageChangedEventOJ.IMAGE_DELETED);
+	}
 
-    /**
-     * removes an image from the list
-     */
-    public void removeImage(ImageOJ img) {
-        imagesKeys.remove(img.getName());
-        removeImageByName(img.getName());
-        changed = true;
-    }
+	/**
+	 * removes all linked images from list
+	 */
+	public void removeAllImages() {
+		removeAllImages(false);
+	}
 
-    private String[] imagesKeyToArray(Hashtable imagesHastable) {
-        String[] result = new String[imagesHastable.size()];
-        List keys = Collections.list(imagesHastable.keys());
-        Collections.sort(keys);
-        System.arraycopy(keys.toArray(), 0, result, 0, keys.size());
-        return result;
-    }
+	/**
+	 * removes unmarked or all images from list
+	 */
+	public void removeAllImages(boolean unmarkedOnly) {
+		for (int i = getImagesCount() - 1; i >= 0; i--) {
+			ImageOJ img = getImageByIndex(i);
+			if ((!unmarkedOnly) || (img.getLastCell() < 0)) {
+				removeImageByName(img.getName());
+			}
+		}
+	}
 
-    /**
-     * @return index of image, 0-based
-     */
-    public int getIndexOfImage(String name) {
-        return imagesKeys.indexOf(name);
-    }
+	/**
+	 * removes an image from the list
+	 */
+	public void removeImage(ImageOJ img) {
+		imagesKeys.remove(img.getName());
+		removeImageByName(img.getName());
+		changed = true;
+	}
 
-    /**
-     * @return true if @imp is linked
-     */
-    public boolean isLinked(ImagePlus imp) {
-        if (imp == null) {
-            return false;
-        }
-        if (imp.getOriginalFileInfo() == null) {//20.6.2014
-            return false;
-        }
-        String dir = imp.getOriginalFileInfo().directory;
-        if (dir != null && dir.equals(OJ.getData().getDirectory())) {//22.6.2016
-            String name = imp.getTitle();
-            ImageOJ img = getImageByName(name);
-            if (img != null) {
-                return true;
-            }
-        }
-        return false;
-    }
+	private String[] imagesKeyToArray(Hashtable imagesHastable) {
+		String[] result = new String[imagesHastable.size()];
+		List keys = Collections.list(imagesHastable.keys());
+		Collections.sort(keys);
+		System.arraycopy(keys.toArray(), 0, result, 0, keys.size());
+		return result;
+	}
 
-    /**
-     * hierachically propagates to all individual images
-     */
-    public void initAfterUnmarshalling(IBaseOJ parent) {
-        super.initAfterUnmarshalling(parent);
-        if (images == null) {
-            images = new Hashtable();
-            imagesKeys = new ArrayList();
-        }
-        for (int i = 0; i < images.size(); i++) {
-            getImageByIndex(i).initAfterUnmarshalling(this);
-        }
-    }
+	/**
+	 * @return index of image, 0-based
+	 */
+	public int getIndexOfImage(String name) {
+		return imagesKeys.indexOf(name);
+	}
+
+	/**
+	 * @return true if @imp is linked
+	 */
+	public boolean isLinked(ImagePlus imp) {
+		if (imp == null) {
+			return false;
+		}
+		if (imp.getOriginalFileInfo() == null) {//20.6.2014
+			return false;
+		}
+		String dir = imp.getOriginalFileInfo().directory;
+		if (dir != null && dir.equals(OJ.getData().getDirectory())) {//22.6.2016
+			String name = imp.getTitle();
+			ImageOJ img = getImageByName(name);
+			if (img != null) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * hierachically propagates to all individual images
+	 */
+	public void initAfterUnmarshalling(IBaseOJ parent) {
+		super.initAfterUnmarshalling(parent);
+		if (images == null) {
+			images = new Hashtable();
+			imagesKeys = new ArrayList();
+		}
+		for (int i = 0; i < images.size(); i++) {
+			getImageByIndex(i).initAfterUnmarshalling(this);
+		}
+	}
 }

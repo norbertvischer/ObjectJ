@@ -88,6 +88,7 @@ public class ImageDefsSettingsOJ extends javax.swing.JPanel implements TableColu
         new DropTarget(jScrollPane1, ImageProcessorOJ.dropOperations, OJ.getImageProcessor());
         
         chkShowObjectLayer.setSelected(OJ.getData().getYtemDefs().isCellLayerVisible());
+        chkVirtualFlag.setSelected(OJ.getData().getImages().getVirtualFlag());
     }
 
     /**
@@ -101,7 +102,9 @@ public class ImageDefsSettingsOJ extends javax.swing.JPanel implements TableColu
 
         jPanel1 = new javax.swing.JPanel();
         chkShowObjectLayer = new javax.swing.JCheckBox();
-        jLabel1 = new javax.swing.JLabel();
+        labelShowLayer = new javax.swing.JLabel();
+        chkVirtualFlag = new javax.swing.JCheckBox();
+        labelVirtualFlag = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         jPanel4 = new RoundPanelOJ();
         jPanel8 = new javax.swing.JPanel();
@@ -126,8 +129,20 @@ public class ImageDefsSettingsOJ extends javax.swing.JPanel implements TableColu
         });
         jPanel1.add(chkShowObjectLayer, new java.awt.GridBagConstraints());
 
-        jLabel1.setText("Show Object Layer");
-        jPanel1.add(jLabel1, new java.awt.GridBagConstraints());
+        labelShowLayer.setText("Show Object Layer                   ");
+        jPanel1.add(labelShowLayer, new java.awt.GridBagConstraints());
+
+        chkVirtualFlag.setMaximumSize(new java.awt.Dimension(50, 23));
+        chkVirtualFlag.setMinimumSize(new java.awt.Dimension(50, 23));
+        chkVirtualFlag.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkVirtualFlagActionPerformed(evt);
+            }
+        });
+        jPanel1.add(chkVirtualFlag, new java.awt.GridBagConstraints());
+
+        labelVirtualFlag.setText("Virtual Flag");
+        jPanel1.add(labelVirtualFlag, new java.awt.GridBagConstraints());
 
         add(jPanel1, java.awt.BorderLayout.NORTH);
 
@@ -283,17 +298,25 @@ private void tblImageDefsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRS
         }
     }
 }//GEN-LAST:event_tblImageDefsMouseClicked
+
+    private void chkVirtualFlagActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkVirtualFlagActionPerformed
+		boolean vFlag = chkVirtualFlag.isSelected();
+		OJ.getData().getImages().setVirtualFlag(vFlag);
+    }//GEN-LAST:event_chkVirtualFlagActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnLinkImage;
     private javax.swing.JButton btnUnlinkImage;
     private javax.swing.JCheckBox chkShowObjectLayer;
-    private javax.swing.JLabel jLabel1;
+    private javax.swing.JCheckBox chkVirtualFlag;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JLabel labelShowLayer;
+    private javax.swing.JLabel labelVirtualFlag;
     private javax.swing.JTable tblImageDefs;
     // End of variables declaration//GEN-END:variables
 
@@ -342,8 +365,12 @@ private void tblImageDefsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRS
      * called e.g. when the user changed the name of a linked image
      */
     public synchronized void imageChanged(ImageChangedEventOJ evt) {//9.9.2009
+		
         if (evt.getOperation() == ImageChangedEventOJ.IMAGE_EDITED) {
             ((ImageDefsTableModel) tblImageDefs.getModel()).fireTableUpdated();
+        } else if (evt.getOperation() == ImageChangedEventOJ.VIRTUAL_FLAG_CHANGED) {
+            chkVirtualFlag.setSelected(OJ.getData().getImages().getVirtualFlag());
+			
         } else {
             ((ImageDefsTableModel) tblImageDefs.getModel()).fireTableStructureChanged();
         }

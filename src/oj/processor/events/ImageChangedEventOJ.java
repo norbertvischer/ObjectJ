@@ -15,6 +15,8 @@ public class ImageChangedEventOJ {
     public static final int IMAGE_DELETED = 3;
     public static final int IMAGES_SWAP = 4;
     public static final int IMAGES_SORT = 5;
+    public static final int VIRTUAL_FLAG_CHANGED = 123;
+	
     private String firstImageName;
     private String secondImageName;
     private int operation;

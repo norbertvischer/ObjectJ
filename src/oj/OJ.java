@@ -42,23 +42,23 @@ public class OJ {
     private static VertexCalculatorOJ vcj;
     private static IjImageChangedListenerOJ ilj;
     private static StackChangedListenerOJ slj;
-    public final static int build = 517;//dropbox problems
-    public final static String releaseVersion = "1.04e";//do not follow Wayne
-    public final static String buildDate = "21-jan-2018 02:46";
+    public final static int build = 518;
+    public final static String releaseVersion = "1.04f";//do not follow Wayne
+    public final static String buildDate = "13-mar-2018 22:38";
     public static final String URL = "https://sils.fnwi.uva.nl/bcb/objectj";
     public static final String URLcurrent = "https://sils.fnwi.uva.nl/bcb/objectj/download/current/";
     public static final String ICONS = "/oj/gui/icons/";
-    public static int bufferStrategy = 2;//10.7.2009
+    public static int bufferStrategy = 2;
     public static boolean loadedAsBinary = true;
     public static boolean saveAsBinary = true;
-    public static boolean useProjectMenu = true;//13.4.2010
-    public static boolean addMagicBytes = true;//23.4.2010
+    public static boolean useProjectMenu = true;
+    public static boolean addMagicBytes = true;
     public static Editor editor = null;//
-    public static Editor plotEditor = null;//23.1.2016
-    public static Window editorWindow = null;//23.4.2010
+    public static Editor plotEditor = null;
+    public static Window editorWindow = null;
     public static Window plotEditorWindow = null;
-    public static Color headerBackground = new Color(80, 80, 80);//17.5.2010
-    public static boolean isProjectOpen = false;//17.5.2010
+    public static Color headerBackground = new Color(80, 80, 80);
+    public static boolean isProjectOpen = false;
     public static boolean doubleBuffered = true;// for Windows only 10.2.2011
 
     /**
@@ -226,7 +226,6 @@ public class OJ {
             bufferStrategy = n;
         } else {
             IJ.showMessage("buffer strategy must be 1 .. 3");
-
         }
     }
 

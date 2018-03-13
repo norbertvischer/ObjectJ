@@ -33,6 +33,7 @@ import ij.macro.Interpreter;
 import ij.measure.Calibration;
 import ij.measure.Measurements;
 import ij.measure.ResultsTable;
+import oj.processor.events.ImageChangedEventOJ;
 
 /**
  *
@@ -197,6 +198,13 @@ public class FunctionsOJ implements MacroExtension {
     public String ojGetProjectPath() {
 	return OJ.getData().getDirectory();
     }
+
+    public String ojGetVirtual() {
+	if(OJ.getData().getImages().getVirtualFlag())
+	    return "1";
+	else return"0";
+    }
+  
 
     public String ojGetStatistics(String columnName, String statisticsOperation) {
 	double value = OJ.getMacroProcessor().getStatistics(columnName, statisticsOperation);
@@ -534,6 +542,13 @@ public class FunctionsOJ implements MacroExtension {
 
     public String ojSetValue(String column, String index, String value) {
 	ojSetResult(column, index, value);
+	return null;
+    }
+
+	public String ojSetVirtualFlag(String virtualFlag) {   
+	    boolean b =MacroProcessorOJ.parseBoolean(virtualFlag);
+	    OJ.getData().getImages().setVirtualFlag(b);
+		OJ.getEventProcessor().fireImageChangedEvent(ImageChangedEventOJ.VIRTUAL_FLAG_CHANGED);
 	return null;
     }
 

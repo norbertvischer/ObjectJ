@@ -208,6 +208,8 @@ public class MacroExtStrOJ {
         buf.append(getFunction("ojSetTool", "tool"));
         buf.append(getFunction("ojSetUnchanged"));
         buf.append(getFunction("ojSetValue", "columnName", "rowIndex", "value"));
+        buf.append(getFunction("ojSetVirtualFlag", "virtualFlag"));
+        buf.append(getIntFunction("ojGetVirtualFlag"));
         buf.append(getFunction("ojOrderObjectsInZ", "imageNumber"));
 
         buf.append(getFunction("ojShowImage", "imageIndex"));

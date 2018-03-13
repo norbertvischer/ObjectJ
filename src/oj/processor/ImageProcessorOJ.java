@@ -15,6 +15,7 @@ import ij.io.FileOpener;
 import ij.io.FileSaver;
 import ij.io.Opener;
 import ij.measure.Calibration;
+import ij.plugin.FileInfoVirtualStack;
 import ij.util.Tools;
 import java.awt.Frame;
 import java.awt.datatransfer.DataFlavor;
@@ -43,7 +44,6 @@ import oj.processor.events.ImageChangedEventOJ;
 import oj.processor.events.ImageChangedListener2OJ;
 import oj.processor.events.YtemChangedListenerOJ;
 import oj.processor.events.YtemDefChangedListenerOJ;
-import oj.project.DataOJ;
 import oj.project.ImageOJ;
 import oj.project.ImagesOJ;
 import oj.util.ImageJAccessOJ;
@@ -156,10 +156,16 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 							//imageOJ.setID(imp.getID());
 						}
 					} else {
-						imp = new Opener().openImage(dir, fName);//30.6.2013
-						imageOJ.setImagePlus(imp);//1.10.2015
-						//imageOJ.setID(imp.getID());
+						
+						boolean virtual = OJ.getData().getImages().getVirtualFlag();
 
+						if (virtual && (fName.endsWith(".tif") || fName.endsWith(".TIF"))) {
+							(new FileInfoVirtualStack()).run(dir + fName);
+							imp = IJ.getImage();
+						} else 
+							imp = new Opener().openImage(dir, fName);//30.6.2013
+						imageOJ.setImagePlus(imp);//1.10.2015
+						
 					}
 
 					imp.show();//30.6.2013                  
@@ -420,6 +426,8 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 									}
 
 								}
+								boolean savedFlag = OJ.getData().getImages().getVirtualFlag();
+								OJ.getData().getImages().setVirtualFlag(false);
 								OJ.getImageProcessor().openImage(imj.getName());
 								ImagePlus imp = imj.getImagePlus();
 								if (expectedSlices != imp.getStackSize()) {
@@ -448,6 +456,8 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 									//IJ.doCommand("Close");
 									//OJ.getImageProcessor().openImageVirtually(imj.getName());
 								}
+								OJ.getData().getImages().setVirtualFlag(savedFlag);
+
 							}
 						}
 					}
