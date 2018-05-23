@@ -49,7 +49,8 @@ public class IJ {
 	private static ProgressBar progressBar;
 	private static TextPanel textPanel;
 	private static String osname, osarch;
-	private static boolean isMac, isWin, isJava16, isJava17, isJava18, isJava19, isLinux, is64Bit;
+	private static boolean isMac, isWin, isLinux, is64Bit;
+	private static int javaVersion = 6;
 	private static boolean controlDown, altDown, spaceDown, shiftDown;
 	private static boolean macroRunning;
 	private static Thread previousThread;
@@ -76,14 +77,14 @@ public class IJ {
 		isMac = !isWin && osname.startsWith("Mac");
 		isLinux = osname.startsWith("Linux");
 		String version = System.getProperty("java.version");
-		if (version.startsWith("1.9")||version.startsWith("9"))
-			isJava16=isJava17=isJava18=isJava19 = true;
-		else if (!isJava18&&version.startsWith("1.8"))
-				isJava16=isJava17=isJava18 = true;
-		else if (!isJava17&&version.startsWith("1.7"))
-				isJava16=isJava17 = true;
-		else if (!isJava16&&version.startsWith("1.6"))
-				isJava16 = true;
+		if (version.startsWith("10"))
+			javaVersion = 10;
+		else if (version.startsWith("1.9")||version.startsWith("9"))
+			javaVersion = 9;
+		else if (version.startsWith("1.8"))
+			javaVersion = 8;
+		else if (version.startsWith("1.7"))
+			javaVersion = 7;
 		dfs = new DecimalFormatSymbols(Locale.US);
 		df = new DecimalFormat[10];
 		df[0] = new DecimalFormat("0", dfs);
@@ -503,7 +504,7 @@ public class IJ {
 		Frame frame = WindowManager.getFrontWindow();
 		if (frame!=null && (frame instanceof TextWindow)) {
 			TextWindow tw = (TextWindow)frame;
-			if (tw.getTextPanel().getResultsTable()==null) {
+			if (tw.getResultsTable()==null) {
 				IJ.error("Rename", "\""+tw.getTitle()+"\" is not a results table");
 				return;
 			}
@@ -515,7 +516,7 @@ public class IJ {
 		}
 	}
 
-	/** Changes the name of a results window from 'oldTitle' to 'newTitle'. */
+	/** Changes the name of a table window from 'oldTitle' to 'newTitle'. */
 	public static void renameResults(String oldTitle, String newTitle) {
 		Frame frame = WindowManager.getFrame(oldTitle);
 		if (frame==null) {
@@ -523,22 +524,20 @@ public class IJ {
 			return;
 		} else if (frame instanceof TextWindow) {
 			TextWindow tw = (TextWindow)frame;
-			if (tw.getTextPanel().getResultsTable()==null) {
-				error("Rename", "\""+oldTitle+"\" is not a results table");
+			if (tw.getResultsTable()==null) {
+				error("Rename", "\""+oldTitle+"\" is not a table");
 				return;
 			}
 			tw.rename(newTitle);
 		} else
-			error("Rename", "\""+oldTitle+"\" is not a results table");
+			error("Rename", "\""+oldTitle+"\" is not a table");
 	}
 
-	/** Deletes 'row1' through 'row2' of the "Results" window. Arguments
-	     must be in the range 0-Analyzer.getCounter()-1. */
+	/** Deletes 'row1' through 'row2' of the "Results" window, where
+		'row1' and 'row2' must be in the range 0-Analyzer.getCounter()-1. */
 	public static void deleteRows(int row1, int row2) {
-		int n = row2 - row1 + 1;
 		ResultsTable rt = Analyzer.getResultsTable();
-		for (int i=row1; i<row1+n; i++)
-			rt.deleteRow(row1);
+		rt.deleteRows(row1, row2);
 		rt.show("Results");
 	}
 
@@ -958,6 +957,11 @@ public class IJ {
 		return isWin;
 	}
 	
+	/** Returns the Java version (6, 7, 8, 9, 10, etc.). */
+	public static int javaVersion() {
+		return javaVersion;
+	}
+	
 	/** Always returns true. */
 	public static boolean isJava2() {
 		return true;
@@ -975,22 +979,22 @@ public class IJ {
 
 	/** Returns true if ImageJ is running on a Java 1.6 or greater JVM. */
 	public static boolean isJava16() {
-		return isJava16;
+		return javaVersion >= 6;
 	}
 
 	/** Returns true if ImageJ is running on a Java 1.7 or greater JVM. */
 	public static boolean isJava17() {
-		return isJava17;
+		return javaVersion >= 7;
 	}
 
 	/** Returns true if ImageJ is running on a Java 1.8 or greater JVM. */
 	public static boolean isJava18() {
-		return isJava18;
+		return javaVersion >= 8;
 	}
 
 	/** Returns true if ImageJ is running on a Java 1.9 or greater JVM. */
 	public static boolean isJava19() {
-		return isJava19;
+		return javaVersion >= 9;
 	}
 
 	/** Returns true if ImageJ is running on Linux. */

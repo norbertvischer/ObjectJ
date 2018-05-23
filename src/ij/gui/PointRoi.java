@@ -44,6 +44,8 @@ public class PointRoi extends PolygonRoi {
 	private ResultsTable rt;
 	private long lastPointTime;
 	private int[] counterInfo;
+	private boolean promptBeforeDeleting;
+	private boolean promptBeforeDeletingCalled;
 	
 	static {
 		setDefaultType((int)Prefs.get(TYPE_KEY, HYBRID));
@@ -81,12 +83,14 @@ public class PointRoi extends PolygonRoi {
 	public PointRoi(int ox, int oy) {
 		super(makeXArray(ox, null), makeYArray(oy, null), 1, POINT);
 		width=1; height=1;
+		incrementCounter(null);
 	}
 
 	/** Creates a new PointRoi using the specified offscreen double coordinates. */
 	public PointRoi(double ox, double oy) {
 		super(makeXArray(ox, null), makeYArray(oy, null), 1, POINT);
 		width=1; height=1;
+		incrementCounter(null);
 	}
 
 	/** Creates a new PointRoi using the specified screen coordinates. */
@@ -496,6 +500,26 @@ public class PointRoi extends PolygonRoi {
 		return counter;
 	}
 
+	public int getNCounters() {
+		int n = 0;
+		for (int counter=0; counter<nCounters; counter++) {
+			if (getCount(counter)>0) n++;
+		}
+		return n;
+	}
+	
+	public boolean promptBeforeDeleting() {
+	    if (promptBeforeDeletingCalled)
+	    	return promptBeforeDeleting;
+	    else
+			return getNCounters()>1 || counts[0]>1;
+	}
+
+	public void promptBeforeDeleting(Boolean prompt) {
+		promptBeforeDeleting = prompt;
+		promptBeforeDeletingCalled = true;
+	}
+
 	public static void setDefaultCounter(int counter) {
 		defaultCounter = counter;
 	}
@@ -516,11 +540,13 @@ public class PointRoi extends PolygonRoi {
 	}
 
 	public int[] getCounters() {
-		if (counters==null)
+		if (nPoints>65535)
 			return null;
 		int[] temp = new int[nPoints];
-		for (int i=0; i<nPoints; i++)
-			temp[i] = (counters[i]&0xff) + ((positions[i]&0xffff)<<8);
+		if (counters!=null) {
+			for (int i=0; i<nPoints; i++)
+				temp[i] = (counters[i]&0xff) + ((positions[i]&0xffff)<<8);
+		}
 		return temp;
 	}
 
@@ -618,7 +644,6 @@ public class PointRoi extends PolygonRoi {
 		rt.setValue(firstColumnHdr, row, "Total");
 		for (int i=0; i<nCounters; i++)
 			rt.setValue("Ctr "+i, row, counts[i]);
-		rt.showRowNumbers(false);
 		rt.show(getCountsTitle());
 		if (IJ.debugMode) debug();
 	}
@@ -627,12 +652,13 @@ public class PointRoi extends PolygonRoi {
 		FloatPolygon p = getFloatPolygon();
 		ResultsTable rt = new ResultsTable();
 		for (int i=0; i<nPoints; i++) {
-			rt.setValue("Counter", i, counters[i]);
-			rt.setValue("Position", i, positions[i]);
+			if (counters!=null) {
+				rt.setValue("Counter", i, counters[i]);
+				rt.setValue("Position", i, positions[i]);
+			} 
 			rt.setValue("X", i, p.xpoints[i]);
 			rt.setValue("Y", i, p.ypoints[i]);
 		}
-		rt.showRowNumbers(false);
 		rt.show(getCountsTitle());
 	}
 
@@ -743,6 +769,8 @@ public class PointRoi extends PolygonRoi {
 		int index = -1;
 		double distance = Double.MAX_VALUE;
 		int slice = imp!=null&&positions!=null&&imp.getStackSize()>1?imp.getCurrentSlice():0;
+		if (Prefs.showAllPoints)
+			slice = 0;
 		for (int i=0; i<points.npoints; i++) {
 			double dx = points.xpoints[i] - x;
 			double dy = points.ypoints[i] - y;

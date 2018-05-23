@@ -78,8 +78,8 @@ public class ImageJ extends Frame implements ActionListener,
 	MouseListener, KeyListener, WindowListener, ItemListener, Runnable {
 
 	/** Plugins should call IJ.getVersion() or IJ.getFullVersion() to get the version string. */
-	public static final String VERSION = "1.51v";
-	public static final String BUILD = "16";
+	public static final String VERSION = "1.52d";
+	public static final String BUILD = "3";
 	public static Color backgroundColor = new Color(237,237,237);
 	/** SansSerif, 12-point, plain font. */
 	public static final Font SansSerif12 = new Font("SansSerif", Font.PLAIN, 12);
@@ -194,7 +194,7 @@ public class ImageJ extends Frame implements ActionListener,
 			Dimension size = getSize();
 			if (size!=null) {
 				if (IJ.debugMode) IJ.log("size: "+size);
-				if (IJ.isWindows() && size.height>108) {
+				if (IJ.isWindows() && (size.height>108||IJ.javaVersion()>=10)) {
 					// workaround for IJ window layout and FileDialog freeze problems with Windows 10 Creators Update
 					IJ.wait(10);
 					pack();
@@ -478,15 +478,17 @@ public class ImageJ extends Frame implements ActionListener,
 
 		if (cmd==null) {
 			switch (keyCode) {
-				case KeyEvent.VK_TAB: WindowManager.putBehind(); return;
-				case KeyEvent.VK_BACK_SPACE: case KeyEvent.VK_DELETE: 
-					if (deleteOverlayRoi(imp))
-						return;
-					if (imp!=null&&imp.getOverlay()!=null&&imp==GelAnalyzer.getGelImage())
-						return;
-					cmd="Clear";
-					hotkey=true;
-					break; 
+				case KeyEvent.VK_TAB: WindowManager.putBehind(); return;				
+				case KeyEvent.VK_BACK_SPACE: case KeyEvent.VK_DELETE:
+					if (!(shift||control||alt||meta)) {
+						if (deleteOverlayRoi(imp))
+							return;
+						if (imp!=null&&imp.getOverlay()!=null&&imp==GelAnalyzer.getGelImage())
+							return;
+						cmd="Clear";
+						hotkey=true;
+					}
+					break;
 				//case KeyEvent.VK_BACK_SLASH: cmd=IJ.altKeyDown()?"Animation Options...":"Start Animation"; break;
 				case KeyEvent.VK_EQUALS: cmd="In [+]"; break;
 				case KeyEvent.VK_MINUS: cmd="Out [-]"; break;
