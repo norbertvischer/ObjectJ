@@ -1116,6 +1116,12 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 				while (iterator.hasNext()) {
 					File file = (File) iterator.next();
 					String fName = file.getName();
+					String path = file.getCanonicalPath() + File.separator;
+					String ojDir= OJ.getData().getDirectory();				
+					if (file.isDirectory() && path.equals(ojDir)) {
+						 OJ.getImageProcessor().linkAllImages();
+						 break;
+					}
 					boolean good = false;
 					String[] goodExt = ".tiff .tif .jpg .png .gif".split(" ");
 					for (int jj = 0; jj < goodExt.length; jj++) {

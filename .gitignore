@@ -14,7 +14,9 @@ hs_err_pid*
 /build/
 /dist/
 /plugins/
-
+/docs/
+/ojjTicket.txt
+/functions.html
 
 # tracking files
 .gitignore

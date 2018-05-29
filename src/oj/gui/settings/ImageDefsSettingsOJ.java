@@ -5,6 +5,7 @@
 package oj.gui.settings;
 
 import ij.IJ;
+import ij.ImagePlus;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -184,12 +185,12 @@ public class ImageDefsSettingsOJ extends javax.swing.JPanel implements TableColu
 
         jScrollPane1.setOpaque(false);
         jScrollPane1.addAncestorListener(new javax.swing.event.AncestorListener() {
-            public void ancestorMoved(javax.swing.event.AncestorEvent evt) {
-            }
             public void ancestorAdded(javax.swing.event.AncestorEvent evt) {
                 jScrollPane1AncestorAdded(evt);
             }
             public void ancestorRemoved(javax.swing.event.AncestorEvent evt) {
+            }
+            public void ancestorMoved(javax.swing.event.AncestorEvent evt) {
             }
         });
 
@@ -273,7 +274,9 @@ private void jScrollPane1AncestorAdded(javax.swing.event.AncestorEvent evt) {//G
 }//GEN-LAST:event_jScrollPane1AncestorAdded
 
 private void tblImageDefsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblImageDefsMouseClicked
-    int row = tblImageDefs.rowAtPoint(evt.getPoint());//8.2.2014
+ 
+	
+	int row = tblImageDefs.rowAtPoint(evt.getPoint());//8.2.2014
     int column = tblImageDefs.columnAtPoint(evt.getPoint());
     boolean ctrl = evt.isControlDown();
     ImagesOJ images = OJ.getData().getImages();
@@ -291,6 +294,14 @@ private void tblImageDefsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRS
     } else if ((evt.getButton() == java.awt.event.MouseEvent.BUTTON3 || ctrl) && (column == 0)) {//8.2.2014
         ImageOJ img = OJ.getData().getImages().getImageByIndex(row);
         if (img != null) {
+//			String msg = "";
+//			msg += "\nname: " + img.getFilename();
+// 			ImagePlus imp = img.getImagePlus();
+//			if(imp == null)
+//				msg += "\nopen:  " + "No";
+// 			else
+//				msg += "\nopen:  " + "yes";
+//			IJ.showMessage(msg);
             String error = SimpleCommandsOJ.renameImageAndFile(img.getName(), "");
             if (!error.equals("")) {
                 IJ.showMessage(error);
@@ -424,6 +435,8 @@ private void tblImageDefsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRS
          * the table
          */
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+			if(table == null)//Err#001
+					return null;
             this.setOpaque(true);
             this.setBorder(new EmptyBorder(1, 8, 1, 8));
             

@@ -6,13 +6,11 @@ package oj.plugin.events;
 
 import ij.ImageListener;
 import ij.ImagePlus;
-import ij.gui.ImageWindow;
-import java.awt.Frame;
+import ij.WindowManager;
 import java.io.File;
 import oj.OJ;
 import oj.project.ImageOJ;
 import oj.gui.KeyEventManagerOJ;
-import oj.gui.MenuManagerOJ;
 import oj.gui.MouseEventManagerOJ;
 import oj.processor.state.CreateCellStateOJ;
 import oj.processor.state.ToolStateOJ;
@@ -69,6 +67,7 @@ public class IjImageChangedListenerOJ implements ImageListener {
     }
 
     public void imageClosed(ImagePlus imp) {
+	if(true)return;//////////////////////////////////////////////////////////////
         String image_name = imp.getTitle();
         if (OJ.isProjectOpen) {
             ImageOJ imageOJ = OJ.getData().getImages().getImageByName(image_name);
@@ -79,6 +78,13 @@ public class IjImageChangedListenerOJ implements ImageListener {
                     ((CreateCellStateOJ) state).closeCell();//3.11.2013        
                 }
 
+		
+		ImagePlus currentImp = WindowManager.getCurrentImage();
+		if(currentImp == imp)
+		    ij.IJ.log("same");
+		else
+		    ij.IJ.log("different");
+		
                 //MenuManagerOJ.getInstance().imageClosed(image_name);
                 OJ.getImageProcessor().removeFromOpenedImages(image_name);
                 //imageOJ.setID(0);

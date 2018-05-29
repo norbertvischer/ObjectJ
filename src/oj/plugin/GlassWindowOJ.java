@@ -35,8 +35,8 @@ public class GlassWindowOJ extends JFrame implements CellChangedListenerOJ, Draw
     public static final int GRAB_TO_CURRENT = 1, GRAB_TO_NEW = 2;
     public static final int k12 = 12;
 
-    public void run(String arg) {
-    }
+//    public void run(String arg) {
+//    }
 
     public  boolean inBar(int x, int y) {
         if (inCloseBox(x, y)) return false;return y < BAR_HEIGHT;
@@ -129,6 +129,7 @@ public class GlassWindowOJ extends JFrame implements CellChangedListenerOJ, Draw
 
     private GlassWindowOJ() {
         super("Glass");
+		this.setOpacity(0.5f);//9.4.2018
         JFrame.setDefaultLookAndFeelDecorated(true);
         if (ij.IJ.isMacOSX()) {
             getRootPane().putClientProperty("apple.awt.draggableWindowBackground", Boolean.FALSE);
@@ -208,7 +209,6 @@ public class GlassWindowOJ extends JFrame implements CellChangedListenerOJ, Draw
 
 
         OJ.getEventProcessor().addCellChangedListener(this);
-
         add(panel);
         pack();
         setVisible(true);

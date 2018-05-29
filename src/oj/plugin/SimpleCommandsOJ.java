@@ -65,6 +65,8 @@ public class SimpleCommandsOJ extends SimpleCommands {
         }
 
         ImagePlus imp = img.getImagePlus();
+		if(imp != null&& imp.getStack().isVirtual())
+				imp.close();
         String projDir = OJ.getData().getDirectory();
 
         boolean doSave = false;

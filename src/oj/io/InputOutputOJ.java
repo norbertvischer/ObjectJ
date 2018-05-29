@@ -220,6 +220,7 @@ public class InputOutputOJ {
 			ed.getTextArea().setText(newMacroText);
 		}
 		int nMacros = OJ.getData().getMacroSet().getMacrosCount();
+		IJ.selectWindow("ImageJ");
 		IJ.showStatus("*** Installed " + nMacros + " Embedded Macros");
 	}
 //   
@@ -247,12 +248,45 @@ public class InputOutputOJ {
 				}
 				oj.OJ.loadedAsBinary = true;
 			}
-			if (f.exists()) {
+			if (f.exists()&& f.canWrite()) {
 				boolean useBinary = OJ.saveAsBinary;//10.4.2010
 				return saveProject(data, data.getDirectory(), data.getFilename(), useBinary);
 			} else {
+			    
+			    if(f.exists() && !f.canWrite())
+				ij.IJ.showMessage("Cannot overwrite project file");
 				boolean pathMayChange = false;
 				return saveProjectAs(data, itsBinary, pathMayChange);//, true
+			}
+		} else {
+			boolean pathMayChange = true;
+			IJ.showMessage("Couldn't relocate project file on disk");
+			return saveProjectAs(data, itsBinary, pathMayChange);//, true
+		}
+	}
+
+	
+		public boolean saveProjectNew(DataOJ data, boolean itsBinary) {
+		ij.IJ.showStatus("Saving ObjectJ project...");
+		if ((data.getDirectory() != null) && (data.getFilename() != null) && (new File(data.getDirectory(), data.getFilename()).exists())) {
+			File f = new File(data.getDirectory(), data.getName() + FileFilterOJ.objectJFileFilter().getExtension());
+
+			if (!oj.OJ.loadedAsBinary) {
+				boolean flag = ij.IJ.showMessageWithCancel("Saving Project", "Project file was loaded in XML format, and will now be saved in the newer Binary format.");
+				if (!flag) {
+					return false;
+				}
+				oj.OJ.loadedAsBinary = true;
+			}
+			if (f.exists() && f.canWrite()) {
+				boolean useBinary = true;
+				return saveProject(data, data.getDirectory(), data.getFilename(), useBinary);
+			} else {
+			    if(ij.IJ.showMessageWithCancel("Error","Cannot save project file here, save elsewhere?")){
+				boolean pathMayChange = false;
+				return saveProjectAs(data, itsBinary, pathMayChange);//, true
+			    }
+			    return false;
 			}
 		} else {
 			boolean pathMayChange = true;
@@ -569,6 +603,7 @@ public class InputOutputOJ {
 	 */
 	public DataOJ loadAProject(String directory, String filename) {
 		DataOJ dataOj = null;
+		OJ.editor = null;
 		//OJ.doubleBuffered = false; //10.2.2011
 		String theType = UtilsOJ.getFileType(directory, filename);
 		try {

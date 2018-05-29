@@ -1,3 +1,24 @@
+
+
+
+
+
+01.02.17 23:23
+bring OJ Tools or OJsettings or OJResults to front: alt key is not recognized when clicking in menu
+
+01.02.17 22:25
+Item in OJ Tools should only be highlighted if OJ tool is active
+
+30.01.17 15:07
+sometimes, all visiblility eyes are missing, but also all objects are invisible.
+Cannot reproduce yet
+
+
+
+
+
+
+
 05.04.16 01.04.16 
 Ticket idea:
 set buttons at the top of linked results for browsing. Includes: Entire panel 
@@ -61,7 +82,7 @@ java.lang.NullPointerException
 ojRoiToItem(); does not close the object or item! 15.07.14 0:17
 getCursorLoc(x, y, z, flags);	after ItenToRoi not the same 15.07.14 0:43
 
-Unlink image with red bullet does not work:
+Unlink image with red bullet does not work: --solved
 	at oj.project.ImagesOJ.removeImageByName(ImagesOJ.java:146)
 	at oj.project.ImagesOJ.removeAllImages(ImagesOJ.java:168)
 	at oj.project.ImagesOJ.removeAllImages(ImagesOJ.java:158)
@@ -77,7 +98,7 @@ Unlink image with red bullet does not work:
 
 
 
-08.11.14 16:02:
+08.11.14 16:02: --solved
 after rename image:
 
 ImageJ 1.49i19; Java 1.6.0_65 [64-bit]; Mac OS X 10.9.2; 124MB of 1300MB (9%)
@@ -91,3 +112,14 @@ java.lang.NullPointerException
 	at ij.Executer.runCommand(Executer.java:131)
 	at ij.Executer.run(Executer.java:61)
 	at java.lang.Thread.run(Thread.java:695)
+	
+22.12.17 18:56--solved
+Install empty embedded macros should remove all previous menu items
+
+
+20.1.2018 -solved
+Open Coli Inspector, add some items without closing objectDelete all objects
+system hangs!
+
+22.02.18 23:31
+ojShowResults does not update statistics if it was already in front
