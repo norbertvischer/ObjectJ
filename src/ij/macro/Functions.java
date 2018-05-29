@@ -3168,6 +3168,130 @@ public class Functions implements MacroConstants, Measurements {
 				IJ.selectWindow(frontImp.getID());
 			}
 			resetImage();
+			return;
+		}
+
+		if (pattern != null) {//Norbert
+			WildcardMatch wm = new WildcardMatch();
+			wm.setCaseSensitive(false);
+			//Frame frontWindow = WindowManager.getFrontWindow();
+			String otherStr = "\\\\Others";
+			boolean others = pattern.equals(otherStr);
+			boolean hasWildcard = pattern.contains("*") || pattern.contains("?");
+			if (!others) {
+				//S c a n   N o n - i m a g e s
+				Window[] windows = WindowManager.getAllNonImageWindows();
+				String[] textExtension = ".txt .ijm .js .java .py .bs .csv".split(" ");
+				boolean isTextPattern = false;
+				for (int jj = 0; jj < textExtension.length; jj++) {
+					isTextPattern |= pattern.endsWith(textExtension[jj]);
+				}
+
+				if (!hasWildcard || isTextPattern) {//e.g. "Roi Manager", "Demo*.txt")
+					for (int win = 0; win < windows.length; win++) {
+						Window thisWin = windows[win];
+						if (thisWin instanceof ContrastAdjuster) {//B&C
+							if (pattern.equalsIgnoreCase("b&c")) {
+								((ContrastAdjuster) thisWin).close();
+							}
+						}
+						if (thisWin instanceof ColorPicker) {//CP
+							if (pattern.equalsIgnoreCase("cp")) {
+								((ColorPicker) thisWin).close();
+							}
+						}
+						if (thisWin instanceof Editor) {//macros editor, loaded text files
+							Editor ed = (Editor) thisWin;
+							String title = ed.getTitle();
+							if (wm.match(title, pattern)) {
+								boolean leaveIt = false;
+								leaveIt = leaveIt || (ed.fileChanged() && keep);
+								leaveIt = leaveIt || !isTextPattern;
+								leaveIt = leaveIt || ed == Editor.currentMacroEditor;
+								if (!leaveIt) {
+									ed.close();
+								}
+							}
+						}
+
+						if (thisWin instanceof TextWindow) {//e.g.Results, Log
+							TextWindow txtWin = (TextWindow) thisWin;
+							String title = txtWin.getTitle();
+							if (wm.match(title, pattern)) {
+								if(title.equals("Results"))
+									IJ.run("Clear Results");
+								txtWin.close();
+							}
+
+						}
+						if (thisWin instanceof RoiManager) {//ROI Manager
+							RoiManager rm = (RoiManager) thisWin;
+							rm.close();
+
+						}
+					}
+				}
+			}
+
+			//S c a n  i m a g e s	
+			ImagePlus frontImp = WindowManager.getCurrentImage();
+			int[] ids = WindowManager.getIDList();
+			if (ids == null) {
+				resetImage();
+				return;
+			}
+			int nPics = ids.length;
+			String[] flaggedNames = new String[nPics];
+
+			for (int jj = 0; jj < nPics; jj++) {//add flags to names for debug
+				ImagePlus imp = WindowManager.getImage(ids[jj]);
+				String flags = "fcm_";//fcm = flags for  front, changed, match
+				String title = imp.getTitle();
+				if (imp.changes) {
+					flags = flags.replace("c", "C");
+				}
+				if (imp == WindowManager.getCurrentImage()) {
+					flags = flags.replace("f", "F");
+				}
+				if (others || wm.match(title, pattern)) {
+					flags = flags.replace("m", "M");
+				}
+				String fName = flags + imp.getTitle();
+				flaggedNames[jj] = fName;
+			}
+			boolean currentImpClosed = false;
+			for (int jj = 0; jj < nPics; jj++) {
+				String flags = flaggedNames[jj].substring(0, 4);
+				boolean M = flags.contains("M");//match
+				boolean F = flags.contains("F");//front
+				boolean C = flags.contains("C");//changed
+				boolean kill = M && !(C && keep);
+				if (others) {
+					kill = !F && !(C && keep);
+				}
+
+				if (kill) {
+					ImagePlus imp = WindowManager.getImage(ids[jj]);
+					ImageWindow win = imp.getWindow();
+					if (win != null) {
+						imp.changes = false;
+						win.close();
+					} else {
+						imp.saveRoi();
+						WindowManager.setTempCurrentImage(null);
+						interp.removeBatchModeImage(imp);
+					}
+					imp.changes = false;
+					imp.close();
+					if (imp == frontImp) {
+						currentImpClosed = true;
+					}
+				}
+			}
+			if (!currentImpClosed && frontImp != null) {
+				IJ.selectWindow(frontImp.getID());
+			}
+			resetImage();
 		}
 	}
 
