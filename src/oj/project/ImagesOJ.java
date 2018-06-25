@@ -153,7 +153,15 @@ public class ImagesOJ extends BaseAdapterOJ {
 		ImageOJ img = (ImageOJ) images.get(name);
 		if (img != null && img.getImagePlus() != null) {
 			img.getImagePlus().close();//3.11.2013
+		}		
+		if(img != null){ //25. 6. 2018
+			CellsOJ cells = OJ.getData().cells;
+			int from = img.getFirstCell();
+			int to = img.getLastCell();
+			if(from>=0 && to >= 0)
+				cells.removeCellsRange(from, to);
 		}
+         	
 		imagesKeys.remove(name);
 		images.remove(name);
 		changed = true;

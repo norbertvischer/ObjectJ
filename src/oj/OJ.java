@@ -42,9 +42,9 @@ public class OJ {
     private static VertexCalculatorOJ vcj;
     private static IjImageChangedListenerOJ ilj;
     private static StackChangedListenerOJ slj;
-    public final static int build = 520;
-    public final static String releaseVersion = "1.04h";//do not follow Wayne
-    public final static String buildDate = "29-may-2018 23:24";
+    public final static int build = 522;
+    public final static String releaseVersion = "1.04j";//do not follow Wayne
+    public final static String buildDate = "25-jun-2018 23:13";
     public static final String URL = "https://sils.fnwi.uva.nl/bcb/objectj";
     public static final String URLcurrent = "https://sils.fnwi.uva.nl/bcb/objectj/download/current/";
     public static final String ICONS = "/oj/gui/icons/";
