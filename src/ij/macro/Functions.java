@@ -768,6 +768,7 @@ public class Functions implements MacroConstants, Measurements {
 			updateRoi(roi);
 		resetImage();
 		shiftKeyDown = altKeyDown = false;
+		IJ.setKeyUp(IJ.ALL_KEYS);
 	}
 
 	void makeRectangle() {
@@ -1062,7 +1063,10 @@ public class Functions implements MacroConstants, Measurements {
 		for (int y=ymin; y<ymax; y++) {
 			for (int x=xmin; x<xmax; x++) {
 				v = isFloat?ip.getPixelValue(x,y):ip.getPixel(x,y)&0xffffff;
-				if (v>=darg1 && v<=darg2) {
+				boolean replace = v>=darg1 && v<=darg2;
+				if (Double.isNaN(darg1) && Double.isNaN(darg2) && Double.isNaN(v))
+					replace = true;
+				if (replace) {
 					if (isFloat)
 						ip.putPixelValue(x, y, darg3);
 					else
@@ -2182,7 +2186,26 @@ public class Functions implements MacroConstants, Measurements {
 			String arg = getFirstString();
 			int what = Plot.toShape(arg);
 			addToPlot(what, arg);
-			return;
+			return;			
+		} else if (name.equals("addHistogram")) {
+			interp.getLeftParen();
+			Variable[] arrV = getArray();
+			interp.getComma();
+			double binWidth = interp.getExpression();
+			double binCenter = 0;
+			interp.getToken();
+			if (interp.token == ',') 
+				 binCenter = interp.getExpression();
+			else
+				interp.putTokenBack();
+			interp.getRightParen();
+			
+			int len1 = arrV.length;
+			double[] arrD = new double[len1];
+			for (int i=0; i<len1; i++)
+				arrD[i] = arrV[i].getValue();		
+			plot.addHistogram(arrD, binWidth, binCenter);			
+			return;	
 		} else if (name.equals("appendToStack")) {
 			plot.appendToStack();
 			return;
@@ -3104,130 +3127,6 @@ public class Functions implements MacroConstants, Measurements {
 						if (thisWin instanceof RoiManager && pattern.equalsIgnoreCase("roi manager")) {//ROI Manager
 							RoiManager rm = (RoiManager) thisWin;
 							rm.close();
-						}
-					}
-				}
-			}
-
-			//S c a n  i m a g e s	
-			ImagePlus frontImp = WindowManager.getCurrentImage();
-			int[] ids = WindowManager.getIDList();
-			if (ids == null) {
-				resetImage();
-				return;
-			}
-			int nPics = ids.length;
-			String[] flaggedNames = new String[nPics];
-
-			for (int jj = 0; jj < nPics; jj++) {//add flags to names for debug
-				ImagePlus imp = WindowManager.getImage(ids[jj]);
-				String flags = "fcm_";//fcm = flags for  front, changed, match
-				String title = imp.getTitle();
-				if (imp.changes) {
-					flags = flags.replace("c", "C");
-				}
-				if (imp == WindowManager.getCurrentImage()) {
-					flags = flags.replace("f", "F");
-				}
-				if (others || wm.match(title, pattern)) {
-					flags = flags.replace("m", "M");
-				}
-				String fName = flags + imp.getTitle();
-				flaggedNames[jj] = fName;
-			}
-			boolean currentImpClosed = false;
-			for (int jj = 0; jj < nPics; jj++) {
-				String flags = flaggedNames[jj].substring(0, 4);
-				boolean M = flags.contains("M");//match
-				boolean F = flags.contains("F");//front
-				boolean C = flags.contains("C");//changed
-				boolean kill = M && !(C && keep);
-				if (others) {
-					kill = !F && !(C && keep);
-				}
-
-				if (kill) {
-					ImagePlus imp = WindowManager.getImage(ids[jj]);
-					ImageWindow win = imp.getWindow();
-					if (win != null) {
-						imp.changes = false;
-						win.close();
-					} else {
-						imp.saveRoi();
-						WindowManager.setTempCurrentImage(null);
-						interp.removeBatchModeImage(imp);
-					}
-					imp.changes = false;
-					imp.close();
-					if (imp == frontImp) {
-						currentImpClosed = true;
-					}
-				}
-			}
-			if (!currentImpClosed && frontImp != null) {
-				IJ.selectWindow(frontImp.getID());
-			}
-			resetImage();
-			return;
-		}
-
-		if (pattern != null) {//Norbert
-			WildcardMatch wm = new WildcardMatch();
-			wm.setCaseSensitive(false);
-			//Frame frontWindow = WindowManager.getFrontWindow();
-			String otherStr = "\\\\Others";
-			boolean others = pattern.equals(otherStr);
-			boolean hasWildcard = pattern.contains("*") || pattern.contains("?");
-			if (!others) {
-				//S c a n   N o n - i m a g e s
-				Window[] windows = WindowManager.getAllNonImageWindows();
-				String[] textExtension = ".txt .ijm .js .java .py .bs .csv".split(" ");
-				boolean isTextPattern = false;
-				for (int jj = 0; jj < textExtension.length; jj++) {
-					isTextPattern |= pattern.endsWith(textExtension[jj]);
-				}
-
-				if (!hasWildcard || isTextPattern) {//e.g. "Roi Manager", "Demo*.txt")
-					for (int win = 0; win < windows.length; win++) {
-						Window thisWin = windows[win];
-						if (thisWin instanceof ContrastAdjuster) {//B&C
-							if (pattern.equalsIgnoreCase("b&c")) {
-								((ContrastAdjuster) thisWin).close();
-							}
-						}
-						if (thisWin instanceof ColorPicker) {//CP
-							if (pattern.equalsIgnoreCase("cp")) {
-								((ColorPicker) thisWin).close();
-							}
-						}
-						if (thisWin instanceof Editor) {//macros editor, loaded text files
-							Editor ed = (Editor) thisWin;
-							String title = ed.getTitle();
-							if (wm.match(title, pattern)) {
-								boolean leaveIt = false;
-								leaveIt = leaveIt || (ed.fileChanged() && keep);
-								leaveIt = leaveIt || !isTextPattern;
-								leaveIt = leaveIt || ed == Editor.currentMacroEditor;
-								if (!leaveIt) {
-									ed.close();
-								}
-							}
-						}
-
-						if (thisWin instanceof TextWindow) {//e.g.Results, Log
-							TextWindow txtWin = (TextWindow) thisWin;
-							String title = txtWin.getTitle();
-							if (wm.match(title, pattern)) {
-								if(title.equals("Results"))
-									IJ.run("Clear Results");
-								txtWin.close();
-							}
-
-						}
-						if (thisWin instanceof RoiManager) {//ROI Manager
-							RoiManager rm = (RoiManager) thisWin;
-							rm.close();
-
 						}
 					}
 				}
@@ -4269,7 +4168,7 @@ public class Functions implements MacroConstants, Measurements {
 			String title = defaultName!=null?path:"openFile";
 			defaultName = defaultName!=null?defaultName:"log.txt";
 			SaveDialog sd = new SaveDialog(title, defaultName, ".txt");
-			if(sd.getFileName()==null) return "";
+			if (sd.getFileName()==null) return "";
 			path = sd.getDirectory()+sd.getFileName();
 		} else {
 			File file = new File(path);
@@ -4900,6 +4799,13 @@ public class Functions implements MacroConstants, Measurements {
 		} else if (key.equals("results.count")) {
 			ResultsTable rt = getResultsTable(false);
 			return rt!=null?rt.size():0;
+		} else if (key.equals("hashCode")) {
+			return interp.hashCode();
+		} else if (key.equals("instance")) {
+			Interpreter instance = interp.getInstance();
+			return instance!=null?instance.hashCode():0;
+		} else if (key.equals("done")) {
+			return interp.done?1:0;
 		} else {
 			interp.error("Invalid key");
 			return 0.0;
@@ -6257,7 +6163,13 @@ public class Functions implements MacroConstants, Measurements {
 			return Double.NaN;
 		} else if (name.equals("measure")) {
 			ResultsTable rt = overlay.measure(imp);
-			rt.show("Results");
+			if (IJ.getInstance()==null)
+				Analyzer.setResultsTable(rt);
+			else
+				rt.show("Results");
+		} else if (name.equals("flatten")) {
+			IJ.runPlugIn("ij.plugin.OverlayCommands", "flatten");
+			return Double.NaN;
 		} else
 			interp.error("Unrecognized function name");
 		return Double.NaN;
@@ -6285,6 +6197,11 @@ public class Functions implements MacroConstants, Measurements {
 		Roi roi = imp.getRoi();
 		if (roi==null)
 			interp.error("No selection");
+		if (offscreenOverlay!=null) {
+			imp.setOverlay(offscreenOverlay);
+			offscreenOverlay = null;
+			overlay = imp.getOverlay();
+		}
 		if (overlay==null)
 			overlay = new Overlay();
 		if (strokeColor!=null && !strokeColor.equals("")) {
@@ -6407,10 +6324,15 @@ public class Functions implements MacroConstants, Measurements {
 		boolean nullFont = font==null;
 		if (nullFont)
 			font = imp.getProcessor().getFont();
-		TextRoi roi = new TextRoi(text, x, y, font);
+		TextRoi roi = null;
+		if (justification!=ImageProcessor.LEFT_JUSTIFY)
+			roi = new TextRoi(x, y-font.getSize(), text, font);
+		else
+			roi = new TextRoi(text, x, y, font);
 		if (!nullFont && !antialiasedText)
 			roi.setAntialiased(false);
 		roi.setAngle(angle);
+		roi.setJustification(justification);
 		addRoi(imp, roi);
 		return Double.NaN;
 	}
@@ -6889,6 +6811,10 @@ public class Functions implements MacroConstants, Measurements {
 			return setSplineAnchors(imp, false);
 		else if (name.equals("setPolylineSplineAnchors"))
 			return setSplineAnchors(imp, true);
+		else if (name.equals("remove")) {
+			getImage().deleteRoi();
+			return null;
+		}
 		Roi roi = imp.getRoi();
 		if (roi==null)
 			interp.error("No selection");

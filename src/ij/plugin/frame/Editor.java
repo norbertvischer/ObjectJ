@@ -113,7 +113,7 @@ public class Editor extends PlugInFrame implements ActionListener, ItemListener,
 			fontSize = sizes.length-1;
 		setFont();
 		positionWindow();
-		if (IJ.isJava16() && !IJ.isJava18() && !IJ.isLinux())
+		if (!IJ.isJava18() && !IJ.isLinux())
 			insertSpaces = false;
 	}
 	
@@ -133,24 +133,24 @@ public class Editor extends PlugInFrame implements ActionListener, ItemListener,
 		mb.add(m);
 		
 		m = new Menu("Edit");
-		MenuItem item = new MenuItem("Undo",new MenuShortcut(KeyEvent.VK_Z));
+		MenuItem item = null;
+		if (IJ.isWindows())
+			item = new MenuItem("Undo  Ctrl+Z");
+		else
+			item = new MenuItem("Undo",new MenuShortcut(KeyEvent.VK_Z));		
 		m.add(item);
-		m.addSeparator();
-		boolean shortcutsBroken = IJ.isWindows()
-			&& (System.getProperty("java.version").indexOf("1.1.8")>=0
-			||System.getProperty("java.version").indexOf("1.5.")>=0);
-		shortcutsBroken = false;
-		if (shortcutsBroken)
+		m.addSeparator();		
+		if (IJ.isWindows())
 			item = new MenuItem("Cut  Ctrl+X");
 		else
 			item = new MenuItem("Cut",new MenuShortcut(KeyEvent.VK_X));
 		m.add(item);
-		if (shortcutsBroken)
+		if (IJ.isWindows())
 			item = new MenuItem("Copy  Ctrl+C");
 		else
 			item = new MenuItem("Copy", new MenuShortcut(KeyEvent.VK_C));
 		m.add(item);
-		if (shortcutsBroken)
+		if (IJ.isWindows())
 			item = new MenuItem("Paste  Ctrl+V");
 		else
 			item = new MenuItem("Paste",new MenuShortcut(KeyEvent.VK_V));
@@ -396,13 +396,7 @@ public class Editor extends PlugInFrame implements ActionListener, ItemListener,
 			text = ta.getText();
 		else
 			text = ta.getSelectedText();
-		Interpreter instance = Interpreter.getInstance();
-		if (instance!=null) { // abort any currently running macro
-			instance.abortMacro();
-			long t0 = System.currentTimeMillis();
-			while (Interpreter.getInstance()!=null && (System.currentTimeMillis()-t0)<3000L)
-				IJ.wait(10);
-		}
+		Interpreter.abort();  // abort any currently running macro
 		if (checkForCurlyQuotes && text.contains("\u201D")) {
 			// replace curly quotes with standard quotes
  			text = text.replaceAll("\u201C", "\""); 
@@ -425,13 +419,13 @@ public class Editor extends PlugInFrame implements ActionListener, ItemListener,
 	void evaluateMacro() {
 		String title = getTitle();
 		if (title.endsWith(".js")||title.endsWith(".bsh")||title.endsWith(".py"))
-			setTitle(title.substring(0,title.length()-3)+".ijm");
+			setWindowTitle(title.substring(0,title.length()-3)+".ijm");
 		runMacro(false);
 	}
 
 	void evaluateJavaScript() {
 		if (!getTitle().endsWith(".js"))
-			setTitle(SaveDialog.setExtension(getTitle(), ".js"));
+			setWindowTitle(SaveDialog.setExtension(getTitle(), ".js"));
 		int start = ta.getSelectionStart();
 		int end = ta.getSelectionEnd();
 		String text;
@@ -453,7 +447,7 @@ public class Editor extends PlugInFrame implements ActionListener, ItemListener,
 			if (strictMode)
 				text = "'use strict';" + text;
 		}
-		if ((IJ.isJava16() && !(IJ.isMacOSX()&&!IJ.is64Bit()))) {
+		if (!(IJ.isMacOSX()&&!IJ.is64Bit())) {
 			// Use JavaScript engine built into Java 6 and later.
 			IJ.runPlugIn("ij.plugin.JavaScriptEvaluator", text);
 		} else {
@@ -474,7 +468,7 @@ public class Editor extends PlugInFrame implements ActionListener, ItemListener,
 			return;
 		}
 		if (!getTitle().endsWith(ext))
-			setTitle(SaveDialog.setExtension(getTitle(), ext));
+			setWindowTitle(SaveDialog.setExtension(getTitle(), ext));
 		int start = ta.getSelectionStart();
 		int end = ta.getSelectionEnd();
 		String text;
@@ -611,6 +605,10 @@ public class Editor extends PlugInFrame implements ActionListener, ItemListener,
 	}	   
 
 	void undo() {
+		if (IJ.isWindows()) {
+			IJ.showMessage("Editor", "Press Ctrl-Z to undo");
+			return;
+		}
 		if (IJ.debugMode) IJ.log("Undo1: "+undoBuffer.size());
 		int position = ta.getCaretPosition();
 		if (undoBuffer.size()>1) {
@@ -619,7 +617,7 @@ public class Editor extends PlugInFrame implements ActionListener, ItemListener,
 			performingUndo = true;
 			ta.setText(text);
 			if (position<=text.length())
-				ta.setCaretPosition(position);
+				ta.setCaretPosition(position-offset(position));
 			if (IJ.debugMode) IJ.log("Undo2: "+undoBuffer.size()+" "+text);
 		}
 	}
@@ -635,13 +633,12 @@ public class Editor extends PlugInFrame implements ActionListener, ItemListener,
 		} else
 			return false;
 	}
- 
 	  
 	void cut() {
 		if (copy()) {
 			int start = ta.getSelectionStart();
 			int end = ta.getSelectionEnd();
-			ta.replaceRange("", start, end);
+			ta.replaceRange("", start-offset(start), end-offset(end-2>=start?end-2:start));
 			if (IJ.isMacOSX())
 				ta.setCaretPosition(start);
 		}	
@@ -654,16 +651,29 @@ public class Editor extends PlugInFrame implements ActionListener, ItemListener,
 		Transferable clipData = clipboard.getContents(s);
 		try {
 			s = (String)(clipData.getTransferData(DataFlavor.stringFlavor));
-		}
-		catch  (Exception e)  {
+		} catch  (Exception e)  {
 			s  = e.toString( );
 		}
 		int start = ta.getSelectionStart( );
 		int end = ta.getSelectionEnd( );
-		ta.replaceRange(s, start, end);
+		ta.replaceRange(s, start-offset(start), end-offset(end-2>=start?end-2:start));
 		if (IJ.isMacOSX())
 			ta.setCaretPosition(start+s.length());
 		checkForCurlyQuotes = true;
+	}
+	
+	// workaround for TextArea.getCaretPosition() bug on Windows
+	private int offset(int pos) {
+		if (!IJ.isWindows())
+			return 0;
+		String text = ta.getText();
+		int rcount = 0;
+		for (int i=0; i<=pos; i++) {
+			if (text.charAt(i)=='\r')
+				rcount++;
+		}
+		if (IJ.debugMode) IJ.log("offset: "+pos+" "+rcount);
+		return pos-rcount>=0?rcount:0;
 	}
 
 	void copyToInfo() { 
@@ -681,7 +691,7 @@ public class Editor extends PlugInFrame implements ActionListener, ItemListener,
 			text = ta.getSelectedText();
 		imp.setProperty("Info", text);
 	}
-
+	
 	public void actionPerformed(ActionEvent e) {
 		String what = e.getActionCommand();
 		int flags = e.getModifiers();
@@ -735,13 +745,13 @@ public class Editor extends PlugInFrame implements ActionListener, ItemListener,
 			revert();
 		else if ("Print...".equals(what))
 			print();
-		else if (what.equals("Undo"))
+		else if (what.startsWith("Undo"))
 		   undo();
-		else if (what.equals("Paste"))
+		else if (what.startsWith("Paste"))
 			paste();
-		else if (what.equals("Copy"))
+		else if (what.startsWith("Copy"))
 			copy();
-		else if (what.equals("Cut"))
+		else if (what.startsWith("Cut"))
 		   cut();
 		else if ("Save As...".equals(what))
 			saveAs();
@@ -1433,11 +1443,12 @@ public class Editor extends PlugInFrame implements ActionListener, ItemListener,
 		return JavaScriptIncludes+"function getArgument() {return \""+arg+"\";};";
 	}
 	
-	/** Changes Mac OS 9 (CR) and Windows (CRLF) line separators to line feeds (LF). */
+	/** Changes Windows (CRLF) line separators to line feeds (LF). */
 	public void fixLineEndings() {
+		if (!IJ.isWindows())
+			return;
 		String text = ta.getText();
 		text = text.replaceAll("\r\n", "\n");
-		text = text.replaceAll("\r", "\n");
 		ta.setText(text);
 	}
 	

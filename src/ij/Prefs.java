@@ -143,7 +143,7 @@ public class Prefs {
 	public static boolean useFileChooser;
 	/** Use sub-pixel resolution with line selections */
 	public static boolean subPixelResolution;
-	/** Adjust contrast when scrolling stacks (or hold shift key down) */
+	/** Adjust contrast when scrolling stacks */
 	public static boolean autoContrast;
 	/** Allow lines to be created with one click at start and another at the end */
 	public static boolean enhancedLineTool;
@@ -449,7 +449,7 @@ public class Prefs {
 
 	static void loadOptions() {
 		int defaultOptions = ANTIALIASING+AVOID_RESLICE_INTERPOLATION+ANTIALIASED_TOOLS+MULTI_POINT_MODE
-			+(!IJ.isMacOSX()?RUN_SOCKET_LISTENER:0);
+			+(!IJ.isMacOSX()?RUN_SOCKET_LISTENER:0)+BLACK_BACKGROUND;
 		int options = getInt(OPTIONS, defaultOptions);
 		usePointerCursor = (options&USE_POINTER)!=0;
 		//antialiasedText = (options&ANTIALIASING)!=0;
