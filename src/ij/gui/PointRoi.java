@@ -47,7 +47,8 @@ public class PointRoi extends PolygonRoi {
 	private boolean promptBeforeDeleting;
 	private boolean promptBeforeDeletingCalled;
 	private int nMarkers;
-	
+	private boolean addToOverlay;
+		
 	static {
 		setDefaultType((int)Prefs.get(TYPE_KEY, HYBRID));
 		setDefaultSize((int)Prefs.get(SIZE_KEY, 1));
@@ -75,6 +76,12 @@ public class PointRoi extends PolygonRoi {
 		this(ox, oy, ox.length);
 	}
 
+	/** Creates a new PointRoi using the specified coordinate arrays and options. */
+	public PointRoi(float[] ox, float[] oy, String options) {
+		this(ox, oy, ox.length);
+		setOptions(options);
+	}
+
 	/** Creates a new PointRoi from a FloatPolygon. */
 	public PointRoi(FloatPolygon poly) {
 		this(poly.xpoints, poly.ypoints, poly.npoints);
@@ -83,6 +90,14 @@ public class PointRoi extends PolygonRoi {
 	/** Creates a new PointRoi from a Polygon. */
 	public PointRoi(Polygon poly) {
 		this(itof(poly.xpoints), itof(poly.ypoints), poly.npoints);
+	}
+
+	/** Creates a new PointRoi using the specified coordinates and options. */
+	public PointRoi(double ox, double oy, String options) {
+		super(makeXArray(ox, null), makeYArray(oy, null), 1, POINT);
+		width=1; height=1;
+		incrementCounter(null);
+		setOptions(options);
 	}
 
 	/** Creates a new PointRoi using the specified offscreen int coordinates. */
@@ -118,8 +133,41 @@ public class PointRoi extends PolygonRoi {
 		setCounter(Toolbar.getMultiPointMode()?defaultCounter:0);
 		incrementCounter(imp);
 		enlargeArrays(50);
-		if (Recorder.record && !Recorder.scriptMode()) 
-			Recorder.record("makePoint", x, y);
+		if (Recorder.record) {
+			String add = Prefs.pointAddToOverlay?" add":"";
+			Overlay overlay = imp.getOverlay();
+			String label = overlay!=null&&overlay.getDrawLabels()?" label":"";
+			String properties = sizes[convertSizeToIndex(size)]+" "+Colors.colorToString(getColor())+" "+types[type]+add+label;
+			properties = properties.toLowerCase();		
+			if (Recorder.scriptMode())
+				Recorder.recordCall("imp.setRoi(new PointRoi("+x+","+y+",\""+properties+"\"));");
+			else
+				Recorder.record("makePoint", x, y, properties);
+		}
+	}
+	
+	private void setOptions(String options) {
+		if (options==null)
+			return;
+		if (options.contains("tiny")) size=TINY;
+		else if (options.contains("medium")) size=MEDIUM;
+		else if (options.contains("extra")) size=EXTRA_LARGE;
+		else if (options.contains("large")) size=LARGE;
+		if (options.contains("cross")) type=CROSSHAIR;
+		else if (options.contains("dot")) type=DOT;
+		else if (options.contains("circle")) type=CIRCLE;
+		Color c = null;
+		if (options.contains("yellow")) c = Color.yellow;
+		else if (options.contains("red")) c = Color.red;
+		else if (options.contains("black")) c = Color.black;
+		else if (options.contains("white")) c = Color.white;
+		else if (options.contains("geen")) c = Color.green;
+		else if (options.contains("blue")) c = Color.blue;
+		else if (options.contains("magenta")) c = Color.magenta;
+		else if (options.contains("cyan")) c = Color.cyan;
+		if (c!=null)
+			setStrokeColor(c);
+		addToOverlay =  options.contains("add");
 	}
 	
 	static float[] itof(int[] arr) {
@@ -145,7 +193,6 @@ public class PointRoi extends PolygonRoi {
 	}
 				
 	void handleMouseMove(int ox, int oy) {
-		//IJ.log("handleMouseMove");
 	}
 	
 	protected void handleMouseUp(int sx, int sy) {
@@ -167,11 +214,16 @@ public class PointRoi extends PolygonRoi {
 			if (fontSize>9)
 				Java2.setAntialiasedText(g, true);
 		}
-		int slice = imp!=null&&positions!=null&&imp.getStackSize()>1?imp.getCurrentSlice():0;
+		int slice = imp!=null&&positions!=null&&imp.getStackSize()>1?imp.getCurrentSlice():0;		
+		ImageCanvas ic = imp!=null?imp.getCanvas():null;
+		if (ic!=null && overlay && ic.getShowAllList()!=null && ic.getShowAllList().contains(this) && !Prefs.showAllSliceOnly)
+			slice = 0;  // draw point irrespective of currently selected slice
 		if (Prefs.showAllPoints)
 			slice = 0;
+		//IJ.log("draw: "+positions+" "+imp.getCurrentSlice());
 		for (int i=0; i<nPoints; i++) {
-			if (slice==0 || slice==positions[i])
+			//IJ.log(i+" "+slice+" "+(positions!=null?positions[i]:-1));
+			if (slice==0 || (positions!=null&&(slice==positions[i])||positions[i]==0))
 				drawPoint(g, xp2[i], yp2[i], i+1);
 		}
 		if (updateFullWindow) {
@@ -302,7 +354,7 @@ public class PointRoi extends PolygonRoi {
 	
 	/** Adds a point to this PointRoi. */
 	public PointRoi addPoint(double x, double y) {
-		addPoint(getImage(), x, y);
+		addPoint(null, x, y);
 		return this;
 	}
 
@@ -795,7 +847,6 @@ public class PointRoi extends PolygonRoi {
 		return index;
 	}
 
-
 	/** Returns a copy of this PointRoi. */
 	public synchronized Object clone() {
 		PointRoi r = (PointRoi)super.clone();
@@ -823,6 +874,10 @@ public class PointRoi extends PolygonRoi {
 
 	public int[] getCounterInfo() {
 		return counterInfo;
+	}
+	
+	public boolean addToOverlay() {
+		return addToOverlay;
 	}
 
 	/** @deprecated */

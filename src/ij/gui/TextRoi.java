@@ -38,6 +38,7 @@ public class TextRoi extends Roi {
 	private double angle;  // degrees
 	private static double defaultAngle;
 	private static boolean firstTime = true;
+	private Roi previousRoi;
 
 	/** Creates a TextRoi.*/
 	public TextRoi(int x, int y, String text) {
@@ -70,6 +71,7 @@ public class TextRoi extends Roi {
 		this.x = (int)x;
 		this.y = (int)(y - height);
 		setAntialiased(true);
+		justification = LEFT;
 	}
 
 	/** Creates a TextRoi using sub-pixel coordinates.*/
@@ -306,15 +308,10 @@ public class TextRoi extends Roi {
 			g.fillRect(sx, sy, sw, sh);
 			g.setColor(c);
 		}
-		int y2 = y;
 		while (i<MAX_LINES && theText[i]!=null) {
 			switch (justification) {
 				case LEFT:
-					if (drawStringMode) {
-						g.drawString(theText[i], screenX(x), screenY(y2+height-descent));
-						y2 += fontHeight/mag;
-					} else
-						g.drawString(theText[i], sx, sy+fontHeight-descent);
+					g.drawString(theText[i], sx, sy+fontHeight-descent);
 					break;
 				case CENTER:
 					int tw = metrics.stringWidth(theText[i]);
@@ -332,18 +329,21 @@ public class TextRoi extends Roi {
 			g2d.setTransform(at);
 	}
 
-	/** Returns the name of the global (default) font. */
-	public static String getFont() {
+	/** Returns the name of the default font. Use getCurrentFont().getName()
+		 to get the name of the font that this TextRoi is using. */
+	public static String getDefaultFontName() {
 		return name;
 	}
 
-	/** Returns the global (default) font size. */
-	public static int getSize() {
+	/** Returns the default font size. Use getCurrentFont().getSize()
+		 to get the size of the font that this TextRoi is using. */
+	public static int getDefaultFontSize() {
 		return size;
 	}
 
-	/** Returns the global (default) font style. */
-	public static int getStyle() {
+	/** Returns the default font style. Use getCurrentFont().getStyle()
+		 to get the style of the font that this TextRoi is using. */
+	public static int getDefaultFontStyle() {
 		return style;
 	}
 	
@@ -404,6 +404,14 @@ public class TextRoi extends Roi {
 	public void setJustification(int justification) {
 		if (justification<0 || justification>RIGHT)
 			justification = LEFT;
+		if (drawStringMode && justification==RIGHT && this.justification==LEFT) {
+			bounds = null;
+			x = x - width;
+		}
+		if (drawStringMode && justification==CENTER && this.justification==LEFT) {
+			bounds = null;
+			x = x - width/2;
+		}
 		this.justification = justification;
 		if (imp!=null)
 			imp.draw();
@@ -452,16 +460,21 @@ public class TextRoi extends Roi {
 
 	protected void handleMouseUp(int screenX, int screenY) {
 		super.handleMouseUp(screenX, screenY);
-		//if (width<size || height<size) 
-		//	grow(x+Math.max(size*5,width), y+Math.max((int)(size*1.5),height));
-		if (firstMouseUp) {
+		if (width<5 && height<5 && imp!=null && previousRoi==null) {
+			int ox = ic!=null?ic.offScreenX(screenX):screenX;
+			int oy = ic!=null?ic.offScreenY(screenY):screenY;
+			TextRoi roi = new TextRoi(ox, oy, line1a);
+			roi.setStrokeColor(Toolbar.getForegroundColor());
+			roi.firstChar = true;
+			imp.setRoi(roi);
+			return;
+		} else if (firstMouseUp) {
 			updateBounds(null);
 			updateText();
 			firstMouseUp = false;
-		} else {
-			if (width<5 || height<5)
-			imp.deleteRoi();
 		}
+		if (width<5 || height<5)
+			imp.deleteRoi();
 	}
 	
 	/** Increases the size of bounding rectangle so it's large enough to hold the text. */ 
@@ -677,6 +690,25 @@ public class TextRoi extends Roi {
 	
 	public void setDrawStringMode(boolean drawStringMode) {
 		this.drawStringMode = drawStringMode;
+	}
+	
+	public void setPreviousRoi(Roi previousRoi) {
+		this.previousRoi = previousRoi;
+	}
+	
+	/** @deprecated Replaced by getDefaultFontName */
+	public static String getFont() {
+		return name;
+	}
+
+	/** @deprecated Replaced by getDefaultFontSize */
+	public static int getSize() {
+		return size;
+	}
+
+	/** @deprecated Replaced by getDefaultFontStyle */
+	public static int getStyle() {
+		return style;
 	}
         
 }
