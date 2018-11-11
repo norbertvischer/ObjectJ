@@ -228,6 +228,15 @@ public class FunctionsOJ implements MacroExtension {
     }
 
     public String ojHideResults() {
+		
+		
+	 if (ProjectResultsOJ.getInstance() == null) {//11.11.2018
+            new ProjectResultsOJ();
+            ProjectResultsOJ.getInstance().setVisible(true);
+            ProjectResultsOJ.getInstance().setState(Frame.NORMAL);
+            ProjectResultsOJ.getInstance().toFront();
+	 }
+			
 	if (ProjectResultsOJ.getInstance() != null) {
 	    ProjectResultsOJ.close();
 	} //24.2.2009

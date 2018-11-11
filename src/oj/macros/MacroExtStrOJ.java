@@ -4,7 +4,7 @@
  */
 package oj.macros;
 
-import java.util.ArrayList;
+import ij.IJ;
 
 /**
  * Composes a large piece of macro text containing all "oj" commands, that will
@@ -269,7 +269,21 @@ public class MacroExtStrOJ {
         buf.append("		ar__oj[jj] = parseFloat(ar__oj[jj]);\n");
         buf.append("	return ar__oj;\n");
         buf.append("}\n");
-
+	
+		//BBEdit: replace \n by:  \\n");\nbuf.append("
+		//take care no globals are affected!
+		buf.append("function ojGetColumn(ss__title, ss__includeAll){\n");
+		//buf.append("  ss__count = 0;\n");
+		buf.append("  ss__values = newArray(ojNObjects());\n");
+		buf.append("  for (ss__obj = 1; ss__obj<= ojNObjects(); ss__obj++){\n");
+		buf.append("    ss__val = ojResult(ss__title, ss__obj);\n");
+		buf.append("    if ((!ojQualified(ss__obj)) && !ss__includeAll)\n");
+		buf.append("	  ss__val = NaN;\n");
+		buf.append("    ss__values[ss__obj-1] = ss__val;\n");
+		buf.append("  }\n ");
+		buf.append("  return ss__values;\n");
+		buf.append("}\n");
+	//IJ.log(buf.toString());
         return buf.toString();
     }
 }

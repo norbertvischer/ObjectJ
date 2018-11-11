@@ -103,10 +103,6 @@ public class CellActionsOJ {
 
         public void actionPerformed(ActionEvent e) {
             final int one = 1;
-
-
-
-
             int cellToShow = 1;
             GenericDialog gd = new GenericDialog("Show Object");
             gd.addNumericField("Object to show", cellToShow, 0);

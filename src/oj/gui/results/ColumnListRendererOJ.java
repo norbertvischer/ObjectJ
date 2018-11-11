@@ -28,7 +28,7 @@ public class ColumnListRendererOJ extends JCheckBox implements ListCellRenderer 
             boolean isSelected, // is the cell selected
             boolean cellHasFocus) {
 
-        int tab =ProjectResultsOJ.getInstance().getTab();
+        //int tab =ProjectResultsOJ.getInstance().getTab();
         if (value == null) {
             setSelected(false);
             setEnabled(false);

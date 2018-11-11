@@ -849,7 +849,7 @@ public class MacroProcessorOJ {
 		ColumnOJ theColumn = OJ.getData().getResults().getColumns().getColumnByName(columnName);//n_ 11.9.2007
 
 		if (theColumn == null) {
-			ImageJAccessOJ.InterpreterAccess.interpError("Column '" + columnName + "' does not exist");
+		    ImageJAccessOJ.InterpreterAccess.interpError("Column '" + columnName + "' does not exist");
 			return "";
 		}
 

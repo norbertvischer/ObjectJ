@@ -9,7 +9,9 @@ package oj.processor;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
+import ij.gui.ImageCanvas;
 import ij.gui.ImageWindow;
+import java.awt.Rectangle;
 import oj.OJ;
 import oj.project.*;
 import oj.project.shapes.*;
@@ -488,6 +490,12 @@ public class DataProcessorOJ implements QualifierChangedListenerOJ {
 	 * Selects and shows cell upon underlying image and slice
 	 */
 	public void showCell(int cellNumber) {
+	    showCell( cellNumber, -1) ;  
+	}
+	/**
+	 * Selects and shows cell upon underlying image and slice
+	 */
+	public void showCell(int cellNumber, double zoom) {
 		CellsOJ cells = OJ.getData().getCells();
 		if ((cellNumber >= 0) && (cellNumber < OJ.getData().getCells().getCellsCount())) {
 			selectCell(cellNumber);
@@ -514,7 +522,16 @@ public class DataProcessorOJ implements QualifierChangedListenerOJ {
 				} else {
 					imp.setSlice(cell.getStackIndex());
 				}
+				if(zoom > 0){
+				    Rectangle bounds = cell.getRectangle();
+				    ImageCanvas ic = imp.getCanvas();
+				    if (ic!=null){
+					Rectangle rVis = ic.getSrcRect();
+					    if(! rVis.contains(bounds))
+					   ;
 
+					}
+				}
 				OJ.getImageProcessor().addToOpenedImages(imp);
 				ImageWindow thisImgW = imp.getWindow();
 				if (thisImgW != null) {
