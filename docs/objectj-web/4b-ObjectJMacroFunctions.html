@@ -70,7 +70,7 @@
                 <br></br>
 
                 <font size = "1">
-                    13-Aug-2017
+                    11-Nov-2018
 
                 </font>
 
@@ -140,6 +140,10 @@
                     returns number of first object in the n-th linked image, or 0 if image is unmarked.   </H4><H3>
 
 
+                    <a name=ojGetColumn></a>
+                    ojGetColumn(title, includeAll)   </H3><H4>
+                    returns numerical array of a column.  Set includeAll=false to set the value of unqualified objects to NaN</H4><H3>
+
                     <a name=ojGetColumnTitle></a>
                     ojGetColumnTitle(n)   </H3><H4>
                     returns the title of the n-th column (1-based).   </H4><H3>
@@ -191,14 +195,17 @@
 
                     <a name=ojGetStatistics></a>
                     ojGetStatistics(columnTitle, operation)   </H3><H4>
-                    returns a statistical value of a column. Operation can be: "count", "mean", "min", "max", "sum", "stdev", "cv%". The returned value is NaN if the calculation is impossible. Only qualified objects are used for calculation.   </H4><H3>
+                    returns a statistical value of a column. Operation can be: "count", "mean", "min", "max", "sum", "stdev", "cv%". 
+                    The returned value is NaN if the calculation is impossible. Only qualified objects are used for calculation.   </H4><H3>
 
                     <a name=ojGetTarget></a>
                     ojGetTarget()   </H3><H4>
                     If in target mode,  target is returned as single string (image index and stack index, both 1-based).  Otherwise, an empty string is returned.
+                     </H4><H3>
 
-
-                </H4><H3>
+                    <a name=ojGetVirtualFlag></a>
+                    ojGetVirtualFlag()  </H3><H4>
+                    returns status of the virtual flag </H4><H3>
 
                     <a name=ojGetVoxelSize></a>
                     ojGetVoxelSize(n, "x")  </H3><H4>
@@ -278,7 +285,8 @@
                     <a name=ojInitColumn></a>
                     ojInitColumn(columnTitle)   </H3><H4>
                     if the object results table contains a column with this title, it is cleared (i.e. it is filled with NaNs).
-                    If the column was static, it is made dynamic. If no column has this title, a new dynamic column is created in the object results.
+                    If the column was static, it is made dynamic. If no column has this title, a new dynamic column is created in the object results. 
+		    columTitle can contain several titles separated by spaces. 
                     No algorithms will be attached.   </H4><H3>
 
                     <a name=ojInitTextColumn></a>
@@ -539,29 +547,17 @@
                     <br/>
                     negative n: deselects tool in ImageJ window and selects a tool in ObjectJ Tools	
                     (also accepts name like "Pistol", "Marker", "SelectObject", "MoveObject", "ObjectToRoi").</H4><H3>
+                        
                     <a name=ojShowImage></a>
                     ojShowImage(n)   </H3>
                 <H4>
                     displays the n-th image as listed in the panel "Linked images" (1-based).
-                </H4>
+                </H4><H3>
 
-                <!--
-                <H3>
-                        ojCloseImages(conditions)
-                </H3><H4>
-                        closes image window for which all conditions are true. Conditions string may contain:<br/>
-                        linked, unlinked, images, unchanged, background, title=[blobs.gif]<br/>
-                        Title accepts wildcards. For example <br/>
-                        &nbsp;&nbsp;&nbsp; ojCloseImages("linked, unchanged, background");<br/>
-                        closes all windows that are linked and unchanged except the front window.
-                        The user is never asked to save changes.
-                
-                
-                
-                </H4>
-                not used -->
-
-
+                    
+                <a name=ojSetVirtualFlag></a>
+                    ojGetVirtualFlag(b)  </H3><H4>
+                    if b=true, linked images will be opened virtually </H4>
 
 
                 <H3>
