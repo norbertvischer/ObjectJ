@@ -810,12 +810,19 @@ public class MacroProcessorOJ {
 	}
 
 	public void recalculate() {
-		ProjectResultsOJ.close();//23.2.2009 completely close results
-		OJ.getImageProcessor().updateImagesProperties();
-		OJ.getDataProcessor().recalculateResults();
-		new ProjectResultsOJ();
-		ProjectResultsOJ.getInstance().setVisible(true);//23.2.2009 re-open results
-		ProjectResultsOJ.getInstance().setState(Frame.NORMAL);//23.2.2009
+
+		try {
+
+			ProjectResultsOJ.close();//23.2.2009 completely close results
+			OJ.getImageProcessor().updateImagesProperties();
+			OJ.getDataProcessor().recalculateResults();
+			//new ProjectResultsOJ();//18.11.2018
+			//ProjectResultsOJ.getInstance().setVisible(true);//23.2.2009 re-open results
+			//ProjectResultsOJ.getInstance().setState(Frame.NORMAL);//23.2.2009
+		} catch (Exception e) {
+			IJ.showMessage("Linked results calculation error");
+			IJ.handleException(e);
+		}
 	}
 
 	public void closeResults() {
@@ -1876,7 +1883,8 @@ public class MacroProcessorOJ {
 	}
 
 	public void showResults() {
-		oj.gui.menuactions.ViewActionsOJ.ResultsViewAction.actionPerformed(null);
+	    ProjectResultsOJ.getInstance().setVisible(true);//18.11.2018
+		//oj.gui.menuactions.ViewActionsOJ.ResultsViewAction.actionPerformed(null);
 	}
 
 //    public void hideResults() {

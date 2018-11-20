@@ -22,8 +22,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
-import mmcorej.Metadata;
 import oj.OJ;
+import oj.gui.results.ProjectResultsOJ;
 import oj.util.UtilsOJ;
 import oj.project.*;
 import oj.io.spi.IIOProviderOJ;
@@ -604,6 +604,7 @@ public class InputOutputOJ {
 	public DataOJ loadAProject(String directory, String filename) {
 		DataOJ dataOj = null;
 		OJ.editor = null;
+		ProjectResultsOJ.kill();//18.11.2018
 		//OJ.doubleBuffered = false; //10.2.2011
 		String theType = UtilsOJ.getFileType(directory, filename);
 		try {

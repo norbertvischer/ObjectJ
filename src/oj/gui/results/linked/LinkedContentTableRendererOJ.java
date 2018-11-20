@@ -21,8 +21,8 @@ import javax.swing.table.TableCellRenderer;
  */
 public class LinkedContentTableRendererOJ extends JLabel implements TableCellRenderer {
 
-    private boolean isSelected;
-    private boolean hasFocus;
+    //private boolean isSelected;
+    //private boolean hasFocus;
     private Font fontArial = Font.decode("Arial-12");
     public static Border emptyBorder = new EmptyBorder(2, 8, 2, 8);
     public static Color rowBackground = new Color(236, 241, 244);
@@ -44,8 +44,8 @@ public class LinkedContentTableRendererOJ extends JLabel implements TableCellRen
             }
         }
 
-        this.isSelected = isSelected;
-        this.hasFocus = hasFocus;
+        //this.isSelected = isSelected;
+        //this.hasFocus = hasFocus;
 
         LinkedTableModelOJ.LinkedTableValueOJ val2 = (LinkedTableModelOJ.LinkedTableValueOJ) value;
 

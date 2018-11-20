@@ -17,6 +17,8 @@ import ij.ImagePlus;
 import ij.Menus;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
+import ij.gui.ImageCanvas;
+import ij.gui.ImageWindow;
 import ij.gui.Plot;
 import ij.gui.PlotContentsDialog;
 import ij.gui.PlotWindow;
@@ -46,6 +48,7 @@ import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableColumnModelListener;
 import javax.swing.table.*;
 import oj.OJ;
+import oj.graphics.CustomCanvasOJ;
 import oj.graphics.PlotOJ;
 import oj.gui.KeyEventManagerOJ;
 import oj.project.ResultsOJ;
@@ -73,6 +76,7 @@ import oj.processor.state.SelectCellStateOJ;
 import oj.gui.settings.ProjectSettingsOJ;
 import oj.gui.settings.ColumnSettingsOJ;
 import oj.processor.events.YtemDefChangedEventOJ;
+import oj.project.CellOJ;
 import oj.project.results.statistics.StatisticsOJ;
 
 /**
@@ -122,14 +126,22 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
     }
 
     public static ProjectResultsOJ getInstance() {//only one instance allowed
+
+	if (dataResults == null) {
+	    dataResults = new ProjectResultsOJ();//18.11.2018
+	    //IJ.wait(100);
+	    //dataResults =new ProjectResultsOJ();//18.11.2018
+	}
 	return dataResults;
+    }
+
+    public static void kill() {
+	dataResults = null;//18.11.2018
     }
 
     public static void close() {
 	if (dataResults != null) {
-	    WindowManager.removeWindow(dataResults);
 	    dataResults.setVisible(false);
-	    dataResults = null;
 	}
     }
 
@@ -1066,10 +1078,40 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 		    int cell_index = Integer.parseInt(value.content) - 1;
 		    if (evt.getClickCount() == 2) {
 			OJ.getDataProcessor().showCell(cell_index);
-//			CellOJ cell = OJ.getData().getCells().getSelectedCell();
-//			double x =cell.getYtemByIndex(0).getLocation(0).getX();
-//			double y =cell.getYtemByIndex(0).getLocation(0).getY();
-//			
+
+			if (false) {//get cell hghlighted with a circle
+
+			    CellOJ cell = OJ.getData().getCells().getSelectedCell();
+			    double x = cell.getYtemByIndex(0).getLocation(0).getX();
+			    double y = cell.getYtemByIndex(0).getLocation(0).getY();
+
+			    ImageWindow win = ij.WindowManager.getCurrentWindow();
+			    if (win == null) {
+				return;
+			    }
+			    Rectangle rr = new Rectangle();
+			    ImagePlus imp = ij.WindowManager.getCurrentImage();
+			    if (imp == null) {
+				return;
+			    }
+
+			    ImageCanvas ic = imp.getCanvas();
+
+			    if (ic != null && ic instanceof CustomCanvasOJ) {
+				CustomCanvasOJ icoj = (CustomCanvasOJ) ic;
+				IJ.makeOval(x - 10, y - 10, 20, 20);
+				icoj.ojZoom(2, (int) x, (int) y);
+				IJ.wait(200);
+				IJ.run("Select None");
+
+			    }
+//		
+//			IJ.OvalRoi(x-10, y-10, 20, 20);
+//			IJ.getImage().updateAndDraw();
+//			IJ.wait(999);
+//			IJ.run("Select None");
+//			IJ.getImage().updateAndDraw();
+			}
 		    } else {
 			switch (stateMode) {
 			    case QUALIFY:

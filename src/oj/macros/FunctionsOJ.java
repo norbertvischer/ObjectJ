@@ -230,12 +230,12 @@ public class FunctionsOJ implements MacroExtension {
     public String ojHideResults() {
 		
 		
-	 if (ProjectResultsOJ.getInstance() == null) {//11.11.2018
-            new ProjectResultsOJ();
-            ProjectResultsOJ.getInstance().setVisible(true);
-            ProjectResultsOJ.getInstance().setState(Frame.NORMAL);
-            ProjectResultsOJ.getInstance().toFront();
-	 }
+//	 if (ProjectResultsOJ.getInstance() == null) {//11.11.2018  16.11.2018
+//            new ProjectResultsOJ();
+//            ProjectResultsOJ.getInstance().setVisible(true);
+//            ProjectResultsOJ.getInstance().setState(Frame.NORMAL);
+//            ProjectResultsOJ.getInstance().toFront();
+//	 }
 			
 	if (ProjectResultsOJ.getInstance() != null) {
 	    ProjectResultsOJ.close();
@@ -811,7 +811,28 @@ public class FunctionsOJ implements MacroExtension {
 	return null;
     }
 
-    public String ojTest(String arg) {//5.1. 2018
+	public String ojTest(String arg) {//5.1. 2018
+		ProjectResultsOJ pr = ProjectResultsOJ.getInstance();
+		if (arg.equalsIgnoreCase("HideResults")) {
+
+			if (pr != null) {
+				pr.setVisible(false);//23.2.2009 re-open results
+			}			//ProjectResultsOJ.getInstance().setState(Frame.NORMAL);//23.2.2009
+		}
+		if (arg.equalsIgnoreCase("ShowResults")) {
+			new ProjectResultsOJ();
+
+			if (pr == null) {
+				pr = new ProjectResultsOJ();
+			}
+			pr.setVisible(true);//23.2.2009 re-open results
+			pr.setState(Frame.NORMAL);//23.2.2009
+		}
+
+		return ("abc");
+	}
+
+    public String ojTestOld(String arg) {//5.1. 2018
 	ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
 	try {
