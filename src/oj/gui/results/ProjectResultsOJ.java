@@ -268,7 +268,8 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 	linkedScrollPane.getHorizontalScrollBar().addAdjustmentListener(new AdjustmentListener() {
 
 	    public void adjustmentValueChanged(AdjustmentEvent e) {
-		linkedHeaderScrollPane.getHorizontalScrollBar().setValue(e.getValue());
+//		if(e.getValueIsAdjusting())//8-12-2018
+//		    linkedHeaderScrollPane.getHorizontalScrollBar().setValue(e.getValue());
 	    }
 	});
 
@@ -821,8 +822,8 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
         lstColumnSelector.setSelectionBackground(java.awt.SystemColor.inactiveCaptionText);
         lstColumnSelector.setSelectionForeground(new java.awt.Color(0, 0, 0));
         lstColumnSelector.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                lstColumnSelectorMouseClicked(evt);
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                lstColumnSelectorMousePressed(evt);
             }
         });
         lstColumnSelector.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
@@ -894,8 +895,8 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
         tblLinkedContent.setSurrendersFocusOnKeystroke(true);
         tblLinkedContent.getTableHeader().setReorderingAllowed(false);
         tblLinkedContent.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                tblLinkedContentMouseClicked(evt);
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                tblLinkedContentMousePressed(evt);
             }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 tblLinkedContentMouseEntered(evt);
@@ -1065,74 +1066,6 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 	    popupMenuYPos = -1;
 	}
 }//GEN-LAST:event_popUpColumnPopupMenuWillBecomeInvisible
-
-    private void tblLinkedContentMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblLinkedContentMouseClicked
-	if (evt.getButton() == java.awt.event.MouseEvent.BUTTON1) {
-	    int index = tblLinkedContent.getSelectedRow();
-	    if (index >= 0) {
-		if ((index < 0) || (index >= OJ.getData().getCells().getCellsCount())) {
-		    return;
-		}
-		LinkedTableModelOJ.LinkedTableValueOJ value = (LinkedTableModelOJ.LinkedTableValueOJ) ((LinkedTableModelOJ) tblLinkedContent.getModel()).getValueAt(index, 0);
-		try {
-		    int cell_index = Integer.parseInt(value.content) - 1;
-		    if (evt.getClickCount() == 2) {
-			OJ.getDataProcessor().showCell(cell_index);
-
-			if (false) {//get cell hghlighted with a circle
-
-			    CellOJ cell = OJ.getData().getCells().getSelectedCell();
-			    double x = cell.getYtemByIndex(0).getLocation(0).getX();
-			    double y = cell.getYtemByIndex(0).getLocation(0).getY();
-
-			    ImageWindow win = ij.WindowManager.getCurrentWindow();
-			    if (win == null) {
-				return;
-			    }
-			    Rectangle rr = new Rectangle();
-			    ImagePlus imp = ij.WindowManager.getCurrentImage();
-			    if (imp == null) {
-				return;
-			    }
-
-			    ImageCanvas ic = imp.getCanvas();
-
-			    if (ic != null && ic instanceof CustomCanvasOJ) {
-				CustomCanvasOJ icoj = (CustomCanvasOJ) ic;
-				IJ.makeOval(x - 10, y - 10, 20, 20);
-				icoj.ojZoom(2, (int) x, (int) y);
-				IJ.wait(200);
-				IJ.run("Select None");
-
-			    }
-//		
-//			IJ.OvalRoi(x-10, y-10, 20, 20);
-//			IJ.getImage().updateAndDraw();
-//			IJ.wait(999);
-//			IJ.run("Select None");
-//			IJ.getImage().updateAndDraw();
-			}
-		    } else {
-			switch (stateMode) {
-			    case QUALIFY:
-				OJ.getData().getCells().getCellByIndex(cell_index).setQualified(!OJ.getData().getCells().getCellByIndex(cell_index).isQualified());
-				break;
-			    case DELETE:
-				OJ.getData().getCells().removeCellByIndex(cell_index);
-				break;
-			    //insert here selection of a row, 2.11.2008
-			    default:
-				OJ.getDataProcessor().selectCell(cell_index);
-
-			}
-		    }
-		} catch (NumberFormatException e) {
-		    IJ.showMessage(e.getMessage());
-		}
-	    }
-	    tblLinkedContent.setRowSelectionInterval(index, index);
-	}
-}//GEN-LAST:event_tblLinkedContentMouseClicked
 
     private void mncDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mncDeleteActionPerformed
 	int index = lstColumnSelector.getSelectedIndex();
@@ -1425,46 +1358,6 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 	}
     }//GEN-LAST:event_formWindowActivated
 
-    private void lstColumnSelectorMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lstColumnSelectorMouseClicked
-	int index = ((JList) evt.getSource()).getSelectedIndex();
-	if (index >= 0) {
-	    ColumnOJ column = (ColumnOJ) ((ColumnListModelOJ) ((JList) evt.getSource()).getModel()).getElementAt(index);
-	    Rectangle r = ((JList) evt.getSource()).getCellBounds(index, index);
-	    if ((evt.getX() > (r.x + 2)) && (evt.getX() < (r.x + 24)) && (evt.getY() > (r.y + 5)) && (evt.getY() < (r.y + 16))) {//5..16 ->2..24  1.11.2008
-		if (column.isUnlinkedColumn()) {
-		    int row = tblUnlinkedContent.getSelectedRow();
-		    try {
-			if (column != null) {
-			    column.getColumnDef().setHidden(!column.getColumnDef().isHidden());
-			    ((ColumnListModelOJ) ((JList) evt.getSource()).getModel()).fireColumChanged();
-			    ((AbstractTableModel) tblUnlinkedHeader.getModel()).fireTableStructureChanged();
-			    ((AbstractTableModel) tblUnlinkedContent.getModel()).fireTableStructureChanged();
-			}
-
-		    } finally {
-			tblLinkedContent.getSelectionModel().setSelectionInterval(row, row);
-		    }
-
-		} else {
-		    int row = tblLinkedContent.getSelectedRow();
-		    try {
-			if (column != null) {
-			    column.getColumnDef().setHidden(!column.getColumnDef().isHidden());
-			    ((ColumnListModelOJ) ((JList) evt.getSource()).getModel()).fireColumChanged();
-			    ((AbstractTableModel) tblLinkedHeader.getModel()).fireTableStructureChanged();
-			    ((AbstractTableModel) tblLinkedContent.getModel()).fireTableStructureChanged();
-			}
-
-		    } finally {
-			tblLinkedContent.getSelectionModel().setSelectionInterval(row, row);//3.8.2010
-			((JList) evt.getSource()).setSelectedIndex(index);
-		    }
-
-		}
-	    }
-	}
-}//GEN-LAST:event_lstColumnSelectorMouseClicked
-
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
 	OJ.getEventProcessor().removeCellChangedListener(this);
 	OJ.getEventProcessor().removeImageChangedListener(this);
@@ -1603,6 +1496,133 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
     private void mncAddToPlotActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mncAddToPlotActionPerformed
 	plotFromOjResult(evt, true);
     }//GEN-LAST:event_mncAddToPlotActionPerformed
+
+    private void tblLinkedContentMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblLinkedContentMousePressed
+ 	if (evt.getButton() == java.awt.event.MouseEvent.BUTTON1) {
+	    int index = tblLinkedContent.getSelectedRow();
+
+	    if (IJ.debugMode) {//8.12.2018
+		IJ.log("index = " + index);
+	    }
+
+	    if (index >= 0) {
+		if ((index < 0) || (index >= OJ.getData().getCells().getCellsCount())) {
+		    return;
+		}
+		LinkedTableModelOJ.LinkedTableValueOJ value = (LinkedTableModelOJ.LinkedTableValueOJ) ((LinkedTableModelOJ) tblLinkedContent.getModel()).getValueAt(index, 0);
+		try {
+		    int cell_index = Integer.parseInt(value.content) - 1;
+		    if (evt.getClickCount() == 2) {
+			if (IJ.debugMode) {//29.11.2018
+			    IJ.log("---- second click in ObjectJ results row----");
+			    IJ.beep();
+			}
+			OJ.getDataProcessor().showCell(cell_index);
+
+			if (false) {//get cell hghlighted with a circle
+
+			    CellOJ cell = OJ.getData().getCells().getSelectedCell();
+			    double x = cell.getYtemByIndex(0).getLocation(0).getX();
+			    double y = cell.getYtemByIndex(0).getLocation(0).getY();
+
+			    ImageWindow win = ij.WindowManager.getCurrentWindow();
+			    if (win == null) {
+				return;
+			    }
+			    Rectangle rr = new Rectangle();
+			    ImagePlus imp = ij.WindowManager.getCurrentImage();
+			    if (imp == null) {
+				return;
+			    }
+
+			    ImageCanvas ic = imp.getCanvas();
+
+			    if (ic != null && ic instanceof CustomCanvasOJ) {
+				CustomCanvasOJ icoj = (CustomCanvasOJ) ic;
+				IJ.makeOval(x - 10, y - 10, 20, 20);
+				icoj.ojZoom(2, (int) x, (int) y);
+				IJ.wait(200);
+				IJ.run("Select None");
+
+			    }
+//		
+//			IJ.OvalRoi(x-10, y-10, 20, 20);
+//			IJ.getImage().updateAndDraw();
+//			IJ.wait(999);
+//			IJ.run("Select None");
+//			IJ.getImage().updateAndDraw();
+			}
+		    } else {
+			switch (stateMode) {
+			    case QUALIFY:
+				OJ.getData().getCells().getCellByIndex(cell_index).setQualified(!OJ.getData().getCells().getCellByIndex(cell_index).isQualified());
+				break;
+			    case DELETE:
+				OJ.getData().getCells().removeCellByIndex(cell_index);
+				break;
+			    //insert here selection of a row, 2.11.2008
+			    default:
+				OJ.getDataProcessor().selectCell(cell_index);
+
+			}
+		    }
+		} catch (NumberFormatException e) {
+		    IJ.showMessage(e.getMessage());
+		}
+	    }
+	    tblLinkedContent.setRowSelectionInterval(index, index);
+	}
+    }//GEN-LAST:event_tblLinkedContentMousePressed
+
+    private void lstColumnSelectorMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lstColumnSelectorMousePressed
+        
+	
+	
+	
+	                                                 
+	int index = ((JList) evt.getSource()).getSelectedIndex();
+	if (index >= 0) {
+	    ColumnOJ column = (ColumnOJ) ((ColumnListModelOJ) ((JList) evt.getSource()).getModel()).getElementAt(index);
+	    Rectangle r = ((JList) evt.getSource()).getCellBounds(index, index);
+	    if ((evt.getX() > (r.x + 2)) && (evt.getX() < (r.x + 24)) && (evt.getY() > (r.y + 5)) && (evt.getY() < (r.y + 16))) {//5..16 ->2..24  1.11.2008
+		if (column.isUnlinkedColumn()) {
+		    int row = tblUnlinkedContent.getSelectedRow();
+		    try {
+			if (column != null) {
+			    column.getColumnDef().setHidden(!column.getColumnDef().isHidden());
+			    ((ColumnListModelOJ) ((JList) evt.getSource()).getModel()).fireColumChanged();
+			    ((AbstractTableModel) tblUnlinkedHeader.getModel()).fireTableStructureChanged();
+			    ((AbstractTableModel) tblUnlinkedContent.getModel()).fireTableStructureChanged();
+			}
+
+		    } finally {
+			tblLinkedContent.getSelectionModel().setSelectionInterval(row, row);
+		    }
+
+		} else {
+		    int row = tblLinkedContent.getSelectedRow();
+		    try {
+			if (column != null) {
+			    column.getColumnDef().setHidden(!column.getColumnDef().isHidden());
+			    ((ColumnListModelOJ) ((JList) evt.getSource()).getModel()).fireColumChanged();
+			    ((AbstractTableModel) tblLinkedHeader.getModel()).fireTableStructureChanged();
+			    ((AbstractTableModel) tblLinkedContent.getModel()).fireTableStructureChanged();
+			}
+
+		    } finally {
+			tblLinkedContent.getSelectionModel().setSelectionInterval(row, row);//3.8.2010
+			((JList) evt.getSource()).setSelectedIndex(index);
+		    }
+
+		}
+	    }
+	
+}                                              
+
+	    
+	    
+	    
+    }//GEN-LAST:event_lstColumnSelectorMousePressed
 
     private void plotFromOjResult(java.awt.event.ActionEvent evt, boolean doAdd) {
 	String[] defaults = new String[2];
@@ -1880,7 +1900,11 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 	    int row_index = ((LinkedTableModelOJ) tblLinkedContent.getModel()).getCellRowIndex(evt.getCellIndex());
 	    if (row_index >= 0) {
 		tblLinkedContent.setRowSelectionInterval(row_index, row_index);
+		
+		Rectangle visRect = tblLinkedContent.getVisibleRect();//don't scroll horizontally
 		Rectangle rect = tblLinkedContent.getCellRect(row_index, 0, true);
+		rect.x = visRect.x;
+		rect.width = visRect.width;
 		tblLinkedContent.scrollRectToVisible(rect);
 	    }
 

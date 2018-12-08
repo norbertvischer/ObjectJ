@@ -220,7 +220,6 @@
                       </Properties>
                       <Events>
                         <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="tblImageDefsMousePressed"/>
-                        <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="tblImageDefsMouseClicked"/>
                       </Events>
                       <AuxValues>
                         <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="tblImageDefs.getColumnModel().addColumnModelListener(this);&#xa;"/>

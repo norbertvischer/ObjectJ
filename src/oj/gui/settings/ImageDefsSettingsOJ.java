@@ -185,12 +185,12 @@ public class ImageDefsSettingsOJ extends javax.swing.JPanel implements TableColu
 
         jScrollPane1.setOpaque(false);
         jScrollPane1.addAncestorListener(new javax.swing.event.AncestorListener() {
+            public void ancestorMoved(javax.swing.event.AncestorEvent evt) {
+            }
             public void ancestorAdded(javax.swing.event.AncestorEvent evt) {
                 jScrollPane1AncestorAdded(evt);
             }
             public void ancestorRemoved(javax.swing.event.AncestorEvent evt) {
-            }
-            public void ancestorMoved(javax.swing.event.AncestorEvent evt) {
             }
         });
 
@@ -203,9 +203,6 @@ public class ImageDefsSettingsOJ extends javax.swing.JPanel implements TableColu
         tblImageDefs.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mousePressed(java.awt.event.MouseEvent evt) {
                 tblImageDefsMousePressed(evt);
-            }
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                tblImageDefsMouseClicked(evt);
             }
         });
         jScrollPane1.setViewportView(tblImageDefs);
@@ -266,17 +263,8 @@ private void tblImageDefsMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRS
         btnUnlinkImage.setEnabled(false);
     } else {
         btnUnlinkImage.setEnabled(index >= 0);
-    }
-}//GEN-LAST:event_tblImageDefsMousePressed
-
-private void jScrollPane1AncestorAdded(javax.swing.event.AncestorEvent evt) {//GEN-FIRST:event_jScrollPane1AncestorAdded
-    jScrollPane1.getColumnHeader().setOpaque(false);
-}//GEN-LAST:event_jScrollPane1AncestorAdded
-
-private void tblImageDefsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblImageDefsMouseClicked
- 
-	
-	int row = tblImageDefs.rowAtPoint(evt.getPoint());//8.2.2014
+    }   	
+int row = tblImageDefs.rowAtPoint(evt.getPoint());//8.2.2014
     int column = tblImageDefs.columnAtPoint(evt.getPoint());
     boolean ctrl = evt.isControlDown();
     ImagesOJ images = OJ.getData().getImages();
@@ -285,7 +273,7 @@ private void tblImageDefsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRS
         return;
     }
     if (((evt.getButton() == java.awt.event.MouseEvent.BUTTON1)) && !ctrl && (evt.getClickCount() == 2)) {
-        ImageOJ imj = images.getImageByIndex(row);
+	ImageOJ imj = images.getImageByIndex(row);
         if (imj != null) {
             OJ.getImageProcessor().openImage(imj.getName());
         }
@@ -294,21 +282,17 @@ private void tblImageDefsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRS
     } else if ((evt.getButton() == java.awt.event.MouseEvent.BUTTON3 || ctrl) && (column == 0)) {//8.2.2014
         ImageOJ img = OJ.getData().getImages().getImageByIndex(row);
         if (img != null) {
-//			String msg = "";
-//			msg += "\nname: " + img.getFilename();
-// 			ImagePlus imp = img.getImagePlus();
-//			if(imp == null)
-//				msg += "\nopen:  " + "No";
-// 			else
-//				msg += "\nopen:  " + "yes";
-//			IJ.showMessage(msg);
             String error = SimpleCommandsOJ.renameImageAndFile(img.getName(), "");
             if (!error.equals("")) {
                 IJ.showMessage(error);
             }
         }
     }
-}//GEN-LAST:event_tblImageDefsMouseClicked
+}//GEN-LAST:event_tblImageDefsMousePressed
+
+private void jScrollPane1AncestorAdded(javax.swing.event.AncestorEvent evt) {//GEN-FIRST:event_jScrollPane1AncestorAdded
+    jScrollPane1.getColumnHeader().setOpaque(false);
+}//GEN-LAST:event_jScrollPane1AncestorAdded
 
     private void chkVirtualFlagActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkVirtualFlagActionPerformed
 		boolean vFlag = chkVirtualFlag.isSelected();
