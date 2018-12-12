@@ -268,8 +268,7 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 	linkedScrollPane.getHorizontalScrollBar().addAdjustmentListener(new AdjustmentListener() {
 
 	    public void adjustmentValueChanged(AdjustmentEvent e) {
-//		if(e.getValueIsAdjusting())//8-12-2018
-//		    linkedHeaderScrollPane.getHorizontalScrollBar().setValue(e.getValue());
+		linkedHeaderScrollPane.getHorizontalScrollBar().setValue(e.getValue());
 	    }
 	});
 
@@ -466,10 +465,6 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
         mncShowAll = new javax.swing.JMenuItem();
         mncHideAll = new javax.swing.JMenuItem();
         mncHideOthers = new javax.swing.JMenuItem();
-        jSeparator3 = new javax.swing.JSeparator();
-        mncNew = new javax.swing.JMenuItem();
-        mncEdit = new javax.swing.JMenuItem();
-        mncDelete = new javax.swing.JMenuItem();
         popUpColumn = new javax.swing.JPopupMenu();
         mncColorRed = new javax.swing.JMenuItem();
         mncColorBlack = new javax.swing.JMenuItem();
@@ -498,7 +493,6 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
         lstColumnSelector.setCellRenderer(new ColumnListRendererOJ());
         jPanel5 = new javax.swing.JPanel();
         labelColumnSelector = new javax.swing.JLabel();
-        popupColumnSelector = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         btnCopyExport = new javax.swing.JButton();
         tabbedResultsPane = new javax.swing.JTabbedPane();
@@ -628,31 +622,6 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
             }
         });
         popColumnsLeftList.add(mncHideOthers);
-        popColumnsLeftList.add(jSeparator3);
-
-        mncNew.setText("New..."); // NOI18N
-        mncNew.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mncNewActionPerformed(evt);
-            }
-        });
-        popColumnsLeftList.add(mncNew);
-
-        mncEdit.setText("Edit..."); // NOI18N
-        mncEdit.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mncEditActionPerformed(evt);
-            }
-        });
-        popColumnsLeftList.add(mncEdit);
-
-        mncDelete.setText("Delete"); // NOI18N
-        mncDelete.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mncDeleteActionPerformed(evt);
-            }
-        });
-        popColumnsLeftList.add(mncDelete);
 
         popUpColumn.addPopupMenuListener(new javax.swing.event.PopupMenuListener() {
             public void popupMenuWillBecomeVisible(javax.swing.event.PopupMenuEvent evt) {
@@ -846,17 +815,12 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
         labelColumnSelector.setText("Linked columns"); // NOI18N
         labelColumnSelector.setToolTipText("Result columns where each row entry is connected to an object.  \\n\\r\\pDeleting an object will also delete the linked result.    hhh"); // NOI18N
         labelColumnSelector.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 6, 0, 0));
-        jPanel5.add(labelColumnSelector, java.awt.BorderLayout.CENTER);
-
-        popupColumnSelector.setIcon(new javax.swing.ImageIcon(getClass().getResource("/oj/gui/icons/Triangle.gif"))); // NOI18N
-        popupColumnSelector.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
-        popupColumnSelector.setComponentPopupMenu(popColumnsLeftList);
-        popupColumnSelector.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
+        labelColumnSelector.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
                 popupColumnSelectorMouseClicked(evt);
             }
         });
-        jPanel5.add(popupColumnSelector, java.awt.BorderLayout.WEST);
+        jPanel5.add(labelColumnSelector, java.awt.BorderLayout.CENTER);
 
         jPanel1.add(jPanel5, java.awt.BorderLayout.NORTH);
 
@@ -1051,12 +1015,6 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 }//GEN-LAST:event_popupColumnSelectorMouseClicked
     }
 
-    private void mncNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mncNewActionPerformed
-	ViewActionsOJ.SettingsAction.actionPerformed(evt);
-	ProjectSettingsOJ.getInstance().selectColumnsPanel();
-	((ColumnSettingsOJ) ProjectSettingsOJ.getInstance().getSettings()).newColumn();
-    }//GEN-LAST:event_mncNewActionPerformed
-
     private void popUpColumnPopupMenuWillBecomeInvisible(javax.swing.event.PopupMenuEvent evt) {//GEN-FIRST:event_popUpColumnPopupMenuWillBecomeInvisible
 	try {
 	    popupMenuXPos = (int) ((JPopupMenu) evt.getSource()).getLocationOnScreen().getX();
@@ -1066,30 +1024,6 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 	    popupMenuYPos = -1;
 	}
 }//GEN-LAST:event_popUpColumnPopupMenuWillBecomeInvisible
-
-    private void mncDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mncDeleteActionPerformed
-	int index = lstColumnSelector.getSelectedIndex();
-	if (index >= 0) {
-	    ColumnOJ column = ((ColumnOJ) ((ColumnListModelOJ) lstColumnSelector.getModel()).getElementAt(index));
-	    if (column != null) {
-		ResultsOJ results = OJ.getData().getResults();
-		if (lstColumnSelector.getModel() instanceof ColumnListModelOJ) {
-		    if ((results.getColumns().getColumnLinkedSortName() != null) && (results.getColumns().getColumnLinkedSortName().equals(column.getName()))) {
-			results.getColumns().setColumnLinkedSortFlag(ColumnsOJ.COLUM_SORT_FLAG_NONE);
-			results.getColumns().setColumnLinkedSortName("");
-			((LinkedTableModelOJ) tblLinkedContent.getModel()).setSortedIndexes(results.getSortedIndexes(false));
-		    }
-		} else {
-		    if ((results.getColumns().getColumnLinkedSortName() != null) && (results.getColumns().getColumnUnlinkedSortName().equals(column.getName()))) {
-			results.getColumns().setColumnUnlinkedSortFlag(ColumnsOJ.COLUM_SORT_FLAG_NONE);
-			results.getColumns().setColumnUnlinkedSortName("");
-			((UnlinkedTableModelOJ) tblLinkedContent.getModel()).setSortedIndexes(results.getSortedIndexes(true));
-		    }
-		}
-		OJ.getData().getResults().getColumns().removeColumnByName(column.getName());
-	    }
-	}
-    }//GEN-LAST:event_mncDeleteActionPerformed
 
     private void mncDigits4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mncDigits4ActionPerformed
 
@@ -1289,15 +1223,6 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 
 	((ColumnListModelOJ) lstColumnSelector.getModel()).fireColumChanged();
     }//GEN-LAST:event_mncShowAllActionPerformed
-
-    private void mncEditActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mncEditActionPerformed
-	int index = lstColumnSelector.getSelectedIndex();
-	if (index >= 0) {
-	    ViewActionsOJ.SettingsAction.actionPerformed(evt);
-	    ProjectSettingsOJ.getInstance().selectColumnsPanel();
-	    ((ColumnSettingsOJ) ProjectSettingsOJ.getInstance().getSettings()).editColumn(((ColumnOJ) lstColumnSelector.getSelectedValue()).getName());
-	}
-    }//GEN-LAST:event_mncEditActionPerformed
 
     private void mncDigits2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mncDigits2ActionPerformed
 	columnDigitsAction(currentHeader(), 2);
@@ -1729,7 +1654,6 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
-    private javax.swing.JSeparator jSeparator3;
     private javax.swing.JPopupMenu.Separator jSeparator4;
     private javax.swing.JSeparator jSeparator6;
     private javax.swing.JLabel labelColumnSelector;
@@ -1742,17 +1666,14 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
     private javax.swing.JMenuItem mncColorBlue;
     private javax.swing.JMenuItem mncColorGreen;
     private javax.swing.JMenuItem mncColorRed;
-    private javax.swing.JMenuItem mncDelete;
     private javax.swing.JMenuItem mncDigits0;
     private javax.swing.JMenuItem mncDigits2;
     private javax.swing.JMenuItem mncDigits4;
-    private javax.swing.JMenuItem mncEdit;
     private javax.swing.JMenuItem mncEditThisColumn;
     private javax.swing.JMenuItem mncHideAll;
     private javax.swing.JMenuItem mncHideOthers;
     private javax.swing.JMenuItem mncHistogram;
     private javax.swing.JMenuItem mncLabel;
-    private javax.swing.JMenuItem mncNew;
     private javax.swing.JMenuItem mncPlot;
     private javax.swing.JMenuItem mncShowAll;
     private javax.swing.JMenuItem mncSortMaxTop;
@@ -1763,7 +1684,6 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
     private javax.swing.JPopupMenu popColumnsLeftList;
     private javax.swing.JPopupMenu popStatistics;
     private javax.swing.JPopupMenu popUpColumn;
-    private javax.swing.JLabel popupColumnSelector;
     private javax.swing.JSplitPane splitPaneBig;
     private javax.swing.JSplitPane splitPaneLeft;
     private javax.swing.JTabbedPane tabbedResultsPane;

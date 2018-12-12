@@ -31,8 +31,7 @@ import oj.gui.tools.ToolManagerOJ;
  */
 public class OJ {
 
-    //public static boolean ojIsInstalled = false;//14.9.2010
-    private static DataOJ doj;
+     private static DataOJ doj;
     private static ToolStateProcessorOJ ccj;
     private static DataProcessorOJ poj;
     private static EventProcessorOJ evp;
@@ -42,9 +41,9 @@ public class OJ {
     private static VertexCalculatorOJ vcj;
     private static IjImageChangedListenerOJ ilj;
     private static StackChangedListenerOJ slj;
-    public final static int build = 528;
-    public final static String releaseVersion = "1.04q";
-    public final static String buildDate = "8-Dec-2018 21:04";
+    public final static int build = 530;
+    public final static String releaseVersion = "1.04r";
+    public final static String buildDate = "12-Dec-2018 14:34";
     public static final String URL = "https://sils.fnwi.uva.nl/bcb/objectj";
     public static final String URLcurrent = "https://sils.fnwi.uva.nl/bcb/objectj/download/current/";
     public static final String ICONS = "/oj/gui/icons/";

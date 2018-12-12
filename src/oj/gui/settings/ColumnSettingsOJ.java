@@ -2268,7 +2268,7 @@ private void spinDigitsStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FI
             }
 //            Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
 //        at oj.settings.ColumnSettingsOJ$ColumnsTableRenderer.getTableCellRendererComponent(ColumnSettingsOJ.java:2179)
-            this.setIcon(((JLabel) value).getIcon());
+            //this.setIcon(((JLabel) value).getIcon()); removed 9.12.2018
             setHorizontalAlignment(SwingConstants.LEFT);
             switch (column) {
                 case 0:

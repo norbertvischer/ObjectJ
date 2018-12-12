@@ -90,7 +90,10 @@ public class ImageOJ extends BaseAdapterOJ {
     }
 
     public String getDescription() {
-        return "";
+        return description;
+    }
+    public void setDescription(String s) {
+        description = s;
     }
 
     /**

@@ -393,7 +393,7 @@ public class ToolsWindowOJ extends javax.swing.JPanel implements ToolListChanged
 
     private void butSizesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_butSizesActionPerformed
         GenericDialog gd = new GenericDialog("Font and Marker Sizes");
-        String[] choices = "12 16 20".split(" ");
+        String[] choices = "13 16 20".split(" ");
 
         boolean showNumber = OJ.getData().getYtemDefs().getShowCellNumber();
         gd.addCheckbox("Show Object Number", showNumber);
