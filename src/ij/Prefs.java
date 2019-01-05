@@ -36,6 +36,7 @@ public class Prefs {
     public static final String DIV_BY_ZERO_VALUE = "div-by-zero";
     public static final String NOISE_SD = "noise.sd";
     public static final String MENU_SIZE = "menu.size";
+    public static final String TEXT_SCALE = "text.scale";
     public static final String THREADS = "threads";
 	public static final String KEY_PREFIX = ".";
  
@@ -56,7 +57,7 @@ public class Prefs {
 		SUBPIXEL_RESOLUTION=1<<2, ENHANCED_LINE_TOOL=1<<3, SKIP_RAW_DIALOG=1<<4,
 		REVERSE_NEXT_PREVIOUS_ORDER=1<<5, AUTO_RUN_EXAMPLES=1<<6, SHOW_ALL_POINTS=1<<7,
 		DO_NOT_SAVE_WINDOW_LOCS=1<<8, JFILE_CHOOSER_CHANGED=1<<9,
-		CANCEL_BUTTON_ON_RIGHT=1<<10;
+		CANCEL_BUTTON_ON_RIGHT=1<<10, IGNORE_RESCALE_SLOPE=1<<11;
 	public static final String OPTIONS2 = "prefs.options2";
     
 	/** file.separator system property */
@@ -117,6 +118,8 @@ public class Prefs {
 	public static boolean multiPointMode;
 	/** Open DICOMs as 32-bit float images */
 	public static boolean openDicomsAsFloat;
+	/** Ignore Rescale Slope when opening DICOMs */
+	public static boolean ignoreRescaleSlope;
 	/** Plot rectangular selectons vertically */
 	public static boolean verticalProfile;
 	/** Rotate YZ orthogonal views 90 degrees */
@@ -190,6 +193,7 @@ public class Prefs {
 	static int threads;
 	static int transparentIndex = -1;
 	private static boolean resetPreferences;
+	private static double textScale = 1.0;
 
 	/** Finds and loads the ImageJ configuration file, "IJ_Props.txt".
 		@return	an error message if "IJ_Props.txt" not found.
@@ -212,17 +216,17 @@ public class Prefs {
 		imagesURL = props.getProperty("images.location");
 		loadPreferences();
 		loadOptions();
+		textScale = get(TEXT_SCALE, 1.0);
 		return null;
 	}
 
 	/*
-	static void dumpPrefs(String title) {
-		IJ.log("");
-		IJ.log(title);
+	static void dumpPrefs() {
+		System.out.println("");
 		Enumeration e = ijPrefs.keys();
 		while (e.hasMoreElements()) {
 			String key = (String) e.nextElement();
-			IJ.log(key+": "+ijPrefs.getProperty(key));
+			System.out.println(key+": "+ijPrefs.getProperty(key));
 		}
 	}
 	*/
@@ -496,6 +500,7 @@ public class Prefs {
 		doNotSaveWindowLocations = (options2&DO_NOT_SAVE_WINDOW_LOCS)!=0;
 		jFileChooserSettingChanged = (options2&JFILE_CHOOSER_CHANGED)!=0;
 		dialogCancelButtonOnRight = (options2&CANCEL_BUTTON_ON_RIGHT)!=0;
+		ignoreRescaleSlope = (options2&IGNORE_RESCALE_SLOPE)!=0;
 	}
 
 	static void saveOptions(Properties prefs) {
@@ -524,7 +529,8 @@ public class Prefs {
 			+ (autoRunExamples?AUTO_RUN_EXAMPLES:0) + (showAllPoints?SHOW_ALL_POINTS:0)
 			+ (doNotSaveWindowLocations?DO_NOT_SAVE_WINDOW_LOCS:0)
 			+ (jFileChooserSettingChanged?JFILE_CHOOSER_CHANGED:0)
-			+ (dialogCancelButtonOnRight?CANCEL_BUTTON_ON_RIGHT:0);
+			+ (dialogCancelButtonOnRight?CANCEL_BUTTON_ON_RIGHT:0)
+			+ (ignoreRescaleSlope?IGNORE_RESCALE_SLOPE:0);			
 		prefs.put(OPTIONS2, Integer.toString(options2));
 	}
 
@@ -682,5 +688,18 @@ public class Prefs {
 		return get("options.ext", ".csv");
 	}
 		
+	/** Sets the GenericDialog and Command Finder text scale (0.5 to 2.0). */
+	public static void setTextScale(double scale) {
+		if (scale>=0.5 && scale<=2.0) {
+			textScale = scale;
+			set(TEXT_SCALE, textScale);
+		}
+	}
+
+	/** Returns the GenericDialog and Command Finder text scale. */
+	public static double getTextScale() {
+		return textScale;
+	}
+
 }
 

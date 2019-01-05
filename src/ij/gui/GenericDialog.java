@@ -79,6 +79,7 @@ FocusListener, ItemListener, KeyListener, AdjustmentListener, WindowListener {
 	private Vector imagePanels;
 	private static GenericDialog instance;
 	private boolean firstPaint = true;
+	private boolean fontSizeSet;
 
     /** Creates a new GenericDialog with the specified title. Uses the current image
     	image window as the parent frame or the ImageJ frame if no image windows
@@ -1226,7 +1227,13 @@ FocusListener, ItemListener, KeyListener, AdjustmentListener, WindowListener {
 			c.insets = new Insets(15, 0, 0, 0);
 			add(buttons, c);
 			if (IJ.isMacOSX()&&IJ.isJava18())
-				instance = this;
+				instance = this;				
+			Font font = getFont();
+			if (IJ.debugMode) IJ.log("GenericDialog font: "+fontSizeSet+" "+font);
+			if (!fontSizeSet && font!=null && Prefs.getTextScale()!=1.0) {
+				fontSizeSet = true;
+				setFont(font.deriveFont((float)(font.getSize()*Prefs.getTextScale())));
+			}
 			pack();
 			setup();
 			if (centerDialog) GUI.center(this);
@@ -1242,6 +1249,12 @@ FocusListener, ItemListener, KeyListener, AdjustmentListener, WindowListener {
 			recorderOn = false;
 		}
 		resetCounters();
+	}
+	
+	@Override
+	public void setFont(Font font) {
+		super.setFont(!fontSizeSet&&Prefs.getTextScale()!=1.0?font.deriveFont((float)(font.getSize()*Prefs.getTextScale())):font);
+		fontSizeSet = true;
 	}
 
     /** Reset the counters before reading the dialog parameters */

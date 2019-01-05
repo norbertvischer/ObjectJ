@@ -620,10 +620,7 @@ public class Functions implements MacroConstants, Measurements {
 			arg2 = getString();
 			interp.getRightParen();
 		}
-		if (arg2!=null)
-			IJ.run(arg1, arg2);
-		else
-			IJ.run(arg1);
+		IJ.run(this.interp, arg1, arg2);
 		resetImage();
 		IJ.setKeyUp(IJ.ALL_KEYS);
 		shiftKeyDown = altKeyDown = false;
@@ -3496,7 +3493,7 @@ public class Functions implements MacroConstants, Measurements {
 			s = sb.toString();
 		}
 		interp.getRightParen();
-		IJ.log(s);
+		interp.log(s);
 		interp.inPrint = false;
 	}
 
@@ -5668,7 +5665,7 @@ public class Functions implements MacroConstants, Measurements {
 			if (i!=len-1)
 				sb.append(", ");
 		}
-		IJ.log(sb.toString());
+		interp.log(sb.toString());
 		return null;
 	}
 
@@ -6232,6 +6229,36 @@ public class Functions implements MacroConstants, Measurements {
 		} else if (name.equals("flatten")) {
 			IJ.runPlugIn("ij.plugin.OverlayCommands", "flatten");
 			return Double.NaN;
+		} else if (name.equals("setLabelFontSize")) {
+			int fontSize = (int)getFirstArg();
+			String options = null;
+			if (interp.nextToken()!=')')
+				options = getLastString();
+			else
+				interp.getRightParen();
+			overlay.setLabelFontSize(fontSize, options);
+			return Double.NaN;
+		} else if (name.equals("setLabelColor")) {
+			interp.getLeftParen();
+			Color color = getColor();
+			if (interp.nextToken()==',') {
+				interp.getComma();
+				Color ignore = getColor();
+				overlay.drawBackgrounds(true);
+			}
+			interp.getRightParen();
+			overlay.setLabelColor(color);
+			overlay.drawLabels(true);
+			return Double.NaN;
+		} else if (name.equals("setStrokeColor")) {
+			interp.getLeftParen();
+			Color color = getColor();
+			interp.getRightParen();
+			overlay.setStrokeColor(color);
+			return Double.NaN;
+		} else if (name.equals("setStrokeWidth")) {
+			overlay.setStrokeWidth(getArg());
+			return Double.NaN;
 		} else
 			interp.error("Unrecognized function name");
 		return Double.NaN;
@@ -6517,9 +6544,63 @@ public class Functions implements MacroConstants, Measurements {
 		} else if (name.startsWith("showArray")) {
 			showArray();
 			return new Variable();
-		} else
+		} else if (name.equals("getSelectionStart"))	
+			return getSelectionStart();
+		else if (name.equals("getSelectionEnd"))
+			return getSelectionEnd();
+		else if (name.equals("setSelection"))
+			return setSelection();
+		else
 			interp.error("Unrecognized function name");
 		return new Variable();
+	}
+	
+	private Variable setSelection() {
+		interp.getLeftParen();
+		double from = interp.getExpression();
+		interp.getComma();
+		double to = interp.getExpression();
+		String title = getTitle();
+		if (title != null){
+			Frame f = WindowManager.getFrame(title);
+			if (f!=null && (f instanceof TextWindow)){
+				TextWindow tWin = (TextWindow)f;
+				tWin.getTextPanel().setSelection((int)from, (int)to);
+				return new Variable();
+			}
+		}
+		interp.error("Title of table missing or not found");
+		return new Variable();
+	}
+	
+	private Variable getSelectionStart() {
+		int selStart = -1;
+		String title = getTitleArg();
+		if (title != null){
+			Frame f = WindowManager.getFrame(title);
+			if (f!=null && (f instanceof TextWindow)){
+				TextWindow tWin = (TextWindow)f;	
+				selStart = tWin.getTextPanel().getSelectionStart();
+				return new Variable(selStart);
+			}
+		}
+		interp.error("Title of table missing or not found");
+		return new Variable(selStart);
+	}
+	
+	private Variable getSelectionEnd() {
+		int selEnd = -1;
+		String title = getTitleArg();
+		if (title != null){
+			Frame f = WindowManager.getFrame(title);
+			if (f!=null && (f instanceof TextWindow)){
+				TextWindow tWin = (TextWindow)f;	
+				selEnd = tWin.getTextPanel().getSelectionEnd();
+				return new Variable(selEnd);
+			}
+		}
+		interp.error("Title of table missing or not found");
+		return new Variable(selEnd);
 	}
 	
 	private Variable setTableValue() {
