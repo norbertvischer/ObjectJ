@@ -26,98 +26,98 @@ import oj.gui.settings.ProjectSettingsOJ;
 
 public class ViewActionsOJ {
 
-    /**
-     * Used to make project window visible
-     */
-    public static ActionListener SettingsAction = new ActionListener() {
+	/**
+	 * Used to make project window visible
+	 */
+	public static ActionListener SettingsAction = new ActionListener() {
 
-	public void actionPerformed(ActionEvent e) {
+		public void actionPerformed(ActionEvent e) {
 
-	    if (Recorder.record && !IJ.isMacro()) {//my first recorded macro command
-		Recorder.record("ojShowProject");
-	    }
-	    if (ProjectSettingsOJ.getInstance() != null) {
-		ProjectSettingsOJ.getInstance().validate();
-		ProjectSettingsOJ.getInstance().setVisible(true);
-
-	    } else {
-		new ProjectSettingsOJ();
-		ProjectSettingsOJ.getInstance().validate();
-		ProjectSettingsOJ.getInstance().setVisible(true);
-		// ProjectSettingsOJ.getInstance().setState(Frame.NORMAL);
-	    }
-	    if (ProjectSettingsOJ.getInstance().getState() == Frame.ICONIFIED) {//30.10.2011
-		ProjectSettingsOJ.getInstance().setState(Frame.NORMAL);
-	    }
-
-	    ProjectSettingsOJ.getInstance().toFront();
-	}
-    };
-    /**
-     * Used to add listeners to the item list at the bottom of ObjectJ tools
-     */
-    public static ActionListener YtemListAction = new ActionListener() {
-
-	public void actionPerformed(ActionEvent e) {
-	    if (ToolsWindowOJ.getInstance() == null) {
-		if (IJ.isMacintosh()) {
-		    ToolsWindowOJ.setInstance(new JFrame());
-		    ToolsWindowOJ.getInstance().addKeyListener(KeyEventManagerOJ.getInstance());
-		    ToolsWindowOJ.getInstance().addWindowListener(new java.awt.event.WindowAdapter() {
-
-			public void windowActivated(java.awt.event.WindowEvent evt) {
-			    if (IJ.isMacintosh() && IJ.getInstance() != null) {
-				IJ.wait(1); // needed for 1.4.1 on OS X
-				if (((Frame) ToolsWindowOJ.getInstance()).getMenuBar() != Menus.getMenuBar()) {
-				    ((Frame) ToolsWindowOJ.getInstance()).setMenuBar(Menus.getMenuBar());
-				}
-			    }
+			if (Recorder.record && !IJ.isMacro()) {//my first recorded macro command
+				Recorder.record("ojShowProject");
 			}
-		    });
-		} else {
-		    ToolsWindowOJ.setInstance(new JDialog());
+			if (ProjectSettingsOJ.getInstance() != null) {
+				ProjectSettingsOJ.getInstance().validate();
+				ProjectSettingsOJ.getInstance().setVisible(true);
+
+			} else {
+				new ProjectSettingsOJ();
+				ProjectSettingsOJ.getInstance().validate();
+				ProjectSettingsOJ.getInstance().setVisible(true);
+				// ProjectSettingsOJ.getInstance().setState(Frame.NORMAL);
+			}
+			if (ProjectSettingsOJ.getInstance().getState() == Frame.ICONIFIED) {//30.10.2011
+				ProjectSettingsOJ.getInstance().setState(Frame.NORMAL);
+			}
+
+			ProjectSettingsOJ.getInstance().toFront();
 		}
+	};
+	/**
+	 * Used to add listeners to the item list at the bottom of ObjectJ tools
+	 */
+	public static ActionListener YtemListAction = new ActionListener() {
 
-	    }
-	    ToolsWindowOJ.getInstance().setVisible(true);
-	}
-    };
+		public void actionPerformed(ActionEvent e) {
+			if (ToolsWindowOJ.getInstance() == null) {
+				if (IJ.isMacintosh()) {
+					ToolsWindowOJ.setInstance(new JFrame());
+					ToolsWindowOJ.getInstance().addKeyListener(KeyEventManagerOJ.getInstance());
+					ToolsWindowOJ.getInstance().addWindowListener(new java.awt.event.WindowAdapter() {
 
-    /**
-     * called to make the ObjectJ results window visible
-     */
-    public static ActionListener ResultsViewAction = new ActionListener() {
+						public void windowActivated(java.awt.event.WindowEvent evt) {
+							if (IJ.isMacintosh() && IJ.getInstance() != null) {
+								IJ.wait(1); // needed for 1.4.1 on OS X
+								if (((Frame) ToolsWindowOJ.getInstance()).getMenuBar() != Menus.getMenuBar()) {
+									((Frame) ToolsWindowOJ.getInstance()).setMenuBar(Menus.getMenuBar());
+								}
+							}
+						}
+					});
+				} else {
+					ToolsWindowOJ.setInstance(new JDialog());
+				}
 
-	public void actionPerformed(ActionEvent e) {
-	    try {
-		if (ProjectResultsOJ.getInstance() == null) {//30.10.2011
-		    new ProjectResultsOJ();
+			}
+			ToolsWindowOJ.getInstance().setVisible(true);
 		}
-		ProjectResultsOJ.getInstance().setVisible(true);
-		ProjectResultsOJ.getInstance().setState(Frame.NORMAL);
-		ProjectResultsOJ.getInstance().toFront();
-	    } catch (Exception ex) {
-		IJ.log("ResultsViewAction:  " + ex.toString());//24.11.2018
-	    }
-	}
-    };
-    /**
-     * calls a macro to tell Finder/Explorer to show the project folder
-     */
-    public static ActionListener ShowProjectFolderAction = new ActionListener() {//7.6.2009
+	};
 
-	public void actionPerformed(ActionEvent e) {
-	    UtilsOJ.showInFinderOrExplorer();
-	}
-    };
-    public static ActionListener ShowEmbeddedMacroAction = new ActionListener() {
+	/**
+	 * called to make the ObjectJ results window visible
+	 */
+	public static ActionListener ResultsViewAction = new ActionListener() {
 
-	public void actionPerformed(ActionEvent e) {
-	    EmbeddedMacrosOJ emb = EmbeddedMacrosOJ.getInstance();
-	    emb.showEmbeddedMacros(e.getModifiers());
+		public void actionPerformed(ActionEvent e) {
+			try {
+				if (ProjectResultsOJ.getInstance() == null) {//30.10.2011
+					new ProjectResultsOJ();
+				}
+				ProjectResultsOJ.getInstance().setVisible(true);
+				ProjectResultsOJ.getInstance().setState(Frame.NORMAL);
+				ProjectResultsOJ.getInstance().toFront();
+			} catch (Exception ex) {
+				IJ.log("ResultsViewAction:  " + ex.toString());//24.11.2018
+			}
+		}
+	};
+	/**
+	 * calls a macro to tell Finder/Explorer to show the project folder
+	 */
+	public static ActionListener ShowProjectFolderAction = new ActionListener() {//7.6.2009
 
-	    oj.OJ.editor.setState(Frame.NORMAL);
-	    oj.OJ.editor.toFront();
-	}
-    };
+		public void actionPerformed(ActionEvent e) {
+			UtilsOJ.showInFinderOrExplorer();
+		}
+	};
+	public static ActionListener ShowEmbeddedMacroAction = new ActionListener() {
+
+		public void actionPerformed(ActionEvent e) {
+			EmbeddedMacrosOJ emb = EmbeddedMacrosOJ.getInstance();
+			emb.showEmbeddedMacros(e.getModifiers());
+
+			oj.OJ.editor.setState(Frame.NORMAL);
+			oj.OJ.editor.toFront();
+		}
+	};
 }

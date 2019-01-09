@@ -167,7 +167,7 @@ public class ProjectActionsOJ {
 
 		CustomCanvasOJ.markerRad = 2;
 		CustomCanvasOJ.markerSize = 4;
-		CustomCanvasOJ.fontSize = 12;
+		CustomCanvasOJ.fontSize = 13;
 
 		OJ.getDataProcessor().qualifyCells();
 		OJ.getImageProcessor().applyImageMarkers();

@@ -349,8 +349,8 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
         }
 
         if (allvisible) {
-            if (fontSize > 12) {
-                Java2.setAntialiasedText(g, true);//18.9.2014
+            if (fontSize >= 12) {
+                Java2.setAntialiasedText(g, true);//18.12.2018
             }
             int visRangeHigh = OJ.getData().getYtemDefs().getVisRangeHigh();//28.1.2009
             int visRangeLow = OJ.getData().getYtemDefs().getVisRangeLow();
