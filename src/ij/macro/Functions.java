@@ -3216,12 +3216,13 @@ public class Functions implements MacroConstants, Measurements {
 				boolean F = flags.contains("F");//front
 				boolean C = flags.contains("C");//changed
 				boolean kill = M && !(C && keep);
-				if (others) {
+				if (others)
 					kill = !F && !(C && keep);
-				}
 
 				if (kill) {
 					ImagePlus imp = WindowManager.getImage(ids[jj]);
+					if (imp==null)
+						continue;
 					ImageWindow win = imp.getWindow();
 					if (win != null) {
 						imp.changes = false;
@@ -6565,7 +6566,10 @@ public class Functions implements MacroConstants, Measurements {
 			Frame f = WindowManager.getFrame(title);
 			if (f!=null && (f instanceof TextWindow)){
 				TextWindow tWin = (TextWindow)f;
-				tWin.getTextPanel().setSelection((int)from, (int)to);
+				if (from == -1 && to == -1)
+					tWin.getTextPanel().resetSelection();
+				else
+					tWin.getTextPanel().setSelection((int)from, (int)to);
 				return new Variable();
 			}
 		}
