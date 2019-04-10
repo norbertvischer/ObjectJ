@@ -21,6 +21,7 @@ public class CellOJ extends BaseAdapterOJ {
     private ArrayList <YtemOJ> ytemList = new ArrayList();
     private int cellID = 0;//negative ID that is not affected by removing cells elsewhere
     public Properties properties = new Properties();//hash table results: column name + value (as text)
+	public String info;//6.2.2019
     private transient boolean open;//true while editing, i.e. adding more points or ytems
     private transient boolean selected;//true if cell is selected
     private transient int selectedYtemIndex = 0;
@@ -328,7 +329,19 @@ public class CellOJ extends BaseAdapterOJ {
         changed = true;
 
     }
+	
+	
+	public String getInfo() {//6.2.2019
+		if (info == null) {
+			return "";
+		}
+		return info;
+	}
 
+	public void setInfo(String s) {//6.2.2019
+		info = s;
+	}
+	
     /** @return ytem currently being edited, otherwise null */
     public YtemOJ getOpenYtem() {
         for (int i = 0; i < ytemList.size(); i++) {

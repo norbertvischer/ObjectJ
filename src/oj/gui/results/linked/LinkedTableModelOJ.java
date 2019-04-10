@@ -129,7 +129,8 @@ public class LinkedTableModelOJ extends AbstractTableModel {
 	public int getRowCount() {
 		//Nullpointer 13.12.2018
 		try {
-			return OJ.getData().getCells().getCellsCount() + EMPTY_ROWS_COUNT;
+		    if(OJ.getData().getCells() != null)
+			    return OJ.getData().getCells().getCellsCount() + EMPTY_ROWS_COUNT;
 		} catch (Exception e) {
 			IJ.showMessage(e.toString() + " warning 7634, click OK to continue");
 		}

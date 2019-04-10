@@ -1577,6 +1577,24 @@ public class MacroProcessorOJ {
 		OJ.getDataProcessor().movePoint(index, loc);
 	}
 
+	public void setItemInfo(String s){ //21.1.2019
+		OJ.getData().getCells().getSelectedCell().getSelectedYtem().setInfo(s);
+	}
+			
+	public String getItemInfo(){//21.1.2019
+		String info = OJ.getData().getCells().getSelectedCell().getSelectedYtem().getInfo();
+		return info;
+	}
+			
+	public void setObjectInfo(String s){ //6.2.2019
+		OJ.getData().getCells().getSelectedCell().setInfo(s);
+	}
+			
+	public String getObjectInfo(){//6.2.2019
+		String info = OJ.getData().getCells().getSelectedCell().getInfo();
+		return info;
+	}
+			
 	//not used
 	public void setStatisticValue(String columnName, String statisticName, double value) {
 		OJ.getData().getResults().getColumns().getColumnByName(columnName).getStatistics().setStatisticsValueByName(statisticName, value);

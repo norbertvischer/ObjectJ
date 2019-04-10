@@ -246,6 +246,12 @@ public class MacroExtStrOJ {
         buf.append(getFloatFunction("ojZPos", "n"));
         buf.append(getFloatArrayFunction("ojXYZPos", "n"));
 
+		buf.append(getStrFunction("ojGetItemInfo")); //21.1.2019
+		buf.append(getFunction("ojSetItemInfo", "info"));//21.1.2019
+
+		buf.append(getStrFunction("ojGetObjectInfo")); //6.2.2019
+		buf.append(getFunction("ojSetObjectInfo", "info"));//6.2.2019
+
         buf.append(getFunction("ojZoom", "factor", "xHook", "yHook"));
         buf.append(getFunction("ojTest", "arg"));
         buf.append(getStrFunction("ojTmpFunction", "anything"));

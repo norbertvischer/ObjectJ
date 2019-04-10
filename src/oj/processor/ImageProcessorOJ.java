@@ -15,6 +15,7 @@ import ij.io.FileOpener;
 import ij.io.FileSaver;
 import ij.io.Opener;
 import ij.measure.Calibration;
+import ij.plugin.AVI_Reader;
 import ij.plugin.FileInfoVirtualStack;
 import ij.util.Tools;
 import java.awt.Frame;
@@ -162,7 +163,14 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 						if (virtual && (fName.endsWith(".tif") || fName.endsWith(".TIF"))) {
 							(new FileInfoVirtualStack()).run(dir + fName);
 							imp = IJ.getImage();
-						} else 
+						}
+						
+						
+//						else if (fName.endsWith(".avi")) {//16.2.2019
+//							imp = AVI_Reader.openVirtual(dir+ fName);//16.2.2019
+//							//updateImagesProperties();
+//						}
+						else 
 							imp = new Opener().openImage(dir, fName);//30.6.2013
 						imageOJ.setImagePlus(imp);//1.10.2015
 						
@@ -794,6 +802,17 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 					applyImageProperties(fileInfo, image);
 					///30.6.2012 OJ.getEventProcessor().fireImageChangedEvent(image.getName(), ImageChangedEventOJ.IMAGE_EDITED);
 				}
+//				else if(filename.toLowerCase().endsWith(".avi")){
+//				    AVI_Reader reader = new AVI_Reader();
+//				    reader.setVirtual(true);
+//				    reader.displayDialog(false);
+//				    reader.run(directory+ File.separator +filename);//17.2.2019
+//					
+//				    int nSlices = reader.getSize();
+//				    image.setNumberOfFrames(nSlices);
+//				    //image.setNumberOfSlices(nSlices);
+//				    image.setChanged(true);
+//				}
 
 			}
 		}
@@ -1123,6 +1142,7 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 						 break;
 					}
 					boolean good = false;
+//					String[] goodExt = ".tiff .tif .jpg .png .gif .avi".split(" ");//16.2.2019
 					String[] goodExt = ".tiff .tif .jpg .png .gif".split(" ");
 					for (int jj = 0; jj < goodExt.length; jj++) {
 						if (fName.toLowerCase().endsWith(goodExt[jj])) {
