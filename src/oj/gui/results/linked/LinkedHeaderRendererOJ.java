@@ -3,6 +3,7 @@
  */
 package oj.gui.results.linked;
 
+import ij.util.FontUtil;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
@@ -25,27 +26,30 @@ import oj.project.results.ColumnsOJ;
 public class LinkedHeaderRendererOJ extends JLabel implements TableCellRenderer {
 
     private static Font fontArialBold = Font.decode("Arial-BOLD-12");
+	private static Font	 fontArialBoldItalic = FontUtil.getFont("Arial", Font.BOLD + Font.ITALIC, 12);
     private static Border headerBorder = new EmptyBorder(2, 8, 2, 8);
-    private static Icon triangleIcon = new ImageIcon(LinkedHeaderRendererOJ.class.getResource(OJ.ICONS+"TriangleWhite.gif"));
-
+//    private static Icon triangleIcon = new ImageIcon(LinkedHeaderRendererOJ.class.getResource(OJ.ICONS+"TriangleWhite.gif"));
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         setBorder(headerBorder);
         setHorizontalAlignment(SwingConstants.LEFT);
         setBackground(oj.OJ.headerBackground);
-        if (column > 0 && column <= getVisibleSize()) {//2.6.2010
+		
+		setFont(fontArialBold);
+        if (column > 0 && column <= getVisibleSize()) {
             ColumnOJ col = getVisibleElementAt(column - 1);
+			if(col.getColumnDef().isTextMode())
+				setFont(fontArialBoldItalic);
             if ((col.getName() != null) && (col.getName().equals(OJ.getData().getResults().getColumns().getColumnLinkedSortName())) && (OJ.getData().getResults().getColumns().getColumnLinkedSortFlag() != ColumnsOJ.COLUM_SORT_FLAG_NONE)) {
                 setForeground(Color.YELLOW);
             } else {
                 setForeground(Color.WHITE);
             }
-            setIcon(triangleIcon);
+            //setIcon(triangleIcon);
         } else {
             setForeground(Color.WHITE);
-            setIcon(null);
+            //setIcon(null);
         }
-        setFont(fontArialBold);
-
+        //setFont(fontArialBold);
         if (value != null) {
             setText(value.toString());
         }
