@@ -31,7 +31,7 @@ public class LinkedHeaderRendererOJ extends JLabel implements TableCellRenderer 
 //    private static Icon triangleIcon = new ImageIcon(LinkedHeaderRendererOJ.class.getResource(OJ.ICONS+"TriangleWhite.gif"));
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         setBorder(headerBorder);
-        setHorizontalAlignment(SwingConstants.LEFT);
+        setHorizontalAlignment(SwingConstants.RIGHT);//13.5.2019
         setBackground(oj.OJ.headerBackground);
 		
 		setFont(fontArialBold);
@@ -53,7 +53,9 @@ public class LinkedHeaderRendererOJ extends JLabel implements TableCellRenderer 
         if (value != null) {
             setText(value.toString());
         }
+
         if (column == 0) {
+			table.getColumnModel().getColumn(0).setResizable(false);//13.5.2019
             setText("[Stat]");
         }
         setOpaque(true);

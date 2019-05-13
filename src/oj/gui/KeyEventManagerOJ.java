@@ -75,11 +75,11 @@ public class KeyEventManagerOJ implements KeyListener {
 	}
 
 	public void keyPressed(KeyEvent evt) {
-
-		if ((KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow() instanceof ImageWindow)
-				&& (Toolbar.getToolId() == Toolbar.TEXT)
-				&& (IJ.getImage().getRoi() != null)
-				&& (IJ.getImage().getRoi() instanceof TextRoi)) {
+		ImagePlus imp = IJ.getImage();
+		if (imp != null
+				&& (KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow() instanceof ImageWindow)
+				&& (imp.getRoi() != null)
+				&& (imp.getRoi() instanceof TextRoi)) {
 			IJ.getInstance().keyPressed(evt);
 			evt.consume();
 			return;
@@ -98,7 +98,7 @@ public class KeyEventManagerOJ implements KeyListener {
 				evt.consume();
 				return;
 			}
-			ImagePlus imp = null;
+			imp = null;
 
 			boolean isGlassWindow = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow() instanceof GlassWindowOJ;
 			if (isGlassWindow) {

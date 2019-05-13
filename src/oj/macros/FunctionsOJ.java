@@ -129,8 +129,10 @@ public class FunctionsOJ implements MacroExtension {
 	}
 
 	public String ojGetGlassDimensions() {
-		double[] val = OJ.getMacroProcessor().getGlass();
-		return floatArrayToString(val);
+			ImageJAccessOJ.InterpreterAccess.interpError("GlassWindow is not supported anymore");
+		return null;
+		//double[] val = OJ.getMacroProcessor().getGlass();
+		//return floatArrayToString(val);
 	}
 
 	/**
@@ -313,7 +315,8 @@ public class FunctionsOJ implements MacroExtension {
 	}
 
 	public String ojGlassWindow(String properties) {
-		OJ.getMacroProcessor().setGlass(properties);
+		ImageJAccessOJ.InterpreterAccess.interpError("GlassWindow is not supported anymore");
+		//OJ.getMacroProcessor().setGlass(properties);
 
 		return null;
 	}

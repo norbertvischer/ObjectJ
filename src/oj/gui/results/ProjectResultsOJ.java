@@ -300,11 +300,11 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 						if (ij.IJ.isWindows()) {
 							ProjectResultsOJ.getInstance().getColumnPopupMenu(tblUnlinkedHeader).show(tblUnlinkedHeader.getTableHeader(), evt.getX(), evt.getY());
 						} else {
-							if (ij.IJ.isMacOSX()) {
-								ij.IJ.showMessage("This triangle is obsolete. \nPlease click column title with  right button or Ctrl key down");//25.1.2010
-							} else {
-								ij.IJ.showMessage("This triangle is obsolete. \nPlease click column title with  right button");//25.1.2010
-							}
+//							if (ij.IJ.isMacOSX()) {
+//								ij.IJ.showMessage("This triangle is obsolete. \nPlease click column title with  right button or Ctrl key down");//25.1.2010
+//							} else {
+//								ij.IJ.showMessage("This triangle is obsolete. \nPlease click column title with  right button");//25.1.2010
+//							}
 						}
 					}
 				}
@@ -339,11 +339,11 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 						if (ij.IJ.isWindows()) {
 							ProjectResultsOJ.getInstance().getColumnPopupMenu(tblLinkedHeader).show(tblLinkedHeader.getTableHeader(), evt.getX(), evt.getY());
 						} else {
-							if (ij.IJ.isMacOSX()) {
-								ij.IJ.showMessage("This triangle is obsolete. \nPlease click column title with  right button or Ctrl key down");//25.1.2010
-							} else {
-								ij.IJ.showMessage("This triangle is obsolete. \nPlease click column title with  right button");//25.1.2010
-							}
+//							if (ij.IJ.isMacOSX()) {
+//								ij.IJ.showMessage("This triangle is obsolete. \nPlease click column title with  right button or Ctrl key down");//25.1.2010
+//							} else {
+//								ij.IJ.showMessage("This triangle is obsolete. \nPlease click column title with  right button");//25.1.2010
+//							}
 						}
 					}
 				}
@@ -892,6 +892,11 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
         tblLinkedHeader.setOpaque(false);
         tblLinkedHeader.setRowSelectionAllowed(false);
         tblLinkedHeader.getTableHeader().setReorderingAllowed(false);
+        tblLinkedHeader.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+            public void mouseDragged(java.awt.event.MouseEvent evt) {
+                tblLinkedHeaderMouseDragged(evt);
+            }
+        });
         tblLinkedHeader.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 tblLinkedHeaderMouseClicked(evt);
@@ -1544,6 +1549,11 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 
 
     }//GEN-LAST:event_lstColumnSelectorMousePressed
+
+    private void tblLinkedHeaderMouseDragged(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblLinkedHeaderMouseDragged
+IJ.beep();//13.5.2019
+		// TODO add your handling code here:
+    }//GEN-LAST:event_tblLinkedHeaderMouseDragged
 
 	private void plotFromOjResult(java.awt.event.ActionEvent evt, boolean doAdd) {
 		String[] defaults = new String[2];
