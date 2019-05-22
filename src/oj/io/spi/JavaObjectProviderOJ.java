@@ -27,7 +27,7 @@ import java.util.jar.JarInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
-import oj.gui.settings.PlotManagerOJ;
+//import oj.gui.settings.PlotManagerOJ;
 import oj.project.DataOJ;
 import oj.io.InputOutputOJ.ProjectIOExceptionOJ;
 import oj.util.UtilsOJ;
@@ -97,20 +97,20 @@ public class JavaObjectProviderOJ implements IIOProviderOJ {
 		myMacroStream.writeTo(zipOut);
 		zipOut.closeEntry();
 	    }
-	    if (PlotManagerOJ.withPlots) {
-		ByteArrayOutputStream myPlotStream = new ByteArrayOutputStream();
-		String pText = data.getLinkedPlotText();
-		if (pText != null && pText.length() > 0) {
-		    byte[] plotBytes = null;
-		    if (mText != null) {
-			zipOut.putNextEntry(new ZipEntry("objectj-plots"));
-			plotBytes = pText.getBytes();
-			myPlotStream.write(plotBytes);
-			myPlotStream.writeTo(zipOut);
-			zipOut.closeEntry();
-		    }
-		}
-	    }
+//	    if (PlotManagerOJ.withPlots) {
+//		ByteArrayOutputStream myPlotStream = new ByteArrayOutputStream();
+//		String pText = data.getLinkedPlotText();
+//		if (pText != null && pText.length() > 0) {
+//		    byte[] plotBytes = null;
+//		    if (mText != null) {
+//			zipOut.putNextEntry(new ZipEntry("objectj-plots"));
+//			plotBytes = pText.getBytes();
+//			myPlotStream.write(plotBytes);
+//			myPlotStream.writeTo(zipOut);
+//			zipOut.closeEntry();
+//		    }
+//		}
+//	    }
 
 	    if (testFlag) {
 		out = new DataOutputStream(new BufferedOutputStream(zipOut));

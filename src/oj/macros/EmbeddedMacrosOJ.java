@@ -18,7 +18,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import oj.OJ;
-import oj.gui.settings.PlotManagerOJ;
+//import oj.gui.settings.PlotManagerOJ;
 import oj.gui.tools.ToolManagerOJ;
 import oj.processor.events.MacroChangedEventOJ;
 import oj.project.DataOJ;
@@ -76,13 +76,13 @@ public class EmbeddedMacrosOJ {
 			Editor ed = OJ.editor;
 			String theText = ed.getText();
 			theText = UtilsOJ.fixLineFeeds(theText);
-			PlotManagerOJ plSettings = PlotManagerOJ.getInstance();
-			if (plSettings != null) {
-				boolean ok = plSettings.setCurrentPlotMacro(theText);
-				if (!ok) {
-					IJ.showMessage("Couldn't accept text; was the plot title changed?");
-				}
-			}
+//			PlotManagerOJ plSettings = PlotManagerOJ.getInstance();
+//			if (plSettings != null) {
+//				boolean ok = plSettings.setCurrentPlotMacro(theText);
+//				if (!ok) {
+//					IJ.showMessage("Couldn't accept text; was the plot title changed?");
+//				}
+//			}
 			setEditorUnchanged(ed);
 			ed.close();
 		}

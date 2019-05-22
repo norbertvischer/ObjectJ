@@ -20,7 +20,7 @@ import oj.macros.EmbeddedMacrosOJ;
 import oj.gui.results.ProjectResultsOJ;
 import oj.gui.MenuManagerOJ;
 import oj.gui.ToolsWindowOJ;
-import oj.gui.settings.PlotManagerOJ;
+//import oj.gui.settings.PlotManagerOJ;
 import oj.io.InputOutputOJ;
 import oj.gui.settings.ProjectSettingsOJ;
 import oj.gui.tools.ToolManagerOJ;
@@ -264,17 +264,17 @@ public class ProjectActionsOJ {
 				if (imgs != null) {
 					imgs.removeAllImages();
 				}
-				PlotManagerOJ plotSettings = PlotManagerOJ.getInstance();
-				if (plotSettings != null) {
-					String plotTitles[] = plotSettings.getPlotTitles();
-					for (String title : plotTitles) {
-						Window window = WindowManager.getWindow(title);
-						if (window != null) {
-							window.dispose();
-							WindowManager.removeWindow(window);
-						}
-					}
-				}
+//				PlotManagerOJ plotSettings = PlotManagerOJ.getInstance();
+//				if (plotSettings != null) {
+//					String plotTitles[] = plotSettings.getPlotTitles();
+//					for (String title : plotTitles) {
+//						Window window = WindowManager.getWindow(title);
+//						if (window != null) {
+//							window.dispose();
+//							WindowManager.removeWindow(window);
+//						}
+//					}
+//				}
 			}
 			OJ.isProjectOpen = false;
 		}
@@ -282,9 +282,9 @@ public class ProjectActionsOJ {
 	}
 
 	static boolean resetProjectData() {
-		if (GlassWindowOJ.exists()) {
-			IJ.runMacro("ojGlassWindow(\"hide\");");//15.10.2012
-		}
+//		if (GlassWindowOJ.exists()) {
+//			IJ.runMacro("ojGlassWindow(\"hide\");");//15.10.2012
+//		}
 		if (closeProjectData()) {
 			if (OJ.editorWindow != null) {
 				OJ.editorWindow.dispose();//24.6.2010

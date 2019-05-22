@@ -2,7 +2,7 @@ package oj.project;
 
 import java.io.Serializable;
 import java.util.Date;
-import oj.gui.settings.PlotManagerOJ;
+//import oj.gui.settings.PlotManagerOJ;
 import oj.macros.MacroSetOJ;
 
 /**

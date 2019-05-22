@@ -87,9 +87,9 @@ public class ProjectSettingsOJ extends javax.swing.JFrame {
         settingsPanels.put(ProjectSettingsOJ.QUALIFIERS_PANEL, new QualifiersSettingsOJ());
         settingsPanels.put(ProjectSettingsOJ.YTEM_DEFS_PANEL, new YtemDefsSettingsOJ());
         settingsPanels.put(ProjectSettingsOJ.IMAGE_DEFS_PANEL, new ImageDefsSettingsOJ());
-        if (PlotManagerOJ.withPlots) {
-            settingsPanels.put(ProjectSettingsOJ.PLOTS_PANEL, new PlotManagerOJ());
-        }
+//        if (PlotManagerOJ.withPlots) {
+//            settingsPanels.put(ProjectSettingsOJ.PLOTS_PANEL, new PlotManagerOJ());
+//        }
         pnlSettings.add((javax.swing.JPanel) settingsPanels.get(ProjectSettingsOJ.COLUMNS_PANEL), ProjectSettingsOJ.COLUMNS_PANEL);
         pnlSettings.add((javax.swing.JPanel) settingsPanels.get(ProjectSettingsOJ.QUALIFIERS_PANEL), ProjectSettingsOJ.QUALIFIERS_PANEL);
         pnlSettings.add((javax.swing.JPanel) settingsPanels.get(ProjectSettingsOJ.YTEM_DEFS_PANEL), ProjectSettingsOJ.YTEM_DEFS_PANEL);
@@ -97,9 +97,9 @@ public class ProjectSettingsOJ extends javax.swing.JFrame {
         
         new DropTarget(lblImageDefs, ImageProcessorOJ.dropOperations, OJ.getImageProcessor());//18.11.2014
 
-        if (PlotManagerOJ.withPlots) {
-            pnlSettings.add((javax.swing.JPanel) settingsPanels.get(ProjectSettingsOJ.PLOTS_PANEL), ProjectSettingsOJ.PLOTS_PANEL);
-        }
+//        if (PlotManagerOJ.withPlots) {
+//            pnlSettings.add((javax.swing.JPanel) settingsPanels.get(ProjectSettingsOJ.PLOTS_PANEL), ProjectSettingsOJ.PLOTS_PANEL);
+//        }
         if (IJ.isWindows()) {
             btnShowInFinder.setText("Show in Explorer");
         }
@@ -130,13 +130,13 @@ public class ProjectSettingsOJ extends javax.swing.JFrame {
             lblResults.setBorder(unselectedBorder);
             lblResults.setBackground(Color.WHITE);
         }
-        if (selectedLabel != lblPlots) {
-            lblPlots.setBorder(unselectedBorder);
-            lblPlots.setBackground(Color.WHITE);
-        }
-        if (!PlotManagerOJ.withPlots && lblPlots != null) {
-            lblPlots.hide();
-        }
+//        if (selectedLabel != lblPlots) {
+//            lblPlots.setBorder(unselectedBorder);
+//            lblPlots.setBackground(Color.WHITE);
+//        }
+//        if (!PlotManagerOJ.withPlots && lblPlots != null) {
+//            lblPlots.hide();
+//        }
     }
 
     /**
@@ -166,7 +166,6 @@ public class ProjectSettingsOJ extends javax.swing.JFrame {
         lblYtemDefs = new javax.swing.JLabel();
         lblResults = new javax.swing.JLabel();
         lblQualifiers = new javax.swing.JLabel();
-        lblPlots = new javax.swing.JLabel();
         filler2 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 88), new java.awt.Dimension(20, 88), new java.awt.Dimension(20, 88));
         jPanel2 = new javax.swing.JPanel();
         btnObjectJResults = new javax.swing.JButton();
@@ -277,23 +276,6 @@ public class ProjectSettingsOJ extends javax.swing.JFrame {
             }
         });
         pnlHeader.add(lblQualifiers);
-
-        lblPlots.setBackground(new java.awt.Color(255, 255, 255));
-        lblPlots.setIcon(new javax.swing.ImageIcon(getClass().getResource("/oj/gui/icons/plots-48x48.png"))); // NOI18N
-        lblPlots.setText("Plots");
-        lblPlots.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        lblPlots.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        lblPlots.setMaximumSize(new java.awt.Dimension(84, 88));
-        lblPlots.setMinimumSize(new java.awt.Dimension(72, 88));
-        lblPlots.setOpaque(true);
-        lblPlots.setPreferredSize(new java.awt.Dimension(76, 88));
-        lblPlots.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        lblPlots.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mousePressed(java.awt.event.MouseEvent evt) {
-                lblPlotsMousePressed(evt);
-            }
-        });
-        pnlHeader.add(lblPlots);
         pnlHeader.add(filler2);
 
         jPanel2.setBackground(new java.awt.Color(255, 255, 255));
@@ -395,15 +377,6 @@ private void formComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRS
     }
 }//GEN-LAST:event_formComponentResized
 
-  private void lblPlotsMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblPlotsMousePressed
-
-      if (PlotManagerOJ.withPlots) {
-          updateLabels(lblPlots);
-          selectedPanelKey = ProjectSettingsOJ.PLOTS_PANEL;
-          resizeControlPanel();
-      }
-  }//GEN-LAST:event_lblPlotsMousePressed
-
     private void btnShowInFinderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnShowInFinderActionPerformed
         oj.gui.menuactions.ViewActionsOJ.ShowProjectFolderAction.actionPerformed(null);
     }//GEN-LAST:event_btnShowInFinderActionPerformed
@@ -445,7 +418,6 @@ private void formComponentResized(java.awt.event.ComponentEvent evt) {//GEN-FIRS
     private javax.swing.Box.Filler filler3;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JLabel lblImageDefs;
-    private javax.swing.JLabel lblPlots;
     private javax.swing.JLabel lblQualifiers;
     private javax.swing.JLabel lblResults;
     private javax.swing.JLabel lblYtemDefs;

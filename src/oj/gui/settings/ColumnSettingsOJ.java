@@ -1453,9 +1453,9 @@ private void tblColumnsCaretPositionChanged(java.awt.event.InputMethodEvent evt)
 }//GEN-LAST:event_tblColumnsCaretPositionChanged
 
 private void btnShowHistoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnShowHistoActionPerformed
-    ColumnOJ column = getSelectedColumn();//26.1.2010
+    ColumnOJ column = getSelectedColumn();
     if (column != null) {
-        new PlotOJ().makeHistoFromColumn(column);
+        new PlotOJ().makeHistoFromColumn2(column);//22.5.2019
     }
 }//GEN-LAST:event_btnShowHistoActionPerformed
 

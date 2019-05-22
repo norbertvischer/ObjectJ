@@ -1551,7 +1551,7 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
     }//GEN-LAST:event_lstColumnSelectorMousePressed
 
     private void tblLinkedHeaderMouseDragged(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblLinkedHeaderMouseDragged
-IJ.beep();//13.5.2019
+//IJ.beep();//13.5.2019
 		// TODO add your handling code here:
     }//GEN-LAST:event_tblLinkedHeaderMouseDragged
 
@@ -1918,7 +1918,7 @@ IJ.beep();//13.5.2019
 
 		ColumnOJ column = rightClickedColumn(table);
 		if (column != null) {
-			new PlotOJ().makeHistoFromColumn(column);
+			new PlotOJ().makeHistoFromColumn2(column);//22.5.2019
 		}
 	}
 
