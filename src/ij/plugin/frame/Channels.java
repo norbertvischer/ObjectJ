@@ -76,15 +76,17 @@ public class Channels extends PlugInDialog implements PlugIn, ItemListener, Acti
 		update();
 
 		pm=new PopupMenu();
+		GUI.scalePopupMenu(pm);
 		for (int i=0; i<menuItems.length; i++)
 			addPopupItem(menuItems[i]);
 		add(pm);
 
 		addKeyListener(ij);  // ImageJ handles keyboard shortcuts
 		setResizable(false);
+		GUI.scale(this);
 		pack();
 		if (location==null) {
-			GUI.center(this);
+			GUI.centerOnImageJScreen(this);
 			location = getLocation();
 		} else
 			setLocation(location);

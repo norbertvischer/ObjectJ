@@ -40,6 +40,13 @@ public class ImageInfo implements PlugIn {
 		s += "ImageJ home: "+IJ.getDir("imagej")+"\n";
 		s += "Java home: "+System.getProperty("java.home")+"\n";
 		s += "Screen size: "+screen.width+"x"+screen.height+"\n";
+		s += "GUI scale: "+IJ.d2s(Prefs.getGuiScale(),2)+"\n";
+		String path = Prefs.getCustomPropsPath();
+		if (path!=null)
+			s += "*Custom properties*: "+ path +"\n";
+		path = Prefs.getCustomPrefsPath();
+		if (path!=null)
+			s += "*Custom preferences*: "+ path +"\n";
 		if (IJ.isMacOSX()) {
 			String time = " ("+ImageWindow.setMenuBarTime+"ms)";
 			s += "SetMenuBarCount: "+Menus.setMenuBarCount+time+"\n";
@@ -270,7 +277,14 @@ public class ImageInfo implements PlugIn {
 				lower = cal.getCValue((int)lower);
 				upper = cal.getCValue((int)upper);
 			}
-			s += "Threshold: "+d2s(lower)+"-"+d2s(upper)+uncalibrated+"\n";
+			int lutMode = ip.getLutUpdateMode();
+			String mode = "red";
+			switch (lutMode) {
+				case ImageProcessor.BLACK_AND_WHITE_LUT: mode="B&W"; break;
+				case ImageProcessor.NO_LUT_UPDATE: mode="invisible"; break;
+				case ImageProcessor.OVER_UNDER_LUT: mode="over/under"; break;
+			}
+			s += "Threshold: "+d2s(lower)+"-"+d2s(upper)+uncalibrated+" ("+mode+")\n";
 		}
 		ImageCanvas ic = imp.getCanvas();
     	double mag = ic!=null?ic.getMagnification():1.0;
@@ -316,8 +330,8 @@ public class ImageInfo implements PlugIn {
 		ImageWindow win = imp.getWindow();
 		if (win!=null) {
 			Point loc = win.getLocation();
-			Dimension screen = IJ.getScreenSize();
-			s += "Screen location: "+loc.x+","+loc.y+" ("+screen.width+"x"+screen.height+")\n";
+			Rectangle bounds = GUI.getScreenBounds(win);
+			s += "Screen location: "+(loc.x-bounds.x)+","+(loc.y-bounds.y)+" ("+bounds.width+"x"+bounds.height+")\n";
 		}
 		if (IJ.isMacOSX()) {
 			String time = " ("+ImageWindow.setMenuBarTime+"ms)";

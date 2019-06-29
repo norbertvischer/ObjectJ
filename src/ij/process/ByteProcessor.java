@@ -317,7 +317,7 @@ public class ByteProcessor extends ImageProcessor {
 			else
 				return cTable[pixels[y*width + x]&0xff];
 		} else
-			return 0f;
+			return Float.NaN;
 	}
 
 	/** Sets the foreground drawing color. */
@@ -423,8 +423,8 @@ public class ByteProcessor extends ImageProcessor {
 	public void setMinAndMax(double min, double max) {
 		if (max<min)
 			return;
-		this.min = (int)min;
-		this.max = (int)max;
+		this.min = (int)Math.round(min);
+		this.max = (int)Math.round(max);
 		if (rLUT1==null) {
 			if (cm==null)
 				makeDefaultColorModel();

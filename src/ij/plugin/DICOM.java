@@ -110,24 +110,29 @@ public class DICOM extends ImagePlus implements PlugIn {
 		if (fi!=null && fi.width>0 && fi.height>0 && fi.offset>0) {
 			FileOpener fo = new FileOpener(fi);
 			ImagePlus imp = fo.openImage();
-			ImageProcessor ip = imp.getProcessor();
 			boolean openAsFloat = (dd.rescaleSlope!=1.0&&!Prefs.ignoreRescaleSlope) || Prefs.openDicomsAsFloat;
+			String options = Macro.getOptions();
 			if (openAsFloat) {
-				ip = ip.convertToFloat();
+				IJ.run(imp, "32-bit", "");
 				if (dd.rescaleSlope!=1.0)
-					ip.multiply(dd.rescaleSlope);
+					IJ.run(imp, "Multiply...", "value="+dd.rescaleSlope+" stack");
 				if (dd.rescaleIntercept!=0.0)
-					ip.add(dd.rescaleIntercept);
-				imp.setProcessor(ip);
+					IJ.run(imp, "Add...", "value="+dd.rescaleIntercept+" stack");
+				if (imp.getStackSize()>1) {
+				    imp.setSlice(imp.getStackSize()/2);
+					ImageStatistics stats = imp.getRawStatistics();
+					imp.setDisplayRange(stats.min,stats.max);
+				}
 			} else if (fi.fileType==FileInfo.GRAY16_SIGNED) {
 				if (dd.rescaleIntercept!=0.0 && dd.rescaleSlope==1.0)
-					ip.add(dd.rescaleIntercept);
+					IJ.run(imp, "Add...", "value="+dd.rescaleIntercept+" stack");
 			} else if (dd.rescaleIntercept!=0.0 && (dd.rescaleSlope==1.0||fi.fileType==FileInfo.GRAY8)) {
 				double[] coeff = new double[2];
 				coeff[0] = dd.rescaleIntercept;
 				coeff[1] = dd.rescaleSlope;
 				imp.getCalibration().setFunction(Calibration.STRAIGHT_LINE, coeff, "Gray Value");
 			}
+			Macro.setOptions(options);
 			if (dd.windowWidth>0.0) {
 				double min = dd.windowCenter-dd.windowWidth/2;
 				double max = dd.windowCenter+dd.windowWidth/2;
@@ -136,6 +141,7 @@ public class DICOM extends ImagePlus implements PlugIn {
 					min = cal.getRawValue(min);
 					max = cal.getRawValue(max);
 				}
+				ImageProcessor ip = imp.getProcessor();
 				ip.setMinAndMax(min, max);
 				if (IJ.debugMode) IJ.log("window: "+min+"-"+max);
 			}
@@ -670,12 +676,12 @@ class DicomDecoder {
 					fi.blues = getLut(elementLength);
 					addInfo(tag, elementLength/2);
 					break;
-				case PIXEL_DATA:
 				case FLOAT_PIXEL_DATA:
+					fi.fileType = FileInfo.GRAY32_FLOAT;
+					// continue without break
+				case PIXEL_DATA:
 					// Start of image data...
 					if (elementLength!=0) {
-						if (tag==FLOAT_PIXEL_DATA)
-							fi.fileType = FileInfo.GRAY32_FLOAT;
 						fi.offset = location;
 						addInfo(tag, location);
 						decodingTags = false;

@@ -72,6 +72,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	private boolean allowDuplicates;
 	private double translateX = 10.0;
 	private double translateY = 10.0;
+	private static String errorMessage;
 
 		
 	/** Opens the "ROI Manager" window, or activates it if it is already open.
@@ -92,6 +93,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		instance = this;
 		list = new JList();
+		errorMessage = null;
 		showWindow();
 	}
 	
@@ -101,6 +103,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		list = new JList();
 		listModel = new DefaultListModel();
 		list.setModel(listModel);
+		errorMessage = null;
 	}
 
 	void showWindow() {
@@ -113,6 +116,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		setLayout(new BorderLayout());
 		listModel = new DefaultListModel();
 		list.setModel(listModel);
+		GUI.scale(list);
 		list.setPrototypeCellValue("0000-0000-0000 ");		
 		list.addListSelectionListener(this);
 		list.addKeyListener(ij);
@@ -139,6 +143,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		panel.add(labelsCheckbox);
 		add("East", panel);		
 		addPopupMenu();
+		GUI.scale(this);
 		pack();
 		Dimension size = getSize();
 		if (size.width>270)
@@ -148,7 +153,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (loc!=null)
 			setLocation(loc);
 		else
-			GUI.center(this);
+			GUI.centerOnImageJScreen(this);
 		show();
 	}
 
@@ -162,8 +167,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	void addPopupMenu() {
-		pm=new PopupMenu();
-		//addPopupItem("Select All");
+		pm = new PopupMenu();
+		GUI.scalePopupMenu(pm);
 		addPopupItem("Open...");
 		addPopupItem("Save...");
 		addPopupItem("Fill");
@@ -772,7 +777,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (Recorder.record && !Recorder.scriptMode())
 			Recorder.record("roiManager", "Open", path);
 		if (path.endsWith(".zip")) {
+			boolean wasRecording = Recorder.record;
+			Recorder.record = false;
 			openZip(path);
+			Recorder.record = wasRecording;
 			return;
 		}
 		Opener o = new Opener();
@@ -785,7 +793,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				name = name.substring(0, name.length()-4);
 			listModel.addElement(name);
 			rois.add(roi);
-		}		
+			errorMessage = null;
+		} else
+			errorMessage = "Unable to 	open ROI at "+path;
 		updateShowAll();
 	}
 	
@@ -794,6 +804,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		ZipInputStream in = null; 
 		ByteArrayOutputStream out = null; 
 		int nRois = 0; 
+		errorMessage = null;
 		try { 
 			in = new ZipInputStream(new FileInputStream(path)); 
 			byte[] buf = new byte[1024]; 
@@ -820,15 +831,18 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			} 
 			in.close(); 
 		} catch (IOException e) {
-			error(e.toString());
+			errorMessage = e.toString();
+			error(errorMessage);
 		} finally {
 			if (in!=null)
 				try {in.close();} catch (IOException e) {}
 			if (out!=null)
 				try {out.close();} catch (IOException e) {}
 		}
-		if(nRois==0)
-				error("This ZIP archive does not appear to contain \".roi\" files");
+		if (nRois==0 && errorMessage==null) {
+			errorMessage = "This ZIP archive does not contain \".roi\" files: " + path;
+			error(errorMessage);
+		}
 		updateShowAll();
 	} 
 
@@ -862,10 +876,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			path = dir+name2;
 		}
 		RoiEncoder re = new RoiEncoder(path);
+		errorMessage = null;
 		try {
 			re.write(roi);
 		} catch (IOException e) {
-			IJ.error("ROI Manager", e.getMessage());
+			errorMessage = e.getMessage();
+			IJ.error("ROI Manager", errorMessage);
 		}
 		if (Recorder.record && !IJ.isMacro())
 			Recorder.record("roiManager", "Save", path);
@@ -890,6 +906,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		String[] names = new String[listModel.size()];
 		for (int i=0; i<listModel.size(); i++)
 			names[i] = (String)listModel.getElementAt(i);
+		errorMessage = null;
 		try {
 			ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(path)));
 			out = new DataOutputStream(new BufferedOutputStream(zos));
@@ -907,7 +924,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			out.close();
 		} catch (IOException e) {
-			error(""+e);
+			errorMessage = ""+e;
+			error(errorMessage);
 			return false;
 		} finally {
 			if (out!=null)
@@ -1407,19 +1425,20 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			error("More than one item must be selected, or none");
 			return;
 		}
-		int nPointRois = 0;
-		for (int i=0; i<rois.length; i++) {
-			if (rois[i].getType()==Roi.POINT)
-				nPointRois++;
-			else
-				break;
-		}
-		if (nPointRois==rois.length)
+		if (countPointRois(rois)==rois.length)
 			combinePoints(imp, rois);
 		else
 			combineRois(imp, rois);
 	}
-	
+
+	private int countPointRois(Roi[] rois) {
+		int nPointRois = 0;
+		for (Roi roi : rois)
+			if (roi.getType()==Roi.POINT)
+				nPointRois++;
+		return nPointRois;
+	}
+
 	private void combineRois(ImagePlus imp, Roi[] rois) {
 		IJ.resetEscape();
 		ShapeRoi s1=null, s2=null;
@@ -1431,7 +1450,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				return;
 			}
 			Roi roi = rois[i];
-			if (!roi.isArea()) {
+			if (!roi.isArea() && roi.getType() != Roi.POINT) {
 				if (ip==null)
 					ip = new ByteProcessor(imp.getWidth(), imp.getHeight());
 				roi = convertLineToPolygon(roi, ip);
@@ -1453,17 +1472,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 		}
 		if (s1!=null)
-			imp.setRoi(simplifyShapeRoi(s1));
-	}
-
-	private Roi simplifyShapeRoi(ShapeRoi sRoi) { //convert composite roi to simple roi if possible
-		Roi[] rois = sRoi.getRois();
-		if (rois.length != 1) return sRoi;
-		int type = rois[0].getType();
-		if (type==Roi.POLYGON || type==Roi.FREEROI)
-			return rois[0];
-		else
-			return sRoi;
+			imp.setRoi(s1.trySimplify());
 	}
 
 	Roi convertLineToPolygon(Roi roi, ImageProcessor ip) {
@@ -1484,49 +1493,49 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	void combinePoints(ImagePlus imp, Roi[] rois) {
 		int n = rois.length;
-		Polygon[] p = new Polygon[n];
-		int points = 0;
-		for (int i=0; i<n; i++) {
-			p[i] = rois[i].getPolygon();
-			points += p[i].npoints;
+		FloatPolygon fp = new FloatPolygon();
+		for (int r=0; r<n; r++) {
+			FloatPolygon fpi = rois[r].getFloatPolygon();
+			for (int i=0; i<fpi.npoints; i++)
+				fp.addPoint(fpi.xpoints[i], fpi.ypoints[i]);
 		}
-		if (points==0)
-			return;
-		int[] xpoints = new int[points];
-		int[] ypoints = new int[points];
-		int index = 0;
-		for (int i=0; i<p.length; i++) {
-			for (int j=0; j<p[i].npoints; j++) {
-				xpoints[index] = p[i].xpoints[j];
-				ypoints[index] = p[i].ypoints[j];
-				index++;
-			}	
-		}
-		imp.setRoi(new PointRoi(xpoints, ypoints, xpoints.length));
+		imp.setRoi(new PointRoi(fp));
 	}
 
+	/** Intersection of area rois or PointRois.
+	 *  If there is one PointRoi in the list of selected Rois, the points inside all selected area rois are kept.
+	 *  If more than one PointRoi is selected, the PointRois get converted to area rois with each pixel containing
+	 *  at least one point selected. */
 	void and() {
 		ImagePlus imp = getImage();
 		if (imp==null) return;
-		int[] indexes = getSelectedIndexes();
-		if (indexes.length==1) {
+		Roi[] rois = getSelectedRoisAsArray();
+		if (rois.length==1) {
 			error("More than one item must be selected, or none");
 			return;
 		}
-		if (indexes.length==0)
-			indexes = getAllIndexes();
-		ShapeRoi s1=null, s2=null;
-		for (int i=0; i<indexes.length; i++) {
-			Roi roi = (Roi)rois.get(indexes[i]);
-			if (roi==null || !roi.isArea())
+		int nPointRois = countPointRois(rois);
+		ShapeRoi s1=null;
+		PointRoi pointRoi = null;
+		for (Roi roi : rois) {
+			if (roi==null || !(roi.isArea() || roi.getType() == Roi.POINT))
 				continue;
 			if (s1==null) {
+				if (nPointRois == 1 && roi.getType() == Roi.POINT) {
+					pointRoi = (PointRoi)roi;
+					continue;  //PointRoi will be handled at the end
+				}
 				if (roi instanceof ShapeRoi)
 					s1 = (ShapeRoi)roi.clone();
 				else
 					s1 = new ShapeRoi(roi);
-				if (s1==null) return;
+				if (s1==null) continue;
 			} else {
+				if (nPointRois == 1 && roi.getType() == Roi.POINT) {
+					pointRoi = (PointRoi)roi;
+					continue;  //PointRoi will be handled at the end
+				}
+				ShapeRoi s2 = null;
 				if (roi instanceof ShapeRoi)
 					s2 = (ShapeRoi)roi.clone();
 				else
@@ -1535,7 +1544,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				s1.and(s2);
 			}
 		}
-		if (s1!=null) imp.setRoi(simplifyShapeRoi(s1));
+		if (s1==null) return;
+		if (pointRoi != null) imp.setRoi(pointRoi.containedPoints(s1));
+		else imp.setRoi(s1.trySimplify());
 		if (record()) Recorder.record("roiManager", "AND");
 	}
 
@@ -1552,7 +1563,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		ShapeRoi s1=null, s2=null;
 		for (int i=0; i<indexes.length; i++) {
 			Roi roi = (Roi)rois.get(indexes[i]);
-			if (!roi.isArea()) continue;
+			if (roi==null || !(roi.isArea() || roi.getType() == Roi.POINT))
+				continue;
 			if (s1==null) {
 				if (roi instanceof ShapeRoi)
 					s1 = (ShapeRoi)roi.clone();
@@ -1568,7 +1580,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				s1.xor(s2);
 			}
 		}
-		if (s1!=null) imp.setRoi(simplifyShapeRoi(s1));
+		if (s1!=null) imp.setRoi(s1.trySimplify());
 		if (record()) Recorder.record("roiManager", "XOR");
 	}
 
@@ -2175,8 +2187,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	private boolean save(String name, boolean saveSelected) {
-		if (!name.endsWith(".zip") && !name.equals(""))
-			return error("Name must end with '.zip'");
+		errorMessage = null;
+		if (!name.endsWith(".zip") && !name.equals("")) {
+			errorMessage = "Name must end with '.zip'";
+			return error(errorMessage);
+		}
 		if (getCount()==0)
 			return error("The list is empty");
 		int[] indexes = null;
@@ -2541,6 +2556,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			add(overlay.get(i), i+1);
 		setEditMode(null, true);
 		runCommand("show all");
+	}
+	
+	/** Returns the most recent I/O error message, or null if there was no error. */
+	public static String getErrorMessage() {
+		return errorMessage;
 	}
 	
 	// This class runs the "Multi Measure" command in a separate thread

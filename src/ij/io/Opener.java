@@ -148,8 +148,8 @@ public class Opener {
 				case OJJ:  // ObjectJ project
 					IJ.runPlugIn("ObjectJ_", path);
 					break;
-				case TABLE:  // ImageJ Results table
-					openResultsTable(path);
+				case TABLE: 
+					openTable(path);
 					break;
 				case RAW:
 					IJ.runPlugIn("ij.plugin.Raw", path);
@@ -616,7 +616,6 @@ public class Opener {
 	ImagePlus openPngUsingURL(String title, URL url) {
 		if (url==null)
 			return null;
-		//System.setProperty("jsse.enableSNIExtension","false");
 		Image img = null;
 		try {
 			InputStream in = url.openStream();
@@ -663,7 +662,8 @@ public class Opener {
 		} catch (Exception e) {
 			IJ.error("Open Using ImageIO", ""+e);
 		} 
-		if (img==null) return null;
+		if (img==null)
+			return null;
 		if (img.getColorModel().hasAlpha()) {
 			int width = img.getWidth();
 			int height = img.getHeight();
@@ -865,7 +865,7 @@ public class Opener {
 			if (n<1 || n>fi.nImages)
 				throw new IllegalArgumentException("N out of 1-"+fi.nImages+" range");
 			long size = fi.width*fi.height*fi.getBytesPerPixel();
-			fi.longOffset = fi.getOffset() + (n-1)*(size+fi.gapBetweenImages);
+			fi.longOffset = fi.getOffset() + (n-1)*(size+fi.getGap());
 			fi.offset = 0;
 			fi.nImages = 1;
 		} else {
@@ -1115,7 +1115,9 @@ public class Opener {
 	public static void openResultsTable(String path) {
 		try {
 			ResultsTable rt = ResultsTable.open(path);
-			if (rt!=null) rt.show("Results");
+			rt.showRowNumbers(true);
+			if (rt!=null)
+				rt.show("Results");
 		} catch(IOException e) {
 			IJ.error("Open Results", e.getMessage());
 		}
@@ -1132,13 +1134,15 @@ public class Opener {
 				return;
 			else
 				path = dir+name;
+		} else {
+			name = (new Opener()).getName(path);
+			if (name.startsWith("Results."))
+				name = "Results";
 		}
 		try {
 			ResultsTable rt = ResultsTable.open(path);
-			if (rt!=null) {
-				rt.showRowNumbers(false);
+			if (rt!=null)
 				rt.show(name);
-			}
 		} catch(IOException e) {
 			IJ.error("Open Table", e.getMessage());
 		}

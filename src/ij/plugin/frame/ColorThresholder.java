@@ -448,8 +448,9 @@ public class ColorThresholder extends PlugInFrame implements PlugIn, Measurement
 		add(panel);
 
 		addKeyListener(ij);  // ImageJ handles keyboard shortcuts
+		GUI.scale(this);
 		pack();
-		GUI.center(this);
+		GUI.centerOnImageJScreen(this);
 		setVisible(true);
 
 		thread.start();

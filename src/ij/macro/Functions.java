@@ -24,41 +24,43 @@ import java.awt.geom.*;
 public class Functions implements MacroConstants, Measurements {
 	Interpreter interp;
 	Program pgm;
-    boolean updateNeeded;
-    boolean autoUpdate = true;
-    ImageProcessor defaultIP;
-    ImagePlus defaultImp;
-    int imageType;
-    boolean colorSet, fontSet;
-    Color defaultColor;
-    double defaultValue = Double.NaN;
-    Plot plot;
-    static int plotID;
-    int justification = ImageProcessor.LEFT_JUSTIFY;
-    Font font;
-    GenericDialog gd;
-    PrintWriter writer;
-    boolean altKeyDown, shiftKeyDown;
-    boolean antialiasedText;
-    StringBuffer buffer;
-    RoiManager roiManager;
-    Properties props;
-    CurveFitter fitter;
-    boolean showFitDialog;
-    boolean logFitResults;
-    boolean resultsPending;
-    Overlay offscreenOverlay;
-    Overlay overlayClipboard;
-    Roi roiClipboard;
-    GeneralPath overlayPath;
-    boolean overlayDrawLabels;
-    ResultsTable currentTable;
+	boolean updateNeeded;
+	boolean autoUpdate = true;
+	ImageProcessor defaultIP;
+	ImagePlus defaultImp;
+	int imageType;
+	boolean fontSet;
+	Color globalColor;
+	double globalValue = Double.NaN;
+	int globalLineWidth;
+	Plot plot;
+	static int plotID;
+	int justification = ImageProcessor.LEFT_JUSTIFY;
+	Font font;
+	GenericDialog gd;
+	PrintWriter writer;
+	boolean altKeyDown, shiftKeyDown;
+	boolean antialiasedText;
+	StringBuffer buffer;
+	RoiManager roiManager;
+	Properties props;
+	CurveFitter fitter;
+	boolean showFitDialog;
+	boolean logFitResults;
+	boolean resultsPending;
+	Overlay offscreenOverlay;
+	Overlay overlayClipboard;
+	Roi roiClipboard;
+	GeneralPath overlayPath;
+	boolean overlayDrawLabels;
+	ResultsTable currentTable;
+	ResultsTable unUpdatedTable;
 
 	// save/restore settings
 	boolean saveSettingsCalled;
 	boolean usePointerCursor, hideProcessStackDialog;
 	float divideByZeroValue;
-    int jpegQuality;
+	int jpegQuality;
 	int saveLineWidth;
 	boolean doScaling;
 	boolean weightedColor;
@@ -74,8 +76,6 @@ public class Functions implements MacroConstants, Measurements {
 	boolean autoContrast;
 	static WaitForUserDialog waitForUserDialog;
 	int pasteMode;
-	int lineWidth = 1;
-	boolean lineWidthSet;
 	boolean expandableArrays;
 	int plotWidth;
 	int plotHeight;
@@ -224,7 +224,7 @@ public class Functions implements MacroConstants, Measurements {
 			case GET_ZOOM: value = getZoom(); break;
 			case PARSE_FLOAT: value = parseDouble(getStringArg()); break;
 			case PARSE_INT: value = parseInt(); break;
-			case IS_KEY_DOWN: value=isKeyDown(); break;
+			case IS_KEY_DOWN: value = isKeyDown(); break;
 			case GET_SLICE_NUMBER: interp.getParens(); value=getImage().getCurrentSlice(); break;
 			case SCREEN_WIDTH: case SCREEN_HEIGHT: value = getScreenDimension(type); break;
 			case CALIBRATE: value = getImage().getCalibration().getCValue(getArg()); break;
@@ -286,13 +286,14 @@ public class Functions implements MacroConstants, Measurements {
 		}
 		return str;
 	}
-	
+
 	private void setLineWidth(int width) {
-		if (overlayPath!=null && width!=lineWidth)
-			addDrawingToOverlay(getImage());
-		lineWidth = width;
-		getProcessor().setLineWidth(width);
-		lineWidthSet = true;
+		if (WindowManager.getCurrentImage()!=null) {
+			if (overlayPath!=null && width!=globalLineWidth)
+				addDrawingToOverlay(getImage());
+			getProcessor().setLineWidth(width);
+		}
+		globalLineWidth = width;
 	}
 
 	Variable[] getArrayFunction(int type) {
@@ -628,9 +629,9 @@ public class Functions implements MacroConstants, Measurements {
 
 	void setForegroundColor() {
 		boolean isImage = WindowManager.getCurrentImage()!=null;
-		int lineWidth = 0;
+		int lnWidth = 0;
 		if (isImage)
-			lineWidth = getProcessor().getLineWidth();
+			lnWidth = getProcessor().getLineWidth();
 		int red=0, green=0, blue=0;
 		int arg1 = (int)getFirstArg();
 		if (interp.nextToken()==')') {
@@ -646,9 +647,9 @@ public class Functions implements MacroConstants, Measurements {
 		IJ.setForegroundColor(red, green, blue);
 		resetImage();
 		if (isImage)
-			setLineWidth(lineWidth);
-		defaultColor = null;
-		defaultValue = Double.NaN;
+			setLineWidth(lnWidth);
+		globalColor = null;
+		globalValue = Double.NaN;
 	}
 
 	void setBackgroundColor() {
@@ -669,24 +670,32 @@ public class Functions implements MacroConstants, Measurements {
 	}
 
 	void setColor() {
-		colorSet = true;
 		interp.getLeftParen();
 		if (isStringArg()) {
-			defaultColor = getColor();
-			getProcessor().setColor(defaultColor);
-			defaultValue = Double.NaN;
+			globalColor = getColor();
+			globalValue = Double.NaN;
+			ImagePlus imp = WindowManager.getCurrentImage();
+			if (imp!=null) {
+				if (overlayPath!=null)
+					addDrawingToOverlay(imp);
+				getProcessor().setColor(globalColor);
+			}
 			interp.getRightParen();
 			return;
 		}
 		double arg1 = interp.getExpression();
-		if (interp.nextToken()==')')
-			{interp.getRightParen(); setColor(arg1); return;}
+		if (interp.nextToken()==')') {
+			interp.getRightParen();
+			setColor(arg1);
+			return;
+		}
 		int red=(int)arg1, green=(int)getNextArg(), blue=(int)getLastArg();
 		if (red<0) red=0; if (green<0) green=0; if (blue<0) blue=0;
 		if (red>255) red=255; if (green>255) green=255; if (blue>255) blue=255;
-		defaultColor = new Color(red, green, blue);
-		getProcessor().setColor(defaultColor);
-		defaultValue = Double.NaN;
+		globalColor = new Color(red, green, blue);
+		globalValue = Double.NaN;
+		if (WindowManager.getCurrentImage()!=null)
+			getProcessor().setColor(globalColor);
 	}
 
 	void setColor(double value) {
@@ -709,8 +718,8 @@ public class Functions implements MacroConstants, Measurements {
 				ip.setValue(value);
 				break;
 		}
-		defaultValue = value;
-		defaultColor = null;
+		globalValue = value;
+		globalColor = null;
 	}
 
 	void makeLine() {
@@ -723,32 +732,24 @@ public class Functions implements MacroConstants, Measurements {
 		if (interp.token==')')
 			IJ.makeLine(x1d, y1d, x2d, y2d);
 		else {
-			int x1 = (int)Math.round(x1d);
-			int y1 = (int)Math.round(y1d);
-			int x2 = (int)Math.round(x2d);
-			int y2 = (int)Math.round(y2d);
-			int max = 200;
-			int[] x = new int[max];
-			int[] y = new int[max];
-			x[0]=x1; y[0]=y1; x[1]=x2; y[1]=y2;
-			int n = 2;
-			while (interp.token==',' && n<max) {
-				x[n] = (int)Math.round(interp.getExpression());
-				if (n==2 && interp.nextToken()==')') {
+			Polygon points = new Polygon();
+			points.addPoint((int)Math.round(x1d),(int)Math.round(y1d));
+			points.addPoint((int)Math.round(x2d),(int)Math.round(y2d));
+			while (interp.token==',') {
+				int x = (int)Math.round(interp.getExpression());
+				if (points.npoints==2 && interp.nextToken()==')') {
 					interp.getRightParen();
 					Roi line = new Line(x1d, y1d, x2d, y2d);
-					line.updateWideLine((float)x[n]);
+					line.updateWideLine((float)x);
 					getImage().setRoi(line);
 					return;
 				}
 				interp.getComma();
-				y[n] = (int)Math.round(interp.getExpression());
+				int y = (int)Math.round(interp.getExpression());
+				points.addPoint(x,y);
 				interp.getToken();
-				n++;
 			}
-			if (n==max && interp.token!=')')
-				interp.error("More than "+max+" points");
-			getImage().setRoi(new PolygonRoi(x, y, n, Roi.POLYLINE));
+			getImage().setRoi(new PolygonRoi(points, Roi.POLYLINE));
 		}
 		resetImage();
 	}
@@ -812,7 +813,7 @@ public class Functions implements MacroConstants, Measurements {
 	}
 
 	ImagePlus getImage() {
-		ImagePlus imp = IJ.getImage();
+		ImagePlus imp = IJ.getImage(interp);
 		if (imp.getWindow()==null && IJ.getInstance()!=null && !interp.isBatchMode() && WindowManager.getTempCurrentImage()==null)
 			throw new RuntimeException(Macro.MACRO_CANCELED);
 		defaultIP = null;
@@ -823,15 +824,20 @@ public class Functions implements MacroConstants, Measurements {
 	void resetImage() {
 		defaultImp = null;
 		defaultIP = null;
-		colorSet = fontSet = false;
-		lineWidth = 1;
+		fontSet = false;
 	}
 
 	ImageProcessor getProcessor() {
 		if (defaultIP==null) {
 			defaultIP = getImage().getProcessor();
-			if (lineWidthSet)
-				defaultIP.setLineWidth(lineWidth);
+			if (globalLineWidth>0)
+				defaultIP.setLineWidth(globalLineWidth);
+			if (globalColor!=null)
+				defaultIP.setColor(globalColor);
+			else if (!Double.isNaN(globalValue))
+				defaultIP.setValue(globalValue);
+			else
+				defaultIP.setColor(Toolbar.getForegroundColor());
 		}
 		return defaultIP;
 	}
@@ -924,7 +930,6 @@ public class Functions implements MacroConstants, Measurements {
 		int a2 = (int)Math.round(interp.getExpression());
 		interp.getRightParen();
 		ImageProcessor ip = getProcessor();
-		if (!colorSet) setForegroundColor(ip);
 		ip.lineTo(a1, a2);
 		updateAndDraw();
 	}
@@ -940,19 +945,8 @@ public class Functions implements MacroConstants, Measurements {
 		int y2 = (int)Math.round(interp.getExpression());
 		interp.getRightParen();
 		ImageProcessor ip = getProcessor();
-		if (!colorSet) setForegroundColor(ip);
 		ip.drawLine(x1, y1, x2, y2);
 		updateAndDraw();
-	}
-
-	void setForegroundColor(ImageProcessor ip) {
-		if (defaultColor!=null)
-			ip.setColor(defaultColor);
-		else if (!Double.isNaN(defaultValue))
-			ip.setValue(defaultValue);
-		else
-			ip.setColor(Toolbar.getForegroundColor());
-		colorSet = true;
 	}
 
 	void doIPMethod(int type) {
@@ -967,7 +961,6 @@ public class Functions implements MacroConstants, Measurements {
 			case FILL:
 				ImagePlus imp = getImage();
 				Roi roi = imp.getRoi();
-				if (!colorSet) setForegroundColor(ip);
 				if (roi==null) {
 					ip.resetRoi();
 					ip.fill();
@@ -1013,8 +1006,6 @@ public class Functions implements MacroConstants, Measurements {
 		}
 		interp.getRightParen();
 		ImageProcessor ip = getProcessor();
-		if (!colorSet)
-			setForegroundColor(ip);
 		setFont(ip);
 		ip.setJustification(justification);
 		ip.setAntialiasedText(antialiasedText);
@@ -1244,7 +1235,8 @@ public class Functions implements MacroConstants, Measurements {
 		if (rt==null) {
 			rt = Analyzer.getResultsTable();
 			resultsPending = true;
-		}
+		} else
+			unUpdatedTable = rt;
 		if (row<0 || row>rt.size())
 			interp.error("Row ("+row+") out of range");
 		if (row==rt.size())
@@ -1648,7 +1640,7 @@ public class Functions implements MacroConstants, Measurements {
 		String type = win.getClass().getName();
 		if (win instanceof TextWindow) {
 			TextPanel tp = ((TextWindow)win).getTextPanel();
-			if (tp.getColumnHeadings().isEmpty())
+			if (tp.getColumnHeadings().isEmpty()  && tp.getResultsTable()==null)
 				type = "Text";
 			else {
 				if (tp.getResultsTable()!=null)
@@ -2086,7 +2078,9 @@ public class Functions implements MacroConstants, Measurements {
 		} else if (name.equals("getValues")) {
 			return getPlotValues();
 		} else if (name.equals("showValues")) {
-			return showPlotValues();
+			return showPlotValues(/*useLabels=*/false);
+		} else if (name.equals("showValuesWithLabels")) {
+			return showPlotValues(/*useLabels=*/true);
 		}
 		// the following commands work with a plot under construction or an image with a plot created previously
 		Plot currentPlot = plot;
@@ -2169,8 +2163,7 @@ public class Functions implements MacroConstants, Measurements {
 			return replacePlot(currentPlot);
 		} else if (name.equals("addText") || name.equals("drawLabel")) {
 			return addPlotText(currentPlot);
-		}		
-		
+		}
 		// the following commands need a plot under construction
 		if (plot==null)
 			interp.error("No plot defined");
@@ -2187,7 +2180,7 @@ public class Functions implements MacroConstants, Measurements {
 		} else if (name.equals("drawShapes")) {
 			return drawShapes();
 		} else if (name.equals("drawGrid")) {
-			plot.drawShapes("redraw_grid", null);	
+			plot.drawShapes("redraw_grid", null);
 			return Double.NaN;
 		} else if (name.startsWith("setLineWidth")) {
 			plot.setLineWidth((float)getArg());
@@ -2202,7 +2195,7 @@ public class Functions implements MacroConstants, Measurements {
 			double binWidth = interp.getExpression();
 			double binCenter = 0;
 			interp.getToken();
-			if (interp.token == ',') 
+			if (interp.token == ',')
 				 binCenter = interp.getExpression();
 			else
 				interp.putTokenBack();
@@ -2210,9 +2203,9 @@ public class Functions implements MacroConstants, Measurements {
 			int len1 = arrV.length;
 			double[] arrD = new double[len1];
 			for (int i=0; i<len1; i++)
-				arrD[i] = arrV[i].getValue();		
-			plot.addHistogram(arrD, binWidth, binCenter);			
-			return Double.NaN;	
+				arrD[i] = arrV[i].getValue();
+			plot.addHistogram(arrD, binWidth, binCenter);
+			return Double.NaN;
 		} else if (name.equals("appendToStack")) {
 			plot.appendToStack();
 			return Double.NaN;
@@ -2258,7 +2251,7 @@ public class Functions implements MacroConstants, Measurements {
 		return Double.NaN;
 	}
 
-	double showPlotValues() {
+	double showPlotValues(boolean useLabels) {
 		String title = "Results";
 		if (interp.nextToken() == '(') {
 			interp.getLeftParen();
@@ -2269,13 +2262,13 @@ public class Functions implements MacroConstants, Measurements {
 		interp.getParens();
 		ImagePlus imp = getImage();
 		ImageWindow win = imp.getWindow();
-		if (win==null || !(win instanceof PlotWindow)) {
-			interp.error("No plot window");
+		Plot plot = win instanceof PlotWindow ? ((PlotWindow)win).getPlot() : imp.getPlot();
+		if (plot!=null) {
+			ResultsTable rt = useLabels ? plot.getResultsTableWithLabels() : plot.getResultsTable(true);
+			rt.show(title);
 			return Double.NaN;
-		}
-		PlotWindow pw = (PlotWindow)win;
-		ResultsTable rt = pw.getResultsTable();
-		rt.show(title);
+		} else
+			interp.error("No plot window");
 		return Double.NaN;
 	}
 
@@ -2414,7 +2407,7 @@ public class Functions implements MacroConstants, Measurements {
 		plot.drawShapes(type, shapeData);
 		return Double.NaN;
 	}
-	
+
 	double setPlotColor(Plot plot) {
 		interp.getLeftParen();
 		Color color = getColor();
@@ -2448,8 +2441,10 @@ public class Functions implements MacroConstants, Measurements {
 				style |= Font.ITALIC;
 		}
 		interp.getRightParen();
-		if (forAxisLabels) plot.setAxisLabelFont(style, size);
-		else plot.setFont(style, size);
+		if (forAxisLabels)
+			plot.setAxisLabelFont(style, size);
+		else
+			plot.setFont(style, size);
 		plot.updateImage();
 		return Double.NaN;
 	}
@@ -2544,10 +2539,10 @@ public class Functions implements MacroConstants, Measurements {
 	double addToPlot(Plot currentPlot) {
 		String shape = getFirstString();
 		int what = Plot.toShape(shape);
-		boolean errorBars = false;
 		double[] x = getNextArray();
 		double[] y;
-		double[] e = new double[x.length];
+		double[] errorBars = null;
+		String label = null;
 		if (interp.nextToken()==')') {
 			y = x;
 			x = new double[y.length];
@@ -2557,9 +2552,11 @@ public class Functions implements MacroConstants, Measurements {
 			interp.getComma();
 			y = getNumericArray();
 			if (interp.nextToken()!=')') {
-				errorBars = true;
 				interp.getComma();
-				e = getNumericArray();
+				if (isArrayArg()) //can error bars (array) or label
+					errorBars = getNumericArray();
+				else
+					label = getString();
 			}
 		}
 		interp.getRightParen();
@@ -2567,15 +2564,17 @@ public class Functions implements MacroConstants, Measurements {
 			currentPlot.addErrorBars(y);
 		else if (what==-2)
 			currentPlot.addHorizontalErrorBars(y);
-		else if (errorBars)
-			currentPlot.addPoints(x, y, e, what);
+		else if (errorBars != null)
+			currentPlot.addPoints(x, y, errorBars, what);
 		else if (what==Plot.CUSTOM)
 			currentPlot.add(shape, x, y);
 		else
 			currentPlot.addPoints(x, y, what);
+		if (label != null)
+			currentPlot.setLabel(-1, label);
 		return Double.NaN;
 	}
-	
+
 	double replacePlot(Plot plot) {
 		int index = (int)getFirstArg();
 		String shape = getNextString();
@@ -2688,7 +2687,7 @@ public class Functions implements MacroConstants, Measurements {
 		if (tok!=WORD) return false;
 		Variable v = interp.lookupVariable(nextToken>>TOK_SHIFT);
 		if (v==null) return false;
-		int type = v.getType();	
+		int type = v.getType();
 		if (type!=Variable.ARRAY)
 			return v.getType()==Variable.STRING;
 		Variable[] array = v.getArray();
@@ -2814,6 +2813,11 @@ public class Functions implements MacroConstants, Measurements {
 			IJ.setKeyDown(KeyEvent.VK_SHIFT);
 		else
 			IJ.setKeyUp(KeyEvent.VK_SHIFT);
+		boolean controlKeyDown = keys.indexOf("control")!=-1;
+		if (controlKeyDown)
+			IJ.setKeyDown(KeyEvent.VK_CONTROL);
+		else
+			IJ.setKeyUp(KeyEvent.VK_CONTROL);
 		if (keys.equals("space"))
 			IJ.setKeyDown(KeyEvent.VK_SPACE);
 		else
@@ -3145,7 +3149,7 @@ public class Functions implements MacroConstants, Measurements {
 							if (pattern.equalsIgnoreCase("cp")) {
 								((ColorPicker) thisWin).close();
 							}
-						}						
+						}
 						if (thisWin instanceof ThresholdAdjuster) {//Threshold
 							if (pattern.equalsIgnoreCase("Threshold")) {
 								((ThresholdAdjuster) thisWin).close();
@@ -3183,7 +3187,7 @@ public class Functions implements MacroConstants, Measurements {
 				}
 			}
 
-			//S c a n  i m a g e s	
+			//S c a n  i m a g e s
 			ImagePlus frontImp = WindowManager.getCurrentImage();
 			int[] ids = WindowManager.getIDList();
 			if (ids == null) {
@@ -3331,7 +3335,7 @@ public class Functions implements MacroConstants, Measurements {
 			height = (int)getNextArg();
 		}
 		interp.getRightParen();
-		if (width==0&&height==0) {
+		if (width==0 && height==0) {
 			Window win = WindowManager.getActiveWindow();
 			if (win!=null)
 				win.setLocation(x, y);
@@ -3395,8 +3399,8 @@ public class Functions implements MacroConstants, Measurements {
 			interp.getRightParen();
 			oneArg = true;
 		}
-		if (oneArg && format.contains(File.separator))
-			IJ.save(format); // argument is a path
+		if (oneArg && (format.contains(File.separator)||format.contains("/")))
+			IJ.save(format); // assume argument is a path
 		else
 			IJ.saveAs(format, path);
 	}
@@ -3583,6 +3587,7 @@ public class Functions implements MacroConstants, Measurements {
 		if (key.indexOf("alt")!=-1) value = IJ.altKeyDown()==true?1.0:0.0;
 		else if (key.indexOf("shift")!=-1) value = IJ.shiftKeyDown()==true?1.0:0.0;
 		else if (key.indexOf("space")!=-1) value = IJ.spaceBarDown()==true?1.0:0.0;
+		else if (key.indexOf("control")!=-1) value = IJ.controlKeyDown()==true?1.0:0.0;
 		else interp.error("Invalid key");
 		return value;
 	}
@@ -3628,7 +3633,6 @@ public class Functions implements MacroConstants, Measurements {
 		int width = (int)getNextArg();
 		int height = (int)getLastArg();
 		ImageProcessor ip = getProcessor();
-		if (!colorSet) setForegroundColor(ip);
 		switch (type) {
 			case DRAW_RECT: ip.drawRect(x, y, width, height); break;
 			case FILL_RECT: ip.setRoi(x, y, width, height); ip.fill(); break;
@@ -3745,7 +3749,6 @@ public class Functions implements MacroConstants, Measurements {
 		} else
 			interp.getRightParen();
 		ImageProcessor ip = getProcessor();
-		if (!colorSet) setForegroundColor(ip);
 		FloodFiller ff = new FloodFiller(ip);
 		if (fourConnected)
 			ff.fill(x, y);
@@ -3806,6 +3809,9 @@ public class Functions implements MacroConstants, Measurements {
 		try {
 			if (name.equals("create")) {
 				gd = new GenericDialog(getStringArg());
+				return null;
+			} else if (name.equals("createNonBlocking")) {
+				gd = new NonBlockingGenericDialog(getStringArg());
 				return null;
 			}
 			if (gd==null) {
@@ -4039,28 +4045,22 @@ public class Functions implements MacroConstants, Measurements {
 	}
 
 	private void makePolygon() {
-		int max = 200;
-		int[] x = new int[max];
-		int[] y = new int[max];
-		x[0] = (int)Math.round(getFirstArg());
-		y[0] = (int)Math.round(getNextArg());
+		Polygon points = new Polygon();
+		points.addPoint((int)Math.round(getFirstArg()), (int)Math.round(getNextArg()));
 		interp.getToken();
-		int n = 1;
-		while (interp.token==',' && n<max) {
-			x[n] = (int)Math.round(interp.getExpression());
+		while (interp.token==',') {
+			int x = (int)Math.round(interp.getExpression());
 			interp.getComma();
-			y[n] = (int)Math.round(interp.getExpression());
+			int y = (int)Math.round(interp.getExpression());
+			points.addPoint(x,y);
 			interp.getToken();
-			n++;
 		}
-		if (n<3)
+		if (points.npoints<3)
 			interp.error("Fewer than 3 points");
-		if (n==max && interp.token!=')')
-			interp.error("More than "+max+" points");
 		ImagePlus imp = getImage();
 		Roi previousRoi = imp.getRoi();
 		if (shiftKeyDown||altKeyDown) imp.saveRoi();
-		imp.setRoi(new PolygonRoi(x, y, n, Roi.POLYGON));
+		imp.setRoi(new PolygonRoi(points, Roi.POLYGON));
 		Roi roi = imp.getRoi();
 		if (previousRoi!=null && roi!=null)
 			updateRoi(roi);
@@ -4117,7 +4117,7 @@ public class Functions implements MacroConstants, Measurements {
 				return "0";
 		} else if (name.equals("copy")) {
 			String f1 = getFirstString();
-			String f2 = getLastString();		
+			String f2 = getLastString();
 			String err = Tools.copyFile(f1, f2);
 			if (err.length()>0)
 				interp.error(err);
@@ -4300,7 +4300,7 @@ public class Functions implements MacroConstants, Measurements {
 		}
 		return null;
 	}
-	
+
 	public static String copyFile(File f1, File f2) {
 		return Tools.copyFile(f1.getPath(), f2.getPath());
 	}
@@ -4455,6 +4455,8 @@ public class Functions implements MacroConstants, Measurements {
 			Analyzer.setMeasurement(STD_DEV, state);
 		else if (arg1.equals("showrownumbers"))
 			ResultsTable.getResultsTable().showRowNumbers(state);
+		else if (arg1.equals("showrowindexes"))
+			ResultsTable.getResultsTable().showRowIndexes(state);
 		else if (arg1.startsWith("show"))
 			Analyzer.setOption(arg1, state);
 		else if (arg1.startsWith("bicubic"))
@@ -4479,6 +4481,10 @@ public class Functions implements MacroConstants, Measurements {
 			Prefs.supportMacroUndo = state;
 		else if (arg1.equals("inverty"))
 			getImage().getCalibration().setInvertY(state);
+		else if (arg1.equals("scaleconversions"))
+			ImageConverter.setDoScaling(state);
+		else if (arg1.startsWith("copyhead"))
+			Prefs.copyColumnHeaders = state;
 		else
 			interp.error("Invalid option");
 	}
@@ -4570,9 +4576,15 @@ public class Functions implements MacroConstants, Measurements {
 		else if (arg.indexOf("animated")!=-1) {
 			ImageWindow win = getImage().getWindow();
 			state = win!=null && (win instanceof StackWindow) && ((StackWindow)win).getAnimate();
-		} else if (arg.equals("inverty"))
+		} else if (arg.equals("inverty")) {
 			state = getImage().getCalibration().getInvertY();
-		else
+		} else if (arg.startsWith("area")) {
+			Roi roi = getImage().getRoi();
+			state = roi!=null?roi.isArea():false;
+		} else if (arg.startsWith("line")) {
+			Roi roi = getImage().getRoi();
+			state = roi!=null?roi.isLine():false;
+		} else
 			interp.error("Invalid argument");
 		return state?1.0:0.0;
 	}
@@ -4824,7 +4836,14 @@ public class Functions implements MacroConstants, Measurements {
 	}
 
 	double getValue() {
-		String key = getStringArg();
+		interp.getLeftParen();
+		if (!isStringArg()) {  // getValue(x,y)
+			int x = (int)interp.getExpression();
+			int y = (int)getLastArg();
+			return getProcessor().getPixelValue(x,y);
+		}
+		String key = getString();
+		interp.getRightParen();
 		if (key.equals("rgb.foreground"))
 			return Toolbar.getForegroundColor().getRGB()&0xffffff;
 		else if (key.equals("rgb.background"))
@@ -4843,6 +4862,13 @@ public class Functions implements MacroConstants, Measurements {
 			ImageProcessor ip = getProcessor();
 			setFont(ip);
 			return ip.getFontMetrics().getHeight();
+		} else if (key.equals("selection.size")) {
+			ImagePlus imp = getImage();
+			Roi roi = imp.getRoi();
+			if (roi==null)
+				return 0.0;
+			else
+				return roi.size();
 		} else if (key.equals("selection.width")) {
 			ImagePlus imp = getImage();
 			Roi roi = imp.getRoi();
@@ -4852,6 +4878,8 @@ public class Functions implements MacroConstants, Measurements {
 		} else if (key.equals("results.count")) {
 			ResultsTable rt = getResultsTable(false);
 			return rt!=null?rt.size():0;
+		} else if (key.equals("rotation.angle")) {
+			return Rotator.getAngle();
 		} else if (key.equals("hashCode")) {
 			return interp.hashCode();
 		} else if (key.equals("instance")) {
@@ -4860,9 +4888,44 @@ public class Functions implements MacroConstants, Measurements {
 		} else if (key.equals("done")) {
 			return interp.done?1:0;
 		} else {
+			String[] headings = ResultsTable.getDefaultHeadings();
+			for (int i=0; i<headings.length; i++) {
+				if (key.startsWith(headings[i]))
+					return getMeasurementValue(key);
+			}
 			interp.error("Invalid key");
 			return 0.0;
 		}
+	}
+
+	double getMeasurementValue(String measurement) {
+		String options = "";
+		int index = measurement.indexOf(" ");
+		if (index>0) {
+			if (index<measurement.length()-1)
+				options = measurement.substring(index+1, measurement.length());
+			measurement = measurement.substring(0, index);
+		}
+		ImagePlus imp = getImage();
+		int measurements = ALL_STATS + SLICE;
+		if (options.contains("limit"))
+			measurements += LIMIT;
+		Calibration cal = null;
+		if (options.contains("raw")) {
+			cal = imp.getCalibration();
+			imp.setCalibration(null);
+		}
+		ImageStatistics stats = imp.getStatistics(measurements);
+		ResultsTable rt = new ResultsTable();
+		Analyzer analyzer = new Analyzer(imp, measurements, rt);
+		analyzer.saveResults(stats, imp.getRoi());
+		double value = Double.NaN;
+		try {
+			value = rt.getValue(measurement, 0);
+		} catch (Exception e) {};
+		if (cal!=null)
+			imp.setCalibration(cal);
+		return value;
 	}
 
 	double getColorValue(Color color) {
@@ -5383,7 +5446,7 @@ public class Functions implements MacroConstants, Measurements {
 			font = imp.getProcessor().getFont();
 		TextRoi roi = new TextRoi(x, y, text, font);
 		if (!nullFont)
-			roi.setAntialiased(antialiasedText);
+			roi.setAntiAlias(antialiasedText);
 		imp.setRoi(roi);
 	}
 
@@ -5580,7 +5643,7 @@ public class Functions implements MacroConstants, Measurements {
 			return getRankPositions();
 		else if (name.equals("getStatistics"))
 			return getArrayStatistics();
-		else if (name.equals("getSequence"))
+		else if (name.equals("sequence") || name.equals("getSequence"))
 			return getSequence();
 		else if (name.equals("fill"))
 			return fillArray();
@@ -5606,9 +5669,64 @@ public class Functions implements MacroConstants, Measurements {
 			return getVertexAngles();
 		else if (name.equals("rotate"))
 			return rotateArray();
+		else if (name.equals("deleteValue") || name.equals("delete"))
+			return deleteArrayValue();
+		else if (name.equals("deleteIndex"))
+			return deleteArrayIndex();
 		else
 			interp.error("Unrecognized Array function");
 		return null;
+	}
+
+	Variable[] deleteArrayIndex() {
+		interp.getLeftParen();
+		Variable[] arr1 = getArray();
+		int index = (int)getLastArg();
+		checkIndex(index, 0, arr1.length-1);
+		int len1 = arr1.length;
+		Variable[] arr2 = new Variable[len1-1];
+		int index2 = 0;
+		for (int i=0; i<len1; i++) {
+			if (i!=index)
+				arr2[index2++] = (Variable)arr1[i].clone();
+		}
+		return arr2;
+	}
+
+	Variable[] deleteArrayValue() {
+		interp.getLeftParen();
+		Variable[] arr1 = getArray();
+		double value = Double.MAX_VALUE;
+		String stringValue = null;
+		interp.getComma();
+		if (isStringArg())
+			stringValue = getString();
+		else
+			value = interp.getExpression();
+		interp.getRightParen();
+		int len1 = arr1.length;
+		Variable[] cleanArr = new Variable[len1];
+		int len2 = 0;
+		for (int jj = 0; jj < len1; jj++) {
+			int type = arr1[jj].getType();
+			boolean remove = false;
+			if (stringValue!=null) {
+				if (type==Variable.STRING) {
+					String str = arr1[jj].getString();
+					remove =  stringValue.equals(str);
+				}
+			} else if (type==Variable.VALUE) {
+				double val = arr1[jj].getValue();
+				remove =  (val==value);
+				remove = remove || (Double.isNaN(val) && Double.isNaN(value));
+			}
+			if (!remove)
+				cleanArr[len2++] = (Variable)arr1[jj].clone();
+		}
+		Variable[] shortenedArr = new Variable[len2];
+		for (int jj=0; jj<len2; jj++)
+			shortenedArr[jj] = cleanArr[jj];
+		return shortenedArr;
 	}
 
 	Variable[] fourierArray() {
@@ -6039,6 +6157,7 @@ public class Functions implements MacroConstants, Measurements {
 			}
 		}
      	rt.show(title);
+		waitUntilActivated(title);
 		return null;
 	}
 
@@ -6143,7 +6262,7 @@ public class Functions implements MacroConstants, Measurements {
 			return showOverlay(imp);
 		else if (name.equals("hide"))
 			return hideOverlay(imp);
-		else if (name.equals("selectable")) 
+		else if (name.equals("selectable"))
 			return overlaySelectable(imp);
 		else if (name.equals("remove"))
 			return removeOverlay(imp);
@@ -6171,9 +6290,10 @@ public class Functions implements MacroConstants, Measurements {
 			return overlay!=null && imp.getHideOverlay()?1.0:0.0;
 		else if (name.equals("addSelection"))
 			return overlayAddSelection(imp, overlay);
-		else if (name.equals("setPosition"))
+		else if (name.equals("setPosition")) {
+			addDrawingToOverlay(imp);
 			return overlaySetPosition(overlay);
-		else if (name.equals("setFillColor"))
+		} else if (name.equals("setFillColor"))
 			return overlaySetFillColor(overlay);
 		if (overlay==null)
 			interp.error("No overlay");
@@ -6347,7 +6467,8 @@ public class Functions implements MacroConstants, Measurements {
 	}
 
 	double overlayMoveTo() {
-		if (overlayPath==null) overlayPath = new GeneralPath();
+		if (overlayPath==null)
+			overlayPath = new GeneralPath();
 		interp.getLeftParen();
 		float x = (float)interp.getExpression();
 		interp.getComma();
@@ -6358,7 +6479,10 @@ public class Functions implements MacroConstants, Measurements {
 	}
 
 	double overlayLineTo() {
-		if (overlayPath==null) overlayPath = new GeneralPath();
+		if (overlayPath==null) {
+			overlayPath = new GeneralPath();
+			overlayPath.moveTo(0, 0);
+		}
 		interp.getLeftParen();
 		float x = (float)interp.getExpression();
 		interp.getComma();
@@ -6416,7 +6540,7 @@ public class Functions implements MacroConstants, Measurements {
 			font = imp.getProcessor().getFont();
 		TextRoi roi = new TextRoi(text, x, y, font);  // use drawString() compatible constructor
 		if (!nullFont && !antialiasedText)
-			roi.setAntialiased(false);
+			roi.setAntiAlias(false);
 		roi.setAngle(angle);
 		roi.setJustification(justification);
 		addRoi(imp, roi);
@@ -6430,7 +6554,8 @@ public class Functions implements MacroConstants, Measurements {
 	}
 
 	void addDrawingToOverlay(ImagePlus imp) {
-		if (overlayPath==null) return;
+		if (overlayPath==null)
+			return;
 		Roi roi = new ShapeRoi(overlayPath);
 		overlayPath = null;
 		addRoi(imp, roi);
@@ -6443,8 +6568,8 @@ public class Functions implements MacroConstants, Measurements {
 				offscreenOverlay = new Overlay();
 			overlay = offscreenOverlay;
 		}
-		if (defaultColor!=null)
-			roi.setStrokeColor(defaultColor);		
+		if (globalColor!=null)
+			roi.setStrokeColor(globalColor);
 		roi.setStrokeWidth(getProcessor().getLineWidth());
 		overlay.add(roi);
 	}
@@ -6489,7 +6614,7 @@ public class Functions implements MacroConstants, Measurements {
 			overlay.clear();
 		return Double.NaN;
 	}
-	
+
 	private Variable doTable() {
 		interp.getToken();
 		if (interp.token!='.')
@@ -6532,8 +6657,12 @@ public class Functions implements MacroConstants, Measurements {
 			return new Variable(getResultsTable(getTitleArg()).getTitle());
 		else if (name.equals("headings"))
 			return new Variable(getResultsTable(getTitleArg()).getColumnHeadings());
+		else if (name.equals("allHeadings"))
+			return getAllHeadings();
 		else if (name.equals("showRowNumbers"))
-			return showRowNumbers();
+			return showRowNumbers(true);
+		else if (name.equals("showRowIndexes"))
+			return showRowNumbers(false);
 		else if (name.equals("sort"))
 			return sortTable();
 		else if (name.equals("hideRowNumbers")) {
@@ -6545,87 +6674,110 @@ public class Functions implements MacroConstants, Measurements {
 		} else if (name.startsWith("showArray")) {
 			showArray();
 			return new Variable();
-		} else if (name.equals("getSelectionStart"))	
+		} else if (name.equals("getSelectionStart"))
 			return getSelectionStart();
 		else if (name.equals("getSelectionEnd"))
 			return getSelectionEnd();
 		else if (name.equals("setSelection"))
 			return setSelection();
+		else if (name.equals("setLocAndSize") || name.equals("setLocationAndSize"))
+			return setTableLocAndSize();
 		else
 			interp.error("Unrecognized function name");
 		return new Variable();
 	}
-	
+
+	private Variable setTableLocAndSize() {
+		double x = getFirstArg();
+		double y = getNextArg();
+		double width = getNextArg();
+		double height = getNextArg();
+		String title = getTitle();
+		if (title==null) {
+			ResultsTable rt = getResultsTable(title);
+			title = rt.getTitle();
+		}
+		Frame frame = WindowManager.getFrame(title);
+		if (frame!=null) {
+			Point loc = frame.getLocation();
+			Dimension size = frame.getSize();
+			frame.setLocation(Double.isNaN(x)?loc.x:(int)x, Double.isNaN(y)?loc.y:(int)y);
+			frame.setSize(Double.isNaN(width)?size.width:(int)width, Double.isNaN(height)?size.height:(int)height);
+		}
+		return new Variable();
+	}
+
 	private Variable setSelection() {
 		interp.getLeftParen();
 		double from = interp.getExpression();
 		interp.getComma();
 		double to = interp.getExpression();
-		String title = getTitle();
-		if (title != null){
-			Frame f = WindowManager.getFrame(title);
-			if (f!=null && (f instanceof TextWindow)){
-				TextWindow tWin = (TextWindow)f;
-				if (from == -1 && to == -1)
-					tWin.getTextPanel().resetSelection();
-				else
-					tWin.getTextPanel().setSelection((int)from, (int)to);
-				return new Variable();
-			}
+		ResultsTable rt = getResultsTable(getTitle());
+		String title = rt.getTitle();
+		Frame f = WindowManager.getFrame(title);
+		if (f!=null && (f instanceof TextWindow)){
+			TextWindow tWin = (TextWindow)f;
+			if (from == -1 && to == -1)
+				tWin.getTextPanel().resetSelection();
+			else
+				tWin.getTextPanel().setSelection((int)from, (int)to);
+			return new Variable();
 		}
-		interp.error("Title of table missing or not found");
+		interp.error("\""+title+"\" table not found");
 		return new Variable();
 	}
-	
+
 	private Variable getSelectionStart() {
 		int selStart = -1;
-		String title = getTitleArg();
-		if (title != null){
-			Frame f = WindowManager.getFrame(title);
-			if (f!=null && (f instanceof TextWindow)){
-				TextWindow tWin = (TextWindow)f;	
-				selStart = tWin.getTextPanel().getSelectionStart();
-				return new Variable(selStart);
-			}
+		ResultsTable rt = getResultsTable(getTitleArg());
+		String title = rt.getTitle();
+		Frame f = WindowManager.getFrame(title);
+		if (f!=null && (f instanceof TextWindow)){
+			TextWindow tWin = (TextWindow)f;
+			selStart = tWin.getTextPanel().getSelectionStart();
+			return new Variable(selStart);
 		}
-		interp.error("Title of table missing or not found");
 		return new Variable(selStart);
 	}
-	
+
 	private Variable getSelectionEnd() {
 		int selEnd = -1;
-		String title = getTitleArg();
-		if (title != null){
-			Frame f = WindowManager.getFrame(title);
-			if (f!=null && (f instanceof TextWindow)){
-				TextWindow tWin = (TextWindow)f;	
-				selEnd = tWin.getTextPanel().getSelectionEnd();
-				return new Variable(selEnd);
-			}
+		ResultsTable rt = getResultsTable(getTitleArg());
+		String title = rt.getTitle();
+		Frame f = WindowManager.getFrame(title);
+		if (f!=null && (f instanceof TextWindow)){
+			TextWindow tWin = (TextWindow)f;
+			selEnd = tWin.getTextPanel().getSelectionEnd();
+			return new Variable(selEnd);
 		}
-		interp.error("Title of table missing or not found");
+		interp.error("\""+title+"\" table not found");
 		return new Variable(selEnd);
 	}
-	
+
 	private Variable setTableValue() {
 		ResultsTable rt = getRT(null);
 		setResult(rt);
 		return new Variable();
 	}
-	
+
 	private Variable setTableColumn() {
 		String column = getFirstString();
-		interp.getComma();
-		Variable[] array = getArray();
-		ResultsTable rt = getResultsTable(getTitle());		
+		Variable[] array = new Variable[0];
+		if (interp.nextToken()!=')') {
+			interp.getComma();
+			array = getArray();
+		}
+		ResultsTable rt = getResultsTable(getTitle());
 		rt.setColumn(column, array);
+		rt.show(rt.getTitle());
 		return new Variable();
 	}
-	
+
 	private Variable updateTable() {
 		String title = getTitleArg();
 		ResultsTable rt = getResultsTable(title);
 		rt.show(rt.getTitle());
+		unUpdatedTable = null;
 		if (rt==Analyzer.getResultsTable())
 			resultsPending = false;
 		return new Variable();
@@ -6645,16 +6797,31 @@ public class Functions implements MacroConstants, Measurements {
 		if (getRT(title)==null) {
 			rt = new ResultsTable();
 			rt.show(title);
+			waitUntilActivated(title);
 		} else {
 			rt = getResultsTable(title);
 			rt.reset();
-			toFront(title);	
+			toFront(title);
 			if (rt==Analyzer.getResultsTable())
 				resultsPending = true;
 		}
 		return new Variable();
 	}
-	
+
+	private void waitUntilActivated(String title) {
+		long start = System.currentTimeMillis();
+		while (true) {
+			IJ.wait(5);
+			Frame frame = WindowManager.getFrontWindow();
+			String title2 = frame!=null?frame.getTitle():null;
+			if (title.equals(title2))
+				return;
+			if ((System.currentTimeMillis()-start)>200)
+				break;
+		}
+	}
+
+
 	private void toFront(String title) {
 		if (title==null)
 			return;
@@ -6664,20 +6831,20 @@ public class Functions implements MacroConstants, Measurements {
 			WindowManager.setWindow(frame);
 		}
 	}
-	
+
 	private Variable applyMacroToTable() {
 		String macro = getFirstString();
 		String title = getTitle();
 		if (macro.equals("Results")) {
 			macro = title;
-			title = "Results";			
+			title = "Results";
 		}
 		ResultsTable rt = getResultsTable(title);
 		rt.applyMacro(macro);
 		rt.show(rt.getTitle());
 		return new Variable();
 	}
-	
+
 	private Variable deleteRows() {
 		int row1 = (int)getFirstArg();
 		int row2 = (int)getNextArg();
@@ -6687,13 +6854,14 @@ public class Functions implements MacroConstants, Measurements {
 		rt.show(title);
 		return new Variable();
 	}
-	
+
 	private Variable deleteColumn() {
 		String column = getFirstString();
 		String title = getTitle();
-		ResultsTable rt = getResultsTable(title);		
+		ResultsTable rt = getResultsTable(title);
 		try {
 			rt.deleteColumn(column);
+			unUpdatedTable = rt;
 		} catch (Exception e) {
 			interp.error(e.getMessage());
 		}
@@ -6702,27 +6870,38 @@ public class Functions implements MacroConstants, Measurements {
 
 	private Variable getColumn() {
 		String col = getFirstString();
-		ResultsTable rt = getResultsTable(getTitle());	
-		return new Variable(rt.getColumnAsVariables(col));
+		ResultsTable rt = getResultsTable(getTitle());
+		Variable column = null;
+		try {
+			column =  new Variable(rt.getColumnAsVariables(col));
+		} catch (Exception e) {
+			interp.error(e.getMessage());
+		}
+		return column;
 	}
 
 	private Variable renameColumn() {
 		String oldName = getFirstString();
 		String newName = getNextString();
 		String title = getTitle();
-		ResultsTable rt = getResultsTable(title);		
+		ResultsTable rt = getResultsTable(title);
 		try {
 			rt.renameColumn(oldName, newName);
+			unUpdatedTable = rt;
 		} catch (Exception e) {
 			interp.error(e.getMessage());
 		}
 		return new Variable();
 	}
 
-	private Variable showRowNumbers() {
+	private Variable showRowNumbers(boolean numbers) {
 		boolean show = (int)getFirstArg()!=0;
 		ResultsTable rt = getResultsTable(getTitle());
-		rt.showRowNumbers(show);
+		if (numbers)
+			rt.showRowNumbers(show);
+		else
+			rt.showRowIndexes(show);
+		unUpdatedTable = rt;
 		return new Variable();
 	}
 
@@ -6740,7 +6919,7 @@ public class Functions implements MacroConstants, Measurements {
 
 	private Variable saveTable() {
 		String path = getFirstString();
-		ResultsTable rt = getResultsTable(getTitle());		
+		ResultsTable rt = getResultsTable(getTitle());
 		try {
 			rt.saveAs(path);
 		} catch (Exception e) {
@@ -6750,10 +6929,10 @@ public class Functions implements MacroConstants, Measurements {
 		}
 		return new Variable();
 	}
-	
+
 	private Variable openTable() {
 		String path = getFirstString();
-		String title = getTitle();	
+		String title = getTitle();
 		if (title==null)
 			title = new File(path).getName();
 		ResultsTable rt = null;
@@ -6766,6 +6945,18 @@ public class Functions implements MacroConstants, Measurements {
 		}
 		rt.show(title);
 		return new Variable();
+	}
+
+	private Variable getAllHeadings() {
+		interp.getParens();
+		String[] headings = ResultsTable.getDefaultHeadings();
+		StringBuilder sb = new StringBuilder(250);
+		for (int i=0; i<headings.length; i++) {
+			sb.append(headings[i]);
+			if (i<headings.length-1)
+				sb.append("\t");
+		}
+		return new Variable(sb.toString());
 	}
 
 	private String getTitle() {
@@ -6802,7 +6993,7 @@ public class Functions implements MacroConstants, Measurements {
 
 	private ResultsTable getRT(String title) {
 		if (interp.applyMacroTable!=null && title==null)
-			return interp.applyMacroTable; 
+			return interp.applyMacroTable;
 		ResultsTable rt = null;
 		Frame frame = null;
 		if (title==null) {
@@ -6861,7 +7052,7 @@ public class Functions implements MacroConstants, Measurements {
 		h.setValue(r.height);
 	}
 
-	void toScaled() {       //pixel coordinates to calibrated coordinates
+	void toScaled() {   //pixel coordinates to calibrated coordinates
 		ImagePlus imp = getImage();
 		Plot plot = (Plot)(getImage().getProperty(Plot.PROPERTY_KEY)); //null if not a plot window
 		int height = imp.getHeight();
@@ -6879,7 +7070,7 @@ public class Functions implements MacroConstants, Measurements {
 		} else {
 			Variable xv = getVariable();
 			Variable yv = null;
-			Variable zv = null;			
+			Variable zv = null;
 			boolean twoArgs = interp.nextToken()==',';
 			if (twoArgs) {
 				interp.getComma();
@@ -6898,13 +7089,12 @@ public class Functions implements MacroConstants, Measurements {
 				yv.setValue(plot == null ? cal.getY(y,height) : plot.descaleY((int)(y+0.5)));
 				if (threeArgs)
 					zv.setValue(cal.getZ(zv.getValue()));
-			} else {
-				xv.setValue(plot == null ? x*cal.pixelWidth : plot.descaleX((int)(x+0.5)));
-			}
+			} else //oneArg; convert horizontal length (not the x coordinate, no offset)
+				xv.setValue(x * cal.pixelWidth) ;
 		}
 	}
 
-	void toUnscaled() {     //calibrated coordinates to pixel coordinates
+	void toUnscaled() {   //calibrated coordinates to pixel coordinates
 		ImagePlus imp = getImage();
 		Plot plot = (Plot)(getImage().getProperty(Plot.PROPERTY_KEY)); //null if not a plot window
 		int height = imp.getHeight();
@@ -6922,7 +7112,7 @@ public class Functions implements MacroConstants, Measurements {
 		} else {
 			Variable xv = getVariable();
 			Variable yv = null;
-			Variable zv = null;			
+			Variable zv = null;
 			boolean twoArgs = interp.nextToken()==',';
 			if (twoArgs) {
 				interp.getComma();
@@ -6941,9 +7131,8 @@ public class Functions implements MacroConstants, Measurements {
 				yv.setValue(plot == null ? cal.getRawY(y,height) : plot.scaleYtoPxl(y));
 				if (threeArgs)
 					zv.setValue(cal.getRawZ(zv.getValue()));
-			} else {
-				xv.setValue(plot == null ? x/cal.pixelWidth : plot.scaleXtoPxl(x));
-			}
+			} else  //oneArg; convert horizontal length (not the x coordinate, no offset)
+				xv.setValue(x/cal.pixelWidth);
 		}
 	}
 
@@ -7018,6 +7207,10 @@ public class Functions implements MacroConstants, Measurements {
 			roi.setFillColor(getRoiColor());
 			imp.draw();
 			return null;
+		} else if (name.equals("setAntiAlias")) {
+			roi.setAntiAlias(getBooleanArg());
+			imp.draw();
+			return null;
 		} else if (name.equals("move")) {
 			setSelectionLocation();
 			return null;
@@ -7053,8 +7246,25 @@ public class Functions implements MacroConstants, Measurements {
 			return type.toLowerCase(Locale.US);
 		} else if (name.equals("getSplineAnchors"))
 			return getSplineAnchors(roi);
+		else if (name.equals("getFeretPoints"))
+			return getFeretPoints(roi);
 		else
 			interp.error("Unrecognized Roi function");
+		return null;
+	}
+
+	private String getFeretPoints(Roi roi) {
+		Variable xCoordinates = getFirstArrayVariable();
+		Variable yCoordinates = getLastArrayVariable();
+		double[] feretValues = roi.getFeretValues();
+		Variable[] xa = new Variable[4];
+		Variable[] ya = new Variable[4];
+		for (int i=0; i<4; i++) {
+			xa[i] = new Variable(feretValues[Roi.FERET_ARRAY_POINTOFFSET + 2*i]);
+			ya[i] = new Variable(feretValues[Roi.FERET_ARRAY_POINTOFFSET + 2*i+1]);
+		}
+		xCoordinates.setArray(xa);
+		yCoordinates.setArray(ya);
 		return null;
 	}
 

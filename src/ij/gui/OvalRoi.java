@@ -1,7 +1,7 @@
 package ij.gui;
-
 import java.awt.*;
 import java.awt.image.*;
+import java.awt.geom.*;
 import ij.*;
 import ij.process.*;
 import ij.measure.Calibration;
@@ -33,11 +33,40 @@ public class OvalRoi extends Roi {
 		setImage(imp);
 	}
 
+	/** Feret (caliper width) values, see ij.gui.Roi.getFeretValues().
+	 *  The superclass method of calculating this via the convex hull is less accurate for the MinFeret
+	 *  because it does not get the exact minor axis. */
+	public double[] getFeretValues() {
+		double[] a = new double[FERET_ARRAYSIZE];
+		double pw=1.0, ph=1.0;
+		if (imp!=null) {
+			Calibration cal = imp.getCalibration();
+			pw = cal.pixelWidth;
+			ph = cal.pixelHeight;
+		}
+		boolean highAspect = ph*height > pw*width;
+		a[0] = highAspect ? height*ph : width*pw;            // (max)Feret
+		a[1] = highAspect ?    90.0   :   0.0;               // (max)Feret angle
+		a[2] = highAspect ? width*pw  : height*ph;           //  MinFeret
+		a[3] = (x + (highAspect ? 0.5*width : 0)) * pw;      //FeretX scaled
+		a[4] = (y + (highAspect ? height : 0.5*height)) * ph;//FeretY scaled
+		int i = FERET_ARRAY_POINTOFFSET;
+		a[i++] = x + (highAspect ? 0.5*width : 0);           //MaxFeret start
+		a[i++] = y + (highAspect ? height : 0.5*height);
+		a[i++] = x + (highAspect ? 0.5*width : width);       //MaxFeret end
+		a[i++] = y + (highAspect ? 0 : 0.5*height);
+		a[i++] = x + (highAspect ? 0 : 0.5*width);           //MinFeret start
+		a[i++] = y + (highAspect ? 0.5*height : height);
+		a[i++] = x + (highAspect ? width : 0.5*width);       //MinFeret end
+		a[i++] = y + (highAspect ? 0.5*height : 0);
+		return a;
+	}
+
 	protected void moveHandle(int sx, int sy) {
 		double asp;
 		if (clipboard!=null) return;
-		int ox = ic.offScreenX(sx);
-		int oy = ic.offScreenY(sy);
+		int ox = ic.offScreenX2(sx);
+		int oy = ic.offScreenY2(sy);
 		//IJ.log("moveHandle: "+activeHandle+" "+ox+" "+oy);
 		int x1=x, y1=y, x2=x+width, y2=y+height, xc=x+width/2, yc=y+height/2;
 		int w2 = (int)(0.14645*width);
@@ -66,7 +95,7 @@ public class OvalRoi extends Roi {
 		   height = y2-y;
 		else
 		   {height=1; y=y2;}
-		if(center) {
+		if (center) {
 			switch(activeHandle){
 				case 0:
 					width=(xc-x)*2;
@@ -103,11 +132,11 @@ public class OvalRoi extends Roi {
 					width=(xc-x)*2;
 					break;
 			}
-			if(x>=x2) {
+			if (x>=x2) {
 				width=1;
 				x=x2=xc;
 			}
-			if(y>=y2) {
+			if (y>=y2) {
 				height=1;
 				y=y2=yc;
 			}
@@ -115,10 +144,10 @@ public class OvalRoi extends Roi {
 		}
 
 		if (constrain) {
-			if(activeHandle==1 || activeHandle==5) width=height;
+			if (activeHandle==1 || activeHandle==5) width=height;
 			else height=width;
 			
-			if(x>=x2) {
+			if (x>=x2) {
 				width=1;
 				x=x2=xc;
 			}
@@ -159,10 +188,10 @@ public class OvalRoi extends Roi {
 		}
 
 		if (aspect && !constrain) {
-			if(activeHandle==1 || activeHandle==5) width=(int)Math.rint((double)height*asp);
+			if (activeHandle==1 || activeHandle==5) width=(int)Math.rint((double)height*asp);
 			else height=(int)Math.rint((double)width/asp);
 
-			switch (activeHandle){
+			switch (activeHandle) {
 				case 0:
 					x=x2-width;
 					y=y2-height;
@@ -188,17 +217,17 @@ public class OvalRoi extends Roi {
 					x=x2-width;
 					break;
 			}
-			if (center){
+			if (center) {
 				x=xc-width/2;
 				y=yc-height/2;
 			}
 			// Attempt to preserve aspect ratio when roi very small:
 			if (width<8) {
-				if(width<1) width = 1;
+				if (width<1) width = 1;
 				height=(int)Math.rint((double)width/asp_bk);
 			}
 			if (height<8) {
-				if(height<1) height =1;
+				if (height<1) height =1;
 				width=(int)Math.rint((double)height*asp_bk);
 			}
 		}
@@ -235,6 +264,7 @@ public class OvalRoi extends Roi {
 		Graphics2D g2d = (Graphics2D)g;
 		if (stroke!=null) 
 			g2d.setStroke(getScaledStroke());
+		setRenderingHint(g2d);
 		if (fillColor!=null) {
 			if (!overlay && isActiveOverlayRoi()) {
 				g.setColor(Color.cyan);
@@ -274,33 +304,40 @@ public class OvalRoi extends Roi {
 			updateFullWindow = true;
 	}		
 
-	/** Returns this OvalRoi as a Polygon. */
+	/** Returns this OvalRoi as a Polygon that outlines the mask, in image pixel coordinates. */
 	public Polygon getPolygon() {
+		return getPolygon(true);
+	}
+
+	/** Returns this OvalRoi as a Polygon that outlines the mask.
+	 *  @param absoluteCoordinates determines whether to use image pixel coordinates
+	 *         instead of coordinates relative to roi origin. */
+	Polygon getPolygon(boolean absoluteCoordinates) {
 		ImageProcessor mask = getMask();
 		Wand wand = new Wand(mask);
 		wand.autoOutline(width/2,height/2, 255, 255);
-        for (int i=0; i<wand.npoints; i++) {
-            wand.xpoints[i] += x;
-            wand.ypoints[i] += y;
-        }
+        if (absoluteCoordinates)
+			for (int i=0; i<wand.npoints; i++) {
+				wand.xpoints[i] += x;
+				wand.ypoints[i] += y;
+			}
 		return new Polygon(wand.xpoints, wand.ypoints, wand.npoints);
 	}		
 
-	/** Returns this OvalRoi as a FloatPolygon. */
+	/** Returns this OvalRoi as a FloatPolygon approximating the ellipse. */
 	public FloatPolygon getFloatPolygon() {
-		Polygon p = getPolygon();
-		return new FloatPolygon(toFloat(p.xpoints), toFloat(p.ypoints), p.npoints);
+		ShapeRoi sr = new ShapeRoi(new java.awt.geom.Ellipse2D.Double(x-0.0004, y-0.0004, width+0.0008, height+0.0008));  //better accuracy with slightly increased size
+		return sr.getFloatPolygon();
 	}
-	
-	/** Returns the number of points in this selection; equivalent to getPolygon().npoints. */
+
+	/** Returns the number of corner points in the mask of this selection; equivalent to getPolygon().npoints. */
 	public int size() {
 		return getPolygon().npoints;
 	}
 
-
-	/** Tests if the specified point is inside the boundary of this OvalRoi.
-	* Authors: Barry DeZonia and Michael Schmid
-	*/
+	/** Tests whether the center of the specified pixel is inside the boundary of this OvalRoi.
+	 *  Authors: Barry DeZonia and Michael Schmid
+	 */
 	public boolean contains(int ox, int oy) {
 		double a = width*0.5;
 		double b = height*0.5;
@@ -310,7 +347,17 @@ public class OvalRoi extends Roi {
 		double dy = oy - cy;
 		return ((dx*dx)/(a*a) + (dy*dy)/(b*b)) <= 1.0;
 	}
-		
+
+	/** Returns whether coordinate (x,y) is contained in the Roi.
+	 *  Note that the coordinate (0,0) is the top-left corner of pixel (0,0).
+	 *  Use contains(int, int) to determine whether a given pixel is contained in the Roi. */
+	public boolean containsPoint(double x, double y) {
+		if (!super.containsPoint(x, y))
+			return false;
+		Ellipse2D.Double e = new Ellipse2D.Double(this.x, this.y, width, height);
+		return e.contains(x, y);
+	}
+
 	/** Returns a handle number if the specified screen coordinates are  
 		inside or near a handle, otherwise returns -1. */
 	public int isHandle(int sx, int sy) {
@@ -362,7 +409,7 @@ public class OvalRoi extends Roi {
 		return mask;
 	}
 
-	/** Returns the perimeter length. */
+	/** Returns the perimeter length using Ramanujan's approximation for the circumference of an ellipse */
 	public double getLength() {
 		double pw=1.0, ph=1.0;
 		if (imp!=null) {
@@ -370,7 +417,9 @@ public class OvalRoi extends Roi {
 			pw = cal.pixelWidth;
 			ph = cal.pixelHeight;
 		}
-		return Math.PI*(width*pw+height*ph)/2.0;
+		double a = 0.5*width*pw;
+		double b = 0.5*height*ph;
+		return Math.PI*(3*(a + b) - Math.sqrt((3*a + b)*(a + 3*b)));
 	}
 		
 }

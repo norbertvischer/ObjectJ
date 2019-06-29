@@ -37,7 +37,8 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 
 	private static final int XINC = 12;
 	private static final int YINC = 16;
-	private static final int TEXT_GAP = 10;
+	private final double SCALE = Prefs.getGuiScale();
+	private int TEXT_GAP = 11;
 	private static int xbase = -1;
 	private static int ybase;
 	private static int xloc;
@@ -45,8 +46,7 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 	private static int count;
 	private static boolean centerOnScreen;
 	private static Point nextLocation;
-	public static long setMenuBarTime;
-	
+	public static long setMenuBarTime;	
     private int textGap = centerOnScreen?0:TEXT_GAP;
 	
 	/** This variable is set false if the user presses the escape key or closes the window. */
@@ -66,6 +66,10 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
     
     public ImageWindow(ImagePlus imp, ImageCanvas ic) {
 		super(imp.getTitle());
+		if (SCALE>1.0) {
+			TEXT_GAP = (int)(TEXT_GAP*SCALE);
+			textGap = centerOnScreen?0:TEXT_GAP;
+		}
 		if (Prefs.blackCanvas && getClass().getName().equals("ij.gui.ImageWindow")) {
 			setForeground(Color.white);
 			setBackground(Color.black);
@@ -148,27 +152,37 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 			return;
 		int width = imp.getWidth();
 		int height = imp.getHeight();
-		Rectangle maxWindow = getMaxWindow(0, 0);
+		// load location and find associated screen bounds
+		Point loc = Prefs.getLocation(LOC_KEY);
+		Rectangle bounds = null;
+		if (loc!=null) {
+			bounds = GUI.getMaxWindowBounds(loc);
+			if (bounds!=null && (loc.x>bounds.x+bounds.width/3||loc.y>bounds.y+bounds.height/3)
+			&& (loc.x+width>bounds.x+bounds.width||loc.y+height>bounds.y+bounds.height)) {
+				loc = null;
+				bounds = null;
+			}
+		}		
+		// if loc not valid, use screen bounds of visible window (this) or of main window (ij) if not visible yet (updating == false)
+		Rectangle maxWindow = bounds!=null?bounds:GUI.getMaxWindowBounds(updating?this: ij);  
+		
 		if (WindowManager.getWindowCount()<=1)
 			xbase = -1;
 		if (width>maxWindow.width/2 && xbase>maxWindow.x+5+XINC*6)
 			xbase = -1;
 		if (xbase==-1) {
 			count = 0;
-			xbase = maxWindow.x + (maxWindow.width>1800?24:12);
-			if (width*2<=maxWindow.width) {
-				Point loc = Prefs.getLocation(LOC_KEY);
-				if (loc!=null && loc.x<maxWindow.width*2/3 && loc.y<maxWindow.height/3) {
-					xbase = loc.x;
-					ybase = loc.y;
-				} else {
-					xbase = maxWindow.x+maxWindow.width/2-width/2;
-					ybase = maxWindow.y;
-				}
-				firstSmallWindow = true;
-				if (IJ.debugMode) IJ.log("ImageWindow.xbase: "+xbase+" "+loc);
-			} else
-				ybase = maxWindow.y;
+			if (loc != null) {
+				xbase = loc.x;
+				ybase = loc.y;
+			} else {
+				xbase = maxWindow.x + (maxWindow.width - width) / 2;
+				ybase = maxWindow.y + (maxWindow.height - height) / 4;
+			}
+			xbase = Math.max(xbase, maxWindow.x);
+			ybase = Math.max(ybase, maxWindow.y);
+			firstSmallWindow = true;
+			if (IJ.debugMode) IJ.log("ImageWindow.xbase: "+xbase+" "+loc);
 			xloc = xbase;
 			yloc = ybase;
 		}
@@ -183,8 +197,9 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 		}
 
 		int screenHeight = maxWindow.y+maxWindow.height-sliderHeight;
+		int screenWidth = maxWindow.x+maxWindow.width;
 		double mag = 1;
-		while (xbase+width*mag>maxWindow.x+maxWindow.width || ybase+height*mag>=screenHeight) {
+		while (xbase+width*mag>screenWidth || ybase+height*mag>=screenHeight) {
 			double mag2 = ImageCanvas.getLowerZoomLevel(mag);
 			if (mag2==mag) break;
 			mag = mag2;
@@ -200,47 +215,18 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
         if (Prefs.open100Percent && ic.getMagnification()<1.0) {
 			while(ic.getMagnification()<1.0)
 				ic.zoomIn(0, 0);
-			setSize(Math.min(width, maxWindow.width-x), Math.min(height, screenHeight-y));
+			setSize(Math.min(width, screenWidth-x), Math.min(height, screenHeight-y));
 			validate();
 		} else 
 			pack();
 		if (!updating)
 			setLocation(x, y);
 	}
-					
+
 	Rectangle getMaxWindow(int xloc, int yloc) {
-		Rectangle bounds = GUI.getMaxWindowBounds();
-		if (xloc>bounds.x+bounds.width || yloc>bounds.y+bounds.height) {
-			Rectangle bounds2 = getSecondaryMonitorBounds(xloc, yloc);
-			if (bounds2!=null) return bounds2;
-		}
-		Dimension ijSize = ij!=null?ij.getSize():new Dimension(0,0);
-		if (bounds.height>600) {
-			bounds.y += ijSize.height;
-			bounds.height -= ijSize.height;
-		}
-		return bounds;
+		return GUI.getMaxWindowBounds(new Point(xloc, yloc));
 	}
-	
-	private Rectangle getSecondaryMonitorBounds(int xloc, int yloc) {
-		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-		GraphicsDevice[] gs = ge.getScreenDevices();
-		Rectangle bounds = null;
-		for (int j=0; j<gs.length; j++) {
-			GraphicsDevice gd = gs[j];
-			GraphicsConfiguration[] gc = gd.getConfigurations();
-			for (int i=0; i<gc.length; i++) {
-				Rectangle bounds2 = gc[i].getBounds();
-				if (bounds2!=null && bounds2.contains(xloc, yloc)) {
-					bounds = bounds2;
-					break;
-				}
-			}
-		}		
-		if (IJ.debugMode) IJ.log("getSecondaryMonitorBounds: "+bounds);
-		return bounds;
-	}
-	
+
 	public double getInitialMagnification() {
 		return initialMagnification;
 	}
@@ -274,7 +260,11 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 					g.setColor(c);
 				}
 			}
-			Java2.setAntialiasedText(g, true);
+			Java2.setAntialiasedText(g, true);			
+			if (SCALE>1.0) {
+				Font font = new Font("SansSerif", Font.PLAIN, (int)(12*SCALE));
+				g.setFont(font);
+			}
 			g.drawString(createSubtitle(), insets.left+5, insets.top+TEXT_GAP);
 		}
     }
@@ -300,7 +290,7 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
     		s += "; ";
 		} else {
 			String label = (String)imp.getProperty("Label");
-			if (label!=null) {
+			if (label!=null && label.length()>0) {
 				int newline = label.indexOf('\n');
 				if (newline>0)
 					label = label.substring(0, newline);
@@ -309,7 +299,7 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 					label = label.substring(0,len-4);
 				if (label.length()>60)
 					label = label.substring(0, 60);
-				s = label + "; ";
+				s = "\""+label + "\"; ";
 			}
 		}
     	int type = imp.getType();
@@ -404,6 +394,7 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 				msg = "Save changes to\n" + "\"" + name + "\"?";
 			else
 				msg = "Save changes to \"" + name + "\"?";
+			toFront();
 			YesNoCancelDialog d = new YesNoCancelDialog(this, "ImageJ", msg);
 			if (d.cancelPressed())
 				return false;
@@ -475,7 +466,7 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 	}
 	
 	public Rectangle getMaximumBounds() {
-		Rectangle maxWindow = GUI.getMaxWindowBounds();
+		Rectangle maxWindow = GUI.getMaxWindowBounds(this);
 		if (imp==null)
 			return maxWindow;
 		double width = imp.getWidth();
@@ -502,7 +493,9 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 			wWidth = (int)(width*mag+extraSize.width);
 		}
 		int xloc = (int)(maxWidth-wWidth)/2;
-		if (xloc<0) xloc = 0;
+		if (xloc<maxWindow.x) xloc = maxWindow.x;
+		wWidth = Math.min(wWidth, maxWindow.x-xloc+maxWindow.width);
+		wHeight = Math.min(wHeight, maxWindow.height);
 		return new Rectangle(xloc, maxWindow.y, wWidth, wHeight);
 	}
 	
@@ -720,4 +713,3 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 	}
 			
 } //class ImageWindow
-

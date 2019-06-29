@@ -11,7 +11,7 @@ import java.awt.*;
 import java.util.*;
 import java.awt.event.KeyEvent;
 import java.io.PrintWriter;
-import java.awt.datatransfer.StringSelection;
+
 
 /** This is the recursive descent parser/interpreter for the ImageJ macro language. */
 public class Interpreter implements MacroConstants {
@@ -104,8 +104,11 @@ public class Interpreter implements MacroConstants {
 		return returnValue;
 	}
 	
-	/** Evaluates 'code' and returns the output, or any error, as a String. */
+	/** Evaluates 'code' and returns the output, or any error, as a String.
+	 * @see ij.Macro#eval
+	*/
 	public String eval(String code) {
+		Interpreter saveInstance = instance;
 		if (pgm!=null)
 			reuseSymbolTable();
 		Tokenizer tok = new Tokenizer();
@@ -115,7 +118,9 @@ public class Interpreter implements MacroConstants {
 		evaluating = true;
 		evalOutput = null;
 		ignoreErrors = true;
+		calledMacro = true;
 		run(pgm);
+		instance = saveInstance;
 		if (errorMessage!=null)
 			return errorMessage;
 		else
@@ -829,7 +834,7 @@ public class Interpreter implements MacroConstants {
 			if (type==TABLE) {
 				int token2 = pgm.code[pc+4];
 				String name = pgm.table[token2>>TOK_SHIFT].str;
-				if (name.equals("getString")||name.equals("title")||name.equals("headings"))
+				if (name.equals("getString")||name.equals("title")||name.equals("headings")||name.equals("allHeadings"))
 					return Variable.STRING;
 				else if (name.equals("getColumn"))
 					return Variable.ARRAY;
@@ -1267,11 +1272,6 @@ public class Interpreter implements MacroConstants {
 			done = true;
 			if (line.length()>120)
 				line = line.substring(0,119)+"...";			
-			StringSelection ss = new StringSelection("" + lineNumber);
-			try {
-				java.awt.datatransfer.Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-				clipboard.setContents(ss, null);
-			} catch(Exception e) {}
 			Frame f = WindowManager.getFrame("Debug");			
 			TextPanel panel = null;
 			if (showVariables && f!=null && (f instanceof TextWindow)) { //clear previous content
@@ -1281,7 +1281,7 @@ public class Interpreter implements MacroConstants {
 					panel.clear();
 				}	
 			}
-			showError("Macro Error", message+" in line "+lineNumber+" \n \n"+line + "\n \nLine number is on clipboard.", variables);
+			showError("Macro Error", message+" in line "+lineNumber+" \n \n"+line, variables);
 			f = WindowManager.getFrame("Debug");
 			if (showVariables && f!=null && (f instanceof TextWindow)) {
 				TextWindow debugWindow = (TextWindow)f;
@@ -1296,14 +1296,22 @@ public class Interpreter implements MacroConstants {
 	}
 		
 	void showError(String title, String msg, String[] variables) {
+		boolean noImages = msg.startsWith("There are no images open");
+		if (noImages)
+			title = "No Image";
+		Macro.setOptions(null);
 		GenericDialog gd = new GenericDialog(title);
 		gd.setInsets(6,5,0);
 		gd.addMessage(msg);
 		gd.setInsets(15,30,5);
-		gd.addCheckbox("Show \"Debug\" Window", showVariables);
+		if (!noImages)
+			gd.addCheckbox("Show \"Debug\" Window", showVariables);
 		gd.hideCancelButton();
 		gd.showDialog();
-		showVariables = gd.getNextBoolean();
+		if (!noImages)
+			showVariables = gd.getNextBoolean();
+		else
+			showVariables = false;
 		if (!gd.wasCanceled() && showVariables)
 			updateDebugWindow(variables, null);
 	}
@@ -1773,9 +1781,16 @@ public class Interpreter implements MacroConstants {
 						error("Array expected");
 					if (index<0 || index>=array.length)
 						error("Index ("+index+") out of 0-"+(array.length-1)+" range");
-					str = array[index].getString();
-					if (str==null)
-						str = toString(array[index].getValue());
+					str = array[index].getString();					
+					if (str==null) {
+						int next2 = nextToken();
+						if (next2==')' || next2==';')
+							str = toString(array[index].getValue());
+						else {
+							pc = savePC-1;
+							getToken();
+						}
+					}
 				} else if (next=='.')
 						str = null;
 				else {
@@ -1873,6 +1888,8 @@ public class Interpreter implements MacroConstants {
 			if (rt!=null && rt.size()>0)
 				rt.show("Results");
 		}
+		if (func.unUpdatedTable!=null)
+			func.unUpdatedTable.show(func.unUpdatedTable.getTitle());
 		if (IJ.isMacOSX() && selectCount>0 && debugger==null) {
 			Frame frame = WindowManager.getFrontWindow();
 			if (frame!=null && (frame instanceof ImageWindow))
@@ -2321,7 +2338,7 @@ public class Interpreter implements MacroConstants {
 	public String getErrorMessage() {
 		return errorMessage;
 	}
-		
+			
 } // class Interpreter
 
 

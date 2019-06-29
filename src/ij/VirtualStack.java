@@ -3,6 +3,7 @@ import ij.process.*;
 import ij.io.*;
 import ij.gui.ImageCanvas;
 import ij.util.Tools;
+import ij.plugin.FolderOpener;
 import java.io.*;
 import java.awt.*;
 import java.awt.image.ColorModel;
@@ -26,9 +27,18 @@ public class VirtualStack extends ImageStack {
 		super(width, height);
 	}
 
-	/** Creates an empty virtual stack. */
+	/** Creates an empty virtual stack.
+	 * @param width		image width
+	 * @param height	image height
+	 * @param cm	ColorModel or null
+	 * @param path	file path of directory containing the images
+	 * @see #addSlice(String)
+	 * @see <a href="http://wsr.imagej.net/macros/js/OpenAsVirtualStack.js">OpenAsVirtualStack.js</a>
+	*/
 	public VirtualStack(int width, int height, ColorModel cm, String path) {
 		super(width, height, cm);
+		if (path.length()>0 && !(path.endsWith(File.separator)||path.endsWith("/")))
+			path = path + "/";
 		this.path = path;
 		names = new String[INITIAL_SIZE];
 		labels = new String[INITIAL_SIZE];
@@ -49,12 +59,18 @@ public class VirtualStack extends ImageStack {
 		bitDepth = 8;
 	}
 
-	 /** Adds an image to the end of the stack. */
-	public void addSlice(String name) {
-		if (name==null) 
-			throw new IllegalArgumentException("'name' is null!");
+	/** Adds an image to the end of the stack. The argument 
+	 * can be a full file path (e.g., "C:/Users/wayne/dir1/image.tif")
+	 * if the 'path' argument in the constructor is "". File names
+	 * that start with '.' are ignored.
+	*/
+	public void addSlice(String fileName) {
+		if (fileName==null) 
+			throw new IllegalArgumentException("'fileName' is null!");
+		if (fileName.startsWith("."))
+			return;
 		nSlices++;
-	   //IJ.log("addSlice: "+nSlices+"	"+name);
+	   //IJ.log("addSlice: "+nSlices+"	"+fileName);
 	   if (nSlices==names.length) {
 			String[] tmp = new String[nSlices*2];
 			System.arraycopy(names, 0, tmp, 0, nSlices);
@@ -63,7 +79,7 @@ public class VirtualStack extends ImageStack {
 			System.arraycopy(labels, 0, tmp, 0, nSlices);
 			labels = tmp;
 		}
-		names[nSlices-1] = name;
+		names[nSlices-1] = fileName;
 	}
 
    /** Does nothing. */
@@ -122,7 +138,7 @@ public class VirtualStack extends ImageStack {
 		Opener opener = new Opener();
 		opener.setSilentMode(true);
 		IJ.redirectErrorMessages(true);
-		ImagePlus imp = opener.openImage(path, names[n-1]);
+		ImagePlus imp = opener.openImage(path+names[n-1]);
 		IJ.redirectErrorMessages(false);
 		ImageProcessor ip = null;
 		int depthThisImage = 0;
@@ -132,8 +148,14 @@ public class VirtualStack extends ImageStack {
 			int type = imp.getType();
 			ColorModel cm = imp.getProcessor().getColorModel();
 			String info = (String)imp.getProperty("Info");
-			if (info!=null && !(info.startsWith("Software")||info.startsWith("ImageDescription")))
-				labels[n-1] = info;
+			if (info!=null) {
+				if (FolderOpener.useInfo(info))
+					labels[n-1] = info;
+			} else {
+				String sliceLabel = imp.getStack().getSliceLabel(1);
+				if (FolderOpener.useInfo(sliceLabel))
+					labels[n-1] = "Label: "+sliceLabel;
+			}
 			depthThisImage = imp.getBitDepth();
 			ip = imp.getProcessor();
 			ip.setOverlay(imp.getOverlay());
@@ -161,7 +183,7 @@ public class VirtualStack extends ImageStack {
 		}
 		return ip;
 	 }
-	 
+	 	 
 	 private void label(ImageProcessor ip, String msg, Color color) {
 		int size = getHeight()/20;
 		if (size<9) size=9;
@@ -189,10 +211,12 @@ public class VirtualStack extends ImageStack {
 		String label = labels[n-1];
 		if (label==null)
 			return names[n-1];
-		else if (label.length()>100 && label.indexOf('\n')>0)
-			return names[n-1]+"\n"+label;
-		else
-			return label;
+		else {
+			if (label.startsWith("Label: "))  // slice label
+				return label.substring(7,label.length());
+			else
+				return names[n-1]+"\n"+label;
+		}
 	}
 	
 	/** Returns null. */
@@ -215,7 +239,10 @@ public class VirtualStack extends ImageStack {
 	
 	/** Returns the path to the directory containing the images. */
 	public String getDirectory() {
-		return path;
+		String path2 = path;
+		if (!(path2.endsWith("/") || path2.endsWith(File.separator)))
+			path2 = path2 + "/";
+		return path2;
 	}
 		
 	/** Returns the file name of the specified slice, were 1<=n<=nslices. */

@@ -80,6 +80,7 @@ public class Menus {
 	private static int defaultFontSize = IJ.isWindows()?15:0;
 	private static int fontSize = Prefs.getInt(Prefs.MENU_SIZE, defaultFontSize);
 	private static Font menuFont;
+	private static double scale = 1.0;
 
 	static boolean jnlp; // true when using Java WebStart
 	public static int setMenuBarCount;
@@ -92,6 +93,9 @@ public class Menus {
 	}
 
 	String addMenuBar() {
+		scale = Prefs.getGuiScale();
+		if ((scale>=1.5&&scale<2.0) || (scale>=2.5&&scale<3.0))
+			scale = (int)Math.round(scale);
 		nPlugins = nMacros = userPluginsIndex = 0;
 		addSorted = installingJars = duplicateCommand = false;
 		error = null;
@@ -110,7 +114,16 @@ public class Menus {
 		openSamples.addSeparator();
 		addPlugInItem(openSamples, "Cache Sample Images ", "ij.plugin.URLOpener(\"cache\")", 0, false);
 		addOpenRecentSubMenu(file);
-		Menu importMenu = getMenu("File>Import", true);
+		Menu importMenu = getMenu("File>Import", true);		
+		Menu showFolderMenu = new Menu("Show Folder");
+		file.add(showFolderMenu);
+		addPlugInItem(showFolderMenu, "Image", "ij.plugin.SimpleCommands(\"showdirImage\")", 0, false);
+		addPlugInItem(showFolderMenu, "Plugins", "ij.plugin.SimpleCommands(\"showdirPlugins\")", 0, false);
+		addPlugInItem(showFolderMenu, "Macros", "ij.plugin.SimpleCommands(\"showdirMacros\")", 0, false);
+		addPlugInItem(showFolderMenu, "LUTs", "ij.plugin.SimpleCommands(\"showdirLuts\")", 0, false);
+		addPlugInItem(showFolderMenu, "ImageJ", "ij.plugin.SimpleCommands(\"showdirImageJ\")", 0, false);
+		addPlugInItem(showFolderMenu, "temp", "ij.plugin.SimpleCommands(\"showdirTemp\")", 0, false);
+		addPlugInItem(showFolderMenu, "Home", "ij.plugin.SimpleCommands(\"showdirHome\")", 0, false);
 		file.addSeparator();
 		addPlugInItem(file, "Close", "ij.plugin.Commands(\"close\")", KeyEvent.VK_W, false);
 		addPlugInItem(file, "Close All", "ij.plugin.Commands(\"close-all\")", KeyEvent.VK_W, true);
@@ -249,12 +262,17 @@ public class Menus {
 		file.addSeparator();
 		addPlugInItem(file, "Quit", "ij.plugin.Commands(\"quit\")", 0, false);
 
-		if (fontSize!=0)
+		//System.out.println("MenuBar.setFont: "+fontSize+" "+scale+"  "+getFont());
+		if (fontSize!=0 || scale>1.0)
 			mbar.setFont(getFont());
 		if (ij!=null) {
 			ij.setMenuBar(mbar);
 			Menus.setMenuBarCount++;
 		}
+		
+		// Add deleted sample images to commands table
+		pluginsTable.put("Lena (68K)", "ij.plugin.URLOpener(\"lena-std.tif\")");
+		pluginsTable.put("Bridge (174K)", "ij.plugin.URLOpener(\"bridge.gif\")");
 		
 		if (pluginError!=null)
 			error = error!=null?error+="\n"+pluginError:pluginError;
@@ -296,6 +314,7 @@ public class Menus {
 		addExample(submenu, "Custom Measurement", "Custom_Measurement.ijm");
 		addExample(submenu, "Synthetic Images", "Synthetic_Images.ijm");
 		addExample(submenu, "Spiral Rotation", "Spiral_Rotation.ijm");
+		addExample(submenu, "Curve Fitting", "Curve_Fitting.ijm");
 		submenu.addSeparator();
 		addExample(submenu, "Circle Tool", "Circle_Tool.ijm");
 		addExample(submenu, "Star Tool", "Star_Tool.ijm");
@@ -327,6 +346,7 @@ public class Menus {
 		addExample(submenu, "Terabyte VirtualStack", "Terabyte_VirtualStack.js");
 		addExample(submenu, "Event Listener", "Event_Listener.js");
 		addExample(submenu, "FFT Filter", "FFT_Filter.js");
+		addExample(submenu, "Curve Fitting", "Curve_Fitting.js");
 		submenu.addActionListener(listener);
 		menu.add(submenu);
 		submenu = new Menu("BeanShell");
@@ -1148,9 +1168,8 @@ public class Menus {
 		int count = 0;
 		MenuItem mi;
 		popup = new PopupMenu("");
-		if (fontSize!=0)
+		if (fontSize!=0 || scale>1.0)
 			popup.setFont(getFont());
-
 		while (true) {
 			count++;
 			s = Prefs.getString("popup" + (count/10)%10 + count%10);
@@ -1609,12 +1628,17 @@ public class Menus {
 	/** Returns the size (in points) used for the fonts in ImageJ menus. Returns
 		0 if the default font size is being used or if this is a Macintosh. */
 	public static int getFontSize() {
-		return IJ.isMacintosh()?0:fontSize;
+		return fontSize;
+		//return IJ.isMacintosh()?0:fontSize;
 	}
 	
 	public static Font getFont() {
-		if (menuFont==null)
-			menuFont =  new Font("SanSerif", Font.PLAIN, fontSize==0?12:fontSize);
+		if (menuFont==null) {
+			int size = fontSize==0?12:fontSize;
+			size = (int)Math.round(size*scale);
+			menuFont =  new Font("SanSerif", Font.PLAIN, size);
+		}
+		//System.out.println("Menus.getFont: "+scale+" "+fontSize+" "+menuFont);
 		return menuFont;
 	}
 
@@ -1646,6 +1670,28 @@ public class Menus {
 		IJ.resetClassLoader();
 		IJ.runPlugIn("ij.plugin.ClassChecker", "");
 		IJ.showStatus("Menus updated: "+m.nPlugins + " commands, " + m.nMacros + " macros");
+	}
+	
+	public static void updateFont() {
+		scale = (int)Math.round(Prefs.getGuiScale());
+		Font font = getFont();
+		mbar.setFont(font);
+		if (ij!=null)
+			ij.setMenuBar(mbar);
+		popup.setFont(font);
+	}
+	
+	/** Adds a command to the ImageJ menu bar. */
+	public static void add(String menuPath, String plugin) {
+		if (pluginsTable==null)
+			return;
+		int index = menuPath.lastIndexOf(">");
+		if (index==-1 || index==menuPath.length()-1)
+			return;
+		String label = menuPath.substring(index+1, menuPath.length());
+		menuPath = menuPath.substring(0, index);
+		pluginsTable.put(label, plugin);
+		addItem(getMenu(menuPath), label, 0, false);
 	}
 	
 }

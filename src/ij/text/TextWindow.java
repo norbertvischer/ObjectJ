@@ -113,7 +113,8 @@ public class TextWindow extends Frame implements ActionListener, FocusListener, 
 			setLocation(loc);
 		} else {
 			setSize(width, height);
-			if (!IJ.debugMode) GUI.center(this);
+			if (!IJ.debugMode)
+				GUI.centerOnImageJScreen(this);
 		}
 		show();
 		WindowManager.setWindow(this);
@@ -263,6 +264,8 @@ public class TextWindow extends Frame implements ActionListener, FocusListener, 
 		int id = e.getID();
 		if (id==WindowEvent.WINDOW_CLOSING)
 			close();	
+		else if (id==WindowEvent.WINDOW_ACTIVATED)
+			WindowManager.setWindow(this);		
 	}
 
 	public void itemStateChanged(ItemEvent e) {

@@ -108,13 +108,13 @@ public class Line extends Roi {
 	        double dx = Math.abs(xend-xstart);
 	        double comp = dy / dx;
 	        
-	        for(;i<PI_SEARCH.length; i++) {
+	        for (;i<PI_SEARCH.length; i++) {
 	            if(comp < PI_SEARCH[i]) {
 	                break;
 	            }
 	        }
 	        
-	        if(i < PI_SEARCH.length) {
+	        if (i < PI_SEARCH.length) {
 	            if(yend > ystart) {
 	                yend = ystart + dx*PI_MULT[i];
 	            } else {
@@ -163,6 +163,16 @@ public class Line extends Roi {
 	}
 
 	protected void moveHandle(int sx, int sy) {
+		if (constrain && activeHandle == 2) {  // constrain translation in 90deg steps
+			int dx = sx - previousSX;
+			int dy = sy - previousSY;
+			if (Math.abs(dx) > Math.abs(dy))
+				dy = 0;
+			else
+				dx = 0;
+			sx = previousSX + dx;
+			sy = previousSY + dy;
+		}
 		double offset = getOffset(-0.5);
 		double ox = ic.offScreenXD(sx)+offset;
 		double oy = ic.offScreenYD(sy)+offset;
@@ -333,8 +343,7 @@ public class Line extends Roi {
 	}
 
 	protected void mouseDownInHandle(int handle, int sx, int sy) {
-		state = MOVING_HANDLE;
-		activeHandle = handle;
+		super.mouseDownInHandle(handle, sx, sy); //sets state, activeHandle, previousSX&Y
 		if (getStrokeWidth()<=3)
 			ic.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
 	}
@@ -362,6 +371,7 @@ public class Line extends Roi {
 		int sx3 = sx1 + (sx2-sx1)/2;
 		int sy3 = sy1 + (sy2-sy1)/2;
 		Graphics2D g2d = (Graphics2D)g;
+		setRenderingHint(g2d);
 		if (stroke!=null && !isActiveOverlayRoi) 
 			g2d.setStroke(getScaledStroke());
 		g.drawLine(sx1, sy1, sx2, sy2);

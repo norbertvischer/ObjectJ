@@ -81,6 +81,7 @@ FocusListener, ItemListener, KeyListener, AdjustmentListener, WindowListener {
 	private boolean firstPaint = true;
 	private boolean fontSizeSet;
 
+
     /** Creates a new GenericDialog with the specified title. Uses the current image
     	image window as the parent frame or the ImageJ frame if no image windows
     	are open. Dialog parameters are recorded by ImageJ's command recorder but
@@ -113,6 +114,7 @@ FocusListener, ItemListener, KeyListener, AdjustmentListener, WindowListener {
 		c = new GridBagConstraints();
 		setLayout(grid);
 		macroOptions = Macro.getOptions();
+		//IJ.log("macroOptions: "+macroOptions+"  "+title);
 		macro = macroOptions!=null;
 		addKeyListener(this);
 		addWindowListener(this);
@@ -563,8 +565,11 @@ FocusListener, ItemListener, KeyListener, AdjustmentListener, WindowListener {
 		c.gridwidth = GridBagConstraints.REMAINDER;
 		c.anchor = GridBagConstraints.WEST;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		if (font!=null)
+		if (font!=null) {
+			if (Prefs.getGuiScale()>1.0)
+				font = font.deriveFont((float)(font.getSize()*Prefs.getGuiScale()));
 			theLabel.setFont(font);
+		}
 		if (color!=null)
 			theLabel.setForeground(color);
 		add(theLabel, c);
@@ -580,7 +585,7 @@ FocusListener, ItemListener, KeyListener, AdjustmentListener, WindowListener {
     public void addTextAreas(String text1, String text2, int rows, int columns) {
 		if (textArea1!=null) return;
 		Panel panel = new Panel();
-		Font font = new Font("SansSerif", Font.PLAIN, 14);
+		Font font = new Font("SansSerif", Font.PLAIN, (int)(14*Prefs.getGuiScale()));
 		textArea1 = new TextArea(text1,rows,columns,TextArea.SCROLLBARS_NONE);
 		if (IJ.isLinux()) textArea1.setBackground(Color.white);
 		textArea1.setFont(font);
@@ -1230,13 +1235,14 @@ FocusListener, ItemListener, KeyListener, AdjustmentListener, WindowListener {
 				instance = this;				
 			Font font = getFont();
 			if (IJ.debugMode) IJ.log("GenericDialog font: "+fontSizeSet+" "+font);
-			if (!fontSizeSet && font!=null && Prefs.getTextScale()!=1.0) {
+			if (!fontSizeSet && font!=null && Prefs.getGuiScale()!=1.0) {
 				fontSizeSet = true;
-				setFont(font.deriveFont((float)(font.getSize()*Prefs.getTextScale())));
+				setFont(font.deriveFont((float)(font.getSize()*Prefs.getGuiScale())));
 			}
 			pack();
 			setup();
-			if (centerDialog) GUI.center(this);
+			if (centerDialog)
+				GUI.centerOnImageJScreen(this); 
 			setVisible(true);
 			recorderOn = Recorder.record;
 			IJ.wait(25);
@@ -1253,7 +1259,7 @@ FocusListener, ItemListener, KeyListener, AdjustmentListener, WindowListener {
 	
 	@Override
 	public void setFont(Font font) {
-		super.setFont(!fontSizeSet&&Prefs.getTextScale()!=1.0?font.deriveFont((float)(font.getSize()*Prefs.getTextScale())):font);
+		super.setFont(!fontSizeSet&&Prefs.getGuiScale()!=1.0?font.deriveFont((float)(font.getSize()*Prefs.getGuiScale())):font);
 		fontSizeSet = true;
 	}
 
@@ -1579,5 +1585,5 @@ FocusListener, ItemListener, KeyListener, AdjustmentListener, WindowListener {
     public void windowIconified(WindowEvent e) {}
     public void windowDeiconified(WindowEvent e) {}
     public void windowDeactivated(WindowEvent e) {}
-
+    
 }

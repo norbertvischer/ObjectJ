@@ -102,8 +102,15 @@ public class ImageStack {
 	/** Adds the image in 'ip' to the end of the stack, setting
 		the string 'sliceLabel' as the slice metadata. */
 	public void addSlice(String sliceLabel, ImageProcessor ip) {
-		if (ip.getWidth()!=width || ip.getHeight()!=height)
-			throw new IllegalArgumentException("ImageStack.addSlice(): dimensions do not match");
+		if (ip.getWidth()!=width || ip.getHeight()!=height) {
+			if (width==0 && height==0) {
+				width = ip.getWidth();
+				height = ip.getHeight();
+				stack = new Object[INITIAL_SIZE];
+				label = new String[INITIAL_SIZE];
+			} else
+				throw new IllegalArgumentException("ImageStack.addSlice(): dimensions do not match");
+		}
 		if (nSlices==0) {
 			cm = ip.getColorModel();
 			min = ip.getMin();
@@ -346,10 +353,11 @@ public class ImageStack {
 		return ("stack["+getWidth()+"x"+getHeight()+"x"+getSize()+v+"]");
 	}
 	
-	/** Returns, as a double, the specified voxel. Returns
-	 * NaN if x, y or z are beyond the stack limits. Use the
-	 * ImagePlus.getStackIndex() method to convert a C,Z,T
-	 * hyperstack position (one-based) into a z index (zero-based).
+	/** Returns, as a double, the value of the specified voxel.
+	 * Throws an IndexOutOfBoundsException if x, y or z are
+	 * beyond the stack limits. Use the ImagePlus.getStackIndex()
+	 * method to convert a C,Z,T hyperstack position (one-based)
+	 * into a z index (zero-based).
 	 * @see ij.ImagePlus#getStackIndex
 	*/
 	public final double getVoxel(int x, int y, int z) {

@@ -76,7 +76,7 @@ public class PlotWindow extends ImageWindow implements ActionListener, ItemListe
 
 	private Button list, data, more, live;
 	private PopupMenu dataPopupMenu, morePopupMenu;
-	private static final int NUM_MENU_ITEMS = 18; //how many menu items we have in total
+	private static final int NUM_MENU_ITEMS = 19; //how many menu items we have in total
 	private MenuItem[] menuItems = new MenuItem[NUM_MENU_ITEMS];
 	private Label coordinates;
 	private static String defaultDirectory = null;
@@ -246,6 +246,7 @@ public class PlotWindow extends ImageWindow implements ActionListener, ItemListe
 		LayoutManager lm = getLayout();
 		if (lm instanceof ImageLayout)
 			((ImageLayout)lm).ignoreNonImageWidths(true);  //don't expand size to make the panel fit
+		GUI.scale(bottomPanel);
 		pack();
 
 		ImageProcessor ip = plot.getProcessor();
@@ -256,7 +257,7 @@ public class PlotWindow extends ImageWindow implements ActionListener, ItemListe
 		else
 			imp.updateAndDraw();
 		if (listValues)
-			showList();
+			showList(/*useLabels=*/false);
 		else
 			ic.requestFocus();	//have focus on the canvas, not the button, so that pressing the space bar allows panning
 	}
@@ -303,10 +304,10 @@ public class PlotWindow extends ImageWindow implements ActionListener, ItemListe
 	}
 
 	/** Names for popupMenu items. Update NUM_MENU_ITEMS at the top when adding new ones! */
-	private static int SAVE=0, COPY=1, COPY_ALL=2, ADD_FROM_TABLE=3, ADD_FROM_PLOT=4, ADD_FIT=5, //data menu
-			SET_RANGE=6, PREV_RANGE=7, RESET_RANGE=8, FIT_RANGE=9,  //the rest is in the more menu
-			ZOOM_SELECTION=10, AXIS_OPTIONS=11, LEGEND=12, STYLE=13, RESET_PLOT=14,
-			FREEZE=15, HI_RESOLUTION=16, PROFILE_PLOT_OPTIONS=17;
+	private static int SAVE=0, COPY=1, COPY_ALL=2, LIST_SIMPLE=3, ADD_FROM_TABLE=4, ADD_FROM_PLOT=5, ADD_FIT=6, //data menu
+			SET_RANGE=7, PREV_RANGE=8, RESET_RANGE=9, FIT_RANGE=10,  //the rest is in the more menu
+			ZOOM_SELECTION=11, AXIS_OPTIONS=12, LEGEND=13, STYLE=14, RESET_PLOT=15,
+			FREEZE=16, HI_RESOLUTION=17, PROFILE_PLOT_OPTIONS=18;
 	//the following commands are disabled when the plot is frozen
 	private static int[] DISABLED_WHEN_FROZEN = new int[]{ADD_FROM_TABLE, ADD_FROM_PLOT, ADD_FIT,
 			SET_RANGE, PREV_RANGE, RESET_RANGE, FIT_RANGE, ZOOM_SELECTION, AXIS_OPTIONS, LEGEND, STYLE, RESET_PLOT};
@@ -314,9 +315,11 @@ public class PlotWindow extends ImageWindow implements ActionListener, ItemListe
 	/** Prepares and returns the popupMenu of the Data>> button */
 	PopupMenu getDataPopupMenu() {
 		dataPopupMenu = new PopupMenu();
+		GUI.scalePopupMenu(dataPopupMenu);
 		menuItems[SAVE] = addPopupItem(dataPopupMenu, "Save Data...");
 		menuItems[COPY] = addPopupItem(dataPopupMenu, "Copy 1st Data Set");
 		menuItems[COPY_ALL] = addPopupItem(dataPopupMenu, "Copy All Data");
+		menuItems[LIST_SIMPLE] = addPopupItem(dataPopupMenu, "List (Simple Headings)");
 		dataPopupMenu.addSeparator();
 		menuItems[ADD_FROM_TABLE] = addPopupItem(dataPopupMenu, "Add from Table...");
 		menuItems[ADD_FROM_PLOT] = addPopupItem(dataPopupMenu, "Add from Plot...");
@@ -327,6 +330,7 @@ public class PlotWindow extends ImageWindow implements ActionListener, ItemListe
 	/** Prepares and returns the popupMenu of the More>> button */
 	PopupMenu getMorePopupMenu() {
 		morePopupMenu = new PopupMenu();
+		GUI.scalePopupMenu(morePopupMenu);
 		menuItems[SET_RANGE] = addPopupItem(morePopupMenu, "Set Range...");
 		menuItems[PREV_RANGE] = addPopupItem(morePopupMenu, "Previous Range");
 		menuItems[RESET_RANGE] = addPopupItem(morePopupMenu, "Reset Range");
@@ -368,7 +372,7 @@ public class PlotWindow extends ImageWindow implements ActionListener, ItemListe
 		if (b==live)
 			toggleLiveProfiling();
 		else if (b==list)
-			showList();
+			showList(/*useLabels=*/true);
 		else if (b==data) {
 			enableDisableMenuItems();
 			dataPopupMenu.show((Component)b, 1, 1);
@@ -381,6 +385,8 @@ public class PlotWindow extends ImageWindow implements ActionListener, ItemListe
 			copyToClipboard(false);
 		else if (b==menuItems[COPY_ALL])
 			copyToClipboard(true);
+		else if (b==menuItems[LIST_SIMPLE])
+			showList(/*useLabels=*/false);
 		else if (b==menuItems[ADD_FROM_TABLE])
 			new PlotContentsDialog(plot, PlotContentsDialog.ADD_FROM_TABLE).showDialog(this);
 		else if (b==menuItems[ADD_FROM_PLOT])
@@ -462,8 +468,13 @@ public class PlotWindow extends ImageWindow implements ActionListener, ItemListe
                 coordinates.setText("Reset Range");
             else if (activeRangeArrow == 9) //it's the 'F' icon
                 coordinates.setText("Full Range (Fit All)");
+            else if (activeRangeArrow >= 10) //space between arrow-pairs
+                coordinates.setText("Set limit...");
             if (activeRangeArrow >= 0 && !rangeArrowRois[activeRangeArrow].contains(x, y)) {
-                rangeArrowRois[activeRangeArrow].setFillColor(Color.GRAY);
+				if(activeRangeArrow>=10) //numerical box
+					rangeArrowRois[activeRangeArrow].setFillColor(new Color(235, 235, 235));
+				else //arrow
+					rangeArrowRois[activeRangeArrow].setFillColor(Color.GRAY);
                 ic.repaint();			//de-highlight arrow where cursor has moved out
                 activeRangeArrow = -1;
             }
@@ -494,6 +505,10 @@ public class PlotWindow extends ImageWindow implements ActionListener, ItemListe
 		}
 		int rotation = e.getWheelRotation();
 		int amount = e.getScrollAmount();
+		if (e.getX() < plot.leftMargin || e.getX() > plot.leftMargin + plot.frameWidth)//n__
+			return;
+		if (e.getY() < plot.topMargin || e.getY() > plot.topMargin + plot.frameHeight)
+			return;
 		boolean ctrl = (e.getModifiers()&Event.CTRL_MASK)!=0;
 		if (amount<1) amount=1;
 		if (rotation==0)
@@ -518,7 +533,7 @@ public class PlotWindow extends ImageWindow implements ActionListener, ItemListe
         if (imp == null)
             return;
         hideRangeArrows(); //in case we have old arrows from a different plot size or so
-        rangeArrowRois = new Roi[4 * 2 + 2]; //4 arrows per axis plus 'Reset' and 'Fit All' icons
+        rangeArrowRois = new Roi[4 * 2 + 2 + 4]; //4 arrows per axis, plus 'Reset' and 'Fit All' icons, plus 4 numerical input boxes
         int i = 0;
         int height = imp.getHeight();
         int arrowH = plot.topMargin < 14 ? 6 : 8; //height of arrows and distance between them; base is twice that value
@@ -534,7 +549,7 @@ public class PlotWindow extends ImageWindow implements ActionListener, ItemListe
         for (float y : new float[]{plot.topMargin + plot.frameHeight, plot.topMargin}) { //create arrows for y axis
             float[] y0 = new float[]{y + arrowH / 2, y + 3 * arrowH / 2 + 0.1f, y + arrowH / 2};
             rangeArrowRois[i++] = new PolygonRoi(xP, y0, 3, Roi.POLYGON);
-            float[] y1 = new float[]{y - arrowH / 2, y - 3 * arrowH / 2 - 0.1f, y - arrowH / 2};
+          float[] y1 = new float[]{y - arrowH / 2, y - 3 * arrowH / 2 - 0.1f, y - arrowH / 2};
             rangeArrowRois[i++] = new PolygonRoi(xP, y1, 3, Roi.POLYGON);
         }
         Font theFont = new Font("SansSerif", Font.BOLD, 13);
@@ -544,15 +559,22 @@ public class PlotWindow extends ImageWindow implements ActionListener, ItemListe
         TextRoi txtRoi2 = new TextRoi(20, height - 19, "\u2009F\u2009", theFont);
         rangeArrowRois[9] = txtRoi2;
 
+		rangeArrowRois[10] = new Roi(plot.leftMargin - arrowH/2 + 1, height - 5 * arrowH / 2, arrowH - 2, arrowH * 2);//numerical box left
+		rangeArrowRois[11] = new Roi(plot.leftMargin + plot.frameWidth - arrowH/2 + 1, height - 5 * arrowH / 2, arrowH - 2, arrowH * 2);//numerical box right
+        rangeArrowRois[12] = new Roi(arrowH / 2, plot.topMargin + plot.frameHeight - arrowH/2 + 1, arrowH * 2, arrowH -2);//numerical box bottom
+        rangeArrowRois[13] = new Roi(arrowH / 2, plot.topMargin - arrowH/2 + 1,  arrowH * 2, arrowH - 2   );//numerical box top
+
         Overlay ovly = imp.getOverlay();
         if (ovly == null)
             ovly = new Overlay();
         for (Roi roi : rangeArrowRois) {
-            if (roi instanceof TextRoi) {
+            if (roi instanceof PolygonRoi)
+                   roi.setFillColor(Color.GRAY);
+			else if (roi instanceof TextRoi) {
                 roi.setStrokeColor(Color.WHITE);
                 roi.setFillColor(Color.GRAY);
             } else
-                roi.setFillColor(Color.GRAY);
+                roi.setFillColor(new Color(235, 235, 235));
             ovly.add(roi);
         }
         imp.setOverlay(ovly);
@@ -584,8 +606,8 @@ public class PlotWindow extends ImageWindow implements ActionListener, ItemListe
 
 
 	/** Shows the data of the backing plot in a Textwindow with columns */
-	void showList(){
-		ResultsTable rt = plot.getResultsTable(saveXValues);
+	void showList(boolean useLabels){
+		ResultsTable rt = plot.getResultsTable(saveXValues, useLabels);
 		if (rt==null) return;
 		rt.show("Plot Values");
 		if (autoClose) {
@@ -594,7 +616,8 @@ public class PlotWindow extends ImageWindow implements ActionListener, ItemListe
 		}
 	}
 
-	/** Returns the plot values as a ResultsTable. */
+	/** Returns the plot values with simple headings (X, Y, Y1 etc, not the labels) as a ResultsTable.
+	 *  Use plot.getResultsTableWithLabels for a table with data set labels as column headings */
 	public ResultsTable getResultsTable() {
 		return plot.getResultsTable(saveXValues);
 	}
@@ -622,7 +645,7 @@ public class PlotWindow extends ImageWindow implements ActionListener, ItemListe
 		String directory = sd.getDirectory();
 		IJ.wait(250);  // give system time to redraw ImageJ window
 		IJ.showStatus("Saving plot values...");
-		ResultsTable rt = getResultsTable();
+		ResultsTable rt = plot.getResultsTable(/*writeFirstXColumn=*/saveXValues, /*useLabels=*/true);
 		try {
 			rt.saveAs(directory+name);
 		} catch (IOException e) {
@@ -648,7 +671,7 @@ public class PlotWindow extends ImageWindow implements ActionListener, ItemListe
 		PrintWriter pw = new PrintWriter(aw); //uses platform's line termination characters
 
 		if (writeAllColumns) {
-			ResultsTable rt = plot.getResultsTable(true);
+			ResultsTable rt = plot.getResultsTableWithLabels();
 			if (!Prefs.dontSaveHeaders) {
 				String headings = rt.getColumnHeadings();
 				pw.println(headings);

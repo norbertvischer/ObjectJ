@@ -199,10 +199,11 @@ public class IJ {
 				((PlugIn)thePlugIn).run(arg);
  			else
 				new PlugInFilterRunner(thePlugIn, commandName, arg);
-		}
-		catch (ClassNotFoundException e) {
-			if (IJ.getApplet()==null)
-				log("Plugin or class not found: \"" + className + "\"\n(" + e+")");
+		} catch (ClassNotFoundException e) {
+			log("Plugin or class not found: \"" + className + "\"\n(" + e+")");
+			String path = Prefs.getCustomPropsPath();
+			if (path!=null);
+				log("Error may be due to custom properties at " + path);
 		}
 		catch (InstantiationException e) {log("Unable to load plugin (ins)");}
 		catch (IllegalAccessException e) {log("Unable to load plugin, possibly \nbecause it is not public.");}
@@ -231,7 +232,9 @@ public class IJ {
 				new PlugInFilterRunner(thePlugIn, commandName, arg);
 		}
 		catch (ClassNotFoundException e) {
-			if (className.contains("_")  && !suppressPluginNotFoundError)
+			if (className.startsWith("macro:"))
+				runMacro(className.substring(6));
+			else if (className.contains("_")  && !suppressPluginNotFoundError)
 				error("Plugin or class not found: \"" + className + "\"\n(" + e+")");
 		}
 		catch (NoClassDefFoundError e) {
@@ -581,7 +584,7 @@ public class IJ {
     
     /**Displays a "no images are open" dialog box.*/
 	public static void noImage() {
-		String msg = "There are no images open.";
+		String msg = "There are no images open";
 		if (macroInterpreter!=null) {
 			macroInterpreter.abort(msg);
 			macroInterpreter = null;
@@ -647,7 +650,7 @@ public class IJ {
 				if (isMacro() && hd.escapePressed())
 					throw new RuntimeException(Macro.MACRO_CANCELED);
 			} else {
-				MessageDialog md = new MessageDialog(ij, title, msg);
+				MessageDialog md = new MessageDialog(ij, title, msg); 
 				if (isMacro() && md.escapePressed())
 					throw new RuntimeException(Macro.MACRO_CANCELED);
 			}
@@ -659,11 +662,6 @@ public class IJ {
 		macro or JavaScript is running, it is aborted. Writes to the
 		Java console if the ImageJ window is not present.*/
 	public static void error(String msg) {
-		if (macroInterpreter!=null) {
-			macroInterpreter.abort(msg);
-			macroInterpreter = null;
-			return;
-		}
 		error(null, msg);
 		if (Thread.currentThread().getName().endsWith("JavaScript"))
 			throw new RuntimeException(Macro.MACRO_CANCELED);
@@ -675,6 +673,11 @@ public class IJ {
 		macro or JavaScript is running, it is aborted. Writes to the
 		Java console if the ImageJ window is not present. */
 	public static void error(String title, String msg) {
+		if (macroInterpreter!=null) {
+			macroInterpreter.abort(msg);
+			macroInterpreter = null;
+			return;
+		}
 		if (msg!=null && msg.endsWith(Macro.MACRO_CANCELED))
 			return;
 		String title2 = title!=null?title:"ImageJ";
@@ -1550,7 +1553,7 @@ public class IJ {
 					if (EventQueue.isDispatchThread())
 						new MacroRunner(smoothMacro); // run on separate thread
 					else
-						IJ.runMacro(smoothMacro);
+						Macro.eval(smoothMacro);
 				}
 			}
 		}
@@ -1603,6 +1606,14 @@ public class IJ {
 				abort();
 		}
 		return img;
+	}
+	
+	/**The macro interpreter uses this method to call getImage().*/
+	public static ImagePlus getImage(Interpreter interpreter) {
+		macroInterpreter = interpreter;
+		ImagePlus imp =  getImage();
+		macroInterpreter = null;
+		return imp;
 	}
 	
 	/** Returns the active image or stack slice as an ImageProcessor, or displays
@@ -1930,9 +1941,9 @@ public class IJ {
 		} else if (format.indexOf("lut")!=-1) {
 			path = updateExtension(path, ".lut");
 			format = "LUT...";
-		} else if (format.indexOf("results")!=-1 || format.indexOf("measurements")!=-1) {
+		} else if (format.contains("results") || format.contains("measurements") || format.contains("table")) {
 			format = "Results...";
-		} else if (format.indexOf("selection")!=-1 || format.indexOf("roi")!=-1) {
+		} else if (format.contains("selection") || format.contains("roi")) {
 			path = updateExtension(path, ".roi");
 			format = "Selection...";
 		} else if (format.indexOf("xy")!=-1 || format.indexOf("coordinates")!=-1) {
@@ -2213,23 +2224,8 @@ public class IJ {
 	
 	/** Returns the size, in pixels, of the primary display. */
 	public static Dimension getScreenSize() {
-		Rectangle bounds = GUI.getZeroBasedMaxBounds();
-		if (bounds!=null)
-			return new Dimension(bounds.width, bounds.height);
-		if (isWindows())  // GraphicsEnvironment.getConfigurations is *very* slow on Windows
-			return Toolkit.getDefaultToolkit().getScreenSize();
-		if (GraphicsEnvironment.isHeadless())
-			return new Dimension(0, 0);
-		// Can't use Toolkit.getScreenSize() on Linux because it returns 
-		// size of all displays rather than just the primary display.
-		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-		GraphicsDevice[] gd = ge.getScreenDevices();
-		GraphicsConfiguration[] gc = gd[0].getConfigurations();
-		bounds = gc[0].getBounds();
-		if ((bounds.x==0&&bounds.y==0) || (IJ.isLinux()&&gc.length>1))
-			return new Dimension(bounds.width, bounds.height);
-		else
-			return Toolkit.getDefaultToolkit().getScreenSize();
+		Rectangle bounds = GUI.getScreenBounds();
+		return new Dimension(bounds.width, bounds.height);
 	}
 	
 	/** Returns, as an array of strings, a list of the LUTs in the Image/Lookup Tables menu. */

@@ -183,21 +183,17 @@ public class FloatProcessor extends ImageProcessor {
 			pixels8 = new byte[size];
 		double value;
 		int ivalue;
-		double min2 = getMin(), max2=getMax();
-		int maxValue = 255;
-		double scale = 256.0/(max2-min2);
-		if (thresholding) {
-			maxValue = 254;
-			scale = 255.0/(max2-min2);
-		}
+		double min2 = getMin();
+		double max2 = getMax();
+		double scale = 255.0/(max2-min2);
+		int maxValue = thresholding?254:255;
 		for (int i=0; i<size; i++) {
 			value = pixels[i]-min2;
 			if (value<0.0) value=0.0;
-			ivalue = (int)((value*scale)+0.5f);
+			ivalue = (int)(value*scale+0.5);
 			if (ivalue>maxValue) ivalue = maxValue;
 			pixels8[i] = (byte)ivalue;
 		}
-		//if (ij.IJ.debugMode) new ij.ImagePlus("pixels8",new ByteProcessor(width,height,pixels8).duplicate()).show();
 		return pixels8;
 	}
 	
@@ -391,7 +387,7 @@ public class FloatProcessor extends ImageProcessor {
 		if (x>=0 && x<width && y>=0 && y<height)
 			return pixels[y*width + x];
 		else
-			return 0f;
+			return Float.NaN;
 	}
 
 	/** Draws a pixel in the current foreground color. */

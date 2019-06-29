@@ -42,6 +42,13 @@ public class Duplicator implements PlugIn, TextListener, ItemListener {
 			Rectangle bounds = imp.getRoi().getBounds();
 			imp.setRoi(bounds);
 		}
+		if (roiA!=null) {
+			Rectangle r = roiA.getBounds();
+			if (r.x>=imp.getWidth() || r.y>=imp.getHeight() || r.x+r.width<=0 || r.y+r.height<=0) {
+				IJ.error("Roi is outside image");
+				return;
+			}
+		}
 		int stackSize = imp.getStackSize();
 		String title = imp.getTitle();
 		String newTitle = WindowManager.getUniqueName(title);
@@ -193,9 +200,12 @@ public class Duplicator implements PlugIn, TextListener, ItemListener {
 		double max = imp.getDisplayRangeMax();
 		ImageStack stack2 = null;
 		int n = stack.getSize();
+		boolean showProgress = virtualStack || ((double)n*stack.getWidth()*stack.getHeight()>=209715200.0);
 		for (int i=1; i<=n; i++) {
-			if (stack.isVirtual())
+			if (showProgress) {
 				IJ.showStatus("Duplicating: "+i+"/"+n);
+				IJ.showProgress(i,n);
+			}
 			ImageProcessor ip2 = stack.getProcessor(i);
 			ip2.setRoi(rect);
 			ip2 = ip2.crop();
@@ -203,6 +213,7 @@ public class Duplicator implements PlugIn, TextListener, ItemListener {
 				stack2 = new ImageStack(ip2.getWidth(), ip2.getHeight(), imp.getProcessor().getColorModel());
 			stack2.addSlice(stack.getSliceLabel(i), ip2);
 		}
+		IJ.showProgress(1.0);
 		ImagePlus imp2 = imp.createImagePlus();
 		imp2.setStack("DUP_"+imp.getTitle(), stack2);
 		String info = (String)imp.getProperty("Info");
@@ -221,8 +232,12 @@ public class Duplicator implements PlugIn, TextListener, ItemListener {
 		Overlay overlay = imp.getOverlay();
 		if (overlay!=null && !imp.getHideOverlay())
 			imp2.setOverlay(overlay.crop(rect));
-   		if (Recorder.record)
-   			Recorder.recordCall("imp2 = imp.duplicate();");
+   		if (Recorder.record) {
+   			if (imp.getRoi()==null)
+   				Recorder.recordCall("imp2 = imp.duplicate();");
+   			else
+   				Recorder.recordCall("imp2 = imp.crop(\"stack\");");
+   		}
 		return imp2;
 	}
 	
@@ -263,9 +278,12 @@ public class Duplicator implements PlugIn, TextListener, ItemListener {
  			imp2.setOverlay(overlay2);
  		}
    		if (Recorder.record) {
-   			if (imp.getStackSize()==1)
-   				Recorder.recordCall("imp2 = imp.duplicate();");
-   			else
+   			if (imp.getStackSize()==1) {
+   				if (imp.getRoi()==null)
+   					Recorder.recordCall("imp2 = imp.duplicate();");
+   				else
+   					Recorder.recordCall("imp2 = imp.crop();");
+   			} else
    				Recorder.recordCall("imp2 = imp.crop();");
    		}
 		return imp2;
@@ -281,10 +299,14 @@ public class Duplicator implements PlugIn, TextListener, ItemListener {
 		boolean virtualStack = stack.isVirtual();
 		double min = imp.getDisplayRangeMin();
 		double max = imp.getDisplayRangeMax();
-		ImageStack stack2 = null;
+		ImageStack stack2 = null;	
+		int n = lastSlice-firstSlice+1;
+		boolean showProgress = virtualStack || ((double)n*stack.getWidth()*stack.getHeight()>=209715200.0);
 		for (int i=firstSlice; i<=lastSlice; i++) {
-			if (stack.isVirtual())
+			if (showProgress) {
 				IJ.showStatus("Duplicating: "+i+"/"+lastSlice);
+				IJ.showProgress(i-firstSlice,n);
+			}
 			ImageProcessor ip2 = stack.getProcessor(i);
 			ip2.setRoi(rect);
 			ip2 = ip2.crop();
@@ -292,6 +314,7 @@ public class Duplicator implements PlugIn, TextListener, ItemListener {
 				stack2 = new ImageStack(ip2.getWidth(), ip2.getHeight(), imp.getProcessor().getColorModel());
 			stack2.addSlice(stack.getSliceLabel(i), ip2);
 		}
+		IJ.showProgress(1.0);
 		ImagePlus imp2 = imp.createImagePlus();
 		imp2.setStack("DUP_"+imp.getTitle(), stack2);
 		String info = (String)imp.getProperty("Info");
@@ -312,7 +335,7 @@ public class Duplicator implements PlugIn, TextListener, ItemListener {
 			imp2.setOverlay(overlay2);
 		}
    		if (Recorder.record)
-   			Recorder.recordCall("imp2 = new Duplicator().run(imp, "+firstSlice+", "+lastSlice+");");
+   			Recorder.recordCall("imp2 = imp.crop(\""+firstSlice+"-"+lastSlice+"\");");
 		return imp2;
 	}
 

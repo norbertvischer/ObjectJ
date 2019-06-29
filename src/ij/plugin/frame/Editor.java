@@ -196,8 +196,8 @@ public class Editor extends PlugInFrame implements ActionListener, ItemListener,
 			setMenuBar(mb);
 		
 		m = new Menu("Font");
-		m.add(new MenuItem("Make Text Smaller", new MenuShortcut(KeyEvent.VK_MINUS)));
-		m.add(new MenuItem("Make Text Larger", new MenuShortcut(KeyEvent.VK_EQUALS)));
+		m.add(new MenuItem("Make Text Smaller"));
+		m.add(new MenuItem("Make Text Larger"));
 		m.addSeparator();
 		monospaced = new CheckboxMenuItem("Monospaced Font", Prefs.get(FONT_MONO, false));
 		if ((options&MONOSPACED)!=0) monospaced.setState(true);
@@ -247,7 +247,7 @@ public class Editor extends PlugInFrame implements ActionListener, ItemListener,
 			macrosMenu.add(new MenuItem("Install Macros", new MenuShortcut(KeyEvent.VK_I)));
 			macrosMenu.add(new MenuItem("Macro Functions...", new MenuShortcut(KeyEvent.VK_M, true)));
 			macrosMenu.add(new MenuItem("Function Finder...", new MenuShortcut(KeyEvent.VK_F, true)));
-			macrosMenu.add(new MenuItem("Enter Interactive Mode", new MenuShortcut(KeyEvent.VK_M)));
+			macrosMenu.add(new MenuItem("Enter Interactive Mode"));
 			macrosMenu.addSeparator();
 			macrosMenu.add(new MenuItem("Evaluate Macro"));
 			macrosMenu.add(new MenuItem("Evaluate JavaScript", new MenuShortcut(KeyEvent.VK_J, false)));
@@ -1034,7 +1034,7 @@ public class Editor extends PlugInFrame implements ActionListener, ItemListener,
 				if (imp!=null)
 					imp.updateAndDraw();
 			}
-		} else {
+		} else if (!code.startsWith("[Macro ")) {
 			String rtn = interpreter.eval(code);
 			if (rtn!=null)
 				insertText(rtn);

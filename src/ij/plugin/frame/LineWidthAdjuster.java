@@ -66,12 +66,13 @@ public class LineWidthAdjuster extends PlugInFrame implements PlugIn,
 		slider.addAdjustmentListener(this);
 		slider.setUnitIncrement(1);
 		
+		GUI.scale(this);
 		pack();
 		Point loc = Prefs.getLocation(LOC_KEY);
 		if (loc!=null)
 			setLocation(loc);
 		else
-			GUI.center(this);
+			GUI.centerOnImageJScreen(this);
 		setResizable(false);
 		show();
 		thread = new Thread(this, "LineWidthAdjuster");
