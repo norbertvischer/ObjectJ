@@ -123,19 +123,7 @@ public class Functions implements MacroConstants, Measurements {
 			case DRAW_STRING: drawString(); break;
 			case SET_PASTE_MODE: IJ.setPasteMode(getStringArg()); break;
 			case DO_COMMAND: doCommand(); break;
-			case SHOW_STATUS: {//n__
-				String s = getStringArg();
-				boolean withSign = s.startsWith("!");
-				if(withSign){			
-						s = s.substring(1);
-				}
-				IJ.protectStatusBar = false;
-				IJ.protectStatusBar = false;
-				IJ.showStatus(s); 
-				IJ.protectStatusBar = withSign;
-				interp.statusUpdated=true; 
-				break;
-			}
+			case SHOW_STATUS: IJ.showStatus(getStringArg()); interp.statusUpdated=true; break;
 			case SHOW_PROGRESS: showProgress(); break;
 			case SHOW_MESSAGE: showMessage(false); break;
 			case SHOW_MESSAGE_WITH_CANCEL: showMessage(true); break;

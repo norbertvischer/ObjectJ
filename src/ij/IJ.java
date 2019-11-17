@@ -72,8 +72,7 @@ public class IJ {
 	private static boolean trustManagerCreated;
 	private static String smoothMacro;
 	private static Interpreter macroInterpreter;
-	public static boolean protectStatusBar; //n__
-
+	private static boolean protectStatusBar;
 			
 	static {
 		osname = System.getProperty("os.name");
@@ -409,21 +408,22 @@ public class IJ {
 		return applet;
 	}
 	
-	/**Displays a message in the ImageJ status bar.*/
-	public static void showStatus(String s) {	//n__
-		if(Interpreter.getInstance() == null)
+	/**Displays a message in the ImageJ status bar. */
+	public static void showStatus(String s) {
+		if (!macroRunning())
 			protectStatusBar = false;
-		if(!protectStatusBar){
+		boolean doProtect = s.startsWith("!"); //suppress subsequent process status
+		if (doProtect) {
+			protectStatusBar = true;
+			s = s.substring(1);
+		}
+		if (doProtect || !protectStatusBar){
 			if (ij!=null)
 				ij.showStatus(s);
 			ImagePlus imp = WindowManager.getCurrentImage();
 			ImageCanvas ic = imp!=null?imp.getCanvas():null;
-			if (ic!=null){
-				if(protectStatusBar)
-					ic.setShowCursorStatus(false);
-				else
-					ic.setShowCursorStatus(s.length()==0?true:false);
-			}
+			if (ic!=null)
+				ic.setShowCursorStatus(s.length()==0?true:false);
 		}
 	}
 	
