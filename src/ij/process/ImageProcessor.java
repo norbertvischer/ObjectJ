@@ -105,6 +105,7 @@ public abstract class ImageProcessor implements Cloneable {
 	protected boolean minMaxSet;
 	protected static double seed = Double.NaN;
 	protected static Random rnd;
+	protected boolean fillValueSet;
 
 	protected void showProgress(double percentDone) {
 		if (progressBar!=null)
@@ -415,6 +416,11 @@ public abstract class ImageProcessor implements Cloneable {
 
 	/** Sets the default fill/draw value. */
 	public abstract void setValue(double value);
+	
+	/** Returns 'true' if the fill/draw value has been set. */
+	public boolean fillValueSet() {
+		return fillValueSet;
+	}
 
 	/** Sets the background fill value used by the rotate() and scale() methods. */
 	public abstract void setBackgroundValue(double value);
@@ -784,7 +790,8 @@ public abstract class ImageProcessor implements Cloneable {
 				if (x<0) r3.x = -x;
 				if (y<0) r3.y = -y;
 				mask.setRoi(r3);
-				mask = mask.crop();
+				if (mask!=null)
+					mask = mask.crop();
 			}
 			roiX=r2.x; roiY=r2.y; roiWidth=r2.width; roiHeight=r2.height;
 		} else {

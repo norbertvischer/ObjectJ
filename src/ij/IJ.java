@@ -24,6 +24,7 @@ import java.net.*;
 import javax.net.ssl.*;
 import java.security.cert.*;
 import java.security.KeyStore;
+import java.nio.ByteBuffer;
 
 
 /** This class consists of static utility methods. */
@@ -71,6 +72,8 @@ public class IJ {
 	private static boolean trustManagerCreated;
 	private static String smoothMacro;
 	private static Interpreter macroInterpreter;
+	public static boolean protectStatusBar; //n__
+
 			
 	static {
 		osname = System.getProperty("os.name");
@@ -407,15 +410,23 @@ public class IJ {
 	}
 	
 	/**Displays a message in the ImageJ status bar.*/
-	public static void showStatus(String s) {
-		if (ij!=null)
-			ij.showStatus(s);
-		ImagePlus imp = WindowManager.getCurrentImage();
-		ImageCanvas ic = imp!=null?imp.getCanvas():null;
-		if (ic!=null)
-			ic.setShowCursorStatus(s.length()==0?true:false);
+	public static void showStatus(String s) {	//n__
+		if(Interpreter.getInstance() == null)
+			protectStatusBar = false;
+		if(!protectStatusBar){
+			if (ij!=null)
+				ij.showStatus(s);
+			ImagePlus imp = WindowManager.getCurrentImage();
+			ImageCanvas ic = imp!=null?imp.getCanvas():null;
+			if (ic!=null){
+				if(protectStatusBar)
+					ic.setShowCursorStatus(false);
+				else
+					ic.setShowCursorStatus(s.length()==0?true:false);
+			}
+		}
 	}
-
+	
 	/**
 	* @deprecated
 	* replaced by IJ.log(), ResultsTable.setResult() and TextWindow.append().
@@ -564,8 +575,51 @@ public class IJ {
 		'row1' and 'row2' must be in the range 0-Analyzer.getCounter()-1. */
 	public static void deleteRows(int row1, int row2) {
 		ResultsTable rt = Analyzer.getResultsTable();
+		int tableSize = rt.size();
 		rt.deleteRows(row1, row2);
+		ImagePlus imp = WindowManager.getCurrentImage();
+		if (imp!=null)
+			Overlay.updateTableOverlay(imp, row1, row2, tableSize);
 		rt.show("Results");
+	}
+	
+	/** Returns a measurement result, where 'measurement' is "Area", 
+	 * "Mean", "StdDev", "Mode", "Min", "Max", "X", "Y", "XM", "YM",
+	 * "Perim.", "BX", "BY", "Width", "Height", "Major", "Minor", "Angle",
+	 * "Circ.", "Feret", "IntDen", "Median", "Skew", "Kurt", "%Area",
+	 * "RawIntDen", "Ch", "Slice", "Frame", "FeretX", "FeretY",
+	 * "FeretAngle", "MinFeret", "AR", "Round", "Solidity", "MinThr"
+	 * or "MaxThr". Add " raw" to the argument to disable calibration,
+	 * for example IJ.getValue("Mean raw"). Add " limit" to enable
+	 * the "limit to threshold" option.
+	*/
+	public static double getValue(ImagePlus imp, String measurement) {
+		String options = "";
+		int index = measurement.indexOf(" ");
+		if (index>0) {
+			if (index<measurement.length()-1)
+				options = measurement.substring(index+1, measurement.length());
+			measurement = measurement.substring(0, index);
+		}
+		int measurements = Measurements.ALL_STATS + Measurements.SLICE;
+		if (options.contains("limit"))
+			measurements += Measurements.LIMIT;
+		Calibration cal = null;
+		if (options.contains("raw")) {
+			cal = imp.getCalibration();
+			imp.setCalibration(null);
+		}
+		ImageStatistics stats = imp.getStatistics(measurements);
+		ResultsTable rt = new ResultsTable();
+		Analyzer analyzer = new Analyzer(imp, measurements, rt);
+		analyzer.saveResults(stats, imp.getRoi());
+		double value = Double.NaN;
+		try {
+			value = rt.getValue(measurement, 0);
+		} catch (Exception e) {};
+		if (cal!=null)
+			imp.setCalibration(cal);
+		return value;
 	}
 
 	/** Returns a reference to the "Results" window TextPanel.
@@ -889,6 +943,14 @@ public class IJ {
 	/** Pad 'n' with leading zeros to the specified number of digits. */
 	public static String pad(int n, int digits) {
 		String str = ""+n;
+		while (str.length()<digits)
+			str = "0"+str;
+		return str;
+	}
+
+	/** Pad 's' with leading zeros to the specified number of digits. */
+	public static String pad(String s, int digits) {
+		String str = ""+s;
 		while (str.length()<digits)
 			str = "0"+str;
 		return str;
@@ -1644,8 +1706,8 @@ public class IJ {
 		return ImageJ.VERSION+build;
 	}
 
-	/** Returns the path to the home ("user.home"), startup, ImageJ, plugins, macros, 
-		luts, temp, current or image directory if <code>title</code> is "home", "startup", 
+	/** Returns the path to the home ("user.home"), downloads, startup, ImageJ, plugins, macros, 
+		luts, temp, current or image directory if <code>title</code> is "home", "downloads", "startup", 
 		"imagej", "plugins", "macros", "luts", "temp", "current", "default", "image", otherwise, 
 		displays a dialog and returns the path to the directory selected by the user. 
 		Returns null if the specified directory is not found or the user
@@ -1665,6 +1727,8 @@ public class IJ {
 				return null;
 		} else if (title2.equals("home"))
 			return System.getProperty("user.home") + File.separator;
+		else if (title2.equals("downloads"))
+			return System.getProperty("user.home")+File.separator+"Downloads"+File.separator;
 		else if (title2.equals("startup"))
 			return Prefs.getImageJDir();
 		else if (title2.equals("imagej"))
@@ -2061,6 +2125,34 @@ public class IJ {
 			str = "Error: "+e.getMessage();
 		}
 		return str;
+	}
+	
+	public static ByteBuffer openAsByteBuffer(String path) {
+		if (path==null || path.equals("")) {
+			OpenDialog od = new OpenDialog("Open as ByteBuffer", "");
+			String directory = od.getDirectory();
+			String name = od.getFileName();
+			if (name==null) return null;
+			path = directory + name;
+		}
+		File file = new File(path);
+		if (!file.exists()) {
+			error("OpenAsByteBuffer", "File not found");
+			return null;
+		}
+		int len = (int)file.length();
+		byte[] buffer = new byte[len];
+		try {
+			InputStream in = new BufferedInputStream(new FileInputStream(path));
+			DataInputStream dis = new DataInputStream(in);
+			dis.readFully(buffer);
+			dis.close();
+		}
+		catch (Exception e) {
+			error("OpenAsByteBuffer", e.getMessage());
+			return null;
+		}
+		return ByteBuffer.wrap(buffer);
 	}
 
 	/** Creates a new image.

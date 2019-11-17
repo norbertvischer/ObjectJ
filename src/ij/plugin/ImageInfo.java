@@ -23,10 +23,10 @@ public class ImageInfo implements PlugIn {
 		else {
 			String info = getImageInfo(imp);
 			if (info.contains("----"))
-				showInfo(imp, info, 450, 500);
+				showInfo(imp, info, 450, 600);
 			else {
-				int inc = info.contains("No Selection")?0:75;
-				showInfo(imp, info, 300, 350+inc);
+				int inc = info.contains("No selection")?0:130;
+				showInfo(imp, info, 400, 500+inc);
 			}
 		}
 	}
@@ -294,6 +294,7 @@ public class ImageInfo implements PlugIn {
 			s += "ScaleToFit: " + ic.getScaleToFit() + "\n";
 
 			
+	    String valueUnit = cal.getValueUnit();
 	    if (cal.calibrated()) {
 	    	s += " \n";
 	    	int curveFit = cal.getFunction();
@@ -315,7 +316,10 @@ public class ImageInfo implements PlugIn {
 				if (c.length>=5)
 					s += "  c: "+IJ.d2s(c[4],6)+"\n";
 			}
-			s += "  Unit: \""+cal.getValueUnit()+"\"\n";	    	
+			s += "  Unit: \""+valueUnit+"\"\n";	    	
+	    } else if (valueUnit!=null && !valueUnit.equals("Gray Value")) {
+			s += "Calibration function: None\n";
+			s += "  Unit: \""+valueUnit+"\"\n";	    	
 	    } else
 	    	s += "Uncalibrated\n";
 
@@ -323,8 +327,14 @@ public class ImageInfo implements PlugIn {
 		if (fi!=null) {
 			if (fi.url!=null && !fi.url.equals(""))
 				s += "URL: " + fi.url + "\n";
-			else if (fi.directory!=null && fi.fileName!=null)
-				s += "Path: " + fi.directory + fi.fileName + "\n";
+			else {
+				String defaultDir = (fi.directory==null || fi.directory.length()==0)?System.getProperty("user.dir"):"";
+				if (defaultDir.length()>0) {
+					defaultDir = defaultDir.replaceAll("\\\\", "/");
+					defaultDir += "/";
+				}
+				s += "Path: " + defaultDir + fi.getFilePath() + "\n";
+			}
 		}
 		
 		ImageWindow win = imp.getWindow();

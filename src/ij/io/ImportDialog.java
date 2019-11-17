@@ -208,7 +208,7 @@ public class ImportDialog {
 		else {
 			FileOpener fo = new FileOpener(fi);
 			ImagePlus imp = fo.openImage();
-			String filePath = fi.directory+fi.fileName;
+			String filePath = fi.getFilePath();
 			Recorder.recordCall(fi.getCode()+"imp = Raw.open(\""+filePath+"\", fi);");
 			if (imp!=null) {
 				imp.show();
@@ -234,7 +234,7 @@ public class ImportDialog {
 		FileInfo fi = new FileInfo();
 		fi.fileFormat = fi.RAW;
 		fi.fileName = fileName;
-		if (!(directory.endsWith(File.separator)||directory.endsWith("/")))
+		if (directory!=null && !(directory.endsWith(File.separator)||directory.endsWith("/")))
 			directory += "/";
 		fi.directory = directory;
 		fi.width = width;

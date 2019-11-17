@@ -603,13 +603,15 @@ public class Selection implements PlugIn, Measurements {
 		if (!ip.isBinary()) {
 			IJ.error("Create Selection",
 				"This command creates a composite selection from\n"+
-				"a mask (8-bit binary image with white background)\n"+
-				"or from an image that has been thresholded using\n"+
-				"the Image>Adjust>Threshold tool. The current\n"+
-				"image is not a mask and has not been thresholded.");
+				"a mask (8-bit binary image) or from an image\n"+
+				"thresholded using Image>Adjust>Threshold\n"+
+				"The current image is not a mask and has not\n"+
+				"been thresholded.");
 			return;
 		}
 		int threshold = ip.isInvertedLut()?255:0;
+		if (Prefs.blackBackground)
+			threshold = (threshold==255)?0:255;
 		ip.setThreshold(threshold, threshold, ImageProcessor.NO_LUT_UPDATE);
 		IJ.runPlugIn("ij.plugin.filter.ThresholdToSelection", "");
 	}
@@ -637,43 +639,7 @@ public class Selection implements PlugIn, Measurements {
 	
 	/** Converts a line selection into an area selection. */
 	public static Roi lineToArea(Roi roi) {
-		Roi roi2 = null;
-		if (roi.getType()==Roi.LINE) {
-			double width = roi.getStrokeWidth();
-			if (width<=1.0)
-				roi.setStrokeWidth(1.0000001);
-			FloatPolygon p = roi.getFloatPolygon();
-			roi.setStrokeWidth(width);
-			roi2 = new PolygonRoi(p, Roi.POLYGON);
-			roi2.setDrawOffset(roi.getDrawOffset());
-		} else {
-			roi = (Roi)roi.clone();
-			int lwidth = (int)roi.getStrokeWidth();
-			if (lwidth<1)
-				lwidth = 1;
-			Rectangle bounds = roi.getBounds();
-			int width = bounds.width + lwidth*2;
-			int height = bounds.height + lwidth*2;
-			ImageProcessor ip2 = new ByteProcessor(width, height);
-			roi.setLocation(lwidth, lwidth);
-			ip2.setColor(255);
-			roi.drawPixels(ip2);
-			ip2.setThreshold(255, 255, ImageProcessor.NO_LUT_UPDATE);
-			ThresholdToSelection tts = new ThresholdToSelection();
-			roi2 = tts.convert(ip2);
-			if (roi2==null)
-				return roi;
-			if (bounds.x==0&&bounds.y==0)
-				roi2.setLocation(0, 0);
-			else
-				roi2.setLocation(bounds.x-lwidth/2, bounds.y-lwidth/2);
-		}
-		transferProperties(roi, roi2);
-		roi2.setStrokeWidth(0);
-		Color c = roi2.getStrokeColor();
-		if (c!=null)  // remove any transparency
-			roi2.setStrokeColor(new Color(c.getRed(),c.getGreen(),c.getBlue()));
-		return roi2;
+		return roi.convertToPolygon();
 	}
 	
 	void areaToLine(ImagePlus imp) {

@@ -142,7 +142,7 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 	}
 	
 	private int validateNImages(FileInfo fi) {
-		File f = new File(fi.directory + fi.fileName);
+		File f = new File(fi.getFilePath());
 		if (!f.exists())
 			return fi.nImages;
 		long fileLength = f.length();
@@ -203,6 +203,8 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 		} else {
 			FileOpener fo = new FileOpener(info[n-1]);
 			imp = fo.openImage();
+			if (info[n-1].fileType==FileInfo.RGB48 && info[n-1].sliceNumber>0)
+				imp.setSlice(info[n-1].sliceNumber);
 		}
 		if (imp!=null)
 			return imp.getProcessor();

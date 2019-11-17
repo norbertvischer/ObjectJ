@@ -836,18 +836,19 @@ public class ResultsTable implements Cloneable {
 	public synchronized void deleteRow(int rowIndex) {
 		if (counter==0 || rowIndex<0 || rowIndex>counter-1)
 			return;
+		int counter2 = Math.min(counter,maxRows-1);
 		if (rowLabels!=null) {
 			rowLabels[rowIndex] = null;
-			for (int i=rowIndex; i<counter-1; i++)
+			for (int i=rowIndex; i<counter2; i++)
 				rowLabels[i] = rowLabels[i+1];
 		}
 		for (int col=0; col<=lastColumn; col++) {
 			if (columns[col]!=null) {
-				for (int i=rowIndex; i<counter-1; i++)
+				for (int i=rowIndex; i<counter2; i++)
 					columns[col][i] = columns[col][i+1];
 				ArrayList stringColumn = stringColumns!=null?(ArrayList)stringColumns.get(new Integer(col)):null;
 				if (stringColumn!=null && stringColumn.size()==counter) {
-					for (int i=rowIndex; i<counter-1; i++)
+					for (int i=rowIndex; i<counter2; i++)
 						stringColumn.set(i,stringColumn.get(i+1));
 					stringColumn.remove(counter-1);
 				}
@@ -1133,14 +1134,14 @@ public class ResultsTable implements Cloneable {
 		rt.showRowNumbers(path.contains("Results"));
 		for (int i=firstRow; i<lines.length; i++) {
 			rt.incrementCounter();
-			String[] items=lines[i].split(cellSeparator);
-			for (int j=firstColumn; j<items.length; j++) {
+			String[] items = lines[i].split(cellSeparator);
+			for (int j=firstColumn; j<headings.length; j++) {
 				if (j==labelsIndex&&labels)
 					rt.addLabel(headings[labelsIndex], items[labelsIndex]);
-				else if (j<headings.length) {
-					double value = Tools.parseDouble(items[j]);
+				else {
+					double value = j<items.length?Tools.parseDouble(items[j]):Double.NaN;
 					if (Double.isNaN(value)) {
-						String item = items[j];
+						String item = j<items.length?items[j]:"";
 						if (commasReplaced) {
 							item = item.replaceAll(commaSubstitute2, ",");
 							if (item.startsWith("\"") && item.endsWith("\""))
@@ -1490,13 +1491,17 @@ public class ResultsTable implements Cloneable {
 				columns[i][j] = rt2.columns[i][ces[j].index];
 		    ArrayList sc = null;
 		    Map scs =  stringColumns;
-		    if (scs != null)
+		    	if (scs != null)
 			sc = (ArrayList) scs.get (new Integer (i));
 		    if (sc != null) {
-			ArrayList sc2 = (ArrayList) rt2.stringColumns.get (new Integer (i));
-			for (int j = 0; j < size(); j++)
-			    sc.set (j, sc2.get (ces[j].index));
+				ArrayList sc2 = (ArrayList) rt2.stringColumns.get (new Integer (i));
+				for (int j = 0; j < size(); j++)
+			    	sc.set (j, sc2.get (ces[j].index));
 		    }
+		}
+		if (rowLabels != null) {
+			for (int i = 0; i < size(); i++)
+				rowLabels[i] =  rt2.rowLabels[ces[i].index];
 		}
 	}
 	
