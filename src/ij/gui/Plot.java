@@ -22,7 +22,7 @@ import ij.measure.ResultsTable;
  *
  * @author Wayne Rasband
  * @author Philippe CARL, CNRS, philippe.carl (AT) unistra.fr (log axes, arrows, ArrayList data)
- * @author Norbert Vischer (overlay range arrows, 'R'eset range, filled plots, dynamic plots, boxes and whiskers, superscript)
+ * @author Norbert Vischer (overlay range arrows, 'R'eset range, filled plots, dynamic plots, boxes and whiskers)
  * @author Michael Schmid (axis grid/ticks, resizing/panning/changing range, high-resolution, serialization)
  */
 public class Plot implements Cloneable {
@@ -1874,7 +1874,7 @@ public class Plot implements Cloneable {
 		ip.setColor(Color.black);
 		return ip;
 	}
-	
+
 	/** Calculates the margin sizes and sets the class variables accordingly */
 	void makeMarginValues() {
 		Font font = nonNullFont(pp.frame.getFont(), currentFont);
@@ -1884,16 +1884,8 @@ public class Plot implements Cloneable {
 		leftMargin	 = sc(LEFT_MARGIN*marginScale);
 		rightMargin	 = sc(RIGHT_MARGIN*marginScale);
 		topMargin	 = sc(TOP_MARGIN*marginScale);
-		bottomMargin = sc(BOTTOM_MARGIN*marginScale + 2);//n__
-		if(pp != null && pp.xLabel != null && pp.xLabel.getFont() != null){
-			float numberSize = font.getSize2D();
-			float labelSize = pp.xLabel.getFont().getSize2D();
-			float extraHeight = 1.5f *(labelSize - numberSize);
-			if(extraHeight > 0){
-				bottomMargin += sc(extraHeight);
-				leftMargin += sc(extraHeight);
-			}
-		}
+		bottomMargin = sc(BOTTOM_MARGIN*marginScale);
+		//IJ.log("marginScale="+marginScale+" left margin="+leftMargin);
 	}
 
 	/** Calculate the actual range, major step interval and set variables for data <-> pixels scaling */
@@ -2608,19 +2600,12 @@ public class Plot implements Cloneable {
 		// --- Write x and y axis text labels
 		if (xCats == null){
 			ip.setFont(pp.xLabel.getFont() == null ? scFont : scFont(pp.xLabel.getFont()));
-			ImageProcessor xLabel = stringToPixels(xLabelToDraw);
-			int xpos = leftMargin+(frame.width-xLabel.getWidth())/2;
-			int ypos = y + scFont.getSize()/3;//topMargin + frame.height + bottomMargin-xLabel.getHeight();
-			ip.insert(xLabel, xpos, ypos);
+			ip.drawString(xLabelToDraw, leftMargin+(frame.width-ip.getStringWidth(xLabelToDraw))/2, y+ip.getFontMetrics().getHeight());
 		}
 		if (yCats == null && yLabelToDraw.length() > 0) {
-			ip.setFont(pp.yLabel.getFont() == null ? scFont : scFont(pp.yLabel.getFont()));
-			ImageProcessor yLabel = stringToPixels(yLabelToDraw);
-			yLabel = yLabel.rotateLeft();		
 			int xRightOfYLabel = xNumberRight - maxNumWidth - sc(2);
-			int xpos = xRightOfYLabel - yLabel.getWidth() - sc(2);
-			int ypos = topMargin + (frame.height -yLabel.getHeight())/2;
-			ip.insert(yLabel, xpos, ypos);
+			Font yLabelFont = pp.yLabel.getFont() == null ? scFont : scFont(pp.yLabel.getFont());
+			drawYLabel(yLabelToDraw, xRightOfYLabel, topMargin, frame.height, yLabelFont);
 		}
 	}
 
@@ -2648,7 +2633,7 @@ public class Plot implements Cloneable {
 	/** draw something like 1.2 10^-9; returns the width of the string drawn.
 	 *	'Digits' should be >=0 for drawing the mantissa (=1.38 in this example), negative to draw only 10^exponent
 	 *	Currently only supports center justification and right justification (y of center line)
-	 *	Fonts baseFont, smallFont should be scaled already*/	
+	 *	Fonts baseFont, smallFont should be scaled already*/
 	int drawExpString(double value, int digits, int x, int y, int justification, int fontAscent, Font baseFont, Font smallFont) {
 		String base = "10";
 		String exponent = null;
@@ -2681,96 +2666,7 @@ public class Plot implements Cloneable {
 		ip.drawString(base, x, y+fontAscent*7/10);
 		return width;
 	}
-			
-	//Returns a pixelMap containting labelStr.
-	//Uses font of current ImageProcessor.
-	//Supports !!subscript!! and ^^superscript^^
-	ByteProcessor stringToPixels(String labelStr){
-		Font bigFont = ip.getFont();
-		Rectangle rect = ip.getStringBounds(labelStr);
-		int ww = rect.width * 2;
-		int hh = rect.height * 3;//enough space, will be cropped later
-		int y0 = rect.height * 2;//base line
-		ByteProcessor box = new ByteProcessor(ww, hh);
-		box.setColor(Color.WHITE);
-		//box.setColor(Color.LIGHT_GRAY); //make box visible for test
-		box.fill();
-		box.setColor(Color.black);
-		box.setAntialiasedText(pp.antialiasedText);
-		if (invertedLut)
-			box.invertLut();
-		box.setFont(bigFont);
 
-		boolean doParse = (labelStr.indexOf("^^")>=0 || labelStr.indexOf("!!")>=0 );
-		doParse = doParse && (labelStr.indexOf("^^^")<0 && labelStr.indexOf("!!!")< 0 );
-		if(!doParse){
-			box.drawString(labelStr, 0,  y0);
-			Rectangle cropRect = box.getStringBounds(labelStr);
-			cropRect.y += y0;
-			box.setRoi(cropRect);
-			ImageProcessor boxI  = box.crop();
-			box = boxI.convertToByteProcessor();
-			return box;
-		}
-
-		if(labelStr.endsWith("^^") || labelStr.endsWith("!!"))
-			labelStr = labelStr.substring(0, labelStr.length() - 2);
-		Font smallFont = bigFont.deriveFont((float) (bigFont.getSize() * 0.7));
-		FontMetrics fm = ip.getFontMetrics();
-		int ascent = fm.getAscent();
-		int h = fm.getHeight();
-		int len = labelStr.length();
-		int[] signs = new int[len];
-		int nSigns = 0;
-			
-		for (int jj = 0; jj < len - 2; jj++) {//get positions where font size changes
-			if (labelStr.substring(jj, jj + 2).equals("^^")) {
-				signs[nSigns++] = jj;
-			}
-			if (labelStr.substring(jj, jj + 2).equals("!!")) {
-				signs[nSigns++] = -jj;
-			}
-		}
-		signs[nSigns++] = len;
-		signs = Arrays.copyOf(signs, nSigns);
-
-		int leftIndex = 0;
-		int x2 = 0;
-		int y2 = y0;
-		
-		boolean subscript = false;
-		for (int pp = 0; pp < signs.length; pp++) {//draw all text fragments
-			int rightIndex = signs[pp];
-			rightIndex = Math.abs(rightIndex);
-			String part = labelStr.substring(leftIndex, rightIndex);
-			boolean small = pp % 2 == 1;//toggle odd/even
-			if (small) {
-				box.setFont(smallFont);
-				if (subscript) {
-					y2 = y0 + ascent / 6;
-				} else {//superscript:
-					y2 = y0 - ascent / 2;
-				}
-			} else {
-				box.setFont(bigFont);
-				y2 = y0;
-			}
-			x2 ++;
-			int partWidth  = box.getStringWidth(part);
-			box.drawString(part, x2,  y2);
-			leftIndex = rightIndex + 2;
-			subscript = signs[pp] < 0;//negative positions = subscript
-			x2 += partWidth;
-		}
-		x2 += h/4;
-		int top = y0- h;
-		Rectangle cropRect = new Rectangle(0, top, x2, ascent * 16/10);
-		box.setRoi(cropRect);
-		ImageProcessor boxI  = box.crop();
-		box = boxI.convertToByteProcessor();
-		return box;			
-	}
-	
 	// Number of digits to display the number n with resolution 'resolution';
 	// (if n is integer and small enough to display without scientific notation,
 	// no decimals are needed, irrespective of 'resolution')
@@ -3330,6 +3226,31 @@ public class Plot implements Cloneable {
 		}
 	}
 
+	/** Vertical text for y axis label */
+	void drawYLabel(String yLabel, int xRight, int yFrameTop, int frameHeight, Font scaledFont) {
+		if (ip==null || yLabel.equals(""))
+			return;
+		ip.setFont(scaledFont);
+		FontMetrics fm = ip.getFontMetrics();
+		int h = fm.getHeight();
+		//int w =	 ip.getStringWidth(yLabel) + sc(5);
+		//int h =	 fm.getHeight()+sc(1);
+		Rectangle rect = ip.getStringBounds(yLabel);
+		ImageProcessor label = new ByteProcessor(rect.x+rect.width, Math.max(h, rect.height));
+		label.setAntialiasedText(pp.antialiasedText);
+		if (invertedLut)
+			label.invertLut();
+		label.setColor(Color.white);
+		label.fill();
+		label.setColor(Color.black);
+		label.setFont(scaledFont);
+		label.drawString(yLabel, 0, Math.max(-rect.y, h)); //can't antialias if x<0 or y<h
+		label = label.rotateLeft();
+		int y2 = yFrameTop + (frameHeight-label.getHeight())/2;
+		if (y2 < 0) y2 = 0;
+		int x2 = Math.max(xRight-label.getWidth()*4/3, 0); // distance 1/3 height if possible
+		ip.insert(label, x2, y2);
+	}
 
 	/** Draw the legend */
 	void drawLegend(PlotObject legendObject, ImageProcessor ip) {

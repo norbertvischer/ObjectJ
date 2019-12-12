@@ -73,6 +73,7 @@ public class IJ {
 	private static String smoothMacro;
 	private static Interpreter macroInterpreter;
 	private static boolean protectStatusBar;
+	private static Thread statusBarThread;
 			
 	static {
 		osname = System.getProperty("os.name");
@@ -408,16 +409,20 @@ public class IJ {
 		return applet;
 	}
 	
-	/**Displays a message in the ImageJ status bar. */
+	/**Displays a message in the ImageJ status bar. If 's' starts 
+		with '!', subsequent showStatus() calls in the current
+		thread (without "!" in the message) are suppressed. */
 	public static void showStatus(String s) {
-		if (!macroRunning())
-			protectStatusBar = false;
-		boolean doProtect = s.startsWith("!"); //suppress subsequent process status
+		if ((Interpreter.getInstance()==null&&statusBarThread==null)
+		|| (statusBarThread!=null&&Thread.currentThread()!=statusBarThread))
+			protectStatusBar(false);
+		boolean doProtect = s.startsWith("!"); // suppress subsequent showStatus() calls
 		if (doProtect) {
-			protectStatusBar = true;
+			protectStatusBar(true);
+			statusBarThread = Thread.currentThread();
 			s = s.substring(1);
 		}
-		if (doProtect || !protectStatusBar){
+		if (doProtect || !protectStatusBar) {
 			if (ij!=null)
 				ij.showStatus(s);
 			ImagePlus imp = WindowManager.getCurrentImage();
@@ -855,7 +860,8 @@ public class IJ {
 	}
 	
 	public static void showTime(ImagePlus imp, long start, String str, int nslices) {
-		if (Interpreter.isBatchMode()) return;
+		if (Interpreter.isBatchMode())
+			return;
 	    double seconds = (System.currentTimeMillis()-start)/1000.0;
 		double pixels = (double)imp.getWidth() * imp.getHeight();
 		double rate = pixels*nslices/seconds;
@@ -2427,4 +2433,14 @@ public class IJ {
 			return properties.get(key);
 	}
 	
+	public static boolean statusBarProtected() {
+		return protectStatusBar;
+	}
+	
+	public static void protectStatusBar(boolean protect) {
+		protectStatusBar = protect;
+		if (!protectStatusBar)
+			statusBarThread = null;
+	}
+
 }
