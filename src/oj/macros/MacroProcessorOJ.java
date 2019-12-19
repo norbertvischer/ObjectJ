@@ -766,39 +766,6 @@ public class MacroProcessorOJ {
 	public void swapSlices(int sliceA, int sliceB) {
 		IJ.runMacro("Stack.swap(" + sliceA + ", " + sliceB + ");");
 		return;//30.6.2013
-//        if (sliceA == sliceB || sliceA < 1 || sliceB < 1
-//                || sliceA > IJ.getImage().getStackSize() || sliceB > IJ.getImage().getStackSize()) {
-//            return;
-//        }
-//
-//        ImagePlus imp = IJ.getImage();
-//        ImageStack stack = imp.getStack();
-//
-//        String[] labels = ImageJAccessOJ.ImageStackAccess.getStackLabels(stack);
-//
-//        String labelA = labels[sliceA - 1];
-//        String labelB = labels[sliceB - 1];
-//        labels[sliceA - 1] = labelB;
-//        labels[sliceB - 1] = labelA;
-//
-//        ImageJAccessOJ.ImageStackAccess.setStackLabels(stack, labels);
-//
-//        Object[] objects = ImageJAccessOJ.ImageStackAccess.getStackObjects(stack);
-//        Object ipA = objects[sliceA - 1];
-//        Object ipB = objects[sliceB - 1];
-//        objects[sliceA - 1] = ipB;
-//        objects[sliceB - 1] = ipA;
-//
-//        ImageJAccessOJ.ImageStackAccess.setStackObjects(stack, objects);
-//
-//
-//        if (imp.getCurrentSlice() == sliceA) {
-//            imp.setProcessor(imp.getTitle(), stack.getProcessor(sliceA));
-//        } else if (imp.getCurrentSlice() == sliceB) {
-//            imp.setProcessor(imp.getTitle(), stack.getProcessor(sliceB));
-//        }
-//
-//        imp.repaintWindow();
 	}
 
 	public int getImageCount() {
@@ -856,7 +823,7 @@ public class MacroProcessorOJ {
 		ColumnOJ theColumn = OJ.getData().getResults().getColumns().getColumnByName(columnName);//n_ 11.9.2007
 
 		if (theColumn == null) {
-		    ImageJAccessOJ.InterpreterAccess.interpError("Column '" + columnName + "' does not exist");
+			ImageJAccessOJ.InterpreterAccess.interpError("Column '" + columnName + "' does not exist");
 			return "";
 		}
 
@@ -1577,24 +1544,24 @@ public class MacroProcessorOJ {
 		OJ.getDataProcessor().movePoint(index, loc);
 	}
 
-	public void setItemInfo(String s){ //21.1.2019
+	public void setItemInfo(String s) { //21.1.2019
 		OJ.getData().getCells().getSelectedCell().getSelectedYtem().setInfo(s);
 	}
-			
-	public String getItemInfo(){//21.1.2019
+
+	public String getItemInfo() {//21.1.2019
 		String info = OJ.getData().getCells().getSelectedCell().getSelectedYtem().getInfo();
 		return info;
 	}
-			
-	public void setObjectInfo(String s){ //6.2.2019
+
+	public void setObjectInfo(String s) { //6.2.2019
 		OJ.getData().getCells().getSelectedCell().setInfo(s);
 	}
-			
-	public String getObjectInfo(){//6.2.2019
+
+	public String getObjectInfo() {//6.2.2019
 		String info = OJ.getData().getCells().getSelectedCell().getInfo();
 		return info;
 	}
-			
+
 	//not used
 	public void setStatisticValue(String columnName, String statisticName, double value) {
 		OJ.getData().getResults().getColumns().getColumnByName(columnName).getStatistics().setStatisticsValueByName(statisticName, value);
@@ -1901,7 +1868,7 @@ public class MacroProcessorOJ {
 	}
 
 	public void showResults() {
-	    ProjectResultsOJ.getInstance().setVisible(true);//18.11.2018
+		ProjectResultsOJ.getInstance().setVisible(true);//18.11.2018
 		//oj.gui.menuactions.ViewActionsOJ.ResultsViewAction.actionPerformed(null);
 	}
 

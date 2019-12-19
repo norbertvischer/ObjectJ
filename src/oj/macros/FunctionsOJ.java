@@ -824,6 +824,15 @@ public class FunctionsOJ implements MacroExtension {
 	}
 
 	public String ojTest(String arg) {//5.1. 2018
+		
+		if(true)
+			return(getChecksum (new String[3]));
+		
+		
+		
+		
+		
+		
 		ProjectResultsOJ pr = ProjectResultsOJ.getInstance();
 		if (arg.equalsIgnoreCase("HideResults")) {
 
@@ -843,6 +852,26 @@ public class FunctionsOJ implements MacroExtension {
 
 		return ("abc");
 	}
+	
+	
+		String getChecksum(String[] cmd){
+		StringBuffer sb = new StringBuffer(256);
+		BufferedReader reader = null;
+		try {
+			Process p = Runtime.getRuntime().exec(cmd);
+			reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			String line; int count=1;
+			while ((line=reader.readLine())!=null)  {
+        		sb.append(line+"\n");
+        	}
+		} catch (Exception e) {
+    		sb.append(e.getMessage()+"\n");
+		} finally {
+			if (reader!=null) try {reader.close();} catch (IOException e) {}
+		}
+		return sb.toString();
+	}
+
 
 	public String ojTestOld(String arg) {//5.1. 2018
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();

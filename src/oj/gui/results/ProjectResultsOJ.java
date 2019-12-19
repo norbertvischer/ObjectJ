@@ -51,11 +51,9 @@ import oj.OJ;
 import oj.graphics.CustomCanvasOJ;
 import oj.graphics.PlotOJ;
 import oj.gui.KeyEventManagerOJ;
-import oj.project.ResultsOJ;
 import oj.project.results.ColumnDefOJ;
 import oj.project.results.ColumnOJ;
 import oj.project.results.ColumnsOJ;
-import oj.gui.menuactions.ViewActionsOJ;
 import oj.gui.results.unlinked.UnlinkedHeaderRendererOJ;
 import oj.processor.events.CellChangedEventOJ;
 import oj.processor.events.CellChangedListenerOJ;
@@ -516,7 +514,6 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
         tblUnlinkedHeader = new javax.swing.JTable(new oj.gui.results.unlinked.UnlinkedStatRowsModelOJ());
         tblUnlinkedHeader.getColumnModel().addColumnModelListener(this);
         tblUnlinkedHeader.getModel().addTableModelListener(tblUnlinkedContent);
-        jPanel4 = new javax.swing.JPanel();
 
         mniShowAll.setAction(oj.gui.results.StatisticsActionsOJ.ShowAll);
         mniShowAll.setToolTipText("");
@@ -897,11 +894,6 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
                 tblLinkedHeaderMouseDragged(evt);
             }
         });
-        tblLinkedHeader.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                tblLinkedHeaderMouseClicked(evt);
-            }
-        });
         linkedHeaderScrollPane.setViewportView(tblLinkedHeader);
 
         linkedResultsPanel.add(linkedHeaderScrollPane, java.awt.BorderLayout.NORTH);
@@ -950,9 +942,6 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
         splitPaneBig.setRightComponent(tabbedResultsPane);
 
         getContentPane().add(splitPaneBig, java.awt.BorderLayout.CENTER);
-
-        jPanel4.setPreferredSize(new java.awt.Dimension(10, 20));
-        getContentPane().add(jPanel4, java.awt.BorderLayout.SOUTH);
 
         bindingGroup.bind();
 
@@ -1415,10 +1404,6 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 		OJ.getEventProcessor().fireYtemDefChangedEvent(YtemDefChangedEventOJ.LABEL_VISIBILITY_CHANGED);
     }//GEN-LAST:event_mncLabelActionPerformed
 
-    private void tblLinkedHeaderMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblLinkedHeaderMouseClicked
-		IJ.showMessage("clicked");//14.4.2016
-    }//GEN-LAST:event_tblLinkedHeaderMouseClicked
-
     private void mncPlotActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mncPlotActionPerformed
 		plotFromOjResult(evt, false);
     }//GEN-LAST:event_mncPlotActionPerformed
@@ -1655,7 +1640,6 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
     private javax.swing.JCheckBoxMenuItem itemSum;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSeparator jSeparator1;

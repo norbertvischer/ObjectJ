@@ -9,6 +9,7 @@ package oj.io;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import ij.IJ;
+import ij.Prefs;
 import ij.gui.GenericDialog;
 import ij.io.OpenDialog;
 import ij.plugin.frame.Editor;
@@ -176,29 +177,37 @@ public class InputOutputOJ {
 				msg4 += "\n edited elsewhere, but has no function otherwise";
 				msg4 += "\n \n This dialog is skipped when the Alt key was down";
 				gd.addMessage(msg4, Font.decode("Arial-12"));
-				//gd.setOKLabel("Replace");
 				gd.showDialog();
 				if (gd.wasCanceled()) {
 					return;
 				}
 				String radioStr = gd.getNextRadioButton();
 				if (radioStr.equals(radios[0])) {
-					String fromPath = IJ.getFilePath("Select .txt or .ojj file");
+
+					boolean savedFC = Prefs.useJFileChooser;
+					if(IJ.isMacOSX())
+						Prefs.useJFileChooser = true;
+					String fromPath = IJ.getFilePath("Choose .txt or .ojj file to replace embedded macros");
+					Prefs.useJFileChooser = savedFC;//15.10.2019
+					if(fromPath == null){
+						IJ.showStatus("Nothing was imported");
+						return;
+					}
 					int separatorIndex = fromPath.lastIndexOf(File.separator);
 					int len = fromPath.length();
 					String name = fromPath.substring(separatorIndex + 1, len);
 					String projectDir = fromPath.substring(0, separatorIndex);
 
-					if (fromPath.endsWith(".txt")) {
+					if (fromPath.toLowerCase().endsWith(".txt")) {
 						xPath = fromPath;
 						fromTxt = true;
 						newMacroText = IJ.openAsString(xPath);
 
-					} else if (fromPath.endsWith(".ojj")) {
+					} else if (fromPath.toLowerCase().endsWith(".ojj")) {
 						newMacroText = extractEmbeddedMacros(projectDir, name);
 						fromOjj = true;
 					} else {
-						IJ.showMessage("Extension must be  '.txt' or '.ojj' :   \n" + fromPath);
+						IJ.showMessage("Extension must be  '.txt' or '.ojj' :   \nYou chose:\n \n" + fromPath);
 					}
 
 				}
@@ -218,6 +227,13 @@ public class InputOutputOJ {
 		Editor ed = OJ.editor;
 		if (ed != null) {
 			ed.getTextArea().setText(newMacroText);
+			if(OJ.editorWindow != null){
+				
+				//OJ.editorWindow.get.get
+			}
+			ed.getTextArea().setSelectionEnd(0);//13.10.2019
+			ed.getTextArea().setSelectionStart(0);
+			ed.getTextArea().setCaretPosition(0);
 		}
 		int nMacros = OJ.getData().getMacroSet().getMacrosCount();
 		IJ.selectWindow("ImageJ");
@@ -662,7 +678,6 @@ public class InputOutputOJ {
 		} catch (Exception e) {
 		}
 		return dataOj;
-
 	}
 
 	/**

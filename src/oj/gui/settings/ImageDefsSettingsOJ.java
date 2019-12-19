@@ -110,6 +110,7 @@ public class ImageDefsSettingsOJ extends javax.swing.JPanel implements TableColu
         jPanel4 = new RoundPanelOJ();
         jPanel8 = new javax.swing.JPanel();
         btnLinkImage = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
         btnUnlinkImage = new javax.swing.JButton();
         jPanel7 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -166,6 +167,14 @@ public class ImageDefsSettingsOJ extends javax.swing.JPanel implements TableColu
             }
         });
         jPanel8.add(btnLinkImage);
+
+        jButton1.setText("Link all");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+        jPanel8.add(jButton1);
 
         btnUnlinkImage.setText("Unlink");
         btnUnlinkImage.setEnabled(false);
@@ -299,11 +308,16 @@ private void jScrollPane1AncestorAdded(javax.swing.event.AncestorEvent evt) {//G
 		OJ.getData().getImages().setVirtualFlag(vFlag);
     }//GEN-LAST:event_chkVirtualFlagActionPerformed
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+	OJ.getImageProcessor().linkAllImages();
+    }//GEN-LAST:event_jButton1ActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnLinkImage;
     private javax.swing.JButton btnUnlinkImage;
     private javax.swing.JCheckBox chkShowObjectLayer;
     private javax.swing.JCheckBox chkVirtualFlag;
+    private javax.swing.JButton jButton1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;

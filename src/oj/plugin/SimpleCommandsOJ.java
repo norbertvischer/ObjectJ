@@ -90,9 +90,16 @@ public class SimpleCommandsOJ extends SimpleCommands {
         String oldExt = UtilsOJ.getFileExtension(oldName);
         String newExt = UtilsOJ.getFileExtension(newName);
         String both = (oldExt + newExt).toLowerCase();
+		boolean renameOnDisk = true;
         boolean tiftif = both.equals(".tiff.tif") || both.equals(".tif.tiff");
+		boolean allowExistingFilename = false;
         if (!oldExt.equalsIgnoreCase(newExt) && !tiftif) {
-            return "Cannot change file extension ";
+			allowExistingFilename = true;
+			doSave = false;
+			renameOnDisk = false;
+			boolean b = IJ.showMessageWithCancel("Rename linked file", "Cannot save file with different extension, rename anyway?");
+            if(!b)
+				return  "";
         }
 
         boolean alreadyLinked = imgs.getImageByName(newName) != null;
@@ -101,7 +108,8 @@ public class SimpleCommandsOJ extends SimpleCommands {
         boolean alreadyOnDisk = f2.exists();
 
         if (alreadyLinked || alreadyOnDisk) {
-            return "\"" + newName + "\" is already used";
+			if(!allowExistingFilename)
+				return "\"" + newName + "\" is already used";
         }
 
         boolean possible = f1.renameTo(f2);//first try
@@ -129,7 +137,8 @@ public class SimpleCommandsOJ extends SimpleCommands {
             new InputOutputOJ().saveProject(OJ.getData(), true);
         }
         OJ.getImageProcessor().updateImagesProperties();
-        boolean ok = f1.renameTo(f2);
+		if (renameOnDisk)
+			f1.renameTo(f2);
         return "";
     }
 }

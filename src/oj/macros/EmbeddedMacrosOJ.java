@@ -169,7 +169,7 @@ public class EmbeddedMacrosOJ {
 		loadButton.transferFocus();
 	}
 
-	public void showEmbeddedPlotMacros(String plotMacroText) {
+/*	public void showEmbeddedPlotMacros(String plotMacroText) {
 
 		if (Interpreter.getInstance() != null) {
 			Interpreter.getInstance().abortMacro();
@@ -215,7 +215,7 @@ public class EmbeddedMacrosOJ {
 		refreshPopupItems();
 		btn_preview.transferFocus();
 	}
-
+*/
 	public void refreshPopupItems() {
 		if (!showPopUp) {
 			return;
@@ -260,8 +260,8 @@ public class EmbeddedMacrosOJ {
 	}
 
 	public void loadEmbeddedMacros() {
-		boolean altDown = IJ.altKeyDown();//3.8.2009
-		boolean shiftDown = IJ.shiftKeyDown();//18.8.2009
+		boolean altDown = IJ.altKeyDown();
+		boolean shiftDown = IJ.shiftKeyDown();
 		if (shiftDown) {
 			shiftDown = shiftDown && true;
 		}
@@ -269,23 +269,22 @@ public class EmbeddedMacrosOJ {
 			IJ.log("alt=" + altDown + "   shift=" + shiftDown);
 		}
 		String macros_text = null;
-		//String macroFileName = null;
 		if (OJ.isProjectOpen) {
 			DataOJ data = OJ.getData();
-			String project_name = data.getName();
-
-//			String directory = data.getDirectory();
-			//macroFileName = project_name + ".txt";
+			//String project_name = data.getName();
 			macros_text = OJ.getData().getLinkedMacroText();//18.3.2010
 			if (macros_text == null)
 				return;
 			OJ.getData().setLinkedMacroText(macros_text);
 			doInstall(macros_text);
+			Editor ed = OJ.editor;
+			if(ed != null && ed.getTextArea() !=null)
+				ed.getTextArea().setCaretPosition(0);
 
 		}
 	}
 
-	public void doInstall(String macros_text) {//Normal Load Project Macros  //20.9.2010
+	public void doInstall(String macros_text) {//Normal Load Project Macros  
 
 		Interpreter intp = Interpreter.getInstance();
 		if (intp != null) {
