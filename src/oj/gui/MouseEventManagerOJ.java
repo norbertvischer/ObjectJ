@@ -13,7 +13,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import oj.OJ;
 import oj.graphics.CustomCanvasOJ;
-import oj.plugin.GlassWindowOJ;
+//import oj.plugin.GlassWindowOJ;
 import oj.processor.ToolStateProcessorOJ;
 import oj.processor.EventProcessorOJ;
 import oj.processor.state.MacroToolStateOJ;
@@ -31,10 +31,10 @@ public class MouseEventManagerOJ implements MouseListener, MouseMotionListener {
     private MouseEventManagerOJ() {
     }
 
-    private boolean isGlass(MouseEvent e) {
-        Window win = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
-        return (win instanceof GlassWindowOJ);
-    }
+//    private boolean isGlass(MouseEvent e) {
+//        Window win = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
+//        return (win instanceof GlassWindowOJ);
+//    }
 
     public static MouseEventManagerOJ getInstance() {
         if (instance == null) {
@@ -87,37 +87,37 @@ public class MouseEventManagerOJ implements MouseListener, MouseMotionListener {
 
     public void mousePressed(MouseEvent e) {
         ImagePlus connectedImp = null;
-        boolean inGlass = isGlass(e);
-        if (inGlass) {
-            GlassWindowOJ glass = (GlassWindowOJ) KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
-            int x = e.getX();
-            int y = e.getY();
-            if (glass.inBar(x, y) || glass.inResizeBox(x, y)) {
-                pressedX = x;
-                pressedY = y;
-                return;
-            }
-            if (glass.inCloseBox(x, y)) {
-                IJ.runMacro("ojGlassWindow(\"hide\");");
-                return;
-            }
-
-
-
-            ImagePlus imp2 = WindowManager.getCurrentImage();
-            connectedImp = glass.connectedImp;
-            if (imp2 != connectedImp || imp2 == null) {
-                ij.IJ.showStatus("active image is not connected to Glass Window");
-                return;
-            }
-
-            boolean ctrl = e.isControlDown();
-            boolean right = SwingUtilities.isRightMouseButton(e) || IJ.isMacOSX() && ctrl;
-            if (right) {
-                glass.robotCommand = glass.GRAB_TO_NEW;//5.12.2012
-                //return;
-            }
-        }
+//        boolean inGlass = isGlass(e);
+//        if (inGlass) {
+//            GlassWindowOJ glass = (GlassWindowOJ) KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
+//            int x = e.getX();
+//            int y = e.getY();
+//            if (glass.inBar(x, y) || glass.inResizeBox(x, y)) {
+//                pressedX = x;
+//                pressedY = y;
+//                return;
+//            }
+//            if (glass.inCloseBox(x, y)) {
+//                IJ.runMacro("ojGlassWindow(\"hide\");");
+//                return;
+//            }
+//
+//
+//
+//            ImagePlus imp2 = WindowManager.getCurrentImage();
+//            connectedImp = glass.connectedImp;
+//            if (imp2 != connectedImp || imp2 == null) {
+//                ij.IJ.showStatus("active image is not connected to Glass Window");
+//                return;
+//            }
+//
+//            boolean ctrl = e.isControlDown();
+//            boolean right = SwingUtilities.isRightMouseButton(e) || IJ.isMacOSX() && ctrl;
+//            if (right) {
+//                glass.robotCommand = glass.GRAB_TO_NEW;//5.12.2012
+//                //return;
+//            }
+//        }
         double x = 0.0, y = 0.0;
         ImagePlus imp2 = null;
         if (connectedImp != null) {
@@ -160,15 +160,16 @@ public class MouseEventManagerOJ implements MouseListener, MouseMotionListener {
         pressedX = 0;
         pressedY = 0;
         ImagePlus imp2 = null;
-        GlassWindowOJ glass = null;
-        if (isGlass(e)) {
-            glass = (GlassWindowOJ) KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
-            imp2 = WindowManager.getCurrentImage();
-            ImagePlus connectedImp = glass.connectedImp;
-            if (imp2 != connectedImp || imp2 == null) {
-                return;
-            }
-        } else if (KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow() instanceof ImageWindow) {
+//        GlassWindowOJ glass = null;
+//        if (isGlass(e)) {
+//            glass = (GlassWindowOJ) KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
+//            imp2 = WindowManager.getCurrentImage();
+//            ImagePlus connectedImp = glass.connectedImp;
+//            if (imp2 != connectedImp || imp2 == null) {
+//                return;
+//            }
+//        } else 
+		if (KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow() instanceof ImageWindow) {
             imp2 = ((ImageWindow) KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow()).getImagePlus();
         }
         if (imp2 == null) {
@@ -187,15 +188,16 @@ public class MouseEventManagerOJ implements MouseListener, MouseMotionListener {
 //propagate mouseEntered to Toolstate.mouseEntered
 public void mouseEntered(MouseEvent e) {
         ImagePlus imp2 = null;
-        GlassWindowOJ glass = null;
-        if (isGlass(e)) {
-            glass = (GlassWindowOJ) KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
-            imp2 = WindowManager.getCurrentImage();
-            ImagePlus connectedImp = glass.connectedImp;
-            if (imp2 != connectedImp || imp2 == null) {
-                return;
-            }
-        } else if (KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow() instanceof ImageWindow) {
+//        GlassWindowOJ glass = null;
+//        if (isGlass(e)) {
+//            glass = (GlassWindowOJ) KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
+//            imp2 = WindowManager.getCurrentImage();
+//            ImagePlus connectedImp = glass.connectedImp;
+//            if (imp2 != connectedImp || imp2 == null) {
+//                return;
+//            }
+//        } else 
+		if (KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow() instanceof ImageWindow) {
             imp2 = ((ImageWindow) KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow()).getImagePlus();
         }
         if (imp2 == null) {
@@ -204,21 +206,21 @@ public void mouseEntered(MouseEvent e) {
         if (impLinked(imp2) && (OJ.isValidData()) && (OJ.getToolStateProcessor().getToolState() != ToolStateProcessorOJ.STATE_NONE) && (!IJ.spaceBarDown())) {
             double x = imp2.getCanvas().offScreenXD(e.getX());
             double y = imp2.getCanvas().offScreenYD(e.getY());
-            if (glass != null) {
-                x = e.getX();
-                y = e.getY();
-            }
+//            if (glass != null) {
+//                x = e.getX();
+//                y = e.getY();
+//            }
             int stackIndex = imp2.getStackIndex(imp2.getChannel(), imp2.getSlice(), imp2.getFrame());
             OJ.getToolStateProcessor().getToolStateObject().mouseEntered(imp2.getTitle(), stackIndex, x, y, e.getModifiers());
-        } else {
-            imp2.getCanvas().mouseEntered(e);
-        }
+        }// else {
+        imp2.getCanvas().mouseEntered(e);
+        //}
     }
 
     public void mouseExited(MouseEvent e) {
-        if (isGlass(e)) {
-            return;
-        }
+//        if (isGlass(e)) {
+//            return;
+//        }
 
         if (KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow() instanceof ImageWindow) {
             ImagePlus imp = ((ImageWindow) KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow()).getImagePlus();
@@ -227,40 +229,41 @@ public void mouseEntered(MouseEvent e) {
                 double y = imp.getCanvas().offScreenYD(e.getY());
                 int stackIndex = imp.getStackIndex(imp.getChannel(), imp.getSlice(), imp.getFrame());
                 OJ.getToolStateProcessor().getToolStateObject().mouseExited(imp.getTitle(), stackIndex, x, y, e.getModifiers());
-            } else {
-                imp.getCanvas().mouseExited(e);
-            }
+            } 
+			//else {
+            imp.getCanvas().mouseExited(e);
+            //}
         }
     }
 
     public void mouseDragged(MouseEvent e) {
         ImagePlus imp = null;
-        if (isGlass(e)) {
-
-            GlassWindowOJ glass = (GlassWindowOJ) KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
-            boolean moving = pressedY != 0 && pressedY < glass.BAR_HEIGHT;
-            boolean resizing = pressedX > glass.getWidth() - 10 && pressedY > glass.getHeight() - 10;
-
-            //   if (pressedY != 0 && pressedY < GlassWindowOJ.BAR_HEIGHT) {
-            if (moving) {
-                Rectangle usableRect = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
-                int left = e.getXOnScreen() - pressedX;
-                int top = e.getYOnScreen() - pressedY;
-                if (usableRect.x > left) {
-                    left = usableRect.x;
-                }
-                if (usableRect.y > top) {
-                    top = usableRect.y;
-                }
-                glass.setLocation(new Point(left, top));
-            }
-            if (resizing) {
-                glass.setSize(e.getX() + 5, e.getY() + 5);
-                pressedX = e.getX() + 5;
-                pressedY = e.getY() + 5;
-            }
-            imp = glass.getImagePlus();//6.12.2012
-        }
+//        if (isGlass(e)) {
+//
+//            GlassWindowOJ glass = (GlassWindowOJ) KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
+//            boolean moving = pressedY != 0 && pressedY < glass.BAR_HEIGHT;
+//            boolean resizing = pressedX > glass.getWidth() - 10 && pressedY > glass.getHeight() - 10;
+//
+//            //   if (pressedY != 0 && pressedY < GlassWindowOJ.BAR_HEIGHT) {
+//            if (moving) {
+//                Rectangle usableRect = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+//                int left = e.getXOnScreen() - pressedX;
+//                int top = e.getYOnScreen() - pressedY;
+//                if (usableRect.x > left) {
+//                    left = usableRect.x;
+//                }
+//                if (usableRect.y > top) {
+//                    top = usableRect.y;
+//                }
+//                glass.setLocation(new Point(left, top));
+//            }
+//            if (resizing) {
+//                glass.setSize(e.getX() + 5, e.getY() + 5);
+//                pressedX = e.getX() + 5;
+//                pressedY = e.getY() + 5;
+//            }
+//            imp = glass.getImagePlus();//6.12.2012
+//        }
         if (imp == null) {
             if (KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow() instanceof ImageWindow) {
                 imp = ((ImageWindow) KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow()).getImagePlus();
@@ -283,10 +286,10 @@ public void mouseEntered(MouseEvent e) {
 
     public void mouseMoved(MouseEvent e) {
         ImagePlus imp2 = null;
-        if (isGlass(e)) {
-            GlassWindowOJ glass = (GlassWindowOJ) KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
-            imp2 = glass.getImagePlus();
-        }
+//        if (isGlass(e)) {
+//            GlassWindowOJ glass = (GlassWindowOJ) KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
+//            imp2 = glass.getImagePlus();
+//        }
         
         if (imp2 == null) {
             imp2 = WindowManager.getCurrentImage();
