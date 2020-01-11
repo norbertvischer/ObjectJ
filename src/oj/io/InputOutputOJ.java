@@ -24,12 +24,14 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
 import oj.OJ;
+import oj.gui.menuactions.ProjectActionsOJ;
 import oj.gui.results.ProjectResultsOJ;
 import oj.util.UtilsOJ;
 import oj.project.*;
 import oj.io.spi.IIOProviderOJ;
 import oj.io.spi.IOFactoryOJ;
 import oj.macros.EmbeddedMacrosOJ;
+import oj.project.results.ColumnsOJ;
 import static oj.util.UtilsOJ.showInFinderOrExplorer;
 
 public class InputOutputOJ {
@@ -671,12 +673,43 @@ public class InputOutputOJ {
 				}
 			}
 		}
-
+			
 		try {
 			dataOj.getResults().getColumns().fixColumnsOrder();//2.2.2014
 
 		} catch (Exception e) {
+			IJ.showMessage("Exception 1878: " + e.toString());
 		}
+		ColumnsOJ columns = dataOj.getResults().getColumns();
+		String titles[] = columns.columnNamesToArray();
+		int max = titles.length;
+		int nUnlinked = 0;
+			for (int jj = max - 1; jj >= 0; jj--) {
+			if (titles[jj].startsWith("_")){
+				columns.removeColumnByIndex(jj);
+				nUnlinked++;
+				if(nUnlinked == 1){
+					IJ.log("\\Clear");
+					IJ.log("--- Unlinked columns: ---");
+				}
+				IJ.log(titles[jj]);
+			}	
+			
+		}
+		if(nUnlinked > 0){
+		    //IJ.runMacro("waitForUser;");
+		    
+			String msg = "This project file contains unlinked results";
+			msg +="\nwhich are not supported after ObjectJ version 1.04w";
+			
+			msg += "\n \nFor keeping this project file untouched,";
+			msg +="\nclick 'OK' and choose  'ObjectJ>Project>Close Project'";
+			msg +="\n \nOtherwise continue without unlinked results";
+			
+			String version = "ObjectJ " + OJ.releaseVersion;
+			IJ.showMessage(version, msg);
+		}
+		dataOj.setChanged(false);
 		return dataOj;
 	}
 

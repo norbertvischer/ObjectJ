@@ -1386,6 +1386,11 @@ public class MacroProcessorOJ {
 			ImageJAccessOJ.InterpreterAccess.interpError("Illegal character");
 			return;
 		}
+		if (isUnlinked) {
+			String msg = "Unlinked columns (whose titles start with '_') \nare not supported after ObjectJ version 1.04w";
+			ImageJAccessOJ.InterpreterAccess.interpError(msg);
+			return;
+		}
 		String[] parts = Tools.split(columnNames, " ,");
 		for (int nn = 0; nn < parts.length; nn++) {
 			String columnName = parts[nn];

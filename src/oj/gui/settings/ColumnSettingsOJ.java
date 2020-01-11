@@ -1265,10 +1265,14 @@ public class ColumnSettingsOJ extends javax.swing.JPanel implements TableColumnM
                     String notAllowed = ("* \t,\n?");//2017 added question mark
                     for (int jj = 0; jj < notAllowed.length(); jj++) {
                         if (newName.indexOf(notAllowed.charAt(jj)) >= 0) {
-                            ij.IJ.showMessage(newName + ": illegal character");
+                            ij.IJ.showMessage(newName + ": illegal character");			    
                             return;
                         }
-                    }
+			if (newName.startsWith("_")) {
+			      ij.IJ.showMessage(newName + ": cannot start with '_'");
+			      return;
+			}
+                     }
 
                     if (oldIsUnlinked && !newIsUnlinked) {
                         IJ.showMessage("Column Settings", "Cannot change from 'unlinked' to 'linked'. \nBetter remove and re-create column ");

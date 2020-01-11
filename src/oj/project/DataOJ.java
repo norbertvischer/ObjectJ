@@ -1,5 +1,6 @@
 package oj.project;
 
+import ij.IJ;
 import java.io.Serializable;
 import java.util.Date;
 //import oj.gui.settings.PlotManagerOJ;
@@ -91,16 +92,16 @@ public class DataOJ implements Cloneable, IBaseOJ, Serializable {
         }
     }
 
-    public void setChanged(boolean changed) {
-		if(changed){
-			this.changed = changed;//for breakpoint
+    public void setChanged(boolean isChanged) {
+		if(isChanged){
+			this.changed = isChanged;//for breakpoint
 		}
-        this.changed = changed;
-        cells.setChanged(changed);
-        images.setChanged(changed);
-        //macroSet.setChanged(changed);
-        results.setChanged(changed);
-        ytemDefs.setChanged(changed);
+        this.changed = isChanged;
+        cells.setChanged(isChanged);
+        images.setChanged(isChanged);
+        //macroSet.setChanged(isChanged);
+        results.setChanged(isChanged);
+        ytemDefs.setChanged(isChanged);
     }
 
     public void updateChangeDate() {

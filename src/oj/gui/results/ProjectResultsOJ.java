@@ -3,10 +3,10 @@
  */
 package oj.gui.results;
 
-import oj.gui.results.unlinked.UnlinkedTableModelOJ;
-import oj.gui.results.unlinked.UnlinkedContentTableRendererOJ;
-import oj.gui.results.unlinked.UnlinkedStatRowsRendererOJ;
-import oj.gui.results.unlinked.UnlinkedStatRowsModelOJ;
+//import oj.gui.results.unlinked.UnlinkedTableModelOJ;
+//import oj.gui.results.unlinked.UnlinkedContentTableRendererOJ;
+//import oj.gui.results.unlinked.UnlinkedStatRowsRendererOJ;
+//import oj.gui.results.unlinked.UnlinkedStatRowsModelOJ;
 import oj.gui.results.linked.LinkedContentTableRendererOJ;
 import oj.gui.results.linked.LinkedStatRowsRendererOJ;
 import oj.gui.results.linked.LinkedStatRowsModelOJ;
@@ -54,7 +54,7 @@ import oj.gui.KeyEventManagerOJ;
 import oj.project.results.ColumnDefOJ;
 import oj.project.results.ColumnOJ;
 import oj.project.results.ColumnsOJ;
-import oj.gui.results.unlinked.UnlinkedHeaderRendererOJ;
+//import oj.gui.results.unlinked.UnlinkedHeaderRendererOJ;
 import oj.processor.events.CellChangedEventOJ;
 import oj.processor.events.CellChangedListenerOJ;
 import oj.processor.events.ColumnChangedEventOJ;
@@ -89,9 +89,9 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 	private LinkedHeaderRendererOJ linkedHeaderRenderer = new LinkedHeaderRendererOJ();
 	private LinkedContentTableRendererOJ linkedContentRenderer = new LinkedContentTableRendererOJ();
 	private LinkedStatRowsRendererOJ linkedStatRowsRenderer = new LinkedStatRowsRendererOJ();
-	private UnlinkedHeaderRendererOJ unlinkedHeaderRenderer = new UnlinkedHeaderRendererOJ();
-	private UnlinkedContentTableRendererOJ unlinkedContentRenderer = new UnlinkedContentTableRendererOJ();
-	private UnlinkedStatRowsRendererOJ unlinkedStatRowsRenderer = new UnlinkedStatRowsRendererOJ();
+//	private UnlinkedHeaderRendererOJ unlinkedHeaderRenderer = new UnlinkedHeaderRendererOJ();
+//	private UnlinkedContentTableRendererOJ unlinkedContentRenderer = new UnlinkedContentTableRendererOJ();
+//	private UnlinkedStatRowsRendererOJ unlinkedStatRowsRenderer = new UnlinkedStatRowsRendererOJ();
 	private Cursor defaultCursor = Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR);
 	private Cursor qualifyCursor = Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR);
 	//private Cursor deleteCursor = Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR);
@@ -179,35 +179,37 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 				tableCol.setResizable(false);
 			}
 			tableCol.setCellRenderer(linkedContentRenderer);
-		} else if (event.getSource() == tblUnlinkedHeader.getColumnModel()) {
-			TableColumn tableCol = (TableColumn) tblUnlinkedHeader.getColumnModel().getColumn(toIndex);
-			if (toIndex <= (((UnlinkedStatRowsModelOJ) tblUnlinkedHeader.getModel()).getVisibleSize())) {
-				ColumnOJ column = ((UnlinkedStatRowsModelOJ) tblUnlinkedHeader.getModel()).getVisibleElementAt(toIndex - 1);
-				if (column != null) {
-					tableCol.setPreferredWidth(column.getColumnDef().getColumnWidth());
-					tableCol.setResizable(true);
-					tableCol.addPropertyChangeListener(this);
-				}
-			} else {
-				tableCol.setResizable(false);
-			}
-			tableCol.setHeaderRenderer(unlinkedHeaderRenderer);
-			tableCol.setCellRenderer(unlinkedStatRowsRenderer);
-		} else if (event.getSource() == tblUnlinkedContent.getColumnModel()) {
-			TableColumn sTableCol = (TableColumn) tblUnlinkedContent.getColumnModel().getColumn(toIndex);
-			if (toIndex <= (((UnlinkedTableModelOJ) tblUnlinkedContent.getModel()).getVisibleSize())) {
-				ColumnOJ column = ((UnlinkedTableModelOJ) tblUnlinkedContent.getModel()).getVisibleElementAt(toIndex - 1);
-				if (column != null) {
-					int column_width = OJ.getData().getResults().getColumns().getColumnByName(column.getName()).getColumnDef().getColumnWidth();
-					sTableCol.setResizable(true);
-					sTableCol.setPreferredWidth(column_width);
-					sTableCol.addPropertyChangeListener(this);
-				}
-			} else {
-				sTableCol.setResizable(false);
-			}
-			sTableCol.setCellRenderer(unlinkedContentRenderer);
-		}
+		} 
+//		else if (event.getSource() == tblUnlinkedHeader.getColumnModel()) {
+//			TableColumn tableCol = (TableColumn) tblUnlinkedHeader.getColumnModel().getColumn(toIndex);
+//			if (toIndex <= (((UnlinkedStatRowsModelOJ) tblUnlinkedHeader.getModel()).getVisibleSize())) {
+//				ColumnOJ column = ((UnlinkedStatRowsModelOJ) tblUnlinkedHeader.getModel()).getVisibleElementAt(toIndex - 1);
+//				if (column != null) {
+//					tableCol.setPreferredWidth(column.getColumnDef().getColumnWidth());
+//					tableCol.setResizable(true);
+//					tableCol.addPropertyChangeListener(this);
+//				}
+//			} else {
+//				tableCol.setResizable(false);
+//			}
+//			tableCol.setHeaderRenderer(unlinkedHeaderRenderer);
+//			tableCol.setCellRenderer(unlinkedStatRowsRenderer);
+//		} 
+//		else if (event.getSource() == tblUnlinkedContent.getColumnModel()) {
+//			TableColumn sTableCol = (TableColumn) tblUnlinkedContent.getColumnModel().getColumn(toIndex);
+//			if (toIndex <= (((UnlinkedTableModelOJ) tblUnlinkedContent.getModel()).getVisibleSize())) {
+//				ColumnOJ column = ((UnlinkedTableModelOJ) tblUnlinkedContent.getModel()).getVisibleElementAt(toIndex - 1);
+//				if (column != null) {
+//					int column_width = OJ.getData().getResults().getColumns().getColumnByName(column.getName()).getColumnDef().getColumnWidth();
+//					sTableCol.setResizable(true);
+//					sTableCol.setPreferredWidth(column_width);
+//					sTableCol.addPropertyChangeListener(this);
+//				}
+//			} else {
+//				sTableCol.setResizable(false);
+//			}
+//			sTableCol.setCellRenderer(unlinkedContentRenderer);
+//		}
 	}
 
 	public void columnRemoved(TableColumnModelEvent event) {
@@ -232,7 +234,7 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 		jScrollPane1.getViewport().setOpaque(false);
 		//jScrollPane5.getViewport().setOpaque(false); 1.6.2010
 		linkedScrollPane.getViewport().setOpaque(false);
-		unlinkedScrollPane.getViewport().setOpaque(false);
+//		unlinkedScrollPane.getViewport().setOpaque(false);
 
 		JScrollBar linkedDummyBar = new JScrollBar() {
 
@@ -270,44 +272,44 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 			}
 		});
 
-		tblUnlinkedHeader.getTableHeader().addMouseListener(new java.awt.event.MouseAdapter() {//added 13.2.2010
-
-			public void mousePressed(java.awt.event.MouseEvent evt) {
-				//if (ij.IJ.controlKeyDown())
-				boolean ctrl = evt.isControlDown();
-				boolean right = SwingUtilities.isRightMouseButton(evt);
-
-				if (ctrl || right) {//25.1.2010
-					ProjectResultsOJ.getInstance().getColumnPopupMenu(tblUnlinkedHeader).show(tblUnlinkedHeader.getTableHeader(), evt.getX(), evt.getY());
-
-				}
-			}
-
-			public void mouseClicked(java.awt.event.MouseEvent evt) {
-				if (SwingUtilities.isLeftMouseButton(evt) && !evt.isControlDown()) {
-
-					int index = tblUnlinkedHeader.getTableHeader().getColumnModel().getColumnIndexAtX(evt.getX());
-					if (index > 0) {
-						int pos_x = 0;
-						for (int i = 0; i < index; i++) {
-							pos_x = pos_x + tblUnlinkedHeader.getColumnModel().getColumn(i).getWidth();
-						}
-						if (((evt.getX() - pos_x) > 14) || (evt.getY() > 14)) {
-							return;
-						}
-						if (ij.IJ.isWindows()) {
-							ProjectResultsOJ.getInstance().getColumnPopupMenu(tblUnlinkedHeader).show(tblUnlinkedHeader.getTableHeader(), evt.getX(), evt.getY());
-						} else {
-//							if (ij.IJ.isMacOSX()) {
-//								ij.IJ.showMessage("This triangle is obsolete. \nPlease click column title with  right button or Ctrl key down");//25.1.2010
-//							} else {
-//								ij.IJ.showMessage("This triangle is obsolete. \nPlease click column title with  right button");//25.1.2010
-//							}
-						}
-					}
-				}
-			}
-		});
+//		tblUnlinkedHeader.getTableHeader().addMouseListener(new java.awt.event.MouseAdapter() {//added 13.2.2010
+//
+//			public void mousePressed(java.awt.event.MouseEvent evt) {
+//				//if (ij.IJ.controlKeyDown())
+//				boolean ctrl = evt.isControlDown();
+//				boolean right = SwingUtilities.isRightMouseButton(evt);
+//
+//				if (ctrl || right) {//25.1.2010
+//					ProjectResultsOJ.getInstance().getColumnPopupMenu(tblUnlinkedHeader).show(tblUnlinkedHeader.getTableHeader(), evt.getX(), evt.getY());
+//
+//				}
+//			}
+//
+//			public void mouseClicked(java.awt.event.MouseEvent evt) {
+//				if (SwingUtilities.isLeftMouseButton(evt) && !evt.isControlDown()) {
+//
+//					int index = tblUnlinkedHeader.getTableHeader().getColumnModel().getColumnIndexAtX(evt.getX());
+//					if (index > 0) {
+//						int pos_x = 0;
+//						for (int i = 0; i < index; i++) {
+//							pos_x = pos_x + tblUnlinkedHeader.getColumnModel().getColumn(i).getWidth();
+//						}
+//						if (((evt.getX() - pos_x) > 14) || (evt.getY() > 14)) {
+//							return;
+//						}
+//						if (ij.IJ.isWindows()) {
+//							ProjectResultsOJ.getInstance().getColumnPopupMenu(tblUnlinkedHeader).show(tblUnlinkedHeader.getTableHeader(), evt.getX(), evt.getY());
+//						} else {
+////							if (ij.IJ.isMacOSX()) {
+////								ij.IJ.showMessage("This triangle is obsolete. \nPlease click column title with  right button or Ctrl key down");//25.1.2010
+////							} else {
+////								ij.IJ.showMessage("This triangle is obsolete. \nPlease click column title with  right button");//25.1.2010
+////							}
+//						}
+//					}
+//				}
+//			}
+//		});
 
 		tblLinkedHeader.getTableHeader().addMouseListener(new java.awt.event.MouseAdapter() {
 
@@ -353,69 +355,69 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 		((AbstractTableModel) tblLinkedHeader.getModel()).fireTableStructureChanged();
 		((LinkedTableModelOJ) tblLinkedContent.getModel()).setSortedIndexes(OJ.getData().getResults().getSortedIndexes(false));
 
-		JScrollBar unlinkedDummyBar = new JScrollBar() {
+//		JScrollBar unlinkedDummyBar = new JScrollBar() {
+//
+//			@Override
+//			public void paint(Graphics g) {
+//			}
+//		};
 
-			@Override
-			public void paint(Graphics g) {
-			}
-		};
+//		unlinkedDummyBar.setPreferredSize(unlinkedScrollPane.getVerticalScrollBar().getPreferredSize());
+//		unlinkedHeaderScrollPane.setVerticalScrollBar(unlinkedDummyBar);
+//		unlinkedHeaderScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
-		unlinkedDummyBar.setPreferredSize(unlinkedScrollPane.getVerticalScrollBar().getPreferredSize());
-		unlinkedHeaderScrollPane.setVerticalScrollBar(unlinkedDummyBar);
-		unlinkedHeaderScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+//		unlinkedScrollPane.getVerticalScrollBar().addComponentListener(
+//				new ComponentListener() {
+//
+//			public void componentResized(ComponentEvent arg0) {
+//			}
+//
+//			public void componentMoved(ComponentEvent arg0) {
+//			}
+//
+//			public void componentShown(ComponentEvent arg0) {
+//				unlinkedHeaderScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+//			}
+//
+//			public void componentHidden(ComponentEvent arg0) {
+//				unlinkedHeaderScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+//			}
+//		});
 
-		unlinkedScrollPane.getVerticalScrollBar().addComponentListener(
-				new ComponentListener() {
+//		unlinkedScrollPane.getHorizontalScrollBar().addAdjustmentListener(new AdjustmentListener() {
+//
+//			public void adjustmentValueChanged(AdjustmentEvent e) {
+//				unlinkedHeaderScrollPane.getHorizontalScrollBar().setValue(e.getValue());
+//			}
+//		});
 
-			public void componentResized(ComponentEvent arg0) {
-			}
-
-			public void componentMoved(ComponentEvent arg0) {
-			}
-
-			public void componentShown(ComponentEvent arg0) {
-				unlinkedHeaderScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-			}
-
-			public void componentHidden(ComponentEvent arg0) {
-				unlinkedHeaderScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-			}
-		});
-
-		unlinkedScrollPane.getHorizontalScrollBar().addAdjustmentListener(new AdjustmentListener() {
-
-			public void adjustmentValueChanged(AdjustmentEvent e) {
-				unlinkedHeaderScrollPane.getHorizontalScrollBar().setValue(e.getValue());
-			}
-		});
-
-		tblUnlinkedHeader.getTableHeader().addMouseListener(new java.awt.event.MouseAdapter() {
-
-			@Override
-			public void mouseClicked(java.awt.event.MouseEvent evt) {
-				if (SwingUtilities.isLeftMouseButton(evt) && !evt.isControlDown()) {
-					int index = tblUnlinkedHeader.getTableHeader().getColumnModel().getColumnIndexAtX(evt.getX());
-					if (index >= 0) {
-						int pos_x = 0;
-						for (int i = 0; i < index; i++) {
-							pos_x = pos_x + tblUnlinkedHeader.getColumnModel().getColumn(i).getWidth();
-						}
-						if (((evt.getX() - pos_x) > 14) || (evt.getY() > 14)) {
-							return;
-						}
-						ProjectResultsOJ.getInstance().getColumnPopupMenu(tblLinkedHeader).show(tblUnlinkedHeader.getTableHeader(), evt.getX(), evt.getY());
-					}
-				}
-			}
-		});
-		tblUnlinkedContent.setRowSelectionAllowed(true);
-		tblUnlinkedContent.setColumnSelectionAllowed(false);
-		((UnlinkedTableModelOJ) tblUnlinkedContent.getModel()).fireTableStructureChanged();
-		((UnlinkedStatRowsModelOJ) tblUnlinkedHeader.getModel()).fireTableStructureChanged();
-		((UnlinkedTableModelOJ) tblUnlinkedContent.getModel()).setSortedIndexes(OJ.getData().getResults().getSortedIndexes(true));
-
+//		tblUnlinkedHeader.getTableHeader().addMouseListener(new java.awt.event.MouseAdapter() {
+//
+//			@Override
+//			public void mouseClicked(java.awt.event.MouseEvent evt) {
+//				if (SwingUtilities.isLeftMouseButton(evt) && !evt.isControlDown()) {
+//					int index = tblUnlinkedHeader.getTableHeader().getColumnModel().getColumnIndexAtX(evt.getX());
+//					if (index >= 0) {
+//						int pos_x = 0;
+//						for (int i = 0; i < index; i++) {
+//							pos_x = pos_x + tblUnlinkedHeader.getColumnModel().getColumn(i).getWidth();
+//						}
+//						if (((evt.getX() - pos_x) > 14) || (evt.getY() > 14)) {
+//							return;
+//						}
+//						ProjectResultsOJ.getInstance().getColumnPopupMenu(tblLinkedHeader).show(tblUnlinkedHeader.getTableHeader(), evt.getX(), evt.getY());
+//					}
+//				}
+//			}
+//		});
+//		tblUnlinkedContent.setRowSelectionAllowed(true);
+//		tblUnlinkedContent.setColumnSelectionAllowed(false);
+//		((UnlinkedTableModelOJ) tblUnlinkedContent.getModel()).fireTableStructureChanged();
+//		((UnlinkedStatRowsModelOJ) tblUnlinkedHeader.getModel()).fireTableStructureChanged();
+//		((UnlinkedTableModelOJ) tblUnlinkedContent.getModel()).setSortedIndexes(OJ.getData().getResults().getSortedIndexes(true));
+//
 		tabbedResultsPane.setTitleAt(0, "Linked results");// + Integer.toString(OJ.getData().getCells().getQualifiedCellsCount()) + ")");//26.9.2009
-		tabbedResultsPane.setTitleAt(1, "Unlinked results");//17.5.2010
+//		tabbedResultsPane.setTitleAt(1, "Unlinked results");//17.5.2010
 
 		((ColumnListModelOJ) lstColumnSelector.getModel()).fireColumChanged();
 		//((StatisticsListModelOJ) lstStatisticsSelector.getModel()).fireColumChanged();1.6.2010
@@ -426,7 +428,7 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 		mncHideOthers.setVisible(false);
 		addKeyListener(KeyEventManagerOJ.getInstance());
 		tblLinkedContent.addKeyListener(KeyEventManagerOJ.getInstance());
-		tblUnlinkedContent.addKeyListener(KeyEventManagerOJ.getInstance());
+//		tblUnlinkedContent.addKeyListener(KeyEventManagerOJ.getInstance());
 
 		itemCount.setSelected(false);
 		itemMean.setSelected(false);
@@ -504,16 +506,6 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
         tblLinkedHeader = new javax.swing.JTable(new oj.gui.results.linked.LinkedStatRowsModelOJ());
         tblLinkedHeader.getColumnModel().addColumnModelListener(this);
         tblLinkedHeader.getModel().addTableModelListener(tblLinkedContent);
-        unlinkedResultsPanel = new javax.swing.JPanel();
-        unlinkedScrollPane = new javax.swing.JScrollPane();
-        unlinkedScrollPane.getViewport().setBackground(Color.WHITE);
-        tblUnlinkedContent = new javax.swing.JTable(new oj.gui.results.unlinked.UnlinkedTableModelOJ());
-        tblUnlinkedContent.getColumnModel().addColumnModelListener(this);
-        tblUnlinkedContent.getModel().addTableModelListener(tblUnlinkedContent);
-        unlinkedHeaderScrollPane = new javax.swing.JScrollPane();
-        tblUnlinkedHeader = new javax.swing.JTable(new oj.gui.results.unlinked.UnlinkedStatRowsModelOJ());
-        tblUnlinkedHeader.getColumnModel().addColumnModelListener(this);
-        tblUnlinkedHeader.getModel().addTableModelListener(tblUnlinkedContent);
 
         mniShowAll.setAction(oj.gui.results.StatisticsActionsOJ.ShowAll);
         mniShowAll.setToolTipText("");
@@ -900,45 +892,6 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 
         tabbedResultsPane.addTab("Linked Results", linkedResultsPanel);
 
-        unlinkedResultsPanel.setLayout(new java.awt.BorderLayout());
-
-        unlinkedScrollPane.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
-        unlinkedScrollPane.setOpaque(false);
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, unlinkedHeaderScrollPane, org.jdesktop.beansbinding.ELProperty.create("${columnHeader}"), unlinkedScrollPane, org.jdesktop.beansbinding.BeanProperty.create("columnHeader"));
-        bindingGroup.addBinding(binding);
-
-        tblUnlinkedContent.setBackground(new java.awt.Color(236, 233, 216));
-        tblUnlinkedContent.setFont(new java.awt.Font("SansSerif", 0, 12)); // NOI18N
-        tblUnlinkedContent.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
-        tblUnlinkedContent.setDoubleBuffered(true);
-        tblUnlinkedContent.setGridColor(new java.awt.Color(204, 204, 204));
-        tblUnlinkedContent.setOpaque(false);
-        tblUnlinkedContent.setSelectionForeground(new java.awt.Color(0, 0, 0));
-        tblUnlinkedContent.setShowHorizontalLines(false);
-        unlinkedScrollPane.setViewportView(tblUnlinkedContent);
-
-        unlinkedResultsPanel.add(unlinkedScrollPane, java.awt.BorderLayout.CENTER);
-
-        unlinkedHeaderScrollPane.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
-        unlinkedHeaderScrollPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        unlinkedHeaderScrollPane.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-        unlinkedHeaderScrollPane.setOpaque(false);
-        unlinkedHeaderScrollPane.setPreferredSize(new java.awt.Dimension(0, 20));
-        unlinkedHeaderScrollPane.setWheelScrollingEnabled(false);
-
-        tblUnlinkedHeader.setFont(new java.awt.Font("SansSerif", 0, 12)); // NOI18N
-        tblUnlinkedHeader.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
-        tblUnlinkedHeader.setDoubleBuffered(true);
-        tblUnlinkedHeader.setFocusable(false);
-        tblUnlinkedHeader.setOpaque(false);
-        tblUnlinkedHeader.setRowSelectionAllowed(false);
-        unlinkedHeaderScrollPane.setViewportView(tblUnlinkedHeader);
-
-        unlinkedResultsPanel.add(unlinkedHeaderScrollPane, java.awt.BorderLayout.NORTH);
-
-        tabbedResultsPane.addTab("Unlinked Results", unlinkedResultsPanel);
-
         splitPaneBig.setRightComponent(tabbedResultsPane);
 
         getContentPane().add(splitPaneBig, java.awt.BorderLayout.CENTER);
@@ -980,15 +933,16 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 					((LinkedTableModelOJ) tblLinkedContent.getModel()).setSortedIndexes(OJ.getData().getResults().getSortedIndexes(false));
 					((AbstractTableModel) tblLinkedContent.getModel()).fireTableDataChanged();
 				}
-			} else {
-				OJ.getData().getResults().getColumns().setColumnUnlinkedSortFlag(sortFlag);
-				ColumnOJ column = ((UnlinkedStatRowsModelOJ) table.getModel()).getVisibleElementAt(index);
-				if (column != null) {
-					OJ.getData().getResults().getColumns().setColumnUnlinkedSortName(column.getName());
-					((UnlinkedTableModelOJ) tblUnlinkedContent.getModel()).setSortedIndexes(OJ.getData().getResults().getSortedIndexes(true));
-					((AbstractTableModel) tblUnlinkedContent.getModel()).fireTableDataChanged();
-				}
-			}
+			} 
+//			else {
+//				OJ.getData().getResults().getColumns().setColumnUnlinkedSortFlag(sortFlag);
+//				ColumnOJ column = ((UnlinkedStatRowsModelOJ) table.getModel()).getVisibleElementAt(index);
+//				if (column != null) {
+//					OJ.getData().getResults().getColumns().setColumnUnlinkedSortName(column.getName());
+//					((UnlinkedTableModelOJ) tblUnlinkedContent.getModel()).setSortedIndexes(OJ.getData().getResults().getSortedIndexes(true));
+//					((AbstractTableModel) tblUnlinkedContent.getModel()).fireTableDataChanged();
+//				}
+//			}
 		}
 		ProjectResultsOJ.getInstance().updateResultsStatisticsView();//25.7.2011
 	}
@@ -1078,9 +1032,9 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 			if (tab == 0) {
 				column = ((LinkedStatRowsModelOJ) table.getModel()).getVisibleElementAt(index);
 			}
-			if (tab == 1) {
-				column = ((UnlinkedStatRowsModelOJ) table.getModel()).getVisibleElementAt(index);
-			}
+//			if (tab == 1) {
+//				column = ((UnlinkedStatRowsModelOJ) table.getModel()).getVisibleElementAt(index);
+//			}
 
 		}
 		return column;
@@ -1106,9 +1060,9 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 			if (tabbedResultsPane.getSelectedIndex() == 0) {
 				column = ((LinkedStatRowsModelOJ) table.getModel()).getVisibleElementAt(index);
 			}
-			if (tabbedResultsPane.getSelectedIndex() == 1) {
-				column = ((UnlinkedStatRowsModelOJ) table.getModel()).getVisibleElementAt(index);
-			}
+//			if (tabbedResultsPane.getSelectedIndex() == 1) {
+//				column = ((UnlinkedStatRowsModelOJ) table.getModel()).getVisibleElementAt(index);
+//			}
 			if (column != null) {
 				if (!oj.OJ.isProjectOpen) {
 					return;
@@ -1154,10 +1108,11 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 					}
 				}
 
-				if (column.getColumnDef().isUnlinked()) {
-					((AbstractTableModel) tblUnlinkedContent.getModel()).fireTableStructureChanged();
-					((AbstractTableModel) tblUnlinkedHeader.getModel()).fireTableStructureChanged();
-				} else {
+//				if (column.getColumnDef().isUnlinked()) {
+//					((AbstractTableModel) tblUnlinkedContent.getModel()).fireTableStructureChanged();
+//					((AbstractTableModel) tblUnlinkedHeader.getModel()).fireTableStructureChanged();
+//				} else 
+				{
 					((AbstractTableModel) tblLinkedContent.getModel()).fireTableStructureChanged();
 					((AbstractTableModel) tblLinkedHeader.getModel()).fireTableStructureChanged();
 				}
@@ -1170,6 +1125,7 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 
     private void mncHideAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mncHideAllActionPerformed
 		boolean isUnlinked = tabbedResultsPane.getSelectedIndex() == 1;
+		 isUnlinked = false;
 		int max_index = lstColumnSelector.getModel().getSize();
 		for (int i = 0; i
 				< max_index; i++) {
@@ -1182,19 +1138,23 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 			}
 		}
 
-		if (isUnlinked) {
-			((AbstractTableModel) tblUnlinkedContent.getModel()).fireTableStructureChanged();
-			((AbstractTableModel) tblUnlinkedHeader.getModel()).fireTableStructureChanged();
-		} else {
+//		if (isUnlinked) {
+//			((AbstractTableModel) tblUnlinkedContent.getModel()).fireTableStructureChanged();
+//			((AbstractTableModel) tblUnlinkedHeader.getModel()).fireTableStructureChanged();
+//		} else 
+//		{
 			((AbstractTableModel) tblLinkedContent.getModel()).fireTableStructureChanged();
 			((AbstractTableModel) tblLinkedHeader.getModel()).fireTableStructureChanged();
-		}
+		//}
 
 		((ColumnListModelOJ) lstColumnSelector.getModel()).fireColumChanged();
     }//GEN-LAST:event_mncHideAllActionPerformed
 
     private void mncShowAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mncShowAllActionPerformed
-		boolean isUnlinked = tabbedResultsPane.getSelectedIndex() == 1;
+		//boolean isUnlinked = tabbedResultsPane.getSelectedIndex() == 1;
+	
+		boolean isUnlinked = false;
+		
 		int max_index = lstColumnSelector.getModel().getSize();
 		for (int i = 0; i
 				< lstColumnSelector.getModel().getSize(); i++) {
@@ -1207,13 +1167,14 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 			}
 		}
 
-		if (isUnlinked) {
-			((AbstractTableModel) tblUnlinkedContent.getModel()).fireTableStructureChanged();
-			((AbstractTableModel) tblUnlinkedHeader.getModel()).fireTableStructureChanged();
-		} else {
+//		if (isUnlinked) {
+//			((AbstractTableModel) tblUnlinkedContent.getModel()).fireTableStructureChanged();
+//			((AbstractTableModel) tblUnlinkedHeader.getModel()).fireTableStructureChanged();
+//		} else 
+//		{
 			((AbstractTableModel) tblLinkedContent.getModel()).fireTableStructureChanged();
 			((AbstractTableModel) tblLinkedHeader.getModel()).fireTableStructureChanged();
-		}
+		//}
 
 		((ColumnListModelOJ) lstColumnSelector.getModel()).fireColumChanged();
     }//GEN-LAST:event_mncShowAllActionPerformed
@@ -1371,10 +1332,10 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 
     private void mncLabelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mncLabelActionPerformed
 		JTable table = currentHeader();
-		if (tblUnlinkedHeader == table) {
-			IJ.showMessage("Cannot use labels from unlinked columns");
-			return;
-		}
+//		if (tblUnlinkedHeader == table) {
+//			IJ.showMessage("Cannot use labels from unlinked columns");
+//			return;
+//		}
 		ColumnOJ column = rightClickedColumn(table);
 		if (column == null) {
 			return;
@@ -1498,21 +1459,22 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 			ColumnOJ column = (ColumnOJ) ((ColumnListModelOJ) ((JList) evt.getSource()).getModel()).getElementAt(index);
 			Rectangle r = ((JList) evt.getSource()).getCellBounds(index, index);
 			if ((evt.getX() > (r.x + 2)) && (evt.getX() < (r.x + 24)) && (evt.getY() > (r.y + 5)) && (evt.getY() < (r.y + 16))) {//5..16 ->2..24  1.11.2008
-				if (column.isUnlinkedColumn()) {
-					int row = tblUnlinkedContent.getSelectedRow();
-					try {
-						if (column != null) {
-							column.getColumnDef().setHidden(!column.getColumnDef().isHidden());
-							((ColumnListModelOJ) ((JList) evt.getSource()).getModel()).fireColumChanged();
-							((AbstractTableModel) tblUnlinkedHeader.getModel()).fireTableStructureChanged();
-							((AbstractTableModel) tblUnlinkedContent.getModel()).fireTableStructureChanged();
-						}
-
-					} finally {
-						tblLinkedContent.getSelectionModel().setSelectionInterval(row, row);
-					}
-
-				} else {
+//				if (column.isUnlinkedColumn()) {
+//					int row = tblUnlinkedContent.getSelectedRow();
+//					try {
+//						if (column != null) {
+//							column.getColumnDef().setHidden(!column.getColumnDef().isHidden());
+//							((ColumnListModelOJ) ((JList) evt.getSource()).getModel()).fireColumChanged();
+//							((AbstractTableModel) tblUnlinkedHeader.getModel()).fireTableStructureChanged();
+//							((AbstractTableModel) tblUnlinkedContent.getModel()).fireTableStructureChanged();
+//						}
+//
+//					} finally {
+//						tblLinkedContent.getSelectionModel().setSelectionInterval(row, row);
+//					}
+//
+//				} else 
+				{
 					int row = tblLinkedContent.getSelectedRow();
 					try {
 						if (column != null) {
@@ -1679,11 +1641,6 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
     private javax.swing.JTabbedPane tabbedResultsPane;
     private javax.swing.JTable tblLinkedContent;
     private javax.swing.JTable tblLinkedHeader;
-    private javax.swing.JTable tblUnlinkedContent;
-    private javax.swing.JTable tblUnlinkedHeader;
-    private javax.swing.JScrollPane unlinkedHeaderScrollPane;
-    private javax.swing.JPanel unlinkedResultsPanel;
-    private javax.swing.JScrollPane unlinkedScrollPane;
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 
@@ -1729,22 +1686,22 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 						return;
 					}
 				}
-				model = tblUnlinkedHeader.getColumnModel();
-				for (int i = 0; i
-						< model.getColumnCount(); i++) {
-					if (((TableColumn) evt.getSource()).equals(model.getColumn(i))) {
-						String name = tblUnlinkedHeader.getColumnName(i);
-						ColumnOJ col = OJ.getData().getResults().getColumns().getColumnByName(name);
-						if (col != null) {
-							col.getColumnDef().setColumnWidth(width);
-							tblUnlinkedContent.getColumnModel().getColumn(i).setWidth(width);
-							tblUnlinkedContent.getColumnModel().getColumn(i).setPreferredWidth(width);
-						}
-
-						return;
-					}
-
-				}
+//				model = tblUnlinkedHeader.getColumnModel();
+//				for (int i = 0; i
+//						< model.getColumnCount(); i++) {
+//					if (((TableColumn) evt.getSource()).equals(model.getColumn(i))) {
+//						String name = tblUnlinkedHeader.getColumnName(i);
+//						ColumnOJ col = OJ.getData().getResults().getColumns().getColumnByName(name);
+//						if (col != null) {
+//							col.getColumnDef().setColumnWidth(width);
+//							tblUnlinkedContent.getColumnModel().getColumn(i).setWidth(width);
+//							tblUnlinkedContent.getColumnModel().getColumn(i).setPreferredWidth(width);
+//						}
+//
+//						return;
+//					}
+//
+//				}
 			}
 		}
 	}
@@ -1761,10 +1718,11 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 	public synchronized void columnChanged(ColumnChangedEventOJ evt) {//9.9.2009
 		if (evt.getOperation() == ColumnChangedEventOJ.COLUMN_EDITED) {
 			if (OJ.getData().getResults().getColumns().getColumnByName(evt.getNewName()) != null) {
-				if (OJ.getData().getResults().getColumns().getColumnByName(evt.getNewName()).getColumnDef().isUnlinked()) {
-					((AbstractTableModel) tblUnlinkedContent.getModel()).fireTableStructureChanged();
-					((AbstractTableModel) tblUnlinkedHeader.getModel()).fireTableStructureChanged();
-				} else {
+//				if (OJ.getData().getResults().getColumns().getColumnByName(evt.getNewName()).getColumnDef().isUnlinked()) {
+//					((AbstractTableModel) tblUnlinkedContent.getModel()).fireTableStructureChanged();
+//					((AbstractTableModel) tblUnlinkedHeader.getModel()).fireTableStructureChanged();
+//				} else 
+				{
 					((AbstractTableModel) tblLinkedContent.getModel()).fireTableStructureChanged();
 					((AbstractTableModel) tblLinkedHeader.getModel()).fireTableStructureChanged();
 				}
@@ -1774,8 +1732,8 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 
 		} else if (evt.getOperation() == ColumnChangedEventOJ.COLUMN_DELETED) {
 
-			((AbstractTableModel) tblUnlinkedContent.getModel()).fireTableStructureChanged();//30.5.2010
-			((AbstractTableModel) tblUnlinkedHeader.getModel()).fireTableStructureChanged();
+//			((AbstractTableModel) tblUnlinkedContent.getModel()).fireTableStructureChanged();//30.5.2010
+//			((AbstractTableModel) tblUnlinkedHeader.getModel()).fireTableStructureChanged();
 
 			((AbstractTableModel) tblLinkedContent.getModel()).fireTableStructureChanged();
 			((AbstractTableModel) tblLinkedHeader.getModel()).fireTableStructureChanged();
@@ -1783,11 +1741,12 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 			((ColumnListModelOJ) lstColumnSelector.getModel()).fireColumChanged();
 
 		} else {
-			if (OJ.getData().getResults().getColumns().getColumnByName(evt.getNewName()).getColumnDef().isUnlinked()) {
-				((UnlinkedTableModelOJ) tblUnlinkedContent.getModel()).setSortedIndexes(OJ.getData().getResults().getSortedIndexes(true));
-				((AbstractTableModel) tblUnlinkedContent.getModel()).fireTableStructureChanged();
-				((AbstractTableModel) tblUnlinkedHeader.getModel()).fireTableStructureChanged();
-			} else {
+//			if (OJ.getData().getResults().getColumns().getColumnByName(evt.getNewName()).getColumnDef().isUnlinked()) {
+//				((UnlinkedTableModelOJ) tblUnlinkedContent.getModel()).setSortedIndexes(OJ.getData().getResults().getSortedIndexes(true));
+//				((AbstractTableModel) tblUnlinkedContent.getModel()).fireTableStructureChanged();
+//				((AbstractTableModel) tblUnlinkedHeader.getModel()).fireTableStructureChanged();
+//			} else 
+			{
 				tabbedResultsPane.setTitleAt(0, "Linked results (" + Integer.toString(OJ.getData().getCells().getQualifiedCellsCount()) + ")");
 				((LinkedTableModelOJ) tblLinkedContent.getModel()).setSortedIndexes(OJ.getData().getResults().getSortedIndexes(false));
 				((AbstractTableModel) tblLinkedContent.getModel()).fireTableStructureChanged();
@@ -1831,13 +1790,13 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 
 	public void statisticsChanged(StatisticsChangedEventOJ evt) {//9.9.2009
 		((LinkedTableModelOJ) tblLinkedHeader.getModel()).fireTableDataChanged();
-		((UnlinkedTableModelOJ) tblUnlinkedHeader.getModel()).fireTableDataChanged();
+		//((UnlinkedTableModelOJ) tblUnlinkedHeader.getModel()).fireTableDataChanged();
 	}
 
 	public synchronized void resultChanged(ResultChangedEventOJ evt) {//9.9.2009
-		((UnlinkedTableModelOJ) tblUnlinkedContent.getModel()).setSortedIndexes(OJ.getData().getResults().getSortedIndexes(true));
-		((AbstractTableModel) tblUnlinkedContent.getModel()).fireTableDataChanged();
-		((AbstractTableModel) tblUnlinkedHeader.getModel()).fireTableDataChanged();
+//		((UnlinkedTableModelOJ) tblUnlinkedContent.getModel()).setSortedIndexes(OJ.getData().getResults().getSortedIndexes(true));
+//		((AbstractTableModel) tblUnlinkedContent.getModel()).fireTableDataChanged();
+//		((AbstractTableModel) tblUnlinkedHeader.getModel()).fireTableDataChanged();
 		((LinkedTableModelOJ) tblLinkedContent.getModel()).setSortedIndexes(OJ.getData().getResults().getSortedIndexes(false));
 		((AbstractTableModel) tblLinkedContent.getModel()).fireTableDataChanged();
 		((AbstractTableModel) tblLinkedHeader.getModel()).fireTableDataChanged();
@@ -1847,25 +1806,25 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 	public void updateResultsStatisticsView() {
 		((AbstractTableModel) tblLinkedHeader.getModel()).fireTableStructureChanged();
 		((AbstractTableModel) tblLinkedContent.getModel()).fireTableStructureChanged();
-		((AbstractTableModel) tblUnlinkedHeader.getModel()).fireTableStructureChanged();
-		((AbstractTableModel) tblUnlinkedContent.getModel()).fireTableStructureChanged();
+//		((AbstractTableModel) tblUnlinkedHeader.getModel()).fireTableStructureChanged();
+//		((AbstractTableModel) tblUnlinkedContent.getModel()).fireTableStructureChanged();
 
 		int resultsHeight = tblLinkedHeader.getRowCount() * tblLinkedHeader.getRowHeight() + tblLinkedHeader.getTableHeader().getHeight();
 		linkedHeaderScrollPane.setSize(new Dimension((int) linkedHeaderScrollPane.getPreferredSize().getWidth(), resultsHeight));
 		linkedHeaderScrollPane.setPreferredSize(new Dimension((int) linkedHeaderScrollPane.getPreferredSize().getWidth(), resultsHeight));
 
-		int staticHeight = tblUnlinkedHeader.getRowCount() * tblUnlinkedHeader.getRowHeight() + tblUnlinkedHeader.getTableHeader().getHeight();
-		unlinkedHeaderScrollPane.setSize(new Dimension((int) unlinkedHeaderScrollPane.getPreferredSize().getWidth(), staticHeight));
-		unlinkedHeaderScrollPane.setPreferredSize(new Dimension((int) unlinkedHeaderScrollPane.getPreferredSize().getWidth(), staticHeight));
+//		int staticHeight = tblUnlinkedHeader.getRowCount() * tblUnlinkedHeader.getRowHeight() + tblUnlinkedHeader.getTableHeader().getHeight();
+//		unlinkedHeaderScrollPane.setSize(new Dimension((int) unlinkedHeaderScrollPane.getPreferredSize().getWidth(), staticHeight));
+//		unlinkedHeaderScrollPane.setPreferredSize(new Dimension((int) unlinkedHeaderScrollPane.getPreferredSize().getWidth(), staticHeight));
 		tabbedResultsPane.repaint();
 	}
 
 	private JTable currentHeader() {
 		int index = tabbedResultsPane.getSelectedIndex();
-		if (index == 0) {
+		//if (index == 0) {
 			return tblLinkedHeader;
-		}
-		return tblUnlinkedHeader;
+		//}
+		//return tblUnlinkedHeader;
 	}
 
 	private void showHideStatistics(String itemName, boolean flag) {

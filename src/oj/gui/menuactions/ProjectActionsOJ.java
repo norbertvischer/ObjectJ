@@ -145,6 +145,7 @@ public class ProjectActionsOJ {
 			OJ.getData().getCells().sortCells();
 			OJ.getData().setChanged(false);
 			ProjectActionsOJ.initProject();
+			OJ.getData().setChanged(false);//3.1.2020
 			ij.IJ.showStatus("Loaded project: " + data.getCells().getCellsCount() + " objects in " + data.getImages().getImagesCount() + " image(s)");//24.2.2010
 			return true;
 		}
@@ -241,22 +242,37 @@ public class ProjectActionsOJ {
             Prefs.set("objectj.projecty", "" + projectY);
         }
 			 */
-
+			
 		}
+
+
+
 		if ((OJ.getData() != null) && (OJ.getData().getChanged() == true)) {
 			if (ProjectSettingsOJ.getInstance() != null) {
 				ProjectSettingsOJ.getInstance().setVisible(true);
 			}
 			String filename = OJ.getData().getFilename();
-			YesNoCancelDialog d = new YesNoCancelDialog(IJ.getInstance(), "Closing Project ", "Save Changes to Project \n\"" + filename + "\" ?");
+				YesNoCancelDialog d = new YesNoCancelDialog(IJ.getInstance(), "Closing Project ", "Save Changes to Project \n\"" + filename + "\" ?");
 
-			if (d.cancelPressed()) {
-				return false;
-			}
+				if (d.cancelPressed()) {
+					return false;
+				}
 
-			if (d.yesPressed()) {
-				saveProjectData();
-			}
+				if (d.yesPressed()) {
+					saveProjectData();
+				}
+
+//			DataOJ data = OJ.getData();
+//			if (data != null) {
+//				ImagesOJ imgs = data.getImages();
+//				if (imgs != null) {
+//					imgs.removeAllImages();
+//				}
+//			}
+			OJ.isProjectOpen = false;
+		}
+
+
 
 			DataOJ data = OJ.getData();
 			if (data != null) {
@@ -264,20 +280,7 @@ public class ProjectActionsOJ {
 				if (imgs != null) {
 					imgs.removeAllImages();
 				}
-//				PlotManagerOJ plotSettings = PlotManagerOJ.getInstance();
-//				if (plotSettings != null) {
-//					String plotTitles[] = plotSettings.getPlotTitles();
-//					for (String title : plotTitles) {
-//						Window window = WindowManager.getWindow(title);
-//						if (window != null) {
-//							window.dispose();
-//							WindowManager.removeWindow(window);
-//						}
-//					}
-//				}
 			}
-			OJ.isProjectOpen = false;
-		}
 		return true;
 	}
 
