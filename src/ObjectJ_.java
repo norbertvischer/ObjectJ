@@ -42,14 +42,19 @@ public class ObjectJ_ implements PlugIn, CommandListener {
                 if (busyOpeningProject == 0) {
                     busyOpeningProject = 1;
                     ProjectActionsOJ.openProjectData(ojdir, ojName);//18.8.2009
-                    OJ.getData().setDirectory(ojdir + File.separator);
-                    InputOutputOJ.setCurrentDirectory(ojdir + File.separator);//28.8.2010
-                    OJ.getData().setFilename(ojName);
-                    if (isInstalled > 1) {//this shouyldn't happen
-                        IJ.showMessage("ObjectJ installed twice");
-                    }
-                    busyOpeningProject = 0;
+					if(OJ.getData() != null){  //4.1.2020						
+						OJ.getData().setDirectory(ojdir + File.separator);
+						InputOutputOJ.setCurrentDirectory(ojdir + File.separator);//28.8.2010
+						OJ.getData().setFilename(ojName);
+						OJ.getData().setChanged(false);//4.1.2020
+						if (isInstalled > 1) {//this shouyldn't happen
+							IJ.showMessage("ObjectJ installed twice");
+						}
+                    //busyOpeningProject = 0;
+					}
+					
                 }
+				busyOpeningProject = 0;//4.1.2020
             } else {
                 ij.IJ.showMessage("Could not open .ojj file (was it an alias?)");
             }
