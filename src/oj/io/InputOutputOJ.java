@@ -229,10 +229,6 @@ public class InputOutputOJ {
 		Editor ed = OJ.editor;
 		if (ed != null) {
 			ed.getTextArea().setText(newMacroText);
-			if(OJ.editorWindow != null){
-				
-				//OJ.editorWindow.get.get
-			}
 			ed.getTextArea().setSelectionEnd(0);//13.10.2019
 			ed.getTextArea().setSelectionStart(0);
 			ed.getTextArea().setCaretPosition(0);

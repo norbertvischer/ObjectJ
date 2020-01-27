@@ -6,6 +6,7 @@ import ij.Menus;
 import ij.plugin.frame.Editor;
 import java.awt.Color;
 import java.awt.Window;
+import java.util.Hashtable;
 import javax.swing.ToolTipManager;
 import oj.project.DataOJ;
 import oj.geometry.VertexCalculatorOJ;
@@ -41,9 +42,9 @@ public class OJ {
     private static VertexCalculatorOJ vcj;
     private static IjImageChangedListenerOJ ilj;
     private static StackChangedListenerOJ slj;
-    public final static int build = 543;
+    public final static int build = 544;
     public final static String releaseVersion = "1.04x";
-    public final static String buildDate = "12-jan-2020";
+    public final static String buildDate = "27-jan-2020";
     public static final String URL = "https://sils.fnwi.uva.nl/bcb/objectj";
     public static final String URLcurrent = "https://sils.fnwi.uva.nl/bcb/objectj/download/current/";
     public static final String ICONS = "/oj/gui/icons/";
@@ -55,7 +56,6 @@ public class OJ {
     public static Editor editor = null;//
     public static Editor plotEditor = null;
     public static Window editorWindow = null;
-    public static Window plotEditorWindow = null;
     public static Color headerBackground = new Color(80, 80, 80);
     public static boolean isProjectOpen = false;
     public static boolean doubleBuffered = true;// for Windows only 10.2.2011
@@ -105,6 +105,8 @@ public class OJ {
     public static void installPlugins() {
 
         //Menus.getCommands().put("Scale...", "oj.plugin.ScalerOJ");--21.8.2009
+		Hashtable commands = Menus.getCommands();
+		
         Menus.getCommands().put("Set Scale...", "oj.plugin.ScaleDialogOJ");
         Menus.getCommands().put("Quit", "oj.plugin.QuitOJ");
         //Menus.getCommands().put("Open...", "oj.plugin.OpenFileOJ"); removed 24.5.2010

@@ -3,14 +3,12 @@ package oj.macros;
 import ij.IJ;
 import ij.WindowManager;
 import ij.macro.Interpreter;
-import ij.plugin.MacroInstaller;
 import ij.plugin.frame.Editor;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.io.File;
 import java.lang.reflect.Field;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -18,7 +16,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import oj.OJ;
-//import oj.gui.settings.PlotManagerOJ;
 import oj.gui.tools.ToolManagerOJ;
 import oj.processor.events.MacroChangedEventOJ;
 import oj.project.DataOJ;
@@ -38,8 +35,6 @@ public class EmbeddedMacrosOJ {
 	}
 	public ActionListener LoadEmbeddedMacroAction = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
-
-			//Interpreter.abort();//17.9.2010 -checks for null instance etc removed 11.8.2013
 			Editor ed = OJ.editor;
 
 			String theText = ed.getText();
@@ -76,13 +71,6 @@ public class EmbeddedMacrosOJ {
 			Editor ed = OJ.editor;
 			String theText = ed.getText();
 			theText = UtilsOJ.fixLineFeeds(theText);
-//			PlotManagerOJ plSettings = PlotManagerOJ.getInstance();
-//			if (plSettings != null) {
-//				boolean ok = plSettings.setCurrentPlotMacro(theText);
-//				if (!ok) {
-//					IJ.showMessage("Couldn't accept text; was the plot title changed?");
-//				}
-//			}
 			setEditorUnchanged(ed);
 			ed.close();
 		}
@@ -114,6 +102,7 @@ public class EmbeddedMacrosOJ {
 			ed = new Editor(16, 60, 0, Editor.MONOSPACED + Editor.MENU_BAR);
 		}
 		ed.create("Embedded Macros", macros_text);
+		//ed.setAcceptMacros(false); enable this when IJ 1.5t is released
 		JButton loadButton = new JButton("Install in ObjectJ menu");
 		loadButton.addActionListener(LoadEmbeddedMacroAction);
 
@@ -169,53 +158,6 @@ public class EmbeddedMacrosOJ {
 		loadButton.transferFocus();
 	}
 
-/*	public void showEmbeddedPlotMacros(String plotMacroText) {
-
-		if (Interpreter.getInstance() != null) {
-			Interpreter.getInstance().abortMacro();
-		}
-		Window theWindow = OJ.plotEditorWindow;
-		if (theWindow != null && theWindow.isShowing() && OJ.editor != null) {
-			TextArea ta = OJ.editor.getTextArea();
-			ta.setText(plotMacroText);
-			ta.setCaretPosition(0);
-			theWindow.setVisible(true);
-			return;
-		}
-
-		Editor ed = new EditorOJ(16, 60, 0, Editor.MONOSPACED + Editor.MENU_BAR);
-
-		ed.create("Embedded Macros", plotMacroText);
-		JButton btn_cancel = new JButton("Cancel");
-		btn_cancel.addActionListener(CancelPlotAction);
-		JButton btn_preview = new JButton("Preview");
-		btn_preview.addActionListener(PreviewPlotAction);
-		JButton btn_confirm = new JButton("Confirm & Close");
-		btn_confirm.addActionListener(ConfirmPlotAction);
-
-		TextArea ta = ed.getTextArea();
-		ed.remove(ta);
-		ed.setLayout(new BorderLayout());
-		JPanel panel1 = new JPanel();
-
-		panel1.setLayout(new FlowLayout());
-		btn_preview.setFont(new Font("SansSerif", Font.PLAIN, 14));
-		panel1.add(btn_preview);
-		panel1.add(btn_confirm);
-
-		ed.add(BorderLayout.NORTH, panel1);
-		ed.add(BorderLayout.CENTER, ta);
-
-		Font monoFont = new Font("Monospaced", Font.PLAIN, 14);
-		ta.setFont(monoFont);
-		OJ.editor = ed;
-		Frame[] frames = WindowManager.getNonImageWindows();
-		Frame frame = frames[frames.length - 1];
-		OJ.plotEditorWindow = WindowManager.getFrontWindow();
-		refreshPopupItems();
-		btn_preview.transferFocus();
-	}
-*/
 	public void refreshPopupItems() {
 		if (!showPopUp) {
 			return;
