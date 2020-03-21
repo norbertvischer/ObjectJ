@@ -214,7 +214,11 @@ public class Menus {
 		analyzeMenu.addSeparator();
 		addPlugInItem(analyzeMenu, "Set Scale...", "ij.plugin.filter.ScaleDialog", 0, false);
 		addPlugInItem(analyzeMenu, "Calibrate...", "ij.plugin.filter.Calibrator", 0, false);
-		addPlugInItem(analyzeMenu, "Histogram", "ij.plugin.Histogram", KeyEvent.VK_H, false);
+		if (IJ.isMacOSX()) {
+			addPlugInItem(analyzeMenu, "Histogram", "ij.plugin.Histogram", 0, false);
+			shortcuts.put(new Integer(KeyEvent.VK_H),"Histogram");
+		} else
+			addPlugInItem(analyzeMenu, "Histogram", "ij.plugin.Histogram", KeyEvent.VK_H, false);
 		addPlugInItem(analyzeMenu, "Plot Profile", "ij.plugin.Profiler(\"plot\")", KeyEvent.VK_K, false);
 		addPlugInItem(analyzeMenu, "Surface Plot...", "ij.plugin.SurfacePlotter", 0, false);
 		getMenu("Analyze>Gels", true);
@@ -348,6 +352,7 @@ public class Menus {
 		addExample(submenu, "Event Listener", "Event_Listener.js");
 		addExample(submenu, "FFT Filter", "FFT_Filter.js");
 		addExample(submenu, "Curve Fitting", "Curve_Fitting.js");
+		addExample(submenu, "Overlay Text", "Overlay_Text.js");
 		submenu.addActionListener(listener);
 		menu.add(submenu);
 		submenu = new Menu("BeanShell");
@@ -1561,9 +1566,7 @@ public class Menus {
 	
 	void installStartupMacroSet() {
 		if (macrosPath==null) {
-			try {
-				(new MacroInstaller()).installFromIJJar("/macros/StartupMacros.txt");
-			} catch (Exception e) {}
+			MacroInstaller.installFromJar("/macros/StartupMacros.txt");
 			return;
 		}
 		String path = macrosPath + "StartupMacros.txt";

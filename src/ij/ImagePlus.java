@@ -1064,16 +1064,22 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
     		return title;
     }
 
-	/** Returns a shortened version of image name that does not
-		include spaces or a file name extension. */
+	/** If the image title is a file name, returns the name
+		without the extension and with spaces removed,
+		otherwise returns the title shortened to the first space.
+	*/	
 	public String getShortTitle() {
-		String title = getTitle();
-		int index = title.indexOf(' ');
-		if (index>-1)
+		String title = getTitle().trim();
+		int index = title.lastIndexOf('.');
+		boolean fileName = index>0;
+		if (fileName) {
 			title = title.substring(0, index);
-		index = title.lastIndexOf('.');
-		if (index>0)
-			title = title.substring(0, index);
+			title = title.replaceAll(" ","");
+		} else {
+			index = title.indexOf(' ');
+			if (index>-1 && !fileName)
+				title = title.substring(0, index);
+		}
 		return title;
     }
 
@@ -2267,6 +2273,22 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		setRoi(roi);
 		return imp2;
 	}
+	
+	/** Returns a scaled copy of this image or ROI, where the
+		 'options'  string can contain 'none', 'bilinear'. 'bicubic',
+		'average' and 'constrain'.
+	*/
+	public ImagePlus resize(int dstWidth, int dstHeight, String options) {
+		return resize(dstWidth, dstHeight, 1, options);
+	}
+
+	/** Returns a scaled copy of this image or ROI, where the
+		 'options'  string can contain 'none', 'bilinear'. 'bicubic',
+		'average' and 'constrain'.
+	*/
+	public ImagePlus resize(int dstWidth, int dstHeight, int dstDepth, String options) {
+		return Scaler.resize(this, dstWidth, dstHeight, dstDepth, options);
+	}
 
 	/** Returns a copy this image or stack slice, cropped if there is an ROI.
 	 * @see #duplicate
@@ -2439,24 +2461,23 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	}
 
     /** Displays the cursor coordinates and pixel value in the status bar.
-    	Called by ImageCanvas when the mouse moves. Can be overridden by
-    	ImagePlus subclasses.
+	 * Called by ImageCanvas when the mouse moves.
     */
 	public void mouseMoved(int x, int y) {
 		Roi roi2 = getRoi();
 		if (ij!=null && !IJ.statusBarProtected() && (roi2==null || roi2.getState()==Roi.NORMAL))
 			ij.showStatus(getLocationAsString(x,y) + getValueAsString(x,y));
-		savex=x; savey=y;
 	}
 
-    private int savex, savey;
-
     /** Redisplays the (x,y) coordinates and pixel value (which may
-		have changed) in the status bar. Called by the Next Slice and
-		Previous Slice commands to update the z-coordinate and pixel value.
+	 * have changed) in the status bar. Called by the Next Slice and
+	 * Previous Slice commands to update the z-coordinate and pixel value.
     */
 	public void updateStatusbarValue() {
-		IJ.showStatus(getLocationAsString(savex,savey) + getValueAsString(savex,savey));
+		ImageCanvas ic = getCanvas();
+		Point loc = ic!=null?ic.getCursorLoc():null;
+		if (loc!=null)
+			mouseMoved(loc.x,loc.y);
 	}
 
 	String getFFTLocation(int x, int y, Calibration cal) {
@@ -2648,24 +2669,27 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	public static void resetClipboard() {
 		clipboard = null;
 	}
-
-	protected void notifyListeners(int id) {
-		synchronized (listeners) {
-			for (int i=0; i<listeners.size(); i++) {
-				ImageListener listener = (ImageListener)listeners.elementAt(i);
-				switch (id) {
-					case OPENED:
-						listener.imageOpened(this);
-						break;
-					case CLOSED:
-						listener.imageClosed(this);
-						break;
-					case UPDATED:
-						listener.imageUpdated(this);
-						break;
+	
+	protected void notifyListeners(final int id) {
+	    final ImagePlus imp = this;
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				for (int i=0; i<listeners.size(); i++) {
+					ImageListener listener = (ImageListener)listeners.elementAt(i);
+					switch (id) {
+						case OPENED:
+							listener.imageOpened(imp);
+							break;
+						case CLOSED:
+							listener.imageClosed(imp);
+							break;
+						case UPDATED:
+							listener.imageUpdated(imp);
+							break;
+					}
 				}
 			}
-		}
+		});
 	}
 
 	public static void addImageListener(ImageListener listener) {
@@ -2674,6 +2698,20 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 
 	public static void removeImageListener(ImageListener listener) {
 		listeners.removeElement(listener);
+	}
+	
+	/** For debug purposes, writes all registered (and possibly,
+		forgotten) ImageListeners to the log window */
+	public static void logImageListeners() {
+		if (listeners.size() == 0)
+			IJ.log("No ImageListeners");
+		else {
+			for (Object li : listeners) {
+				IJ.log("imageListener: "+li);
+				if (li instanceof Window)
+					IJ.log("   ("+(((Window)li).isShowing() ? "showing" : "invisible")+")");
+			}
+		}
 	}
 
 	public void setOpenAsHyperStack(boolean openAsHyperStack) {
@@ -2885,6 +2923,16 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		ImagePlus imp2 = imp1.flatten();
 		stack.setPixels(imp2.getProcessor().getPixels(), slice);
 	}
+	
+	public boolean tempOverlay() {
+		Overlay o = getOverlay();
+		if (o==null || o.size()!=1)
+			return false;
+		if ("Pixel Inspector".equals(o.get(0).getName()))
+			return true;
+		else
+			return false;
+	}
 
 	private void setPointScale(Roi roi2, Overlay overlay2) {
 		ImageCanvas ic = getCanvas();
@@ -3038,5 +3086,5 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
     public Plot getPlot() {
     	return plot;
     }
-
+    
 }

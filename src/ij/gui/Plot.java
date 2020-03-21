@@ -22,7 +22,7 @@ import ij.measure.ResultsTable;
  *
  * @author Wayne Rasband
  * @author Philippe CARL, CNRS, philippe.carl (AT) unistra.fr (log axes, arrows, ArrayList data)
- * @author Norbert Vischer (overlay range arrows, 'R'eset range, filled plots, dynamic plots, boxes and whiskers)
+ * @author Norbert Vischer (overlay range arrows, 'R'eset range, filled plots, dynamic plots, boxes and whiskers, superscript)
  * @author Michael Schmid (axis grid/ticks, resizing/panning/changing range, high-resolution, serialization)
  */
 public class Plot implements Cloneable {
@@ -158,14 +158,13 @@ public class Plot implements Cloneable {
 	private static final int USUALLY_ENLARGE = 1, ALWAYS_ENLARGE = 2; //enlargeRange settings
 	private static final double RELATIVE_ARROWHEAD_SIZE = 0.2; //arrow heads have 1/5 of vector length
 	private static final int MIN_ARROWHEAD_LENGTH = 3;
-	private static final int MAX_ARROWHEAD_LENGTH = 20;	
+	private static final int MAX_ARROWHEAD_LENGTH = 20;
 
 	PlotProperties pp = new PlotProperties();		//size, range, formatting etc, for easy serialization
 	PlotProperties ppSnapshot;						//copy for reverting
 	Vector<PlotObject> allPlotObjects = new Vector<PlotObject>();	//all curves, labels etc., also serialized for saving/reading
 	Vector<PlotObject> allPlotObjectsSnapshot;      //copy for reverting
 	private PlotVirtualStack stack;
-	private boolean grayscaleStack;
 	/** For high-resolution plots, everything will be scaled with this number. Otherwise, must be 1.0.
 	 *  (creating margins, saving PlotProperties etc only supports scale=1.0) */
 	float scale = 1.0f;
@@ -422,10 +421,14 @@ public class Plot implements Cloneable {
 
 	/** Sets the canvas size in (unscaled) pixels and sets the scale to 1.0.
 	 * If the scale remains 1.0, this will be the size of the resulting ImageProcessor.
-	 * When not called, the canvas size is adjusted for the plot frame size specified
-	 * by setFrameSize or otherwise in Edit>Options>Plots. */
+	 * When not called, the canvas size is adjusted for the plot size specified
+	 * by setFrameSize() or setWindowSize(), or otherwise in Edit>Options>Plots.
+	 * @see #setFrameSize(int,int)
+	 * @see #setWindowSize(int,int)
+	*/
 	public void setSize(int width, int height) {
-		if (ip != null && width == ip.getWidth() && height == ip.getHeight()) return;
+		if (ip != null && width == ip.getWidth() && height == ip.getHeight())
+			return;
 		Dimension minSize = getMinimumSize();
 		pp.width = Math.max(width, minSize.width);
 		pp.height = Math.max(height, minSize.height);
@@ -446,7 +449,9 @@ public class Plot implements Cloneable {
 	 *	This frame size in pixels divided by the data range defines the image scale.
 	 *	This method does not check for the minimum size MIN_FRAMEWIDTH, MIN_FRAMEHEIGHT.
 	 *	Note that the black frame will have an outer size that is one pixel larger
-	 *	(when plotted with a linewidth of one pixel). */
+	 *	(when plotted with a linewidth of one pixel).
+	 * @see #setWindowSize(int,int)
+	*/
 	public void setFrameSize(int width, int height) {
 		if (pp.width <= 0) {                //plot not drawn yet? Just remember as preferred size
 			preferredPlotWidth = width;
@@ -456,6 +461,38 @@ public class Plot implements Cloneable {
 			makeMarginValues();
 			width += leftMargin+rightMargin;
 			height += topMargin+bottomMargin;
+			setSize(width, height);
+		}
+	}
+
+	/** Sets the plot window size in pixels.
+	 * @see #setFrameSize(int,int)
+	*/
+	public void setWindowSize(int width, int height) {
+		scale = 1.0f;
+		makeMarginValues();
+		int titleBarHeight = 22;
+		int infoHeight = 11;
+		double scale = Prefs.getGuiScale();
+		if (scale>1.0)
+			infoHeight = (int)(infoHeight*scale);
+		int buttonPanelHeight = 45;
+		if (pp.width <= 0) {     //plot not drawn yet? 
+			int extraWidth = leftMargin+rightMargin+ImageWindow.HGAP*2;
+			int extraHeight = topMargin+bottomMargin+titleBarHeight+infoHeight+buttonPanelHeight;
+			if (extraWidth<width)
+				width -= extraWidth;
+			if (extraHeight<height)	
+				height -= extraHeight;
+			preferredPlotWidth = width;
+			preferredPlotHeight = height;
+		} else {
+			int extraWidth = ImageWindow.HGAP*2;
+			int extraHeight = titleBarHeight+infoHeight+buttonPanelHeight;
+			if (extraWidth<width)
+				width -= extraWidth;
+			if (extraHeight<height)	
+				height -= extraHeight;
 			setSize(width, height);
 		}
 	}
@@ -889,26 +926,28 @@ public class Plot implements Cloneable {
 		Hidden data sets are ignored.
 		If 'labels' is null or empty, the labels of the data set previously (if any) are used.
 		To modify the legend's style, call 'setFont' and 'setLineWidth' before 'addLegend'. */
-	public void addLegend(String labels, String options) {
-		int flags = Plot.AUTO_POSITION;
-		if (options!=null) {
-			options = options.toLowerCase();
-			if (options.contains("top-left"))
-				flags |= Plot.TOP_LEFT;
-			else if (options.contains("top-right"))
-				flags |= Plot.TOP_RIGHT;
-			else if (options.contains("bottom-left"))
-				flags |= Plot.BOTTOM_LEFT;
-			else if (options.contains("bottom-right"))
-				flags |= Plot.BOTTOM_RIGHT;
-			if (options.contains("bottom-to-top"))
-				flags |= Plot.LEGEND_BOTTOM_UP;
-			if (options.contains("transparent"))
-				flags |= Plot.LEGEND_TRANSPARENT;
+		public void addLegend(String labels, String options) {
+			int flags = 0;
+			if (options!=null) {
+				options = options.toLowerCase();
+				if (options.contains("top-left"))
+					flags |= Plot.TOP_LEFT;
+				else if (options.contains("top-right"))
+					flags |= Plot.TOP_RIGHT;
+				else if (options.contains("bottom-left"))
+					flags |= Plot.BOTTOM_LEFT;
+				else if (options.contains("bottom-right"))
+					flags |= Plot.BOTTOM_RIGHT;
+				else if (!options.contains("off") && !options.contains("no"))
+					flags |= Plot.AUTO_POSITION;
+				if (options.contains("bottom-to-top"))
+					flags |= Plot.LEGEND_BOTTOM_UP;
+				if (options.contains("transparent"))
+					flags |= Plot.LEGEND_TRANSPARENT;
+			}
+			setLegend(labels, flags);
 		}
-		setLegend(labels, flags);
-	}
-
+	
 	/** Adds a legend. The legend will be always drawn last (on top of everything).
 	 *	To modify the legend's style, call 'setFont' and 'setLineWidth' before 'addLegend'
 	 *	@param labels labels of the points or curves in the sequence of the data were added, tab-delimited or linefeed-delimited.
@@ -1026,7 +1065,7 @@ public class Plot implements Cloneable {
 	public void setFontSize(int size) {
 		setFont(-1, (float)size);
 	}
-	
+
 	/** Sets the font for all following addLabel() etc. operations. The currently set font when
 	 *	displaying the plot determines the font of all labels & numbers.
 	 *  After the plot has been shown, sets the font for the numbers and the legend (if present).
@@ -1428,12 +1467,22 @@ public class Plot implements Cloneable {
 	/** Returns the plot as an ImagePlus.
 	 *	If an ImagePlus for this plot already exists, displays the plot in that ImagePlus and returns it. */
 	public ImagePlus getImagePlus() {
+		if (stack != null) {
+			if (imp != null)
+				return imp;
+			else {
+				imp = new ImagePlus(title, stack);
+				adjustCalibration(imp.getCalibration());
+				return imp;
+			}
+		}
 		if (plotDrawn)
 			updateImage();
 		else
 			draw();
 		if (imp != null) {
-			if (imp.getProcessor() != ip) imp.setProcessor(ip);
+			if (imp.getProcessor() != ip)
+				imp.setProcessor(ip);
 			return imp;
 		} else {
 			ImagePlus imp = new ImagePlus(title, ip);
@@ -1448,9 +1497,12 @@ public class Plot implements Cloneable {
 	 *	The ImagePlus is not displayed or updated unless its ImageProcessor is
 	 *  no that of the current Plot (then it gets this ImageProcessor).
 	 *  Does nothing if imp is unchanged and has the ImageProcessor of this plot.
-	 *	'imp' may be null to disconnect the plot from its ImagePlus */
+	 *  'imp' may be null to disconnect the plot from its ImagePlus.
+	 *	Does nothing for Plot Stacks. */
 	public void setImagePlus(ImagePlus imp) {
 		if (imp != null && imp == this.imp && imp.getProcessor() == ip)
+			return;
+		if (stack != null)
 			return;
 		if (this.imp != null)
 			this.imp.setProperty(PROPERTY_KEY, null);
@@ -1484,18 +1536,16 @@ public class Plot implements Cloneable {
 	}
 
 	/** Displays the plot in a PlotWindow.
-	 *  Plot stacks are shown in a StackWindow, however; in this case the return value is null.
+	 *  Plot stacks are shown in a StackWindow, not in a PlotWindow;
+	 *  in this case the return value is null (use getImagePlus().getWindow() instead).
 	 *  Also returns null in BatchMode. Note that the PlotWindow might get closed
 	 *  immediately if its 'listValues' and 'autoClose' flags are set.
 	 *  @see #update()
 	 */
 	public PlotWindow show() {
 		PlotVirtualStack stack = getStack();
-		if (stack!=null && stack.size()>1) {
-			stack.setBitDepth(grayscaleStack?8:24);
-			ImagePlus stackImp = new ImagePlus("Plot Stack",stack);
-			stackImp.show();
-			adjustCalibration(stackImp.getCalibration());
+		if (stack!=null) {
+			getImagePlus().show();
 			return null;
 		}
 		if ((IJ.macroRunning() && IJ.getInstance()==null) || Interpreter.isBatchMode()) {
@@ -1529,15 +1579,11 @@ public class Plot implements Cloneable {
 	 * N. Vischer
 	 */
 	public void addToStack() {
-		if (stack==null) {
+		if (stack==null)
 			stack = new PlotVirtualStack(getSize().width,getSize().height);
-			grayscaleStack = true;
-		}
 		draw();
 		stack.addPlot(this);
-		if (isColored())
-			grayscaleStack = false;
-		IJ.showStatus("addToStack: "+stack.size());
+		IJ.showStatus("addToPlotStack: "+stack.size());
 		allPlotObjects.clear();
 		textLoc = null;
 	}
@@ -1597,7 +1643,7 @@ public class Plot implements Cloneable {
 		if (!plotDrawn || pp.isFrozen) return;
 		getBlankProcessor();
 		drawContents(ip);
-		if (imp == null) return;
+		if (imp == null || stack != null) return;
 		adjustCalibration(imp.getCalibration());
 		imp.updateAndDraw();
 		if (ip != imp.getProcessor())
@@ -1854,7 +1900,8 @@ public class Plot implements Cloneable {
 				invertedLut = Prefs.useInvertingLut && !Interpreter.isBatchMode() && IJ.getInstance()!=null;
 				if (invertedLut) ip.invertLut();
 			}
-			if (imp != null) imp.setProcessor(ip);
+			if (imp != null && stack == null)
+				imp.setProcessor(ip);
 		}
 		if (ip instanceof ColorProcessor)
 			Arrays.fill((int[])(ip.getPixels()), 0xffffff);
@@ -1884,8 +1931,16 @@ public class Plot implements Cloneable {
 		leftMargin	 = sc(LEFT_MARGIN*marginScale);
 		rightMargin	 = sc(RIGHT_MARGIN*marginScale);
 		topMargin	 = sc(TOP_MARGIN*marginScale);
-		bottomMargin = sc(BOTTOM_MARGIN*marginScale);
-		//IJ.log("marginScale="+marginScale+" left margin="+leftMargin);
+		bottomMargin = sc(BOTTOM_MARGIN*marginScale + 2);
+		if(pp != null && pp.xLabel != null && pp.xLabel.getFont() != null){
+			float numberSize = font.getSize2D();
+			float labelSize = pp.xLabel.getFont().getSize2D();
+			float extraHeight = 1.5f *(labelSize - numberSize);
+			if(extraHeight > 0){
+				bottomMargin += sc(extraHeight);
+				leftMargin += sc(extraHeight);
+			}
+		}
 	}
 
 	/** Calculate the actual range, major step interval and set variables for data <-> pixels scaling */
@@ -2598,14 +2653,25 @@ public class Plot implements Cloneable {
 		} else
 			y += sc(1);
 		// --- Write x and y axis text labels
-		if (xCats == null){
+		if (xCats == null) {
 			ip.setFont(pp.xLabel.getFont() == null ? scFont : scFont(pp.xLabel.getFont()));
-			ip.drawString(xLabelToDraw, leftMargin+(frame.width-ip.getStringWidth(xLabelToDraw))/2, y+ip.getFontMetrics().getHeight());
+			ImageProcessor xLabel = stringToPixels(xLabelToDraw);
+			if(xLabel != null){
+				int xpos = leftMargin+(frame.width-xLabel.getWidth())/2;
+				int ypos = y + scFont.getSize()/3;//topMargin + frame.height + bottomMargin-xLabel.getHeight();
+				ip.insert(xLabel, xpos, ypos);
+			}
 		}
-		if (yCats == null && yLabelToDraw.length() > 0) {
-			int xRightOfYLabel = xNumberRight - maxNumWidth - sc(2);
-			Font yLabelFont = pp.yLabel.getFont() == null ? scFont : scFont(pp.yLabel.getFont());
-			drawYLabel(yLabelToDraw, xRightOfYLabel, topMargin, frame.height, yLabelFont);
+		if (yCats == null) {
+			ip.setFont(pp.yLabel.getFont() == null ? scFont : scFont(pp.yLabel.getFont()));
+			ImageProcessor yLabel = stringToPixels(yLabelToDraw);
+			if(yLabel != null){
+				yLabel = yLabel.rotateLeft();
+				int xRightOfYLabel = xNumberRight - maxNumWidth - sc(2);
+				int xpos = xRightOfYLabel - yLabel.getWidth() - sc(2);
+				int ypos = topMargin + (frame.height -yLabel.getHeight())/2;
+				ip.insert(yLabel, xpos, ypos);
+			}
 		}
 	}
 
@@ -2665,6 +2731,114 @@ public class Plot implements Cloneable {
 		}
 		ip.drawString(base, x, y+fontAscent*7/10);
 		return width;
+	}
+
+	//Returns a pixelMap containting labelStr.
+	//Uses font of current ImageProcessor.
+	//Returns null for empty or blank-only strings
+	//Supports !!subscript!! and ^^superscript^^
+	ByteProcessor stringToPixels(String labelStr) {
+		Font bigFont = ip.getFont();
+		Rectangle rect = ip.getStringBounds(labelStr);
+		int ww = rect.width * 2;
+		int hh = rect.height * 3;//enough space, will be cropped later
+		int y0 = rect.height * 2;//base line
+		if (ww <= 0 || hh <= 0) {
+			return null;
+		}
+		ByteProcessor box = new ByteProcessor(ww, hh);
+		box.setColor(Color.WHITE);
+		//box.setColor(Color.LIGHT_GRAY); //make box visible for test
+		box.fill();
+		box.setColor(Color.black);
+		box.setAntialiasedText(pp.antialiasedText);
+		if (invertedLut) {
+			box.invertLut();
+		}
+		box.setFont(bigFont);
+
+		FontMetrics fm = box.getFontMetrics();
+		int ascent = fm.getAscent();
+		int offSub = ascent / 6;
+		int offSuper = -ascent / 2;
+		Font smallFont = bigFont.deriveFont((float) (bigFont.getSize() * 0.7));
+
+		Rectangle bigBounds = box.getStringBounds(labelStr);
+		boolean doParse = (labelStr.indexOf("^^") >= 0 || labelStr.indexOf("!!") >= 0);
+		doParse = doParse && (labelStr.indexOf("^^^") < 0 && labelStr.indexOf("!!!") < 0);
+		if (!doParse) {
+			box.drawString(labelStr, 0, y0);
+			Rectangle cropRect = new Rectangle(bigBounds);
+			cropRect.y += y0;
+			box.setRoi(cropRect);
+			ImageProcessor boxI = box.crop();
+			box = boxI.convertToByteProcessor();
+			return box;
+		}
+
+		if (labelStr.endsWith("^^") || labelStr.endsWith("!!")) {
+			labelStr = labelStr.substring(0, labelStr.length() - 2);
+		}
+		if (labelStr.startsWith("^^") || labelStr.startsWith("!!")) {
+			labelStr = " " + labelStr;
+		}
+
+		box.setFont(smallFont);
+		Rectangle smallBounds = box.getStringBounds(labelStr);
+		box.setFont(bigFont);
+		int upperBound = y0 + smallBounds.y + offSuper;
+		int lowerBound = y0 + smallBounds.y + smallBounds.height + offSub;
+
+		int h = fm.getHeight();
+		int len = labelStr.length();
+		int[] tags = new int[len];
+		int nTags = 0;
+
+		for (int jj = 0; jj < len - 2; jj++) {//get positions where font size changes
+			if (labelStr.substring(jj, jj + 2).equals("^^")) {
+				tags[nTags++] = jj;
+			}
+			if (labelStr.substring(jj, jj + 2).equals("!!")) {
+				tags[nTags++] = -jj;
+			}
+		}
+		tags[nTags++] = len;
+		tags = Arrays.copyOf(tags, nTags);
+
+		int leftIndex = 0;
+		int xRight = 0;
+		int y2 = y0;
+
+		boolean subscript = labelStr.startsWith("!!");
+		for (int pp = 0; pp < tags.length; pp++) {//draw all text fragments
+			int rightIndex = tags[pp];
+			rightIndex = Math.abs(rightIndex);
+			String part = labelStr.substring(leftIndex, rightIndex);
+			boolean small = pp % 2 == 1;//toggle odd/even
+			if (small) {
+				box.setFont(smallFont);
+				if (subscript) {
+					y2 = y0 + offSub;
+				} else {//superscript:
+					y2 = y0 + offSuper;
+				}
+			} else {
+				box.setFont(bigFont);
+				y2 = y0;
+			}
+			xRight++;
+			int partWidth = box.getStringWidth(part);
+			box.drawString(part, xRight, y2);
+			leftIndex = rightIndex + 2;
+			subscript = tags[pp] < 0;//negative positions = subscript
+			xRight += partWidth;
+		}
+		xRight += h / 4;
+		Rectangle cropRect = new Rectangle(0, upperBound, xRight, lowerBound - upperBound);
+		box.setRoi(cropRect);
+		ImageProcessor boxI = box.crop();
+		box = boxI.convertToByteProcessor();
+		return box;
 	}
 
 	// Number of digits to display the number n with resolution 'resolution';
@@ -3226,31 +3400,6 @@ public class Plot implements Cloneable {
 		}
 	}
 
-	/** Vertical text for y axis label */
-	void drawYLabel(String yLabel, int xRight, int yFrameTop, int frameHeight, Font scaledFont) {
-		if (ip==null || yLabel.equals(""))
-			return;
-		ip.setFont(scaledFont);
-		FontMetrics fm = ip.getFontMetrics();
-		int h = fm.getHeight();
-		//int w =	 ip.getStringWidth(yLabel) + sc(5);
-		//int h =	 fm.getHeight()+sc(1);
-		Rectangle rect = ip.getStringBounds(yLabel);
-		ImageProcessor label = new ByteProcessor(rect.x+rect.width, Math.max(h, rect.height));
-		label.setAntialiasedText(pp.antialiasedText);
-		if (invertedLut)
-			label.invertLut();
-		label.setColor(Color.white);
-		label.fill();
-		label.setColor(Color.black);
-		label.setFont(scaledFont);
-		label.drawString(yLabel, 0, Math.max(-rect.y, h)); //can't antialias if x<0 or y<h
-		label = label.rotateLeft();
-		int y2 = yFrameTop + (frameHeight-label.getHeight())/2;
-		if (y2 < 0) y2 = 0;
-		int x2 = Math.max(xRight-label.getWidth()*4/3, 0); // distance 1/3 height if possible
-		ip.insert(label, x2, y2);
-	}
 
 	/** Draw the legend */
 	void drawLegend(PlotObject legendObject, ImageProcessor ip) {

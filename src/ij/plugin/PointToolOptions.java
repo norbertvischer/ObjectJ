@@ -61,7 +61,7 @@ public class PointToolOptions implements PlugIn, DialogListener {
 		String type = PointRoi.types[PointRoi.getDefaultType()];
 		String size = PointRoi.sizes[PointRoi.getDefaultSize()];
 		if (multipointTool)
-			gd = new NonBlockingGenericDialog("Point Tool");
+			gd = NonBlockingGenericDialog.newDialog("Point Tool");
 		else
 			gd = new GenericDialog("Point Tool");
 		gd.setInsets(5,0,2);
@@ -87,8 +87,6 @@ public class PointToolOptions implements PlugIn, DialogListener {
 		gd.addHelp(help);
 		gd.addDialogListener(this);
 		gd.showDialog();
-		if (gd.wasCanceled()) {
-		}
 	}
 	
 	public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
@@ -148,6 +146,7 @@ public class PointToolOptions implements PlugIn, DialogListener {
 				roi.setPointType(typeIndex);
 				roi.setStrokeColor(sc);
 				roi.setSize(sizeIndex);
+				redraw = true;
 			}
 		}
 		if (redraw) {

@@ -23,6 +23,7 @@ public class Analyzer implements PlugInFilter, Measurements {
 	private int measurements;
 	private StringBuffer min,max,mean,sd;
 	private boolean disableReset;
+	private boolean resultsUpdated;
 	
 	// Order must agree with order of checkboxes in Set Measurements dialog box
 	private static final int[] list = {AREA,MEAN,STD_DEV,MODE,MIN_MAX,
@@ -457,7 +458,7 @@ public class Analyzer implements PlugInFilter, Measurements {
 			rt.addValue("Length", roi.getLength());
 			if (roi.getType()==Roi.LINE && showAngle) {
 				Line line = (Line)roi;
-				rt.addValue("Angle", line.getAngle(line.x1,line.y1,line.x2,line.y2));
+				rt.addValue("Angle", line.getFloatAngle(line.x1d,line.y1d,line.x2d,line.y2d));
 			}
 			if ((measurements&LABELS)!=0)
 				rt.addLabel("Label", getFileName());
@@ -477,26 +478,9 @@ public class Analyzer implements PlugInFilter, Measurements {
 			imp2.setGlobalCalibration(null);
 			localCal = imp2.getCalibration().copy();
 			imp2.setCalibration(globalCal);
-		}
-		if (straightLine && lineWidth>1) {
+		} if (lineWidth>1) {
 			saveR = ip2.getRoi();
-			ip2.setRoi(roi.getPolygon());
-		} else if (lineWidth>1 && calibrated && limit!=0) {
-			Calibration cal = imp2.getCalibration().copy();
-			imp2.getCalibration().disableDensityCalibration();
-			ip2 = (new Straightener()).straightenLine(imp2, lineWidth);
-			imp2.setCalibration(cal);
-			ip2 = convertToOriginalDepth(imp2, ip2);
-			ip2.setCalibrationTable(cal.getCTable());
-		} else if (lineWidth>1) {
-			if ((measurements&AREA)!=0 || (measurements&MEAN)!=0 || calibrated) {
-				ip2 = (new Straightener()).straightenLine(imp2, lineWidth);
-				if (limit!=0)
-					ip2 = convertToOriginalDepth(imp2, ip2);
-			} else {
-				saveResults(new ImageStatistics(), roi);
-				return;
-			}
+			ip2.setRoi(Roi.convertLineToArea(roi));
 		} else if (calibrated && limit!=0) {
 			Calibration cal = imp2.getCalibration().copy();
 			imp2.getCalibration().disableDensityCalibration();
@@ -518,7 +502,8 @@ public class Analyzer implements PlugInFilter, Measurements {
 		if (limit!=0 && minThreshold!=ImageProcessor.NO_THRESHOLD)
 			ip2.setThreshold(minThreshold,maxThreshold,ImageProcessor.NO_LUT_UPDATE);
 		ImageStatistics stats = ImageStatistics.getStatistics(ip2, AREA+MEAN+STD_DEV+MODE+MIN_MAX+MEDIAN+limit, imp2.getCalibration());
-		if (saveR!=null) ip2.setRoi(saveR);
+		if (saveR!=null)
+			ip2.setRoi(saveR);
 		if ((roi instanceof Line) && (measurements&CENTROID)!=0) {
 			FloatPolygon p = ((Line)roi).getFloatPoints();
 			stats.xCentroid = p.xpoints[0] + (p.xpoints[1]-p.xpoints[0])/2.0;
@@ -696,7 +681,7 @@ public class Analyzer implements PlugInFilter, Measurements {
 				rt.addValue("Length", roi.getLength());
 				if (roi.getType()==Roi.LINE && showAngle) {
 					Line line = (Line)roi;
-					rt.addValue("Angle", line.getAngle(line.x1,line.y1,line.x2,line.y2));
+					rt.addValue("Angle", line.getFloatAngle(line.x1d,line.y1d,line.x2d,line.y2d));
 				}
 			} else if (roi.getType()==Roi.ANGLE) {
 				double angle = ((PolygonRoi)roi).getAngle();
@@ -721,6 +706,9 @@ public class Analyzer implements PlugInFilter, Measurements {
 			rt.addValue("RRLength", length*pw);
 			rt.addValue("RRWidth", p[4]*pw);
 		}
+		int group = roi!=null?roi.getGroup():0;
+		if (group>0)
+			rt.addValue("Group", group);
 	}
 	
 	private void clearSummary() {
@@ -860,7 +848,11 @@ public class Analyzer implements PlugInFilter, Measurements {
 				rt.deleteRow(index);
 			counter = rt.size();
 		}
-		IJ.write(rt.getRowAsString(counter-1));
+		if (!resultsUpdated && counter>1 && rt.getColumnIndex("Group")>=0 && rt.getValue("Group",counter-1)>0) {
+			rt.show("Results");
+			resultsUpdated = true;
+		} else
+			IJ.write(rt.getRowAsString(counter-1));
 	}
 
 	/** Redisplays the results table. */

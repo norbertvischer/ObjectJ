@@ -55,7 +55,7 @@ public class JpegWriter implements PlugIn {
 		try {
 			Graphics g = bi.createGraphics();
 			Image img = imp.getImage();
-			if (overlay)
+			if (overlay && !imp.tempOverlay())
 				img = imp.flatten().getImage();
 			g.drawImage(img, 0, 0, null);
 			g.dispose();            
@@ -131,7 +131,9 @@ public class JpegWriter implements PlugIn {
 			}
 		} catch (Exception e) {
 			error = ""+e;
-			IJ.error("Jpeg Writer", ""+error);
+			if (error.contains("Output has not been set!"))
+				error = "Incorrect file path: \""+path+"\"";
+			IJ.error("JPEG Writer", error);
 		}
 		return error;
 	}

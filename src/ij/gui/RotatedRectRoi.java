@@ -24,8 +24,8 @@ public class RotatedRectRoi extends PolygonRoi {
 	public RotatedRectRoi(int sx, int sy, ImagePlus imp) {
 		super(sx, sy, imp);
 		type = FREEROI;
-		xstart = ic.offScreenXD(sx);
-		ystart = ic.offScreenYD(sy);
+		xstart = offScreenXD(sx);
+		ystart = offScreenYD(sy);
 		ImageWindow win = imp.getWindow();
 		int pixels = win!=null?(int)(win.getSize().height/win.getCanvas().getMagnification()):imp.getHeight();
 		if (IJ.debugMode) IJ.log("RotatedRectRoi: "+(int)rectWidth+" "+pixels);
@@ -39,13 +39,12 @@ public class RotatedRectRoi extends PolygonRoi {
 		super.draw(g);
 		if (!overlay && ic!=null) {
 			double mag = ic.getMagnification();
-		    int size2 = HANDLE_SIZE/2;
 			for (int i=0; i<4; i++) {
 			if (i==3) //mark starting point
 				handleColor = strokeColor!=null?strokeColor:ROIColor;
 			else
 				handleColor=Color.white;
-			drawHandle(g, hxs(i)-size2, hys(i)-size2);
+			drawHandle(g, hxs(i), hys(i));
 			}
 		}
 	}
@@ -73,8 +72,8 @@ public class RotatedRectRoi extends PolygonRoi {
 	protected void grow(int sx, int sy) {
 		double x1 = xstart;
 		double y1 = ystart;
-		double x2 = ic.offScreenXD(sx);
-		double y2 = ic.offScreenYD(sy);
+		double x2 = offScreenXD(sx);
+		double y2 = offScreenYD(sy);
 		makeRectangle(x1, y1, x2, y2);
 		imp.draw();
 	}
@@ -167,8 +166,8 @@ public class RotatedRectRoi extends PolygonRoi {
 	}
 	
 	protected void moveHandle(int sx, int sy) {
-		double ox = ic.offScreenXD(sx); 
-		double oy = ic.offScreenYD(sy);
+		double ox = offScreenXD(sx); 
+		double oy = offScreenYD(sy);
 		double x1 = hx(3);
 		double y1 = hy(3);
 		double x2 = hx(1);
@@ -198,7 +197,7 @@ public class RotatedRectRoi extends PolygonRoi {
 	}
 	
 	public int isHandle(int sx, int sy) {
-		int size = HANDLE_SIZE+5;
+		int size = getHandleSize()+5;
 		int halfSize = size/2;
 		int index = -1;
 		for (int i=0; i<4; i++) {

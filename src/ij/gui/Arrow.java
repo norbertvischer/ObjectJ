@@ -69,7 +69,7 @@ public class Arrow extends Line {
 			Rectangle r = ic.getSrcRect();
 			xbase = r.x; ybase = r.y;
 		}
-		at.setTransform(mag, 0.0, 0.0, mag, -xbase*mag, -ybase*mag);
+		at.setTransform(mag, 0.0, 0.0, mag, (-xbase+0.5)*mag, (-ybase+0.5)*mag); //0.5: int coordinate at pixel center
 		if (outline) {
 			float lineWidth = (float)(getOutlineWidth()*mag);
 			g2.setStroke(new BasicStroke(lineWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
@@ -80,12 +80,11 @@ public class Arrow extends Line {
 			g2.fill(at.createTransformedShape(shape));
 			if (doubleHeaded) g2.fill(at.createTransformedShape(shape2));
 		}
-		if (state!=CONSTRUCTING && !overlay) {
-			int size2 = HANDLE_SIZE/2;
+		if (!overlay) {
 			handleColor=Color.white;
-			drawHandle(g, screenXD(x1d)-size2, screenYD(y1d)-size2);
-			drawHandle(g, screenXD(x2d)-size2, screenYD(y2d)-size2);
-			drawHandle(g, screenXD(x1d+(x2d-x1d)/2.0)-size2, screenYD(y1d+(y2d-y1d)/2.0)-size2);
+			drawHandle(g, screenXD(x1d), screenYD(y1d));
+			drawHandle(g, screenXD(x2d), screenYD(y2d));
+			drawHandle(g, screenXD(x1d+(x2d-x1d)/2.0), screenYD(y1d+(y2d-y1d)/2.0));
 		}
 		if (state!=NORMAL && imp!=null && imp.getRoi()!=null)
 			showStatus();

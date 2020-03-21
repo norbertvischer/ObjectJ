@@ -85,6 +85,7 @@ public class Functions implements MacroConstants, Measurements {
 	boolean plotNoTicks;
 	boolean profileVerticalProfile;
 	boolean profileSubPixelResolution;
+	boolean waitForCompletion = true;
 
 
 	Functions(Interpreter interp, Program pgm) {
@@ -199,6 +200,7 @@ public class Functions implements MacroConstants, Measurements {
 			case SIN: case SQRT: case TAN: case ATAN: case ASIN: case ACOS:
 				value = math(type);
 				break;
+			case MATH: value = doMath(); break;
 			case MAX_OF: case MIN_OF: case POW: case ATAN2: value=math2(type); break;
 			case GET_TIME: interp.getParens(); value=System.currentTimeMillis(); break;
 			case GET_WIDTH: interp.getParens(); value=getImage().getWidth(); break;
@@ -215,7 +217,7 @@ public class Functions implements MacroConstants, Measurements {
 			case SELECTION_TYPE: value=getSelectionType(); break;
 			case IS_OPEN: value=isOpen(); break;
 			case IS_ACTIVE: value=isActive(); break;
-			case INDEX_OF: value=indexOf(); break;
+			case INDEX_OF: value=indexOf(null); break;
 			case LAST_INDEX_OF: value=getFirstString().lastIndexOf(getLastString()); break;
 			case CHAR_CODE_AT: value=charCodeAt(); break;
 			case GET_BOOLEAN: value=getBoolean(); break;
@@ -233,7 +235,7 @@ public class Functions implements MacroConstants, Measurements {
 			case IS: value = is(); break;
 			case GET_VALUE: value = getValue(); break;
 			case STACK: value = doStack(); break;
-			case MATCHES: value = matches(); break;
+			case MATCHES: value = matches(null); break;
 			case GET_STRING_WIDTH: value = getStringWidth(); break;
 			case FIT: value = fit(); break;
 			case OVERLAY: value = overlay(); break;
@@ -253,7 +255,7 @@ public class Functions implements MacroConstants, Measurements {
 			case TO_BINARY: str = toString(2); break;
 			case GET_TITLE: interp.getParens(); str=getImage().getTitle(); break;
 			case GET_STRING: str = getStringDialog(); break;
-			case SUBSTRING: str = substring(); break;
+			case SUBSTRING: str=substring(null); break;
 			case FROM_CHAR_CODE: str = fromCharCode(); break;
 			case GET_INFO: str = getInfo(); break;
 			case GET_IMAGE_INFO: interp.getParens(); str = getImageInfo(); break;
@@ -264,7 +266,7 @@ public class Functions implements MacroConstants, Measurements {
 			case RUN_MACRO: str = runMacro(false); break;
 			case EVAL: str = runMacro(true); break;
 			case TO_STRING: str = doToString(); break;
-			case REPLACE: str = replace(); break;
+			case REPLACE: str = replace(null); break;
 			case DIALOG: str = doDialog(); break;
 			case GET_METADATA: str = getMetadata(); break;
 			case FILE: str = doFile(); break;
@@ -309,6 +311,7 @@ public class Functions implements MacroConstants, Measurements {
 		switch (type) {
 			case TABLE: var = doTable(); break;
 			case ROI: var = doRoi(); break;
+			case ROI_MANAGER2: var = doRoiManager(); break;
 			default:
 				interp.error("Variable function expected");
 		}
@@ -324,6 +327,58 @@ public class Functions implements MacroConstants, Measurements {
 			getProcessor().setLineWidth(width);
 		}
 		globalLineWidth = width;
+	}
+	
+	private double doMath() {
+		interp.getToken();
+		if (interp.token!='.')
+			interp.error("'.' expected");
+		interp.getToken();
+		if (!(interp.token==WORD||interp.token==NUMERIC_FUNCTION))
+			interp.error("Function name expected: ");
+		String name = interp.tokenString;		
+		if (name.equals("min"))
+			return Math.min(getFirstArg(), getLastArg());
+		else if (name.equals("max"))
+			return Math.max(getFirstArg(), getLastArg());
+		else if (name.equals("pow"))
+			return Math.pow(getFirstArg(), getLastArg());
+		else if (name.equals("atan2"))
+			return Math.atan2(getFirstArg(), getLastArg());
+		double arg = getArg();
+		if (name.equals("ceil"))
+			return Math.ceil(arg);
+		else if (name.equals("abs"))
+			return Math.abs(arg);
+		else if (name.equals("cos"))
+			return Math.cos(arg);			
+		else if (name.equals("exp"))
+			return Math.exp(arg);
+		else if (name.equals("floor"))
+			return Math.floor(arg);			
+		else if (name.equals("log"))
+			return Math.log(arg);
+		else if (name.equals("log10"))
+			return Math.log10(arg);
+		else if (name.equals("round"))
+			return Math.round(arg);			
+		else if (name.equals("sin"))
+			return Math.sin(arg);
+		else if (name.equals("sqr"))
+			return arg*arg;			
+		else if (name.equals("sqrt"))
+			return Math.sqrt(arg);			
+		else if (name.equals("tan"))
+			return Math.tan(arg);
+		else if (name.equals("atan"))
+			return Math.atan(arg);			
+		else if (name.equals("asin"))
+			return Math.asin(arg);
+		else if (name.equals("acos"))
+			return Math.acos(arg);
+		else
+			interp.error("Unrecognized function name");
+		return Double.NaN;
 	}
 
 	final double math(int type) {
@@ -1698,6 +1753,8 @@ public class Functions implements MacroConstants, Measurements {
 	double getSelectionType() {
 		interp.getParens();
 		double type = -1;
+		if (WindowManager.getImageCount()==0)
+			return type;
 		ImagePlus imp = getImage();
 		Roi roi = imp.getRoi();
 		if (roi!=null)
@@ -2615,10 +2672,10 @@ public class Functions implements MacroConstants, Measurements {
 		}
 	}
 
-	String substring() {
-		String s = getFirstString();
-		int index1 = (int)getNextArg();
-		int index2 = s.length();
+	String substring(String s) {
+		s = getStringFunctionArg(s);
+		int index1 = (int)interp.getExpression();
+		int index2 = s.length();	
 		if (interp.nextToken()==',')
 			index2 = (int)getLastArg();
 		else
@@ -2629,10 +2686,19 @@ public class Functions implements MacroConstants, Measurements {
 		checkIndex(index2, 0, s.length());
 		return s.substring(index1, index2);
 	}
+	
+	private String getStringFunctionArg(String s) {
+		if (s==null) {
+			s=getFirstString();
+			interp.getComma();
+		} else
+			interp.getLeftParen();
+		return s;
+	}
 
-	int indexOf() {
-		String s1 = getFirstString();
-		String s2 = getNextString();
+	int indexOf(String s1) {
+		s1 = getStringFunctionArg(s1);
+		String s2 = getString();
 		int fromIndex = 0;
 		if (interp.nextToken()==',') {
 			fromIndex = (int)getLastArg();
@@ -3743,9 +3809,9 @@ public class Functions implements MacroConstants, Measurements {
 		}
 	}
 
-	String replace() {
-		String s1 = getFirstString();
-		String s2 = getNextString();
+	String replace(String s1) {
+		s1 = getStringFunctionArg(s1);
+		String s2 = getString();
 		String s3 = getLastString();
 		if (s2.length()==1 && s3.length()==1)
 			return s1.replace(s2.charAt(0), s3.charAt(0));
@@ -4536,6 +4602,11 @@ public class Functions implements MacroConstants, Measurements {
 			ImageConverter.setDoScaling(state);
 		else if (arg1.startsWith("copyhead"))
 			Prefs.copyColumnHeaders = state;
+		else if (arg1.equals("waitforcompletion"))
+			waitForCompletion = state;
+		//else if (arg1.startsWith("saveimageloc")) {
+		//	Prefs.saveImageLocation = state;
+		//	if (!state) Prefs.set(ImageWindow.LOC_KEY,null);
 		else
 			interp.error("Invalid option");
 	}
@@ -4903,7 +4974,10 @@ public class Functions implements MacroConstants, Measurements {
 		BufferedReader reader = null;
 		try {
 			Process p = Runtime.getRuntime().exec(cmd);
-			if (openingDoc) return null;
+			boolean returnImmediately = openingDoc || !waitForCompletion;
+			waitForCompletion = true;
+			if (returnImmediately)
+				return null;
 			reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
 			String line; int count=1;
 			while ((line=reader.readLine())!=null)  {
@@ -4933,7 +5007,9 @@ public class Functions implements MacroConstants, Measurements {
 		}
 		String key = getString();
 		interp.getRightParen();
-		if (key.equals("rgb.foreground"))
+		if (key.equals("image.size"))
+			return getImage().getSizeInBytes();
+		else if (key.equals("rgb.foreground"))
 			return Toolbar.getForegroundColor().getRGB()&0xffffff;
 		else if (key.equals("rgb.background"))
 			return Toolbar.getBackgroundColor().getRGB()&0xffffff;
@@ -5311,13 +5387,18 @@ public class Functions implements MacroConstants, Measurements {
 		return s;
 	}
 
-	double matches() {
-		String str = getFirstString();
-		String regex = getLastString();
-		boolean matches = str.matches(regex);
-		return matches?1.0:0.0;
+	double matches(String str) {
+		str = getStringFunctionArg(str);
+		String regex = getString();
+		interp.getRightParen();
+		try {
+			return str.matches(regex)?1.0:0.0;
+		} catch (Exception e) {
+			interp.error(""+e);
+			return 0.0;
+		}
 	}
-
+	
 	void waitForUser() {
 		IJ.wait(50);
 		if (waitForUserDialog!=null && waitForUserDialog.isShowing())
@@ -5969,7 +6050,8 @@ public class Functions implements MacroConstants, Measurements {
 	Variable[] sortArray() {
 		interp.getLeftParen();
 		Variable[] a = getArray();
-		interp.getRightParen();
+		boolean multipleArrays= interp.nextToken()==',';
+		int[] indexes = null;
 		int len = a.length;
 		int nNumbers = 0;
 		for (int i=0; i<len; i++) {
@@ -5979,6 +6061,8 @@ public class Functions implements MacroConstants, Measurements {
 			double[] d = new double[len];
 			for (int i=0; i<len; i++)
 				d[i] = a[i].getValue();
+			if(multipleArrays)
+				indexes = Tools.rank(d);
 			Arrays.sort(d);
 			for (int i=0; i<len; i++)
 				a[i].setValue(d[i]);
@@ -5986,12 +6070,31 @@ public class Functions implements MacroConstants, Measurements {
 			String[] s = new String[len];
 			for (int i=0; i<len; i++)
 				s[i] = a[i].getString();
-			//StringSorter.sort(s);
+			if(multipleArrays)
+				indexes = Tools.rank(s);
 			Arrays.sort(s, String.CASE_INSENSITIVE_ORDER);
 			for (int i=0; i<len; i++)
 				a[i].setString(s[i]);
-		} else
+		} else{
 			interp.error("Mixed strings and numbers");
+			return a;
+		}
+		while (interp.nextToken()==',') {
+			interp.getComma();
+			Variable[] b = getArray();
+			if(b.length != len){
+				interp.error("Arrays must have same length");
+				return a;
+			}
+			Variable[] c = new Variable[len];
+			for (int jj = 0; jj < len; jj++){
+				c[jj] = b[indexes[jj]];
+			}	
+			for (int jj = 0; jj < len; jj++){
+				b[jj] = c[jj];
+			}	
+		}
+		interp.getRightParen();
 		return a;
 	}
 
@@ -7258,6 +7361,19 @@ public class Functions implements MacroConstants, Measurements {
 		if (interp.token!=WORD)
 			interp.error("Function name expected: ");
 		String name = interp.tokenString;
+		if (name.equals("getDefaultStrokeWidth")) {
+			interp.getParens();
+			return new Variable(Roi.getDefaultStrokeWidth());
+		} else if (name.equals("setDefaultStrokeWidth")) {
+			Roi.setDefaultStrokeWidth(getArg());
+			return null;
+		} else if (name.equals("getDefaultGroup")) {
+			interp.getParens();
+			return new Variable(Roi.getDefaultGroup());
+		} else if (name.equals("setDefaultGroup")) {
+			Roi.setDefaultGroup((int)getArg());
+			return null;
+		}
 		ImagePlus imp = getImage();
 		if (name.equals("paste")) {
 			interp.getParens();
@@ -7313,6 +7429,12 @@ public class Functions implements MacroConstants, Measurements {
 			interp.getParens();
 			String roiName = roi.getName();
 			return new Variable(roiName!=null?roiName:"");
+		} else if (name.equals("getGroup")) {
+			interp.getParens();
+			return new Variable(roi.getGroup());
+		} else if (name.equals("setGroup")) {
+			roi.setGroup((int)getArg());
+			return null;
 		} else if (name.equals("getProperty")) {
 			String property = roi.getProperty(getStringArg());
 			return new Variable(property!=null?property:"");
@@ -7518,5 +7640,33 @@ public class Functions implements MacroConstants, Measurements {
 		return null;
 	}
 
-} // class Functions
+	private Variable doRoiManager() {
+		interp.getToken();
+		if (interp.token!='.')
+			interp.error("'.' expected");
+		interp.getToken();
+		if (interp.token!=WORD)
+			interp.error("Function name expected: ");
+		String name = interp.tokenString;
+		RoiManager rm = RoiManager.getInstance2();
+		if (rm==null)
+			interp.error("No ROI Manager");
+		if (name.equals("select")) {
+			rm.select((int)getArg());
+			return null;
+		} else if (name.equals("setGroup")) {
+			int group = (int)getArg();
+			if (group<0 || group>255)
+				interp.error("Group out of range");
+			rm.setGroup(group);
+			return null;
+		} else if (name.equals("selectGroup")) {
+			rm.selectGroup((int)getArg());
+			return null;
+		} else
+			interp.error("Unrecognized RoiManager function");
+		return null;
+	}
+	
+	} // class Functions
 

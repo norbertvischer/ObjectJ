@@ -2,10 +2,10 @@ package ij.gui;
 import ij.*;
 import ij.process.*;
 import ij.measure.*;
+import ij.plugin.*;
 import ij.plugin.frame.Recorder;
 import ij.plugin.filter.Analyzer;
 import ij.plugin.filter.ThresholdToSelection;
-import ij.plugin.RectToolOptions;
 import ij.macro.Interpreter;
 import ij.io.RoiDecoder;
 import java.awt.*;
@@ -26,13 +26,30 @@ import java.awt.geom.*;
  *   // process p
  * }
  * </pre>
- */
+ * <b>
+ * Convention for subpixel resolution and zooming in:
+ * </b><ul>
+ * <li> Area ROIs: Integer coordinates refer to the top-left corner of the pixel with these coordinates.
+ *      Thus, pixel (0,0) is enclosed by the rectangle spanned between points (0,0) and (1,1),
+ *      i.e., a rectangle at (0,0) with width = height = 1 pixel.
+ * <li> Line and Point Rois: Integer coordinates refer to the center of a pixel.
+ *      Thus, a line from (0,0) to (1,0) has its start and end points in the center of
+ *      pixels (0,0) and (1,0), respectively, and drawing the line should affect both
+ *      pixels. For images dispplayed at high zoom loevels, this means that (open) lines
+ *      and single points are displayed 0.5 pixels further to the right and bottom than
+ *      the outlines of area ROIs (closed lines) with the same coordinates.
+ * </ul>
+ * Note that rectangular and (nonrotated) oval ROIs do not support subpixel resolution.
+ * Since ImageJ 1.52t, this convention does not depend on the Prefs.subpixelResolution
+ * previously accessible via Edit>Options>Plot) and this flag has no effect any more.
+ *
+  */
 public class Roi extends Object implements Cloneable, java.io.Serializable, Iterable<Point> {
 
 	public static final int CONSTRUCTING=0, MOVING=1, RESIZING=2, NORMAL=3, MOVING_HANDLE=4; // States
 	public static final int RECTANGLE=0, OVAL=1, POLYGON=2, FREEROI=3, TRACED_ROI=4, LINE=5, 
 		POLYLINE=6, FREELINE=7, ANGLE=8, COMPOSITE=9, POINT=10; // Types
-	public static final int HANDLE_SIZE = 5; 
+	public static final int HANDLE_SIZE = 5;  // replaced by getHandleSize()
 	public static final int NOT_PASTING = -1;
 	public static final int FERET_ARRAYSIZE = 16; // Size of array with Feret values
 	public static final int FERET_ARRAY_POINTOFFSET = 8; // Where point coordinates start in Feret array
@@ -55,6 +72,10 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 	protected static int lineWidth = 1;
 	protected static Color defaultFillColor;
 	private static Vector listeners = new Vector();
+	private static LUT glasbeyLut;
+	private static int defaultGroup; // zero is no specific group
+	private static Color groupColor;
+	private static double defaultStrokeWidth;
 	
 	protected int type;
 	protected int xMax, yMax;
@@ -72,7 +93,7 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 	protected double asp_bk;        //saves aspect ratio if resizing takes roi very small
 	protected ImageProcessor cachedMask;
 	protected Color handleColor = Color.white;
-	protected Color	 strokeColor;
+	protected Color strokeColor;
 	protected Color instanceColor;  //obsolete; replaced by strokeColor
 	protected Color fillColor;
 	protected BasicStroke stroke;
@@ -81,6 +102,7 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 	protected boolean wideLine;
 	protected boolean ignoreClipRect;
 	protected double flattenScale = 1.0;
+	protected static Color defaultColor;
 
 	private String name;
 	private int position;
@@ -95,7 +117,11 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 	private double ycenter;
 	private boolean listenersNotified;
 	private boolean antiAlias = true;
-
+	private int group;
+	private boolean usingDefaultStroke;
+	private static int defaultHandleSize;
+	private int handleSize = -1;	
+	private boolean scaleStrokeWidth; // Scale stroke width when zooming images?
 
 	/** Creates a rectangular ROI. */
 	public Roi(int x, int y, int width, int height) {
@@ -106,7 +132,7 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 	public Roi(double x, double y, double width, double height) {
 		this(x, y, width, height, 0);
 	}
-
+	
 	/** Creates a new rounded rectangular ROI. */
 	public Roi(int x, int y, int width, int height, int cornerDiameter) {
 		setImage(null);
@@ -134,7 +160,15 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 			draw(g);
 			g.dispose();
 		}
+		double defaultWidth = defaultStrokeWidth();
+		if (defaultWidth>0) {
+			stroke = new BasicStroke((float)defaultWidth);
+			usingDefaultStroke = true;
+		}
 		fillColor = defaultFillColor;
+		this.group = defaultGroup; //initialize with current group and associated color
+		if (defaultGroup>0)
+			this.strokeColor = groupColor;
 	}
 	
 	/** Creates a rounded rectangular ROI using double arguments. */
@@ -156,7 +190,9 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 	}
 	
 	/** Starts the process of creating a user-defined rectangular Roi,
-		where sx and sy are the starting screen coordinates. */
+		where sx and sy are the starting screen coordinates.
+		For rectangular rois, also a corner diameter may be specified to
+		make it a rounded rectangle */
 	public Roi(int sx, int sy, ImagePlus imp, int cornerDiameter) {
 		setImage(imp);
 		int ox=sx, oy=sy;
@@ -178,7 +214,25 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 			if (scolor!=null)
 				setStrokeColor(scolor);
 		}
+		double defaultWidth = defaultStrokeWidth();
+		if (defaultWidth>0) {
+			stroke = new BasicStroke((float)defaultWidth);
+			usingDefaultStroke = true;
+		}
 		fillColor = defaultFillColor;
+		this.group = defaultGroup;
+		if (defaultGroup>0)
+			this.strokeColor = groupColor;
+	}
+
+	/** Creates a rectangular ROI. */
+	public static Roi create(double x, double y, double width, double height) {
+		return new Roi(x, y, width, height);
+	}
+
+	/** Creates a rounded rectangular ROI. */
+	public static Roi create(double x, double y, double width, double height, int cornerDiameter) {
+		return new Roi(x, y, width, height, cornerDiameter);
 	}
 
 	/** @deprecated */
@@ -194,8 +248,11 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 		startX = x; startY = y;
 		oldX = x; oldY = y; oldWidth=0; oldHeight=0;
 		if (bounds!=null) {
-			if (!isInteger(bounds.x) || !isInteger(bounds.y))
+			if (!isInteger(bounds.x) || !isInteger(bounds.y)) {
 				cachedMask = null;
+				width  = (int)Math.ceil(bounds.width);
+				height = (int)Math.ceil(bounds.height);
+			}
 			bounds.x = x;
 			bounds.y = y;
 		}
@@ -207,8 +264,11 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 		if (isInteger(x) && isInteger(y))
 			return;
 		if (bounds!=null) {
-			if (!isInteger(x-bounds.x) || !isInteger(y-bounds.y))
+			if (!isInteger(x-bounds.x) || !isInteger(y-bounds.y)) {
 				cachedMask = null;
+				width  = (int)Math.ceil(bounds.x + bounds.width) - this.x;	//ensure that all pixels are inside
+				height = (int)Math.ceil(bounds.y + bounds.height) - this.y;
+			}
 			bounds.x = x;
 			bounds.y = y;
 		} else {
@@ -417,6 +477,18 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 			return new Rectangle2D.Double(x, y, width, height);
 	}
 
+	/** Sets the bounds of rectangular, oval or text selections. */
+	public void setBounds(Rectangle2D.Double b) {
+		if (!(type==RECTANGLE||type==OVAL||(this instanceof TextRoi)))
+			return;
+		this.x = (int)b.x;
+		this.y = (int)b.y;
+		this.width = (int)Math.ceil(b.width);
+		this.height = (int)Math.ceil(b.height);
+		bounds = new Rectangle2D.Double(b.x, b.y, b.width, b.height);
+		cachedMask = null;
+	}
+
 	/**
 	* @deprecated
 	* replaced by getBounds()
@@ -611,7 +683,7 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 	public Point[] getContainedPoints() {
 		Roi roi = this;
 		if (isLine())
-			roi = convertToPolygon();
+			roi = convertLineToArea(this);
 		ImageProcessor mask = roi.getMask();
 		Rectangle bounds = roi.getBounds();
 		ArrayList points = new ArrayList();
@@ -634,7 +706,7 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 			if (getStrokeWidth()<=1)
 				return roi2.getInterpolatedPolygon();
 			else
-				roi2 = convertToPolygon();
+				roi2 = convertLineToArea(this);
 		}
 		ImageProcessor mask = roi2.getMask();
 		Rectangle bounds = roi2.getBounds();
@@ -710,7 +782,8 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 		try { 
 			Roi r = (Roi)super.clone();
 			r.setImage(null);
-			r.setStroke(getStroke());
+			if (!usingDefaultStroke)
+				r.setStroke(getStroke());
 			r.setFillColor(getFillColor());
 			r.imageID = getImageID();
 			r.listenersNotified = false;
@@ -1020,10 +1093,8 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 			return;
 		x += dx;
 		y += dy;
-		if (bounds!=null) {
-			bounds.x += dx;
-			bounds.y += dy;
-		}
+		if (bounds!=null)
+			setLocation(bounds.x + dx, bounds.y + dy);
 		boolean isImageRoi = this instanceof ImageRoi;
 		if (clipboard==null && type==RECTANGLE && !isImageRoi) {
 			if (x<0) x=0; if (y<0) y=0;
@@ -1044,10 +1115,6 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 		oldWidth = width;
 		oldHeight=height;
 		if (isImageRoi) showStatus();
-		if (bounds!=null) {
-			bounds.x = x;
-			bounds.y = y;
-		}
 	}
 
 	/** Nudge ROI one pixel on arrow key press. */
@@ -1130,14 +1197,14 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 		clipY = (y<=oldY)?y:oldY;
 		clipWidth = ((x+width>=oldX+oldWidth)?x+width:oldX+oldWidth) - clipX + 1;
 		clipHeight = ((y+height>=oldY+oldHeight)?y+height:oldY+oldHeight) - clipY + 1;
-		int m = 3;
-		if (ic!=null) {
-			double mag = ic.getMagnification();
-			if (mag<1.0)
-				m = (int)(4.0/mag);
-		}
+		int handleSize = getHandleSize();
+		double mag = ic!=null?ic.getMagnification():1;
+		int m = mag<1.0?(int)(handleSize/mag):handleSize;
 		m += clipRectMargin();
-		m = (int)(m+getStrokeWidth()*2);
+		double strokeWidth = getStrokeWidth();
+		if (strokeWidth==0.0)
+			strokeWidth = defaultStrokeWidth();
+		m = (int)(m+strokeWidth*2);
 		clipX-=m; clipY-=m;
 		clipWidth+=m*2; clipHeight+=m*2;
 	 }
@@ -1166,15 +1233,9 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 		}
 		notifyListeners(state==MOVING?RoiListener.MOVED:RoiListener.MODIFIED);
 	}
-
-	int getHandleSize() {
-		double mag = ic!=null?ic.getMagnification():1.0;
-		double size = HANDLE_SIZE/mag;
-		return (int)(size*mag);
-	}
 	
 	public void draw(Graphics g) {
-		Color color =  strokeColor!=null? strokeColor:ROIColor;
+		Color color =  strokeColor!=null?strokeColor:ROIColor;
 		if (fillColor!=null) color = fillColor;
 		if (Interpreter.isBatchMode() && imp!=null && imp.getOverlay()!=null && strokeColor==null && fillColor==null)
 			return;
@@ -1218,16 +1279,15 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 			} else
 				g.drawRect(sx1, sy1, sw, sh);
 		}
-		if (state!=CONSTRUCTING && clipboard==null && !overlay) {
-			int size2 = HANDLE_SIZE/2;
-			drawHandle(g, sx1-size2, sy1-size2);
-			drawHandle(g, sx2-size2, sy1-size2);
-			drawHandle(g, sx3-size2, sy1-size2);
-			drawHandle(g, sx3-size2, sy2-size2);
-			drawHandle(g, sx3-size2, sy3-size2);
-			drawHandle(g, sx2-size2, sy3-size2);
-			drawHandle(g, sx1-size2, sy3-size2);
-			drawHandle(g, sx1-size2, sy2-size2);
+		if (clipboard==null && !overlay) {
+			drawHandle(g, sx1, sy1);
+			drawHandle(g, sx2, sy1);
+			drawHandle(g, sx3, sy1);
+			drawHandle(g, sx3, sy2);
+			drawHandle(g, sx3, sy3);
+			drawHandle(g, sx2, sy3);
+			drawHandle(g, sx1, sy3);
+			drawHandle(g, sx1, sy2);
 		}
 		drawPreviousRoi(g);
 		if (state!=NORMAL)
@@ -1251,28 +1311,90 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 		}		
 	}
 	
+	private static double defaultStrokeWidth() {
+		double defaultWidth = defaultStrokeWidth;
+		double guiScale = Prefs.getGuiScale();
+		if (defaultWidth<=1 && guiScale>1.0) {
+			defaultWidth = guiScale;
+			if (defaultWidth<1.5) defaultWidth = 1.5;
+		}
+		return defaultWidth;
+	}
+	
+	/** Returns the current handle size. */
+	public int getHandleSize() {
+		if (handleSize>=0)
+			return handleSize;
+		else
+			return getDefaultHandleSize();
+	}
+
+	/** Sets the current handle size. */
+	public void setHandleSize(int size) {
+		if (size>=0 && ((size&1)==0))
+			size++; // add 1 if odd
+		handleSize = size;
+		if (imp!=null)
+			imp.draw();
+	}
+
+	/** Returns the default handle size. */
+	public static int getDefaultHandleSize() {
+		if (defaultHandleSize>0)
+			return defaultHandleSize;
+		double defaultWidth = defaultStrokeWidth();
+		int size = 7;
+		if (defaultWidth>1.5) size=9;
+		if (defaultWidth>=3) size=11;
+		if (defaultWidth>=4) size=13;
+		if (defaultWidth>=5) size=15;
+		if (defaultWidth>=11) size=(int)defaultWidth;
+		defaultHandleSize = size;
+		return defaultHandleSize;
+	}
+	
+	public static void resetDefaultHandleSize() {
+		defaultHandleSize = 0;
+	}
+
 	void drawHandle(Graphics g, int x, int y) {
-		double size = (width*height)*mag*mag;
-		if (type==LINE) {
-			size = Math.sqrt(width*width+height*height);
-			size *= size*mag*mag;
+		int threshold1 = 7500;
+		int threshold2 = 1500;
+		double size = (this.width*this.height)*this.mag*this.mag;
+		if (this instanceof Line) {
+			size = ((Line)this).getLength()*this.mag;
+			threshold1 = 150;
+			threshold2 = 50;
+		} else {
+			if (state==CONSTRUCTING && !(type==RECTANGLE||type==OVAL))
+				size = threshold1 + 1;	
 		}
-		if (size>4000.0) {
-			g.setColor(Color.black);
-			g.fillRect(x,y,5,5);
-			g.setColor(handleColor);
-			g.fillRect(x+1,y+1,3,3);
-		} else if (size>1000.0) {
-			g.setColor(Color.black);
-			g.fillRect(x+1,y+1,4,4);
-			g.setColor(handleColor);
-			g.fillRect(x+2,y+2,2,2);
-		} else {			
-			g.setColor(Color.black);
-			g.fillRect(x+1,y+1,3,3);
-			g.setColor(handleColor);
-			g.fillRect(x+2,y+2,1,1);
+		int width = 7;
+		int x0=x, y0=y;
+		if (size>threshold1) {
+			x -= 3;
+			y -= 3;
+		} else if (size>threshold2) {
+			x -= 2;
+			y -= 2;
+			width = 5;
+		} else {
+			x--; y--;
+			width = 3;
 		}
+		int inc = getHandleSize() - 7;
+		width += inc;
+		x -= inc/2;
+		y -= inc/2;
+		g.setColor(Color.black);
+		if (width<3) {
+			g.fillRect(x0,y0,1,1);
+			return;
+		}
+		g.fillRect(x++,y++,width,width);
+		g.setColor(handleColor);
+		width -= 2;
+		g.fillRect(x,y,width,width);
 	}
 
 	/**
@@ -1362,16 +1484,16 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 		if (clipboard!=null || ic==null) return -1;
 		double mag = ic.getMagnification();
 		int margin = IJ.getScreenSize().width>1280?5:3;
-		int size = HANDLE_SIZE+margin;
+		int size = getHandleSize()+margin;
 		int halfSize = size/2;
 		double x = getXBase();
 		double y = getYBase();
 		double width = getFloatWidth();
 		double height = getFloatHeight();
-		int sx1 = ic.screenXD(x) - halfSize;
-		int sy1 = ic.screenYD(y) - halfSize;
-		int sx3 = ic.screenXD(x+width) - halfSize;
-		int sy3 = ic.screenYD(y+height) - halfSize;
+		int sx1 = screenXD(x) - halfSize;
+		int sy1 = screenYD(y) - halfSize;
+		int sx3 = screenXD(x+width) - halfSize;
+		int sy3 = screenYD(y+height) - halfSize;
 		int sx2 = sx1 + (sx3 - sx1)/2;
 		int sy2 = sy1 + (sy3 - sy1)/2;
 		if (sx>=sx1&&sx<=sx1+size&&sy>=sy1&&sy<=sy1+size) return 0;
@@ -1397,10 +1519,10 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 			state = MOVING;
 			previousSX = sx;
 			previousSY = sy;
-			startX = ic.offScreenX(sx);
-			startY = ic.offScreenY(sy);
-			startXD = ic.offScreenXD(sx);
-			startYD = ic.offScreenYD(sy);
+			startX = offScreenX(sx);
+			startY = offScreenY(sy);
+			startXD = offScreenXD(sx);
+			startYD = offScreenYD(sy);
 			//showStatus();
 		}
 	}
@@ -1575,6 +1697,61 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 		clipboard = null;
 		imp.getProcessor().reset();
 		imp.updateAndDraw();
+	}	
+
+	/** Returns the default stroke width. */
+	public static double getDefaultStrokeWidth() {
+		return defaultStrokeWidth;
+	}
+	
+	/** Sets the default stroke width. */
+	public static void setDefaultStrokeWidth(double width) {
+		defaultStrokeWidth = width<0.0?0.0:width;
+		resetDefaultHandleSize();
+	}
+
+	/** Returns the group value assigned to newly created ROIs. */
+	public static int getDefaultGroup() {
+		return defaultGroup;
+	}
+
+	/** Sets the group value assigned to newly created ROIs, and updates default group color. */
+	public static void setDefaultGroup(int group) {
+		if (group<0 || group>255)
+			throw new IllegalArgumentException("Invalid group: "+group);
+		defaultGroup = group;
+		groupColor = getGroupColor(group);
+	}
+	
+	/** Returns the group attribute of this ROI. */
+	public int getGroup() {
+		return this.group;
+	}
+
+	/** Sets the group of this Roi, and updates stroke color accordingly. */
+	public void setGroup(int group) {
+		if (group<0 || group>255)
+			throw new IllegalArgumentException("Invalid group: "+group);
+		this.group = group;
+		this.strokeColor = group>0?getGroupColor(group):null;
+		if (imp!=null) // Update Roi Color in the GUI
+			imp.draw();
+	}
+
+	/** Retrieves color associated to a given roi group. */
+	private static Color getGroupColor(int group) {
+		Color color = ROIColor; // default ROI color
+		if (group>0) { // read Glasbey Lut
+			if (glasbeyLut==null) {
+				String path = IJ.getDir("luts")+"Glasbey.lut";
+				glasbeyLut = LutLoader.openLut("noerror:"+path);
+				if (glasbeyLut==null)
+					IJ.log("LUT not found: "+path);
+			}
+			if (glasbeyLut!=null)
+				color = new Color(glasbeyLut.getRGB(group));
+		}
+		return color;
 	}
 
 	/** Returns the angle in degrees between the specified line and a horizontal line. */
@@ -1625,6 +1802,11 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 	 */
 	public Color getStrokeColor() {
 		return	strokeColor;
+	}
+
+	/** Sets the default stroke color. */
+	public static void setDefaultColor(Color color) {
+		 defaultColor = color;
 	}
 
 	/** Sets the fill color used to display this ROI, or set to null to display it transparently.
@@ -1709,47 +1891,70 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 	/** Sets the width of the line used to draw this ROI. Set
 	 * the width to 0.0 and the ROI will be drawn using a
 	 * a 1 pixel stroke width regardless of the magnification.
+	 * @see #setDefaultStrokeWidth(double)
 	 * @see #setStrokeColor(Color)
 	 * @see ij.ImagePlus#setOverlay(ij.gui.Overlay)
 	 */
-	public void setStrokeWidth(float width) {
-		if (width<0f)
-			width = 0f;
-		boolean notify = listeners.size()>0 && isLine() && getStrokeWidth()!=width;
-		if (width==0)
-			stroke = null;
+	public void setStrokeWidth(float strokeWidth) {
+		if (strokeWidth<0f)
+			strokeWidth = 0f;
+		if (strokeWidth==0f && usingDefaultStroke)
+			return;
+		if (strokeWidth>0f) {
+			scaleStrokeWidth = true;
+			usingDefaultStroke = false;
+		}
+		boolean notify = listeners.size()>0 && isLine() && getStrokeWidth()!=strokeWidth;
+		if (strokeWidth==0f)
+			this.stroke = null;
 		else if (wideLine)
-			this.stroke = new BasicStroke(width, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL);
+			this.stroke = new BasicStroke(strokeWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL);
 		else
-			this.stroke = new BasicStroke(width);
-		if (width>1f)
+			this.stroke = new BasicStroke(strokeWidth);
+		if (strokeWidth>1f)
 			fillColor = null;
 		if (notify)
 			notifyListeners(RoiListener.MODIFIED);
 	}
 
 	/** This is a version of setStrokeWidth() that accepts a double argument. */
-	public void setStrokeWidth(double width) {
-		setStrokeWidth((float)width);
+	public void setStrokeWidth(double strokeWidth) {
+		setStrokeWidth((float)strokeWidth);
+	}
+	
+	public void setUnscalableStrokeWidth(double strokeWidth) {
+		setStrokeWidth((float)strokeWidth);
+		scaleStrokeWidth = false;
+
 	}
 
 	/** Returns the lineWidth. */
 	public float getStrokeWidth() {
-		return stroke!=null?stroke.getLineWidth():0f;
+		return (stroke!=null&&!usingDefaultStroke)?stroke.getLineWidth():0f;
 	}
 
 	/** Sets the Stroke used to draw this ROI. */
 	public void setStroke(BasicStroke stroke) {
 		this.stroke = stroke;
+		if (stroke!=null)
+			usingDefaultStroke = false;
 	}
 	
 	/** Returns the Stroke used to draw this ROI, or null if no Stroke is used. */
 	public BasicStroke getStroke() {
-		return stroke;
+		if (usingDefaultStroke)
+			return null;
+		else
+			return stroke;
 	}
 	
+	/** Returns 'true' if the stroke width is scaled as images are zoomed. */
+	public boolean getScaleStrokeWidth() {
+		return scaleStrokeWidth;
+	}
+
 	protected BasicStroke getScaledStroke() {
-		if (ic==null)
+		if (ic==null || usingDefaultStroke || !scaleStrokeWidth)
 			return stroke;
 		double mag = ic.getMagnification();
 		if (mag!=1.0) {
@@ -1922,7 +2127,13 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 	public boolean isLine() {
 		return type>=LINE && type<=FREELINE;
 	}
-	
+
+
+	/** Return 'true' if this is a line or point selection. */
+	protected boolean isLineOrPoint() {
+		return isLine() || type==POINT;
+	}
+
 	/** Returns 'true' if this is an ROI primarily used from drawing
 		(e.g., TextRoi or Arrow). */
 	public boolean isDrawingTool() {
@@ -1938,13 +2149,16 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 	public String getTypeAsString() {
 		String s="";
 		switch(type) {
-			case POLYGON: s="Polygon"; break;
+			case POLYGON: s="Polygon";
+				if (this instanceof EllipseRoi) s="Ellipse";
+				if (this instanceof RotatedRectRoi) s="Rotated Rectangle";
+				break;
 			case FREEROI: s="Freehand"; break;
 			case TRACED_ROI: s="Traced"; break;
 			case POLYLINE: s="Polyline"; break;
 			case FREELINE: s="Freeline"; break;
 			case ANGLE: s="Angle"; break;
-			case LINE: s="Straight Line"; break;
+			case LINE: s=this instanceof Arrow ? "Arrow" : "Straight Line"; break;
 			case OVAL: s="Oval"; break;
 			case COMPOSITE: s = "Composite"; break;
 			case POINT: s="Point"; break;
@@ -1970,13 +2184,18 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 		return subPixel;
 	}
 
-	/** Returns true if this is a PolygonRoi that supports sub-pixel 
-		resolution and polygons are drawn on zoomed images offset
-		down and to the right by 0.5 pixels.. */
+	/** @deprecated Drawoffset is not used any more. */
+	@Deprecated
 	public boolean getDrawOffset() {
 		return false;
 	}
-	
+
+	/** @deprecated This method was previously used to draw lines and polylines shifted
+	 *  by 0.5 pixels top the bottom and right, for better agreement with the
+	 *  position used by ProfilePlot, with the default taken from
+	 *  Prefs.subPixelResolution. Now the shift is independent of this
+	 *  setting and only depends on the ROI type (area or line/point ROI). */
+	@Deprecated	
 	public void setDrawOffset(boolean drawOffset) {
 	}
 	
@@ -2008,10 +2227,81 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 			return false;
 	}
 
-	protected int screenX(int ox) {return ic!=null?ic.screenX(ox):ox;}
-	protected int screenY(int oy) {return ic!=null?ic.screenY(oy):oy;}
-	protected int screenXD(double ox) {return ic!=null?ic.screenXD(ox):(int)ox;}
-	protected int screenYD(double oy) {return ic!=null?ic.screenYD(oy):(int)oy;}
+	/** Converts image canvas screen x coordinates to integer offscreen image pixel
+	 *  coordinates, depending on whether this roi uses the line or area convention
+	 *  for coordinates. */
+	protected int offScreenX(int sx) {
+		if (ic == null) return sx;
+		return useLineSubpixelConvention() ? ic.offScreenX(sx) : ic.offScreenX2(sx);
+	}
+
+	/** Converts image canvas screen y coordinates to integer offscreen image pixel
+	 *  coordinates, depending on whether this roi uses the line or area convention
+	 *  for coordinates. */
+	protected int offScreenY(int sy) {
+		if (ic == null) return sy;
+		return useLineSubpixelConvention() ? ic.offScreenY(sy) : ic.offScreenY2(sy);
+	}
+
+	/** Converts image canvas screen x coordinates to floating-point offscreen image pixel
+	 *  coordinates, depending on whether this roi uses the line or area convention
+	 *  for coordinates. */
+	protected double offScreenXD(int sx) {
+		if (ic == null) return sx;
+		double offScreenValue = ic.offScreenXD(sx);
+		if (useLineSubpixelConvention())
+			offScreenValue -= 0.5;
+		return offScreenValue;
+	}
+
+	/** Converts image canvas screen y coordinates to floating-point offscreen image pixel
+	 *  coordinates, depending on whether this roi uses the line or area convention
+	 *  for coordinates. */
+	protected double offScreenYD(int sy) {
+		if (ic == null) return sy;
+		double offScreenValue = ic.offScreenYD(sy);
+		if (useLineSubpixelConvention())
+			offScreenValue -= 0.5;
+		return offScreenValue;
+	}
+
+	/** Returns 'true' if this ROI uses for drawing the convention for
+	 *  line and point ROIs, where the coordinates are with respect
+	 *  to the pixel center.
+	 *  Returns false for area rois, which have coordinates with respect to
+	 *  the upper left corners of the pixels */
+	protected boolean useLineSubpixelConvention() {
+		return isLineOrPoint();
+	}
+
+	/** Returns whether a roi created interactively should have subpixel resolution,
+	 *  (if the roi type supports it), i.e., whether the magnification is high enough */
+	protected boolean magnificationForSubPixel() {
+		return magnificationForSubPixel(getMagnification());
+	}
+
+	protected static boolean magnificationForSubPixel(double magnification) {
+		return magnification > 1.5;
+	}
+
+	/**Converts an image pixel x (offscreen)coordinate to a screen x coordinate,
+	 * taking the the line or area convention for coordinates into account */
+	protected int screenXD(double ox) {
+		if (ic == null) return (int)ox;
+		if (useLineSubpixelConvention()) ox += 0.5;
+		return ic.screenXD(ox);
+	}
+
+	/**Converts an image pixel y (offscreen)coordinate to a screen y coordinate,
+	 * taking the the line or area convention for coordinates into account */
+	protected int screenYD(double oy) {
+		if (ic == null) return (int)oy;
+		if (useLineSubpixelConvention()) oy += 0.5;
+		return ic.screenYD(oy);
+	}
+
+	protected int screenX(int ox) {return screenXD(ox);}
+	protected int screenY(int oy) {return screenYD(oy);}
 
 	/** Converts a float array to an int array using truncation. */
 	public static int[] toInt(float[] arr) {
@@ -2250,49 +2540,129 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 		return new double[]{xC, yC};
 	}
 	
-	/** Converts this line selection into an area selection. */
+	/** Obsolete, replaced by Roi.convertLineToArea()
+	 * @deprecated
+	*/
 	public Roi convertToPolygon() {
-		Roi roi = (Roi)this.clone();
-		if (!roi.isLine())
-			return roi;
+		return convertLineToArea(this);
+	}
+	
+	/** Converts a line selection into an area (polygon or composite) selection.<br>
+	 * Author: Michael Schmid
+	*/
+	public static Roi convertLineToArea(Roi line) {
+		if (line==null || !line.isLine())
+			throw new IllegalArgumentException("Line selection required"); 
+		double lineWidth = line.getStrokeWidth();
 		Roi roi2 = null;
-		if (roi.getType()==Roi.LINE) {
-			double width = roi.getStrokeWidth();
-			if (width<=1.0)
-				roi.setStrokeWidth(1.0000001);
-			FloatPolygon p = roi.getFloatPolygon();
-			roi.setStrokeWidth(width);
+		if (line.getType()==Roi.LINE) {
+			if (lineWidth<=1.0)
+				lineWidth = 1.0000001;
+			FloatPolygon p = ((Line)line).getFloatPolygon(lineWidth);
 			roi2 = new PolygonRoi(p, Roi.POLYGON);
-			//roi2.setDrawOffset(roi.getDrawOffset());
+			line.setStrokeWidth(lineWidth);
 		} else {
-			int lwidth = (int)roi.getStrokeWidth();
-			if (lwidth<1)
-				lwidth = 1;
-			Rectangle bounds = roi.getBounds();
-			int width = bounds.width + lwidth*2;
-			int height = bounds.height + lwidth*2;
-			ImageProcessor ip2 = new ByteProcessor(width, height);
-			roi.setLocation(lwidth, lwidth);
-			ip2.setColor(255);
-			roi.drawPixels(ip2);
-			ip2.setThreshold(255, 255, ImageProcessor.NO_LUT_UPDATE);
+			if (lineWidth<1)
+				lineWidth = 1;
+			Rectangle bounds = line.getBounds();
+			double width = bounds.x+bounds.width + lineWidth;
+			double height = bounds.y+bounds.height + lineWidth;
+			ByteProcessor ip = new ByteProcessor((int)Math.round(width), (int)Math.round(height));
+			PolygonFiller polygonFiller = new PolygonFiller();
+			//ip.setColor(255);
+			double radius = lineWidth/2.0;
+			FloatPolygon p = line.getFloatPolygon();
+			int n = p.npoints;
+			float[] xv = new float[4]; //vertex points of rectangle will be filled for each line segment
+			float[] yv = new float[4];
+			float[] xt = new float[3]; //vertex points of triangle will be filled between line segments
+			float[] yt = new float[3];
+			double dx1 = p.xpoints[1]-p.xpoints[0];
+			double dy1 = p.ypoints[1]-p.ypoints[0];
+			double l = length(dx1, dy1);
+			dx1 = dx1/l;			   //unit vector along current line segment
+			dy1 = dy1/l;
+			double dx0 = dx1;
+			double dy0 = dy1;
+			double xfrom = p.xpoints[0] - 0.5*dx1;
+			double yfrom = p.ypoints[0] - 0.5*dy1;
+			//Overlay ovly = new Overlay();
+			for (int i=1; i<n; i++) { //line segment from point i-1 ("from") to point i ("to")
+				double xto = p.xpoints[i];
+				double yto = p.ypoints[i];
+				if (i==n-1) {
+					xto += 0.5*dx1;
+					yto += 0.5*dy1;
+				}
+				xv[0] = (float)(xfrom + radius*dy1);
+				yv[0] = (float)(yfrom - radius*dx1);
+				xv[1] = (float)(xfrom - radius*dy1);
+				yv[1] = (float)(yfrom + radius*dx1);
+				xv[2] = (float)(xto - radius*dy1);
+				yv[2] = (float)(yto + radius*dx1);
+				xv[3] = (float)(xto + radius*dy1);
+				yv[3] = (float)(yto - radius*dx1);
+				polygonFiller.setPolygon(xv, yv, 4, 0.5f, 0.5f); //offset 0.5 pxl: line vs area coordinate convention
+				polygonFiller.fillByteProcessorMask(ip);
+				//ovly.add(new PolygonRoi(xv,yv,Roi.POLYGON));
+				if (i>1) {  //fill triangle to previous line segment
+					boolean rightTurn=(dx1*dy0>dx0*dy1);
+					xt[0] = (float)xfrom;
+					yt[0] = (float)yfrom;
+					if (rightTurn) {
+						xt[1] = (float)(xfrom-radius*dy0);
+						yt[1] = (float)(yfrom+radius*dx0);
+						xt[2] = (float)(xfrom-radius*dy1);
+						yt[2] = (float)(yfrom+radius*dx1);
+						xt[0] += (float)(0.5*(radius*dy0+radius*dy1));  //extend triangle to avoid missing pixels (due to rounding errors)
+						yt[0] -= (float)(0.5*(radius*dx0+radius*dx1));  //where it touches a rectangle
+					} else {
+						xt[1] = (float)(xfrom+radius*dy0);
+						yt[1] = (float)(yfrom-radius*dx0);
+						xt[2] = (float)(xfrom+radius*dy1);
+						yt[2] = (float)(yfrom-radius*dx1);
+						xt[0] -= (float)(0.5*(radius*dy0+radius*dy1));
+						yt[0] += (float)(0.5*(radius*dx0+radius*dx1));
+					}
+					polygonFiller.setPolygon(xt, yt, 3, 0.5f, 0.5f);
+					polygonFiller.fillByteProcessorMask(ip);
+					//ovly.add(new PolygonRoi(xt,yt,Roi.POLYGON));
+				}
+				dx0 = dx1;
+				dy0 = dy1;
+				xfrom = xto;
+				yfrom = yto;
+				if (i<n-1) {
+					dx1 = p.xpoints[i+1]-p.xpoints[i];
+					dy1 = p.ypoints[i+1]-p.ypoints[i];
+					l = length(dx1, dy1);
+					dx1 = dx1/l;	   //unit vector along next line segment
+					dy1 = dy1/l;
+				}
+			}
+			//IJ.getImage().setOverlay(ovly);
+			ip.setThreshold(255, 255, ImageProcessor.NO_LUT_UPDATE);
 			ThresholdToSelection tts = new ThresholdToSelection();
-			roi2 = tts.convert(ip2);
-			if (roi2==null)
-				return roi;
-			if (bounds.x==0&&bounds.y==0)
-				roi2.setLocation(0, 0);
-			else
-				roi2.setLocation(bounds.x-lwidth/2, bounds.y-lwidth/2);
+			roi2 = tts.convert(ip);
 		}
-		transferProperties(roi, roi2);
+		if (roi2==null)
+			return null;
+		transferProperties(line, roi2);
 		roi2.setStrokeWidth(0);
 		Color c = roi2.getStrokeColor();
 		if (c!=null)  // remove any transparency
 			roi2.setStrokeColor(new Color(c.getRed(),c.getGreen(),c.getBlue()));
 		return roi2;
 	}
-	
+
+	/** Returns the length of a vector with components dx, dy */
+	static double length(double dx, double dy) {
+		return Math.sqrt(dx*dx+dy*dy);
+	}
+
+	/** Used by PolygonRoi, Line, ShapeRoi etc. */
+	static double sqr(double x) {return x*x; }
+
 	private static void transferProperties(Roi roi1, Roi roi2) {
 		if (roi1==null || roi2==null)
 			return;
@@ -2312,7 +2682,7 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 	public void setFlattenScale(double scale) {
 		flattenScale = scale;
 	}
-	
+
 	public void notifyListeners(int id) {
 		if (id==RoiListener.CREATED) {
 			if (listenersNotified)
@@ -2352,8 +2722,8 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 		// iterator() method and returns a specific point iterator.
 		return new RoiPointsIteratorMask();
 	}
-	
-	
+		
+		
 	/**
 	 * Default iterator over points contained in a mask-backed {@link Roi}.
 	 * Author: W. Burger
@@ -2367,7 +2737,7 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 		
 		RoiPointsIteratorMask() {
 			if (isLine()) {
-				Roi roi2 = Roi.this.convertToPolygon();
+				Roi roi2 = Roi.convertLineToArea(Roi.this);
 				mask = roi2.getMask();
 				xbase = roi2.x;
 				ybase = roi2.y;

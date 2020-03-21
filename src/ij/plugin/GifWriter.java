@@ -44,7 +44,7 @@ public class GifWriter implements PlugIn {
 		Overlay overlay = imp.getOverlay();
 		int nSlices = stack.size();				
 		if (nSlices==1) { // save using ImageIO
-			if (overlay!=null)
+			if (overlay!=null && !imp.tempOverlay())
 				imp = imp.flatten();
 			try {
 				writeImage(imp, path, transparentIndex);
@@ -54,7 +54,10 @@ public class GifWriter implements PlugIn {
 					msg = ""+e;
 				error = msg;
 				if (showErrors) {
-					IJ.error("GifWriter", "An error occured writing the file.\n \n" + msg);
+					msg = "An error occured writing the file.\n \n" + msg;
+					if (msg.contains("NullPointerException"))
+						msg = "Incorrect file path: \""+path+"\"";
+					IJ.error("GIF Writer", msg);
 					showErrors = false;
 				}
 			}
