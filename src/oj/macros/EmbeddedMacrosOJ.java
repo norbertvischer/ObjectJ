@@ -102,7 +102,8 @@ public class EmbeddedMacrosOJ {
 			ed = new Editor(16, 60, 0, Editor.MONOSPACED + Editor.MENU_BAR);
 		}
 		ed.create("Embedded Macros", macros_text);
-		//ed.setAcceptMacros(false); enable this when IJ 1.5t is released
+		String msg = "Embedded macros can only be installed \nvia button: \n'Install in ObjectJ menu'" ;
+		ed.setRejectMacrosMsg(msg); //enable this when IJ 1.5t is released
 		JButton loadButton = new JButton("Install in ObjectJ menu");
 		loadButton.addActionListener(LoadEmbeddedMacroAction);
 

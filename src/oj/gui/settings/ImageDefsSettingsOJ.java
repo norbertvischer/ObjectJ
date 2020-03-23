@@ -433,7 +433,7 @@ private void jScrollPane1AncestorAdded(javax.swing.event.AncestorEvent evt) {//G
          * the table
          */
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-			if(table == null)//Err#001
+			if(table == null || value == null)//Err#001  value: 21.3.2020
 					return null;
             this.setOpaque(true);
             this.setBorder(new EmptyBorder(1, 8, 1, 8));

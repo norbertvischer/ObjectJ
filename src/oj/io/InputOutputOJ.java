@@ -26,6 +26,7 @@ import java.util.Date;
 import oj.OJ;
 import oj.gui.menuactions.ProjectActionsOJ;
 import oj.gui.results.ProjectResultsOJ;
+import oj.gui.settings.ProjectSettingsOJ;
 import oj.util.UtilsOJ;
 import oj.project.*;
 import oj.io.spi.IIOProviderOJ;
@@ -543,44 +544,6 @@ public class InputOutputOJ {
 	}
 
 	/**
-	 * Called by ResultActionsOJ to save results as text
-	 */
-//	public void saveEmbeddedMacrosNotUsed() {
-//
-//	}
-//
-	/**
-	 * Called by ResultActionsOJ to save results as text
-	 */
-//    public void saveEmbeddedMacrosNotUsed(String txt, String defaultName) {
-//	DataOJ data = oj.OJ.getData();
-//	if (data != null) {
-//	    OpenDialog.setDefaultDirectory(data.getDirectory());//26.8.2010
-//	}
-//	SaveDialogOJ sd = new SaveDialogOJ("Save results ...", defaultName, FileFilterOJ.objectResultTextFileFilter());
-//	if (sd.isApproved()) {
-//	    try {
-//		FileWriter fos = new FileWriter(new File(sd.getDirectory(), sd.getFilename()));
-//		PrintWriter out = new PrintWriter(fos);
-//		out.println(txt);
-//		out.close();
-//	    } catch (Exception e) {
-//		IJ.error("error 3365: " + e.getMessage());
-//	    }
-//	}
-//    }
-//	public void saveIgorAsText(String txt, String dir, String name) {
-//
-//		try {
-//			FileWriter fos = new FileWriter(new File(dir, name));
-//			PrintWriter out = new PrintWriter(fos);
-//			out.println(txt);
-//			out.close();
-//		} catch (Exception e) {
-//			IJ.error("error 3715: " + e.getMessage());
-//		}
-//	}
-	/**
 	 * Asks to load a project
 	 */
 	public DataOJ loadProjectWithDialog() {
@@ -616,6 +579,8 @@ public class InputOutputOJ {
 	 * @return dataOJ or null
 	 */
 	public DataOJ loadAProject(String directory, String filename) {
+		
+		ProjectSettingsOJ.close();//23-3-2020
 		DataOJ dataOj = null;
 		OJ.editor = null;
 		ProjectResultsOJ.kill();//18.11.2018
