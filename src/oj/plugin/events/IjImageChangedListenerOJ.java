@@ -4,9 +4,11 @@
  */
 package oj.plugin.events;
 
+import ij.IJ;
 import ij.ImageListener;
 import ij.ImagePlus;
 import ij.WindowManager;
+import ij.gui.PlotWindow;
 import java.io.File;
 import oj.OJ;
 import oj.project.ImageOJ;
@@ -21,79 +23,59 @@ import oj.processor.state.ToolStateOJ;
  */
 public class IjImageChangedListenerOJ implements ImageListener {
 
-    /**
-     * Checks if path is equal to a linked path and applie graphics. However, if
-     * this is the second instance of a linked image, it is closed again
-     */
-    public void imageOpened(ImagePlus imp) {
+	 int previousID;
+	/**
+	 * Checks if path is equal to a linked path and applies graphics. However, if
+	 * this is the second instance of a linked image, it is closed again
+	 */
+	public void imageOpened(ImagePlus imp) {
 
+		if (OJ.isValidData() && (imp.getOriginalFileInfo() != null) && (imp.getOriginalFileInfo().directory != null)) {
+			String file_name = imp.getTitle();//file called zip, image called tif
+			ImageOJ imageOJ = OJ.getData().getImages().getImageByName(file_name);
+			if (imageOJ == null) {
+				KeyEventManagerOJ.getInstance().replaceKeyListener(imp);//also listen to non-linked images because of the tool macro
+				MouseEventManagerOJ.getInstance().replaceMouseListener(imp);
+				return;
+			}
+			boolean isPlot = imp.getWindow() instanceof PlotWindow;
+			if(isPlot ){
+				OJ.getData().getImages().removeImage(imageOJ);
+				IJ.showMessage(file_name + " is a Plot and cannot be linked");
+				return;
+			}
+			File imageDirectory = new File(imp.getOriginalFileInfo().directory);
+			File projectDirectory = new File(OJ.getData().getDirectory());
 
+			if (!projectDirectory.equals(imageDirectory)) {
+				KeyEventManagerOJ.getInstance().replaceKeyListener(imp);//also listen to non-linked images because of the tool macro, 24.10.2010
+				MouseEventManagerOJ.getInstance().replaceMouseListener(imp);
+				return;
+			}
+			if (OJ.getImageProcessor().closeDuplicates(file_name)) {
+				return;
+			}
+			boolean showChangedMessage = true;
+			OJ.getImageProcessor().applyImageGraphics(imp, imageOJ, showChangedMessage);
+			imageOJ.setImagePlus(imp);
+			KeyEventManagerOJ.getInstance().replaceKeyListener(imp);
+			MouseEventManagerOJ.getInstance().replaceMouseListener(imp);
+		}
+		KeyEventManagerOJ.getInstance().replaceKeyListener(imp);//also listen to non-linked images because of the tool macro, 24.10.2010
+		MouseEventManagerOJ.getInstance().replaceMouseListener(imp);
+	}
 
-        if (OJ.isValidData() && (imp.getOriginalFileInfo() != null) && (imp.getOriginalFileInfo().directory != null)) {
-            //String file_name = imp.getOriginalFileInfo().fileName;
-            String file_name = imp.getTitle();//11.11.2014 file called zip, image called tif
-            ImageOJ imageOJ = OJ.getData().getImages().getImageByName(file_name);
-            if (imageOJ == null) {
-                KeyEventManagerOJ.getInstance().replaceKeyListener(imp);//also listen to non-linked images because of the tool macro, 24.10.2010
-                MouseEventManagerOJ.getInstance().replaceMouseListener(imp);
-                return;
-            }
+	public void imageClosed(ImagePlus imp) {
+	}
 
-            File imageDirectory = new File(imp.getOriginalFileInfo().directory);
-            File projectDirectory = new File(OJ.getData().getDirectory());
-
-            if (!projectDirectory.equals(imageDirectory)) {
-                KeyEventManagerOJ.getInstance().replaceKeyListener(imp);//also listen to non-linked images because of the tool macro, 24.10.2010
-                MouseEventManagerOJ.getInstance().replaceMouseListener(imp);
-                return;
-            }
-
-
-            if (OJ.getImageProcessor().closeDuplicates(file_name)) {
-                return;
-            }
-
-
-            boolean showChangedMessage = true;
-            OJ.getImageProcessor().applyImageGraphics(imp, imageOJ, showChangedMessage);
-
-            //imageOJ.setID(imp.getID());
-            imageOJ.setImagePlus(imp);
-            KeyEventManagerOJ.getInstance().replaceKeyListener(imp);
-            MouseEventManagerOJ.getInstance().replaceMouseListener(imp);
-        }
-        KeyEventManagerOJ.getInstance().replaceKeyListener(imp);//also listen to non-linked images because of the tool macro, 24.10.2010
-        MouseEventManagerOJ.getInstance().replaceMouseListener(imp);
-    }
-
-    public void imageClosed(ImagePlus imp) {
-	if(true)return;//////////////////////////////////////////////////////////////
-        String image_name = imp.getTitle();
-        if (OJ.isProjectOpen) {
-            ImageOJ imageOJ = OJ.getData().getImages().getImageByName(image_name);
-            if (imageOJ != null) {
-                //3.11.2013
-                ToolStateOJ state = OJ.getToolStateProcessor().getToolStateObject();
-                if (state != null && (state instanceof CreateCellStateOJ)) {
-                    ((CreateCellStateOJ) state).closeCell();//3.11.2013        
-                }
-
+	//Plot does not send "Open" event, so we use a one-time Update event. 
+	//Important to block ObjectJ shortcut keys when creating text rois.
+	public void imageUpdated(ImagePlus imp) {
 		
-		ImagePlus currentImp = WindowManager.getCurrentImage();
-		if(currentImp == imp)
-		    ij.IJ.log("same");
-		else
-		    ij.IJ.log("different");
-		
-                //MenuManagerOJ.getInstance().imageClosed(image_name);
-                OJ.getImageProcessor().removeFromOpenedImages(image_name);
-                //imageOJ.setID(0);
-                imageOJ.setImagePlus(null);
-
-            }
-        }
-    }
-
-    public void imageUpdated(ImagePlus imp) {
-    }
+		boolean isPlot = imp.getWindow() instanceof PlotWindow;
+		if (isPlot && imp.getID() != previousID) {
+			previousID = imp.getID();
+			imageOpened(imp);
+		}
+	}
 }
