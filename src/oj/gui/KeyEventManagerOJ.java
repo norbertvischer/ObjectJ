@@ -54,19 +54,17 @@ public class KeyEventManagerOJ implements KeyListener {
 		if (imp != null) {
 			ImageCanvas canvas = imp.getCanvas();
 			ImageWindow win = imp.getWindow();
-			if (canvas == null) {
-				IJ.beep();
-			}
-			if (win == null) {
-				IJ.beep();
-			}
-			canvas.removeKeyListener(KeyEventManagerOJ.getInstance());
-			imp.getWindow().removeKeyListener(KeyEventManagerOJ.getInstance());
-			canvas.removeKeyListener(IJ.getInstance());
-			imp.getWindow().removeKeyListener(IJ.getInstance());
 
-			canvas.addKeyListener(KeyEventManagerOJ.getInstance());
-			win.addKeyListener(KeyEventManagerOJ.getInstance());
+			if (canvas != null) {
+				canvas.removeKeyListener(KeyEventManagerOJ.getInstance());
+				canvas.removeKeyListener(IJ.getInstance());
+				canvas.addKeyListener(KeyEventManagerOJ.getInstance());
+			}
+			if (win != null) {
+				win.removeKeyListener(KeyEventManagerOJ.getInstance());
+				win.removeKeyListener(IJ.getInstance());
+				win.addKeyListener(KeyEventManagerOJ.getInstance());
+			}
 		}
 	}
 
@@ -100,16 +98,12 @@ public class KeyEventManagerOJ implements KeyListener {
 			}
 			imp = null;
 
-			boolean isGlassWindow = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow() instanceof GlassWindowOJ;
-			if (isGlassWindow) {
-				imp = GlassWindowOJ.getInstance().getImagePlus();
-			} else {
-				if (KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow() instanceof ImageWindow) {
-					if (((ImageWindow) KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow()).getCanvas() instanceof CustomCanvasOJ) {
-						imp = ((ImageWindow) KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow()).getImagePlus();
-					}
+			if (KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow() instanceof ImageWindow) {
+				if (((ImageWindow) KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow()).getCanvas() instanceof CustomCanvasOJ) {
+					imp = ((ImageWindow) KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow()).getImagePlus();
 				}
 			}
+
 			if (imp != null) {
 				OJ.getToolStateProcessor().keyPressed(imp.getTitle(), imp.getCurrentSlice(), evt.getKeyCode(), evt.getModifiers());
 				if (OJ.getToolStateProcessor().getToolStateObject() instanceof CreateCellStateOJ) {

@@ -1,6 +1,7 @@
 package oj.macros;
 
 import ij.IJ;
+import ij.ImageJ;
 import ij.WindowManager;
 import ij.macro.Interpreter;
 import ij.plugin.frame.Editor;
@@ -102,8 +103,11 @@ public class EmbeddedMacrosOJ {
 			ed = new Editor(16, 60, 0, Editor.MONOSPACED + Editor.MENU_BAR);
 		}
 		ed.create("Embedded Macros", macros_text);
-		String msg = "Embedded macros can only be installed \nvia button: \n'Install in ObjectJ menu'" ;
-		ed.setRejectMacrosMsg(msg); //enable this when IJ 1.5t is released
+		boolean lessThan = ImageJ.VERSION.compareTo("1.52u")<0;
+		if(!lessThan){
+			String msg = "Embedded macros can only be installed \nvia button: \n'Install in ObjectJ menu'" ; 
+			ed.setRejectMacrosMsg(msg); 
+		}
 		JButton loadButton = new JButton("Install in ObjectJ menu");
 		loadButton.addActionListener(LoadEmbeddedMacroAction);
 
