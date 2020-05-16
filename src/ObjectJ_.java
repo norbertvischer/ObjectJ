@@ -9,6 +9,7 @@ import oj.gui.AboutOJ;
 import oj.OJ;
 import oj.util.UtilsOJ;
 import oj.gui.menuactions.ProjectActionsOJ;
+import oj.gui.settings.ProjectSettingsOJ;
 import oj.io.InputOutputOJ;
 
 public class ObjectJ_ implements PlugIn, CommandListener {
@@ -41,17 +42,22 @@ public class ObjectJ_ implements PlugIn, CommandListener {
             if (ojType.contains("magic-ojj") || ojType.contains("isZipped")) {//23.12.2012
                 if (busyOpeningProject == 0) {
                     busyOpeningProject = 1;
-                    ProjectActionsOJ.openProjectData(ojdir, ojName);//18.8.2009
+					ProjectSettingsOJ.close();//23.3.2020  hides Install Embedded macros button?
+                    ProjectActionsOJ.openProjectData(ojdir, ojName);
 					if(OJ.getData() != null){  //4.1.2020						
 						OJ.getData().setDirectory(ojdir + File.separator);
-						InputOutputOJ.setCurrentDirectory(ojdir + File.separator);//28.8.2010
+						InputOutputOJ.setCurrentDirectory(ojdir + File.separator);
 						OJ.getData().setFilename(ojName);
 						OJ.getData().setChanged(false);//4.1.2020
 						if (isInstalled > 1) {//this shouyldn't happen
 							IJ.showMessage("ObjectJ installed twice");
 						}
-                    //busyOpeningProject = 0;
-					}
+						
+						//double x = 1/OJ.getData().getImages().getImageByIndex(0).getVoxelSizeX();
+						//IJ.log("x=" + x);
+						OJ.getImageProcessor().updateImagesProperties();
+						//OJ.getData().updateImagesProperties() 
+ 					}
 					
                 }
 				busyOpeningProject = 0;//4.1.2020
