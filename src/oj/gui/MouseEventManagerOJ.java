@@ -65,7 +65,7 @@ public class MouseEventManagerOJ implements MouseListener, MouseMotionListener {
 	}
 
 	public void replaceMouseListener(ImagePlus imp) {
-		if (imp != null) {
+		if (imp != null && imp.getCanvas() != null) {//13.5.2020			
 			imp.getCanvas().removeMouseListener(MouseEventManagerOJ.getInstance());
 			imp.getCanvas().removeMouseMotionListener(MouseEventManagerOJ.getInstance());
 

@@ -254,6 +254,7 @@ public class InputOutputOJ {
 	public boolean saveProject(DataOJ data, boolean itsBinary) {
 		ij.IJ.showStatus("Saving ObjectJ project...");
 		if ((data.getDirectory() != null) && (data.getFilename() != null) && (new File(data.getDirectory(), data.getFilename()).exists())) {
+			OJ.getImageProcessor().updateImagesProperties();//verify scaling and stackdimensions when opening and saving a project 16.5.2020
 			File f = new File(data.getDirectory(), data.getName() + FileFilterOJ.objectJFileFilter().getExtension());
 
 			if (!oj.OJ.loadedAsBinary) {

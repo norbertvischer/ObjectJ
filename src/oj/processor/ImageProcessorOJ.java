@@ -56,6 +56,7 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 	static int NOT_FOUND = 0, FOUND = 1, FOUND_ZIP = 2;
 
 	private Hashtable openedImages = new Hashtable();//ImageOJ <-> Name
+	boolean doCange = true;
 
 	public ImageProcessorOJ() {
 		OJ.getEventProcessor().addImageChangedListener(this);
@@ -73,30 +74,23 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 		}
 	}
 
-//   public void closeImageOld(String name) {
-//        ImageWindow imgw = getOpenLinkedImageWindow(name);
-//        if (imgw != null) {
-//            imgw.close();
-//            removeFromOpenedImages(name);
-//        }
-//    }
 
 	/*
      * not used, does not work
 	 */
-	private String resolveAlias(String dir, String fName) {
-		File f = new File(dir, fName);
-		String fullpath = f.getPath();
-		File f2 = new File(fullpath);
-		try {
-			String path = f2.getCanonicalPath();
-
-			return path;
-
-		} catch (IOException e) {
-			return "An error occured while resolving alias";
-		}
-	}
+//	private String resolveAlias(String dir, String fName) {
+//		File f = new File(dir, fName);
+//		String fullpath = f.getPath();
+//		File f2 = new File(fullpath);
+//		try {
+//			String path = f2.getCanonicalPath();
+//
+//			return path;
+//
+//		} catch (IOException e) {
+//			return "An error occured while resolving alias";
+//		}
+//	}
 
 	/**
 	 * Opens linked image if it is not open yet. Says "Bring Project Folder to
@@ -165,11 +159,6 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 							imp = IJ.getImage();
 						}
 						
-						
-//						else if (fName.endsWith(".avi")) {//16.2.2019
-//							imp = AVI_Reader.openVirtual(dir+ fName);//16.2.2019
-//							//updateImagesProperties();
-//						}
 						else 
 							imp = new Opener().openImage(dir, fName);//30.6.2013
 						imageOJ.setImagePlus(imp);//1.10.2015
@@ -241,14 +230,11 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 		} else {
 			ImageOJ imj = OJ.getData().getImages().getImageByName(imageName);
 			if (imj == null) {
-				//imp.setTitle(fileName);+++ 9.7.2013
 				imj = new ImageOJ(imageName, imp);//27.8.2010
 				updateImageProperties(OJ.getData().getDirectory(), imj);
 				OJ.getData().getImages().addImage(imj);
 			}
-
 			applyImageGraphics(imp, imj, showChangeMessage);
-			//  }
 
 		}
 	}
@@ -340,24 +326,7 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 		}
 	}
 
-//    private void updateOjImageName(int index, String imageName) {
-//        ImageOJ image = OJ.getData().getImages().getImageByName(imageName);
-//        image.setName(filename);
-//        image.setFilename(filename);
-//        OJ.getData().getImages().updateImageName(imageName, image.getName());
-//    }
-//    public void renameImage(int index) {
-//
-//        ImagesOJ images = OJ.getData().getImages();
-//        // ImagePlus impl = WindowManager.getCurrentImage();
-//        ImageOJ img = images.getImageByIndex(index);
-//        String oldName = img.getFilename();
-//        String error = SimpleCommandsOJ.renameImageAndFile(oldName, "");
-//        if (!error.equals("")) {
-//            IJ.showMessage(error);
-//        }
-//
-//    }
+
 	public void propagateScale(int index) {
 
 		ImagesOJ images = OJ.getData().getImages();
@@ -610,46 +579,47 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 			IJ.showMessage("Error", "ImageProcessorOJ.applyImageGraphics failed. The ImageOJ is null.");
 			return;
 		}
-
-		boolean outofMem = false;
-		int slicesA = imp.getNSlices();
-		int framesA = imp.getNFrames();
-		int channelsA = imp.getNChannels();
-		int slicesB = imOj.getNumberOfSlices();
-		int framesB = imOj.getNumberOfFrames();
-		int channelsB = imOj.getNumberOfChannels();
-		if (slicesA != slicesB || framesA != framesB || channelsA != channelsB) {
-			// if ((imp.getNSlices() != imOj.getNumberOfSlices()) || (imp.getNFrames() != imOj.getNumberOfFrames()) || (imp.getNChannels() != imOj.getNumberOfChannels())) {
-			boolean doChange = true;
-
-			outofMem = IJ.maxMemory() < (IJ.currentMemory() + 2e7);//20MB
-			if (outofMem) {
-				IJ.error("out of memory");
-
-			}
-
-			if (showChangeMessage && !outofMem && slicesB > -1) {//14.8.2011
-				String s2 = "Image: " + imp.getTitle();
-				s2 += "\nDifferent dimensions between image file and project file:";
-				s2 += "\nImage file (channels-slices-frames:   " + channelsA + "-" + slicesA + "-" + framesA;
-				s2 += "\nProject file (channels-slices-frames:   " + channelsB + "-" + slicesB + "-" + framesB;
-				s2 += "\n \nAdjust project data?";
-
-				GenericDialog gd = new GenericDialog("Synchronize Project File");
-				gd.addMessage(s2);
-				gd.showDialog();
-				doChange = !gd.wasCanceled();
-				// IJ.showMessage("There are differences in image properties (slices, frames and channels count) and project data. Project data are now adjusted");
-			}
-			if (doChange && !outofMem) {
-				int slices = imp.getNSlices();
-				imOj.setNumberOfSlices(slices);
-				int frames = imp.getNFrames();
-				imOj.setNumberOfFrames(frames);
-				int channels = imp.getNChannels();
-				imOj.setNumberOfChannels(channels);
-			}
-		}
+//16.5.2020 //replaced by verification of scaling and stackdimensions when opening and saving a project 16.5.2020
+//		boolean outofMem = false;
+//		int slicesA = imp.getNSlices();
+//		int framesA = imp.getNFrames();
+//		int channelsA = imp.getNChannels();
+//		int slicesB = imOj.getNumberOfSlices();
+//		int framesB = imOj.getNumberOfFrames();
+//		int channelsB = imOj.getNumberOfChannels();
+		
+//		if (slicesA != slicesB || framesA != framesB || channelsA != channelsB) {
+//			// if ((imp.getNSlices() != imOj.getNumberOfSlices()) || (imp.getNFrames() != imOj.getNumberOfFrames()) || (imp.getNChannels() != imOj.getNumberOfChannels())) {
+//			boolean doChange = true;
+//
+//			outofMem = IJ.maxMemory() < (IJ.currentMemory() + 2e7);//20MB
+//			if (outofMem) {
+//				IJ.error("out of memory");
+//
+//			}
+//
+//			if (showChangeMessage && !outofMem && slicesB > -1) {//14.8.2011
+//				String s2 = "Image: " + imp.getTitle();
+//				s2 += "\nDifferent dimensions between image file and project file:";
+//				s2 += "\nImage file (channels-slices-frames:   " + channelsA + "-" + slicesA + "-" + framesA;
+//				s2 += "\nProject file (channels-slices-frames:   " + channelsB + "-" + slicesB + "-" + framesB;
+//				s2 += "\n \nAdjust project data?";
+//
+//				GenericDialog gd = new GenericDialog("Synchronize Project File");
+//				gd.addMessage(s2);
+//				gd.showDialog();
+//				doChange = !gd.wasCanceled();
+//				// IJ.showMessage("There are differences in image properties (slices, frames and channels count) and project data. Project data are now adjusted");
+//			}
+//			if (doChange && !outofMem) {
+//				int slices = imp.getNSlices();
+//				imOj.setNumberOfSlices(slices);
+//				int frames = imp.getNFrames();
+//				imOj.setNumberOfFrames(frames);
+//				int channels = imp.getNChannels();
+//				imOj.setNumberOfChannels(channels);
+//			}
+//		}
 		ImageCanvas ic = imp.getCanvas();
 		if (imp.getWindow() == null) {
 			return;//9.7.2013
@@ -658,14 +628,6 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 
 		myCanvas.updateCanvas(ic, imp);
 		ImageWindow imgw = imp.getWindow();
-//        if (imgw == null) {
-//            if (imp.getStackSize() > 1) {
-//                imgw = new StackWindow(imp, myCanvas);
-//            } else {
-//                imgw = new ImageWindow(imp, myCanvas);
-//            }
-//
-//        } else {
 		ImageWindowUtilsOJ.setImageCanvas(imgw, myCanvas);
 		imgw.remove(ic);
 		imgw.setLayout(new ImageLayout(myCanvas));
@@ -802,18 +764,6 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 					applyImageProperties(fileInfo, image);
 					///30.6.2012 OJ.getEventProcessor().fireImageChangedEvent(image.getName(), ImageChangedEventOJ.IMAGE_EDITED);
 				}
-//				else if(filename.toLowerCase().endsWith(".avi")){
-//				    AVI_Reader reader = new AVI_Reader();
-//				    reader.setVirtual(true);
-//				    reader.displayDialog(false);
-//				    reader.run(directory+ File.separator +filename);//17.2.2019
-//					
-//				    int nSlices = reader.getSize();
-//				    image.setNumberOfFrames(nSlices);
-//				    //image.setNumberOfSlices(nSlices);
-//				    image.setChanged(true);
-//				}
-
 			}
 		}
 	}
@@ -1050,15 +1000,7 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 		return wasClosed;//7.12.2013
 	}
 
-//    public ImageWindow getImageWindow(int id) {
-//        for (Enumeration e = openedImages.keys(); e.hasMoreElements();) {
-//            ImageWindow imgw = (ImageWindow) openedImages.get(e.nextElement());
-//            if (imgw.getImagePlus().getID() == id) {
-//                return imgw;
-//            }
-//        }
-//        return null;
-//    }
+
 	/**
 	 * removes linked image and its listeners
 	 *
