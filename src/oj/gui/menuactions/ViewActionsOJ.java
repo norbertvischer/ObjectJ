@@ -11,12 +11,12 @@ package oj.gui.menuactions;
 import ij.IJ;
 import ij.Menus;
 import ij.plugin.frame.Recorder;
-import java.awt.Event;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import oj.OJ;
 import oj.macros.EmbeddedMacrosOJ;
 import oj.util.UtilsOJ;
 import oj.gui.results.ProjectResultsOJ;
@@ -96,6 +96,7 @@ public class ViewActionsOJ {
 				ProjectResultsOJ.getInstance().setVisible(true);
 				ProjectResultsOJ.getInstance().setState(Frame.NORMAL);
 				ProjectResultsOJ.getInstance().toFront();
+				ProjectResultsOJ.getInstance().friendlyScroll();
 			} catch (Exception ex) {
 				IJ.log("ResultsViewAction:  " + ex.toString());//24.11.2018
 			}

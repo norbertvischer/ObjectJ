@@ -75,15 +75,15 @@ public class ImageActionsOJ {
       OJ.getImageProcessor().propagateScale(-1);
     }
   };
-  public static ActionListener FlattenAction = new ActionListener() {
-
-    public void actionPerformed(ActionEvent e) {
-      ImagePlus imp =  WindowManager.getCurrentImage();
-      if(imp == null)return;
-      CustomCanvasOJ myCanvas = new CustomCanvasOJ(imp, OJ.getData(), imp.getTitle());
-      myCanvas.makeFlattenedImage();
-    }
-  };
+//  public static ActionListener FlattenAction = new ActionListener() {
+//
+//    public void actionPerformed(ActionEvent e) {
+//      ImagePlus imp =  WindowManager.getCurrentImage();
+//      if(imp == null)return;
+//      CustomCanvasOJ myCanvas = new CustomCanvasOJ(imp, OJ.getData(), imp.getTitle());
+//      myCanvas.makeFlattenedImage();
+//    }
+//  };
 
   /**
    * not used

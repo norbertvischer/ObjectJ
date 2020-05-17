@@ -7,6 +7,7 @@
  */
 package oj.gui.menuactions;
 
+import ij.IJ;
 import ij.text.TextPanel;
 import ij.text.TextWindow;
 import java.awt.event.ActionEvent;
@@ -271,4 +272,11 @@ public class ResultsActionsOJ {
         myTextPanel.setVisible(true);
         return labelPair;
     }
+	
+	public void adjustVerticalScrollbar(){
+		ProjectResultsOJ.getInstance().friendlyScroll();
+		//ProjectResultsOJ.getInstance().adjustVerticalScrollbar();
+		IJ.showStatus("hello");
+		IJ.beep();
+	}
 }

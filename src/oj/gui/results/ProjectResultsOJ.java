@@ -1783,6 +1783,25 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 
 	}
 
+	public synchronized void friendlyScroll() {
+		int cell = OJ.getData().getCells().getSelectedCellIndex();
+		((LinkedTableModelOJ) tblLinkedContent.getModel()).setSortedIndexes(OJ.getData().getResults().getSortedIndexes(false));
+		int row_index = 0;
+		if(cell >= 0)
+			row_index = ((LinkedTableModelOJ) tblLinkedContent.getModel()).getCellRowIndex(cell);
+		
+		tblLinkedContent.setRowSelectionInterval(row_index, row_index);
+
+		Rectangle visRect = tblLinkedContent.getVisibleRect();//don't scroll horizontally
+		Rectangle rect = tblLinkedContent.getCellRect(row_index, 0, true);
+		rect.x = visRect.x;
+		rect.width = visRect.width;
+		tblLinkedContent.scrollRectToVisible(rect);
+
+
+		
+	}
+
 	public synchronized void ytemChanged(YtemChangedEventOJ evt) {//9.9.2009
 		((LinkedTableModelOJ) tblLinkedContent.getModel()).setSortedIndexes(OJ.getData().getResults().getSortedIndexes(false));
 		((AbstractTableModel) tblLinkedContent.getModel()).fireTableDataChanged();
@@ -1876,4 +1895,23 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 //
 //		}
 //	}
+	
+	
+//	public void adjustVerticalScrollbar(){
+//		
+//		
+//			//public synchronized void qualifierChanged(QualifierChangedEventOJ evt) {//9.9.2009
+//		//((LinkedTableModelOJ) tblLinkedContent.getModel()).setSortedIndexes(OJ.getData().getResults().getSortedIndexes(false));
+//		int cell = OJ.getData().getCells().getSelectedCellIndex();
+//		friendlyScroll(cell);
+//	
+//
+////		int vv = linkedScrollPane.getVerticalScrollBar().getValue();
+////		IJ.showStatus("vertical=" + vv);
+////		//linkedScrollPane.getVerticalScrollBar().setValue(0);
+//		IJ.beep();
+//	}
+//	
+	
+	
 }
