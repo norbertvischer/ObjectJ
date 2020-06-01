@@ -776,7 +776,8 @@ private void btnRebuildActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
         }
 
         public void fireTableUpdated() {
-            fireTableRowsUpdated(0, getRowCount());
+            //fireTableRowsUpdated(0, getRowCount());//29.5.2010
+            fireTableRowsUpdated(0, 0);
         }
 
         public void fireTableRowUpdated(int index) {

@@ -127,14 +127,17 @@ public class LinkedTableModelOJ extends AbstractTableModel {
 	 * At any time, 50 empty rows are appended to the visible ones
 	 */
 	public int getRowCount() {
-		//Nullpointer 13.12.2018
-		try {
-		    if(OJ.getData().getCells() != null)
-			    return OJ.getData().getCells().getCellsCount() + EMPTY_ROWS_COUNT;
-		} catch (Exception e) {
-			IJ.showMessage(e.toString() + " warning 7634, click OK to continue");
-		}
-		return 0;
+		if(OJ.getData() == null || OJ.getData().getCells() == null) //1.6.2020
+				return 0;
+		return OJ.getData().getCells().getCellsCount() + EMPTY_ROWS_COUNT;
+//		//Nullpointer 13.12.2018
+//		try {
+//		    if(OJ.getData().getCells() != null)
+//			    return OJ.getData().getCells().getCellsCount() + EMPTY_ROWS_COUNT;
+//		} catch (Exception e) {
+//			IJ.showMessage(e.toString() + " warning 7634, click OK to continue");
+//		}
+//		return 0;
 	}
 
 	/**

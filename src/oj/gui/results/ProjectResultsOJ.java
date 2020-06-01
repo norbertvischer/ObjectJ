@@ -1234,7 +1234,7 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 			if (this.getMenuBar() != Menus.getMenuBar()) {
 				this.setMenuBar(Menus.getMenuBar());
 			}
-
+			friendlyScroll();
 		}
     }//GEN-LAST:event_formWindowActivated
 
@@ -1565,7 +1565,8 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 				}
 			}
 		}
-
+		IJ.selectWindow("ImageJ");//1.6.2020
+		return;
 	}
 
 	private void resetStateMode() {
@@ -1793,7 +1794,10 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 		tblLinkedContent.setRowSelectionInterval(row_index, row_index);
 
 		Rectangle visRect = tblLinkedContent.getVisibleRect();//don't scroll horizontally
-		Rectangle rect = tblLinkedContent.getCellRect(row_index, 0, true);
+		int top = row_index - 8;//show 8 lines if possible
+		if(top < 0)
+				top = 0;//1.6.2020
+		Rectangle rect = tblLinkedContent.getCellRect(top, 0, true);
 		rect.x = visRect.x;
 		rect.width = visRect.width;
 		tblLinkedContent.scrollRectToVisible(rect);
