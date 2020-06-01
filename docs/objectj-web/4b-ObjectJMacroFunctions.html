@@ -70,7 +70,7 @@
                 <br></br>
 
                 <font size = "1">
-                    11-Nov-2018
+                    25-May-2019
 
                 </font>
 
@@ -154,10 +154,10 @@
                                 <br/> stacksize is product of channels, slices and frames. ID is negative if image is open, otherwise zero.
                                 </H4><H3>
                     -->
-                    <a name=ojGetImageValue></a>
+                     <a name=ojGetImageValue></a>
                     ojGetImageValue(n, key)  </H3><H4>
                     returns numerical info of the n-th linked image (1-based), where key can be:
-                    <br/>"width", "height", "channels", "slices", "frames", "stacksize", "ID"
+                    <br/>"width", "height", "channels", "slices", "frames", "stacksize", "ID", "frameinterval"
                     <br/> stacksize is product of channels, slices and frames. ID is negative if image is open, otherwise zero.
                 </H4><H3>
 
@@ -170,6 +170,10 @@
                     ojGetItemName()   </H3><H4>
                     returns the name of item that has been selected via ojSelectItem  </H4><H3>
 
+                    <a name=ojGetItemInfo></a>
+                    ojGetItemInfo()   </H3><H4>
+                    returns info string of selected item  </H4><H3>
+
                     <a name=ojGetItemNames></a>
                     ojGetItemNames()   </H3><H4>
                     returns the used item names in the order they are listed in the ObjectJ Tools window, separated by spaces </H4><H3>
@@ -177,6 +181,11 @@
                     <a name=ojGetItemTypes></a>
                     ojGetItemTypes()   </H3><H4>
                     returns the used item types (Point, Line etc) in the order they are listed in the ObjectJ Tools window, separated by spaces </H4><H3>
+
+                   <a name=ojGetObjectInfo></a>
+                    ojGetObjectInfo()   </H3><H4>
+                    returns info string of selected object </H4><H3>
+
 
                     <a name=ojGetOpenObject></a>
                     ojGetOpenObject()	</H3><H4>
@@ -503,18 +512,21 @@
                     ojSetComposite(b)   </H3><H4>
                     b=false sets collect mode to "single", so that an object can only contain a single item. b=true sets collect mode to "composite", so that an object can contain a whole collection of different items, that reside under the same object number and whose results populate the same row. This command only affects future point collection - it doesn't change existing objects.   </H4><H3>
 
+                   <a name=ojSetItemInfo></a>
+                    ojSetItemInfo(s)   </H3><H4>
+                    sets info string of selected item  </H4><H3>
 
+ 
                     <a name=ojSetItemVisible></a>
                     ojSetItemVisible("ItemName", b)	</H3><H4>
                     shows or hides specified items depending on boolen b	</H4><H3>
-
+         
+                   <a name=ojSetObjectInfo></a>
+                    ojSetObjectInfo(s)   </H3><H4>
+                    sets info string of selected object </H4><H3>                   
 
                     <a name=ojSetMarker></a>
                     ojSetMarker(x, y)   </H3><H4>
-                    sets a marker as if the user was clicking with current object tool into the active image. x and y can have fractional values.   </H4><H3>
-
-                    <a name=ojSetPlotProperties></a>
-                    ojSetPlotProperties(columnTitle, properties)   </H3><H4>
                     sets a marker as if the user was clicking with current object tool into the active image. x and y can have fractional values.   </H4><H3>
 
 
@@ -556,7 +568,7 @@
 
                     
                 <a name=ojSetVirtualFlag></a>
-                    ojGetVirtualFlag(b)  </H3><H4>
+                    ojSetVirtualFlag(b)  </H3><H4>
                     if b=true, linked images will be opened virtually </H4>
 
 
