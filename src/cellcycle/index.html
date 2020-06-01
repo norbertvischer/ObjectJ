@@ -1,0 +1,65 @@
+<HTML>  
+<HEAD>
+ <meta http-equiv="Pragma" content="no-cache">
+  <TITLE>Cell Cycle</TITLE>
+  <script language = javascript>
+  
+  	function newWindow(jj) {
+  		if (jj ==1){
+  			explainWindow = window.open('Explain.html' ,'catWin1', 'width=450,height=650,scrollbars=yes');
+  			explainWindow.focus();
+  		}
+  		if (jj ==2){
+  			glossaryWindow = window.open('Glossary.html' ,'catWin2', 'width=450,height=650,,scrollbars=yes');
+  			glossaryWindow.focus();
+  		}
+  		if (jj ==3){
+  			printWindow = window.open('howtoprint.html' ,'catWin3', 'width=450,height=650,,scrollbars=yes');
+  			printWindow.focus();
+  		}
+ 		if (jj ==4){
+  			offlineWindow = window.open('OfflineVersion.html' ,'catWin4', 'width=450,height=650,,scrollbars=yes');
+  			offlineWindow.focus();
+  		}   		} 
+  		
+  	</script>
+  		
+  <script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-10085222-3']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+</HEAD>
+<BODY>
+				Cell Cycle Simulation of the Cooper-Helmstetter Model
+		<table width="439" border="0" cellspacing="2" cellpadding="0">
+			<tr>
+				<td><a href="javascript:newWindow(1)">Explanation</a></td>
+				<td><a href="javascript:newWindow(2)">Glossary</a></td>
+				<td><a href="javascript:newWindow(3)">Printing</a></td>
+				<td><a href="javascript:newWindow(4)">Run Offline</a></td>
+			</tr>
+		</table>
+		<applet archive="Applet4.jar" code="Applet4.class" width=760 height=540>
+
+<br/> 
+You must have a Java-enabled browser to run CCSim.
+- On iPhone or iPad, no Java Applets can be run.
+<br/> 
+
+<br/> 
+<br/> 
+
+<img src="No-Java-Screenshot.png" />
+</applet>
+	</BODY>
+</HTML>
