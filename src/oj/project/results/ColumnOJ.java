@@ -20,11 +20,8 @@ import oj.project.results.statistics.StatisticsProxysOJ;
 
 /**
  * Contains mainly a column definition and a list of either floats or strings.
- * There is a difference in storage of results for linked and unlinked colulmns:
  * Linked columns have a set of properties, where each column title is a
- * key(string) that holds a numeric or string Unlinked columns hold arrayLists
- * that are as long as the last occupied row (ojSetResult will fill holes with
- * NaN or "");
+ * key(string) that holds a numeric or string
  */
 public class ColumnOJ extends BaseAdapterOJ {
 
@@ -466,7 +463,7 @@ public class ColumnOJ extends BaseAdapterOJ {
 	    float val = (float)dataD[jj];
 	    if (!includeAll && !cells.getCellByIndex(jj).isQualified()) 
 		val = Float.NaN;
-	    dataF[jj] = (float) dataD[jj];
+	    dataF[jj] = (float) val;//9.6.2020
 	}
 	return dataF;
     }
