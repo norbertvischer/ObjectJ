@@ -123,7 +123,7 @@ public class PointRoi extends PolygonRoi {
 	/** Creates a new PointRoi using the specified screen coordinates. */
 	public PointRoi(int sx, int sy, ImagePlus imp) {
 		super(makeXorYArray(sx, imp, false), makeXorYArray(sy, imp, true), 1, POINT);
-		defaultCounter = 0;
+		//defaultCounter = 0;
 		setImage(imp);
 		width=1; height=1;
 		type = defaultType;
@@ -150,7 +150,7 @@ public class PointRoi extends PolygonRoi {
 		}
 	}
 	
-	private void setOptions(String options) {
+	public void setOptions(String options) {
 		if (options==null)
 			return;
 		if (options.contains("tiny")) size=TINY;
@@ -162,6 +162,8 @@ public class PointRoi extends PolygonRoi {
 		if (options.contains("cross")) type=CROSS;
 		else if (options.contains("dot")) type=DOT;
 		else if (options.contains("circle")) type=CIRCLE;
+		if (options.contains("nolabel")) setShowLabels(false);
+		else if (options.contains("label")) setShowLabels(true);
 		setStrokeColor(Colors.getColor(options,Roi.getColor()));
 		addToOverlay =  options.contains("add");
 	}
@@ -903,6 +905,18 @@ public class PointRoi extends PolygonRoi {
 				r.counts[i] = counts[i];
 		}
 		return r;
+	}
+	
+	@Override
+	public void copyAttributes(Roi roi2) {
+		super.copyAttributes(roi2);
+		if (roi2 instanceof PointRoi) {
+			PointRoi p2 = (PointRoi)roi2;
+			this.type = p2.type;
+			this.size = p2.size;
+			this.showLabels = p2.showLabels;
+			this.fontSize = p2.fontSize;
+		}
 	}
 	
 	public void setCounterInfo(int[] info) {

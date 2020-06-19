@@ -28,13 +28,13 @@ import ij.measure.*;
 import ij.plugin.OverlayCommands;
 
 /** This plugin implements the Analyze/Tools/ROI Manager command. */
-public class RoiManager extends PlugInFrame implements ActionListener, ItemListener, MouseListener, MouseWheelListener, ListSelectionListener {
+public class RoiManager extends PlugInFrame implements ActionListener, ItemListener, MouseListener, MouseWheelListener, ListSelectionListener, Iterable<Roi> {
 	public static final String LOC_KEY = "manager.loc";
 	private static final int BUTTONS = 11;
 	private static final int DRAW=0, FILL=1, LABEL=2;
 	private static final int SHOW_ALL=0, SHOW_NONE=1, LABELS=2, NO_LABELS=3;
 	private static final int MENU=0, COMMAND=1;
-	private static final int IGNORE_POSITION=-999;
+	private static final int IGNORE_POSITION=-999;  // ignore the ROI's built in position
 	private static final int CHANNEL=0, SLICE=1, FRAME=2, SHOW_DIALOG=3;
 	private static int rows = 15;
 	private static int lastNonShiftClick = -1;
@@ -217,7 +217,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		else if (command.equals("Flatten [F]"))
 			flatten();
 		else if (command.equals("Measure"))
-			measure(MENU);
+			measure(getImage());
 		else if (command.equals("Open..."))
 			open(null);
 		else if (command.equals("Save...")) {
@@ -416,7 +416,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		listModel.addElement(label);
 		roi.setName(label);
 		Roi roiCopy = (Roi)roi.clone();
-		if (imp!=null && imp.getStackSize()>1 && imp.getWindow()!=null && isVisible()) {
+		if (ignorePosition && imp!=null && imp.getStackSize()>1 && imp.getWindow()!=null && isVisible()) {
 			// set ROI position to current stack position if image and RoiManager are visible
 			roiCopy.setPosition(imp);
 		}
@@ -714,7 +714,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								imp.setPosition(n);
 						} else
 							imp.setSlice(n);
-					}
+					} else if (roi.getZPosition()>0 && imp.getNSlices()==imp.getStackSize())
+						imp.setSlice(roi.getZPosition());
 				}
 				imp.unlock();
 			} else
@@ -990,8 +991,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			Recorder.record("roiManager", "List");
 	}
 
-	boolean measure(int mode) {
-		ImagePlus imp = getImage();
+	boolean measure(ImagePlus imp) {
 		if (imp==null)
 			return false;
 		int[] indexes = getIndexes();
@@ -1014,15 +1014,16 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		int currentSlice = imp.getCurrentSlice();
 		Analyzer.setMeasurements(measurements&(~Measurements.ADD_TO_OVERLAY));
 		for (int i=0; i<indexes.length; i++) {
-			if (restore(getImage(), indexes[i], !allSliceOne))
-				IJ.run("Measure");
+			noUpdateMode = true;
+			if (restore(imp, indexes[i], !allSliceOne))
+				IJ.run(imp, "Measure", "");
 			else
 				break;
 		}
 		Analyzer.setMeasurements(measurements);
 		imp.setSlice(currentSlice);
 		if (indexes.length>1)
-			IJ.run("Select None");
+			imp.deleteRoi();
 		if (record()) Recorder.record("roiManager", "Measure");
 		if (!allSliceOne)
 			imp.unlock();
@@ -1052,10 +1053,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	boolean multiMeasure(String cmd) {
 		ImagePlus imp = getImage();
 		if (imp==null) return false;
-		if (!imp.lock())
-			return false;
 		int[] indexes = getIndexes();
-		if (indexes.length==0)
+		if (indexes.length==0) {
+			error("Multi-measure: no selection");
+			return false;
+		}
+		if (!imp.lock())
 			return false;
 		int measurements = Analyzer.getMeasurements();
 
@@ -1373,7 +1376,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			if (n>1)
 				rpRoi.setName("range: "+(indexes[0]+1)+"-"+(indexes[n-1]+1));
 			rpRoi.setFillColor(fillColor);
-			RoiProperties rp = new RoiProperties("Properties", rpRoi);
+			RoiProperties rp = new RoiProperties("Properties ", rpRoi); // " "=show "List coordinates"
 			if (!rp.showDialog())
 				return;
 			// Recover parameters of the Property window that were stored in the "transient" roi
@@ -2005,7 +2008,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	/** Returns the name of the ROI with the specified index,
-		or null if the index is out of range. */
+		or null if the index is out of range.
+		See also: RoiManager.getName() macro function.
+	*/
 	public String getName(int index) {
 		if (index>=0 && index<getCount())
 			return	(String) listModel.getElementAt(index);
@@ -2054,9 +2059,19 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			update(false);
 		else if (cmd.equals("delete"))
 			delete(false);
-		else if (cmd.equals("measure"))
-			measure(COMMAND);
-		else if (cmd.equals("draw"))
+		else if (cmd.equals("measure")) {
+			if (EventQueue.isDispatchThread())
+				measure(getImage());
+			else try {
+				// run on event dispatching thread for greater speed on Windows
+				final ImagePlus imp = getImage();
+				EventQueue.invokeAndWait(new Runnable() {
+					public void run() {
+						measure(imp);
+					}
+				});
+			} catch (Exception e) {}
+		} else if (cmd.equals("draw"))
 			drawOrFill(DRAW);
 		else if (cmd.equals("fill"))
 			drawOrFill(FILL);
@@ -2315,7 +2330,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			select(index);
 			return;
 		}
-		Roi.previousRoi = (Roi)previousRoi.clone();
+		Roi.setPreviousRoi(previousRoi);
 		Roi roi = (Roi)rois.get(index);
 		if (roi!=null) {
 			roi.setImage(imp);
@@ -2569,7 +2584,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				if (imp!=null) {
 					Roi roi = imp.getRoi();
 					if (roi!=null)
-						Roi.previousRoi = (Roi)roi.clone();
+						Roi.setPreviousRoi(roi);
 				}
 				restore(imp, selected[0], true);
 				ResultsTable.selectRow(imp!=null?imp.getRoi():null);
@@ -2631,6 +2646,39 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	/** Returns the most recent I/O error message, or null if there was no error. */
 	public static String getErrorMessage() {
 		return errorMessage;
+	}
+	
+	@Override
+	public Iterator<Roi> iterator() {
+
+		Iterator<Roi> it = new Iterator<Roi>() {
+			private int index = -1;
+			RoiManager rm = RoiManager.getInstance();
+
+			/** Returns 'true' if next element exists. */ 
+			@Override
+			public boolean hasNext() {
+				if (index+1<rm.getCount()) 
+					return true;
+				else 
+					return false;
+			}
+
+			/** Returns current ROI and updates pointer. */
+			@Override
+			public Roi next() {
+				if (index+1<rm.getCount())
+					return rm.getRoi(++index);
+				else
+					return null;
+			} 
+
+			@Override
+			public void remove() { 
+				throw new UnsupportedOperationException(); 
+			}
+		};
+		return it;
 	}
 
 	// This class runs the "Multi Measure" command in a separate thread

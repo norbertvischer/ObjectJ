@@ -335,6 +335,11 @@ public class ByteProcessor extends ImageProcessor {
 		fillValueSet = true;
 	}
 
+	/** Returns the foreground fill/draw value. */
+	public double getForegroundValue() {
+		return fgColor;
+	}
+
 	/** Sets the background fill value, where 0<=value<=255. */
 	public void setBackgroundValue(double value) {
 		bgColor = (int)value;
@@ -823,10 +828,18 @@ public class ByteProcessor extends ImageProcessor {
 		new BinaryProcessor(this).outline();
 	}
 	
+	/** Converts black objects in a binary image to single pixel skeletons. */
 	public void skeletonize() {
 		new BinaryProcessor(this).skeletonize();
 	}
 	
+	/** Converts objects with pixel values of 'forground' (255 or 0) 
+		in a binary imager to single pixel skeletons.
+	*/
+	public void skeletonize(int foreground) {
+		new BinaryProcessor(this).skeletonize(foreground);
+	}
+
 	private final int findMedian (int[] values) {
 	//Finds the 5th largest of 9 values
 		for (int i = 1; i <= 4; i++) {

@@ -443,7 +443,8 @@ public class PolygonRoi extends Roi {
 	//Within correction circle, all vertices with sharp angles are removed.
 	//Norbert Vischer
 	protected void wipeBack() {
-		if (previousRoi!=null && previousRoi.modState==SUBTRACT_FROM_ROI)
+		Roi prevRoi = Roi.getPreviousRoi();
+		if (prevRoi!=null && prevRoi.modState==SUBTRACT_FROM_ROI)
 			return;
 		double correctionRadius = 20;
 		if (ic!=null)
@@ -491,7 +492,7 @@ public class PolygonRoi extends Roi {
 		double oxd = offScreenXD(sx);
 		double oyd = offScreenYD(sy);
 		int ox = offScreenX(sx);
-		int oy = offScreenX(sy);
+		int oy = offScreenY(sy);
 		int x1, y1, x2, y2;
 		if (xpf!=null) {
 			x1 = (int)xpf[nPoints-2]+x;
@@ -517,7 +518,6 @@ public class PolygonRoi extends Roi {
 		if (y1>ymax) ymax=y1;
 		if (y2>ymax) ymax=y2;
 		if (oy>ymax) ymax=oy;
-		//clip = new Rectangle(xmin, ymin, xmax-xmin, ymax-ymin);
 		int margin = boxSize;
 		if (ic!=null) {
 			double mag = ic.getMagnification();
@@ -852,7 +852,8 @@ public class PolygonRoi extends Roi {
 		FloatPolygon points = getFloatPolygon();
 		int n = points.npoints;
 		modState = NO_MODS;
-		if (previousRoi!=null) previousRoi.modState = NO_MODS;
+		Roi prevRoi = Roi.getPreviousRoi();
+		if (prevRoi!=null) prevRoi.modState = NO_MODS;
 		int pointToDuplicate = getClosestPoint(ox, oy, points);
 		if (pointToDuplicate<0)
 			return;
@@ -1028,7 +1029,7 @@ public class PolygonRoi extends Roi {
 	 *  If the ImagePlus is given, calibrated coordinates are used, based on its calibration,
 	 *  and 'segmentLength' should be in calibrated units.
 	 *  Returns null if an input array is null, or the number of points is 0 */
-	static public float[][] getEquidistantPoints(float[] xpoints, float[] ypoints, int npoints, double segmentLength, ImagePlus imp) {
+	static float[][] getEquidistantPoints(float[] xpoints, float[] ypoints, int npoints, double segmentLength, ImagePlus imp) {
 		if (xpoints==null || xpoints==null || npoints <= 0) return null;
 		if (xpoints.length < npoints) npoints = xpoints.length;	// arguments might be inconsistent due to asynchronous modification
 		if (ypoints.length < npoints) npoints = ypoints.length;
@@ -1049,7 +1050,7 @@ public class PolygonRoi extends Roi {
 		int pointsWritten = 1;
 		double x1, y1;
 		double x2 = xpoints[0], y2 = ypoints[0];
-		for (int i=1; i<npoints-1; i++) {
+		for (int i=1; i<npoints; i++) {
 			x1=x2; y1=y2;
 			x2=xpoints[i]; y2=ypoints[i];
 			double dx = x2-x1;
@@ -1057,16 +1058,16 @@ public class PolygonRoi extends Roi {
 			double distance = Math.sqrt(sqr(dx*pixelWidth) + sqr(dy*pixelHeight));
 			lengthRead += distance;
 			double distanceOverNextWrite = lengthRead - pointsWritten*step;
-			if (distanceOverNextWrite >= 0.0) {  // we have to write a new point
+			while ((distanceOverNextWrite >= 0.0 || i==npoints-1) && pointsWritten < npOut) {  // we have to write a new point
 				double fractionOverNextWrite = distanceOverNextWrite/distance;
+				if (distance==0) fractionOverNextWrite = 0;
 				//IJ.log("i="+i+" n="+pointsWritten+"/"+npOut+" leng="+IJ.d2s(lengthRead)+"/"+IJ.d2s(length)+" done="+IJ.d2s(pointsWritten*step)+" over="+IJ.d2s(fractionOverNextWrite)+" x,y="+IJ.d2s(x2 - fractionOverNextWrite*dx)+","+IJ.d2s(y2 - fractionOverNextWrite*dy));
 				xpOut[pointsWritten] = (float)(x2 - fractionOverNextWrite*dx);
 				ypOut[pointsWritten] = (float)(y2 - fractionOverNextWrite*dy);
+				distanceOverNextWrite -= step;
 				pointsWritten++;
 			}
 		}
-		xpOut[npOut-1] = xpoints[npoints-1];
-		ypOut[npOut-1] = ypoints[npoints-1];
 		return new float[][] {xpOut, ypOut, new float[] {(float)step}};
 	}
 	
@@ -1146,7 +1147,6 @@ public class PolygonRoi extends Roi {
 			}
 			previousSX = sx;  //save for constraining next line if desired
 			previousSY = sy;
-			//if (lineWidth>1) fitSpline();
 			notifyListeners(RoiListener.EXTENDED);
 		}
 	}

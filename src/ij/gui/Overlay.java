@@ -2,15 +2,16 @@ package ij.gui;
 import java.awt.*;
 import java.util.Vector;
 import java.awt.geom.Rectangle2D;
+import java.util.Iterator;
 import ij.*;
 import ij.process.ImageProcessor;
-import ij.plugin.filter.Analyzer;
-import ij.plugin.Colors;
+import ij.plugin.filter.*;
+import ij.plugin.*;
 import ij.measure.ResultsTable;
 
 /** An Overlay is a list of ROIs that can be drawn non-destructively on an Image. */
-public class Overlay {
-	private Vector list;
+public class Overlay implements Iterable<Roi> {
+	private Vector<Roi> list;
     private boolean label;
     private boolean drawNames;
     private boolean drawBackgrounds;
@@ -22,12 +23,12 @@ public class Overlay {
     
     /** Constructs an empty Overlay. */
     public Overlay() {
-    	list = new Vector();
+    	list = new Vector<Roi>();
     }
     
     /** Constructs an Overlay and adds the specified ROI. */
     public Overlay(Roi roi) {
-    	list = new Vector();
+    	list = new Vector<Roi>();
     	if (roi!=null)
     		list.add(roi);
     }
@@ -60,7 +61,8 @@ public class Overlay {
 
     /** Removes the ROI with the specified index from this Overlay. */
     public void remove(int index) {
-    	list.remove(index);
+    	if (index>=0)
+    		list.remove(index);
     }
     
     /** Removes the specified ROI from this Overlay. */
@@ -111,6 +113,25 @@ public class Overlay {
 		return -1;
     }
     
+    /** Returns the index of the last ROI that contains the point (x,y)
+    	or null if no ROI contains the point. */
+    public int indexAt(int x, int y) {
+     	Roi[] rois = toArray();
+		for (int i=rois.length-1; i>=0; i--) {
+			if (contains(rois[i],x,y))
+				return i;
+		}
+		return -1;
+    }
+    
+	private boolean contains(Roi roi, int x, int y) {
+		if (roi==null) return false;
+		if (roi instanceof Line)
+			return  (((Line)roi).getFloatPolygon(10)).contains(x,y);
+		else
+			return roi.contains(x,y);
+	}
+	
     /** Returns 'true' if this Overlay contains the specified ROI. */
     public boolean contains(Roi roi) {
     	return list.contains(roi);
@@ -314,7 +335,35 @@ public class Overlay {
 		return overlay2;
 	}
 	
-    public void drawLabels(boolean b) {
+	/** Returns a scaled version of this Overlay. */
+	public Overlay scale(double xscale, double yscale) {
+		Overlay overlay2 = create();
+		for (int i=0; i<size(); i++) {
+			Roi roi = get(i);
+			int position = roi.getPosition();
+			roi = RoiScaler.scale(roi, xscale, yscale, false);
+			roi.setPosition(position);
+			overlay2.add(roi);
+		}
+		return overlay2;
+	}
+
+ 	/** Returns a rotated version of this Overlay. */
+	public Overlay rotate(double angle, double xcenter, double ycenter) {
+		//IJ.log("rotate: "+angle+" "+xcenter+" "+ycenter);
+		Overlay overlay2 = create();
+		for (int i=0; i<size(); i++) {
+			Roi roi = get(i);
+			int position = roi.getPosition();
+			if (!Rotator.GRID.equals(roi.getName()))
+				roi = RoiRotator.rotate(roi, angle, xcenter, ycenter);
+			roi.setPosition(position);
+			overlay2.add(roi);
+		}
+		return overlay2;
+	}
+
+   public void drawLabels(boolean b) {
     	label = b;
     }
     
@@ -387,9 +436,9 @@ public class Overlay {
     	return isCalibrationBar;
     }
 
-    void setVector(Vector v) {list = v;}
+    void setVector(Vector<Roi> v) {list = v;}
         
-    Vector getVector() {return list;}
+    Vector<Roi> getVector() {return list;}
     
     /** Set 'false' to prevent ROIs in this overlay from being activated 
 		by clicking on their labels or by a long clicking. */ 
@@ -442,6 +491,39 @@ public class Overlay {
 		for (int i=first; i<overlay.size(); i++)
 			overlay.get(i).setName(""+(i+1));
 		imp.draw();
+	}
+	
+	@Override
+	public Iterator<Roi> iterator() {
+		final Overlay overlay = this;
+
+		Iterator<Roi> it = new Iterator<Roi>() {
+			private int index = -1;
+
+			/** Returns 'true' if next element exists. */ 
+			@Override
+			public boolean hasNext() {
+				if (index+1<overlay.size()) 
+					return true;
+				else 
+					return false;
+			}
+
+			/** Returns current ROI and updates pointer. */
+			@Override
+			public Roi next() {
+				if (index+1<overlay.size())
+					return overlay.get(++index);
+				else
+					return null;
+			} 
+
+			@Override
+			public void remove() { 
+				throw new UnsupportedOperationException(); 
+			}
+		};
+		return it;
 	}
     
 }

@@ -82,6 +82,7 @@ public class CompositeImage extends ImagePlus {
 		Object info = imp.getProperty("Info");
 		if (info!=null)
 			setProperty("Info", imp.getProperty("Info"));
+		setProperties(imp.getPropertiesAsArray());		
 		if (mode==COMPOSITE) {
 			for (int i=0; i<MAX_CHANNELS; i++)
 				active[i] = true;
@@ -141,6 +142,8 @@ public class CompositeImage extends ImagePlus {
 	}
 
 	void setupLuts(int channels) {
+		if (ip==null)
+			return;
 		if (lut==null || lut.length<channels) {
 			if (displayRanges!=null && channels!=displayRanges.length/2)
 				displayRanges = null;
@@ -457,10 +460,15 @@ public class CompositeImage extends ImagePlus {
 	/* Returns a copy of this image's channel LUTs as an array. */
 	public LUT[] getLuts() {
 		int channels = getNChannels();
-		if (lut==null) setupLuts(channels);
+		if (lut==null)
+			setupLuts(channels);
 		LUT[] luts = new LUT[channels];
-		for (int i=0; i<channels; i++)
-			luts[i] = (LUT)lut[i].clone();
+		for (int i=0; i<channels; i++) {
+			if (i<lut.length)
+				luts[i] = (LUT)lut[i].clone();
+			else
+				luts[i] = (LUT)lut[0].clone();
+		}
 		return luts;
 	}
 
@@ -473,7 +481,7 @@ public class CompositeImage extends ImagePlus {
 		for (int i=0; i<channels; i++)
 			setChannelLut(luts[i], i+1);
 	}
-
+	
 	/** Copies the LUTs and display mode of 'imp' to this image. Does
 		nothing if 'imp' is not a CompositeImage or 'imp' and this
 		image do not have the same number of channels. */

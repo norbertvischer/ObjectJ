@@ -100,6 +100,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	private boolean oneSliceStack;
 	public boolean setIJMenuBar = Prefs.setIJMenuBar;
 	private Plot plot;
+	private Properties imageProperties;
 
 
     /** Constructs an uninitialized ImagePlus. */
@@ -270,7 +271,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		outline is also displayed.  Does nothing if there
 		is no window associated with this image (i.e. show()
 		has not been called).*/
-	public void draw(){
+	public void draw() {
 		if (win!=null)
 			win.getCanvas().repaint();
 	}
@@ -1328,6 +1329,8 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	 * Works with DICOM tags and Bio-Formats metadata.
 	 * @see #getNumericProperty
 	 * @see #getInfoProperty
+	 * @see #getProp
+	 * @see #setProp
 	*/
 	public String getStringProperty(String key) {
 		if (key==null)
@@ -1373,14 +1376,6 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		return Tools.parseDouble(getStringProperty(key));
 	}
 
-	/**
-	 * @deprecated
-	 * @see #getStringProperty
-	*/
-	public String getProp(String key) {
-		return getStringProperty(key);
-	}
-
 	private String getStringProperty(String key, String info) {
 		int index1 = -1;
 		index1 = findKey(info, key+": "); // standard 'key: value' pair?
@@ -1414,7 +1409,110 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			return -1;
 	}
 
-	/** Returns the "Info" property string, or null if it is not found. */
+	/** Adds a key-value pair to this image's string properties.
+	 * The key-value pair is removed if 'value' is null. The 
+	 * properties persist if the image is saved in TIFF format.
+	 * Add a "HideInfo" property (e.g. set("HideInfo","true")) to
+	 * prevent the properties from being displayed by the
+	 * Image/Show Info command.
+	*/
+	public void setProp(String key, String value) {
+		if (key==null)
+			return;
+		if (imageProperties==null)
+			imageProperties = new Properties();
+		if (value==null || value.length()==0)
+			imageProperties.remove(key);
+		else
+			imageProperties.setProperty(key, value);
+	}
+	
+	/** Saves a persistent numeric propery. The property is
+	 *  removed if 'value' is NaN.
+	 * @see #getNumericProp
+	*/
+	public void setProp(String key, double value) {
+		String svalue = ""+value;
+		if (svalue.endsWith(".0"))
+			svalue = svalue.substring(0,svalue.length()-2);
+		setProp(key, Double.isNaN(value)?null:svalue);
+	}
+
+	/** Returns as a string the image property associated with the
+	 *  specified key or null if the property is not found.
+	 * @see #setProp
+	 * @see #getNumericProp
+	 * @see #getStringProperty
+	*/
+	public String getProp(String key) {
+		if (imageProperties==null)
+			return null;
+		else
+			return imageProperties.getProperty(key);
+	}
+	
+	/** Returns the numeric property associated with the specified key
+	 * or NaN if the property is not found.
+	 * @see #setProp(String,double)
+	 * @see #getProp
+	*/
+	public double getNumericProp(String key) {
+		if (imageProperties==null)
+			return Double.NaN;
+		else
+			return Tools.parseDouble(getProp(key), Double.NaN);
+	}
+
+	/** Used for saving string properties in TIFF header. */
+	public String[] getPropertiesAsArray() {
+		if (imageProperties==null || imageProperties.size()==0)
+			return null;
+		String props[] = new String[imageProperties.size()*2];
+		int index = 0;
+		for (Enumeration en=imageProperties.keys(); en.hasMoreElements();) {
+			String key = (String)en.nextElement();
+			String value = imageProperties.getProperty(key);
+			props[index++] = key;
+			props[index++] = value;
+		}
+		return props;
+	}
+	
+	/** Returns information displayed by Image/Show Info command. */
+	public String getPropsInfo() {
+		if (imageProperties==null || imageProperties.size()==0)
+			return "0";
+		String info2 = "";
+		for (Enumeration en=imageProperties.keys(); en.hasMoreElements();) {
+			String key = (String)en.nextElement();
+			if (info2.length()>50) {
+				info2 += "...";
+				break;
+			} else
+				info2 += " " + key;
+		}
+		if (info2.length()>1)
+			info2 = " (" + info2.substring(1) + ")";
+		return imageProperties.size() + info2;			
+	}
+	
+	/** Used for restoring string properties from TIFF header. */
+	public void setProperties(String[] props) {
+		if (props==null)
+			return;
+		//IJ.log("setProperties: "+props.length+" "+getTitle());
+		for (int i=0; i<props.length; i+=2) {
+			String key = props[i];
+			String value = props[i+1];
+			//IJ.log("   "+key+" "+value.length());
+			setProp(key,value);
+		}
+	}
+
+	/** Returns the "Info" property string, or null if it is not found.
+	 * @see #getProp
+	 * @see #setProp
+	*/
 	public String getInfoProperty() {
 		String info = null;
 		Object obj = getProperty("Info");
@@ -1427,6 +1525,8 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	}
 
 	/** Returns the property associated with 'key', or null if it is not found.
+	 * @see #getProp
+	 * @see #setProp
 	 * @see #getStringProperty
 	 * @see #getNumericProperty
 	 * @see #getInfoProperty
@@ -1439,7 +1539,10 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	}
 
 	/** Adds a key-value pair to this image's properties. The key
-		is removed from the properties table if value is null. */
+	 * is removed from the properties table if value is null.
+	 * @see #getProp
+	 * @see #setProp
+	*/
 	public void setProperty(String key, Object value) {
 		if (properties==null)
 			properties = new Properties();
@@ -1832,9 +1935,14 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 				roi = newRoi;
 				return;
 			}
-			newRoi = (Roi)newRoi.clone();
-			if (newRoi==null)
-				{deleteRoi(); return;}
+			if (newRoi==null) {
+				deleteRoi();
+				return;
+			}
+			ImagePlus imp = newRoi.getImage();
+			if (imp!=null && imp.getID()!=getID())
+				newRoi = (Roi)newRoi.clone();
+			newRoi.setImage(null);
 		}
 		if (bounds.width==0 && bounds.height==0 && !(newRoi.getType()==Roi.POINT||newRoi.getType()==Roi.LINE)) {
 			deleteRoi();
@@ -1876,9 +1984,9 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	public void createNewRoi(int sx, int sy) {
 		Roi previousRoi = roi;
 		deleteRoi();   //also saves the roi as <code>Roi.previousRoi</code> if non-null
-		if (Roi.previousRoi != null)
-			Roi.previousRoi.setImage(previousRoi== null ? null : this); //with 'this' it will be recalled in case of ESC
-
+		Roi prevRoi = Roi.getPreviousRoi();
+		if (prevRoi != null)
+			prevRoi.setImage(previousRoi==null ? null : this); //with 'this' it will be recalled in case of ESC
 		switch (Toolbar.getToolId()) {
 			case Toolbar.RECTANGLE:
 				if (Toolbar.getRectToolType()==Toolbar.ROTATED_RECT_ROI)
@@ -1909,7 +2017,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 				break;
 			case Toolbar.TEXT:
 				roi = new TextRoi(sx, sy, this);
-				((TextRoi)roi).setPreviousRoi(previousRoi);
+				((TextRoi)roi).setPreviousTextRoi(previousRoi);
 				break;
 			case Toolbar.POINT:
 				roi = new PointRoi(sx, sy, this);
@@ -1997,7 +2105,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			roi2.endPaste();
 			Rectangle r = roi2.getBounds();
 			if ((r.width>0 || r.height>0)) {
-				Roi.previousRoi = (Roi)roi2.clone();
+				Roi.setPreviousRoi(roi2);
 				if (IJ.debugMode) IJ.log("saveRoi: "+roi2);
 			}
 			if ((roi2 instanceof PointRoi) && ((PointRoi)roi2).promptBeforeDeleting()) {
@@ -2014,8 +2122,9 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			roi.notifyListeners(RoiListener.MODIFIED);
 			return;
 		}
-		if (Roi.previousRoi!=null) {
-			Roi pRoi = Roi.previousRoi;
+		Roi previousRoi = Roi.getPreviousRoi();
+		if (previousRoi!=null) {
+			Roi pRoi = previousRoi;
 			Rectangle r = pRoi.getBounds();
 			if (r.width<=width||r.height<=height||(r.x<width&&r.y<height)||isSmaller(pRoi)) { // will it (mostly) fit in this image?
 				roi = (Roi)pRoi.clone();
@@ -2299,7 +2408,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	}
 
 	/** Returns a cropped copy this image or stack, where 'options'
-	 * can be "stack", "slice" or a range (e.g., "20-30").
+	 * can be "stack", "slice", "whole-slice" or a range (e.g., "20-30").
 	 * @see #duplicate
 	 * @see #crop
 	 * @see ij.plugin.Duplicator#crop
@@ -2309,7 +2418,13 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		int stackSize = getStackSize();
 		if (options==null || options.equals("stack"))
 			return (new Duplicator()).run(this);
-		else if (options.equals("slice") || stackSize==1)
+		else if (options.contains("whole")) {
+			Roi saveRoi = getRoi();
+			deleteRoi();
+			ImagePlus imp2 = crop();
+			setRoi(saveRoi);
+			return imp2;
+		} else if (options.equals("slice") || stackSize==1)
 			return crop();
 		else {
 			String[] range = Tools.split(options, " -");
@@ -2335,6 +2450,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		String info = (String)getProperty("Info");
 		if (info!=null)
 			imp2.setProperty("Info", info);
+		imp2.setProperties(getPropertiesAsArray());
 		FileInfo fi = getOriginalFileInfo();
 		if (fi!=null) {
 			fi = (FileInfo)fi.clone();
@@ -2387,6 +2503,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		Object info = imp.getProperty("Info");
 		if (info!=null)
 			setProperty("Info", imp.getProperty("Info"));
+		setProperties(imp.getPropertiesAsArray());
 		Object plot = imp.getProperty(Plot.PROPERTY_KEY);
 		if (plot != null)
 			setProperty(Plot.PROPERTY_KEY, plot);
@@ -2794,30 +2911,24 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		position[2] = t;
 	}
 
-	/** Returns a "flattened" version of this image, in RGB format. */
+	/** Returns a "flattened" version of this image, or stack slice, in RGB format. */
 	public ImagePlus flatten() {
 		if (IJ.debugMode) IJ.log("flatten");
-		ImagePlus imp2 = createImagePlus();
+		ImagePlus impCopy = this;
+		if (getStackSize()>1)
+			impCopy = crop("whole-slice");
+		ImagePlus imp2 = impCopy.createImagePlus();
+		imp2.setOverlay(impCopy.getOverlay());
 		imp2.setTitle(flattenTitle);
 		ImageCanvas ic2 = new ImageCanvas(imp2);
 		imp2.flatteningCanvas = ic2;
 		imp2.setRoi(getRoi());
-		if (getStackSize()>1) {
-			imp2.setStack(getStack());
-			imp2.setSlice(getCurrentSlice());
-			if (isHyperStack()) {
-				imp2.setDimensions(getNChannels(),getNSlices(),getNFrames());
-				imp2.setPosition(getChannel(),getSlice(),getFrame());
-				imp2.setOpenAsHyperStack(true);
-			}
-		}
 		Overlay overlay2 = getOverlay();
 		if (overlay2!=null && imp2.getRoi()!=null) {
 			imp2.deleteRoi();
 			if (getWindow()!=null) IJ.wait(100);
 		}
 		setPointScale(imp2.getRoi(), overlay2);
-		imp2.setOverlay(overlay2);
 		ImageCanvas ic = getCanvas();
 		if (ic!=null)
 			ic2.setShowAllList(ic.getShowAllList());
@@ -2831,6 +2942,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		ImagePlus imp3 = new ImagePlus("Flat_"+getTitle(), new ColorProcessor(bi));
 		imp3.copyScale(this);
 		imp3.setProperty("Info", getProperty("Info"));
+		imp3.setProperties(getPropertiesAsArray());
 		return imp3;
 	}
 
@@ -3085,6 +3197,12 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 
     public Plot getPlot() {
     	return plot;
+    }
+    
+    public Properties getImageProperties() {
+    	if (imageProperties==null)
+    		imageProperties = new Properties();
+    	return imageProperties;
     }
     
 }

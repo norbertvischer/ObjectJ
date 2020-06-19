@@ -3,6 +3,7 @@ import ij.*;
 import java.awt.event.*;
 import java.awt.EventQueue;
 import java.awt.GraphicsEnvironment;
+import java.awt.Frame;
 
 /** This is an extension of GenericDialog that is non-modal.
  *	@author Johannes Schindelin
@@ -13,7 +14,13 @@ public class NonBlockingGenericDialog extends GenericDialog {
 	WindowListener windowListener;  //checking for whether the associated window gets closed
 
 	public NonBlockingGenericDialog(String title) {
-		super(title, getParentFrame());
+		super(title, GUI.getParentFrame());
+		setModal(false);
+		IJ.protectStatusBar(false);
+	}
+
+	public NonBlockingGenericDialog(String title, Frame parent) {
+		super(title, parent);
 		setModal(false);
 		IJ.protectStatusBar(false);
 	}

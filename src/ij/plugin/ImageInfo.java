@@ -49,10 +49,10 @@ public class ImageInfo implements PlugIn {
 		path = Prefs.getCustomPrefsPath();
 		if (path!=null)
 			s += "*Custom preferences*: "+ path +"\n";
-		if (IJ.isMacOSX()) {
-			String time = " ("+ImageWindow.setMenuBarTime+"ms)";
-			s += "SetMenuBarCount: "+Menus.setMenuBarCount+time+"\n";
-		}
+		//if (IJ.isMacOSX()) {
+		//	String time = " ("+ImageWindow.setMenuBarTime+"ms)";
+		//	s += "SetMenuBarCount: "+Menus.setMenuBarCount+time+"\n";
+		//}
 		new TextWindow("Info", s, 600, 300);
 	}
 
@@ -70,9 +70,18 @@ public class ImageInfo implements PlugIn {
 			if (infoProperty==null)
 				infoProperty = getExifData(imp);
 		}
+		if (imp.getProp("HideInfo")==null) {
+			String properties = getImageProperties(imp);
+			if (properties!=null) {
+				if (infoProperty!=null)
+					infoProperty = properties + "\n" + infoProperty;
+				else
+					infoProperty = properties;
+			}
+		}
 		String info = getInfo(imp, ip);
 		if (infoProperty!=null)
-			return infoProperty + "\n------------------------------------------------------\n" + info;
+			return infoProperty + "--------------------------------------------\n" + info;
 		else
 			return info;
 	}
@@ -357,6 +366,12 @@ public class ImageInfo implements PlugIn {
 	    if (cal.getInvertY())
 	    	s += "Inverted y coordinates\n";
 
+	    String pinfo = imp.getPropsInfo();
+	    if (!pinfo.equals("0"))
+	   		s += "Properties: " + pinfo + "\n";
+	   	else
+	   		s += "No properties\n";
+	   	
 	    Overlay overlay = imp.getOverlay();
 		if (overlay!=null) {
 			int n = overlay.size();
@@ -478,6 +493,24 @@ public class ImageInfo implements PlugIn {
 
     private String d2s(double n) {
 		return IJ.d2s(n,Tools.getDecimalPlaces(n));
+    }
+    
+    private String getImageProperties(ImagePlus imp) {
+    	String s = "";
+    	String[] props = imp.getPropertiesAsArray();
+    	if (props==null)
+    		return null;
+		for (int i=0; i<props.length; i+=2) {
+			String key = props[i];
+			String value = props[i+1];
+			if (key!=null && value!=null && !key.equals("ShowInfo")) {
+				if (value.length()<80)
+					s += key + ": " + value + "\n";
+				else
+					s += key + ": <" + value.length() + " characters>\n";
+			}
+		}
+		return  (s.length()>0)?s:null;
     }
 
 }

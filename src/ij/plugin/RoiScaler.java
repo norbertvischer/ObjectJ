@@ -20,7 +20,7 @@ public class RoiScaler implements PlugIn {
 			IJ.error("Scale", "This command requires a selection");
 			return;
 		}
-		if (!imp.okToDeleteRoi())
+		if (!IJ.isMacro() && !imp.okToDeleteRoi())
 			return;
 		if (!showDialog())
 			return;
@@ -28,24 +28,19 @@ public class RoiScaler implements PlugIn {
 			defaultXScale = xscale;
 			defaultYScale = yscale;
 		}
-		//if (roi instanceof ImageRoi) {
-		//	((ImageRoi)roi).rotate(angle);
-		//	imp.draw();
-		//	return;
-		//}
 		Roi roi2 = scale(roi, xscale, yscale, centered);
 		if (roi2==null)
 			return;
 		Undo.setup(Undo.ROI, imp);
 		roi = (Roi)roi.clone();
 		imp.setRoi(roi2);
-		Roi.previousRoi = roi;
+		Roi.setPreviousRoi(roi);
 	}
 	
 	public boolean showDialog() {
 		GenericDialog gd = new GenericDialog("Scale Selection");
-		gd.addNumericField("X scale factor:", defaultXScale, 2, 3, "");
-		gd.addNumericField("Y scale factor:", defaultYScale, 2, 3, "");
+		gd.addNumericField("X scale factor:", defaultXScale, 2, 4, "");
+		gd.addNumericField("Y scale factor:", defaultYScale, 2, 4, "");
 		gd.addCheckbox("Centered", false);
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -59,6 +54,10 @@ public class RoiScaler implements PlugIn {
 	public static Roi scale(Roi roi, double xscale, double yscale, boolean centered) {
 		if (roi instanceof ShapeRoi)
 			return scaleShape((ShapeRoi)roi, xscale, yscale, centered);
+		else if (roi instanceof TextRoi)
+			return scaleText((TextRoi)roi, xscale, yscale, centered);
+		else if (roi instanceof ImageRoi)
+			return scaleImage((ImageRoi)roi, xscale, yscale, centered);		
 		FloatPolygon poly = roi.getFloatPolygon();
 		int type = roi.getType();
 		if (type==Roi.LINE) {
@@ -97,9 +96,10 @@ public class RoiScaler implements PlugIn {
 				type = Roi.FREEROI;
 			roi2 = new PolygonRoi(poly.xpoints, poly.ypoints,poly.npoints, type);
 		}
-		roi2.setStrokeColor(roi.getStrokeColor());
-		if (roi.getStroke()!=null)
-			roi2.setStroke(roi.getStroke());
+		roi2.copyAttributes(roi);
+		double width = roi.getStrokeWidth();
+		if (width!=0)
+			roi2.setStrokeWidth(width*xscale);
 		return roi2;
 	}
 	
@@ -117,7 +117,38 @@ public class RoiScaler implements PlugIn {
 			int ybase = (int)(centered?r.y-(r.height*yscale-r.height)/2.0:r.y);
 			roi2.setLocation(xbase, ybase);
 		}
+		roi2.copyAttributes(roi);
+		double width = roi.getStrokeWidth();
+		if (width!=0)
+			roi2.setStrokeWidth(width*xscale);
 		return roi2;
 	}
 	
+	private static Roi scaleText(TextRoi roi, double xscale, double yscale, boolean centered) {
+		Rectangle bounds = roi.getBounds();
+		int x = (int)Math.round(bounds.x*xscale);
+		int y = (int)Math.round(bounds.y*yscale);
+		Font font = roi.getCurrentFont();
+		font = font.deriveFont((float)(font.getSize()*yscale));
+		Roi roi2 = new TextRoi(x, y, roi.getText(), font);
+		roi2.copyAttributes(roi);
+		return roi2;
+	}
+	
+	private static Roi scaleImage(ImageRoi roi, double xscale, double yscale, boolean centered) {
+		roi = (ImageRoi)roi.clone();
+		ImageProcessor ip2 = roi.getProcessor();
+		//ip2.setInterpolationMethod(interpolationMethod);
+		int newWidth = (int)Math.round(ip2.getWidth()*xscale);
+		int newHeight = (int)Math.round(ip2.getHeight()*yscale);
+		ip2 = ip2.resize(newWidth, newHeight, true);
+		roi.setProcessor(ip2);
+		Rectangle bounds = roi.getBounds();
+		int x = (int)Math.round(bounds.x*xscale);
+		int y = (int)Math.round(bounds.y*yscale);
+		roi.setLocation(x,y);
+		roi.copyAttributes(roi);
+		return roi;
+	}
+
 }

@@ -31,9 +31,10 @@ public class Selection implements PlugIn, Measurements {
 		if (arg.equals("add")) {
 			addToRoiManager(imp);
 			return;
-		}
+		}		
 		if (imp==null) {
-			IJ.noImage();
+			if (!(IJ.isMacro()&&arg.equals("none")))
+				IJ.noImage();
 			return;
 		}
 		if (arg.equals("all")) {
@@ -371,6 +372,7 @@ public class Selection implements PlugIn, Measurements {
 			fp.putPixelValue(i, 0, a[i]);
 		GaussianBlur gb = new GaussianBlur();
 		gb.blur1Direction(fp, 2.0, 0.01, true, 0);
+		IJ.showProgress(1.0);
 		for (int i=0; i<n; i++)
 			a[i] = (int)Math.round(fp.getPixelValue(i, 0));
 		return a;
@@ -638,7 +640,7 @@ public class Selection implements PlugIn, Measurements {
 		Undo.setup(Undo.ROI, imp);
 		Roi roi2 = lineToArea(roi);
 		imp.setRoi(roi2);
-		Roi.previousRoi = (Roi)roi.clone();
+		Roi.setPreviousRoi(roi);
 	}
 	
 	/** Converts a line selection into an area selection. */
@@ -655,11 +657,18 @@ public class Selection implements PlugIn, Measurements {
 		Undo.setup(Undo.ROI, imp);
 		Polygon p = roi.getPolygon();
 		FloatPolygon fp = (roi.subPixelResolution()) ? roi.getFloatPolygon() : null;
-		if (p==null && fp==null) return;
+		if (p==null && fp==null)
+			return;
 		int type1 = roi.getType();
 		if (type1==Roi.COMPOSITE) {
 			IJ.error("Area to Line", "Composite selections cannot be converted to lines.");
 			return;
+		}
+		if (fp==null && type1==Roi.TRACED_ROI) {
+			for (int i=0; i<p.npoints; i++) {
+				if (p.xpoints[i]>=imp.getWidth()) p.xpoints[i]=imp.getWidth()-1;
+				if (p.ypoints[i]>=imp.getHeight()) p.ypoints[i]=imp.getHeight()-1;
+			}
 		}
 		int type2 = Roi.POLYLINE;
 		if (type1==Roi.OVAL||type1==Roi.FREEROI||type1==Roi.TRACED_ROI

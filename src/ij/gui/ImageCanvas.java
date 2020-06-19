@@ -244,8 +244,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			if (srcRect.width<imageWidth || srcRect.height<imageHeight)
 				drawZoomIndicator(g);
 			//if (IJ.debugMode) showFrameRate(g);
-		}
-		catch(OutOfMemoryError e) {IJ.outOfMemory("Paint");}
+		} catch(OutOfMemoryError e) {IJ.outOfMemory("Paint");}
 		setPaintPending(false);
     }
     
@@ -1131,6 +1130,11 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				return;
 		}
 		
+		if ((System.currentTimeMillis()-mousePressedTime)<300L && !drawingTool()) {
+			if (activateOverlayRoi(ox,oy))
+				return;
+		}
+		
 		mousePressedX = ox;
 		mousePressedY = oy;
 		mousePressedTime = System.currentTimeMillis();
@@ -1220,7 +1224,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 	}
 	
 	private boolean drawingTool() {
-		return Toolbar.getToolName().equals("Paintbrush Tool") || Toolbar.getToolName().equals("Pencil Tool");
+		return Toolbar.getToolId()>=15;
 	}
 	
 	void zoomToSelection(int x, int y) {
@@ -1537,9 +1541,6 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				roi=null;
 			if ((e.isAltDown()||e.isControlDown()||cmdDown) && roi==null) {
 				if (activateOverlayRoi(ox, oy))
-					return;
-			} else if ((System.currentTimeMillis()-mousePressedTime)>250L && !drawingTool()) {
-				if (activateOverlayRoi(ox,oy))
 					return;
 			}
 		}

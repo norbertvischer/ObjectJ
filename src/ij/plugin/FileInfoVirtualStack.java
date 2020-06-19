@@ -221,7 +221,11 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 		}
 	 }
  
-	 /** Returns the number of images in this stack. */
+	/** Returns the number of slices in this stack. */
+	public int size() {
+		return getSize();
+	}
+
 	public int getSize() {
 		return nImages;
 	}
@@ -257,5 +261,23 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 		}
 		info[nImages-1] = fileInfo;
 	}
+	
+	@Override
+	public String getDirectory() {
+		if (info!=null && info.length>0)
+			return info[0].directory;
+		else
+			return null;
+	}
+		
+	@Override
+	public String getFileName(int n) {
+		int index = n - 1;
+		if (index>=0 && info!=null && info.length>index)
+			return info[index].fileName;
+		else
+			return null;
+	}
+
 		
 }

@@ -53,6 +53,7 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 	public static final int NOT_PASTING = -1;
 	public static final int FERET_ARRAYSIZE = 16; // Size of array with Feret values
 	public static final int FERET_ARRAY_POINTOFFSET = 8; // Where point coordinates start in Feret array
+	private static final String NAMES_KEY = "group.names";
 	
 	static final int NO_MODS=0, ADD_TO_ROI=1, SUBTRACT_FROM_ROI=2; // modification states
 		
@@ -64,8 +65,7 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 	int modState = NO_MODS;
 	int cornerDiameter;             //for rounded rectangle
 	int previousSX, previousSY;     //remember for aborting moving with esc and constrain
-	
-	public static Roi previousRoi;  //for Edit>Selection>Restore Selection
+		
 	public static final BasicStroke onePixelWide = new BasicStroke(1);
 	protected static Color ROIColor = Prefs.getColor(Prefs.ROICOLOR,Color.yellow);
 	protected static int pasteMode = Blitter.COPY;
@@ -76,7 +76,13 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 	private static int defaultGroup; // zero is no specific group
 	private static Color groupColor;
 	private static double defaultStrokeWidth;
-	
+	private static String groupNamesString = Prefs.get(NAMES_KEY, null);
+	private static String[] groupNames;
+	private static boolean groupNamesChanged;
+
+	/** Get using getPreviousRoi() and set using setPreviousRoi() */
+	public static Roi previousRoi; 
+
 	protected int type;
 	protected int xMax, yMax;
 	protected ImagePlus imp;
@@ -677,8 +683,8 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 	}
 	
 	/** Returns the coordinates of the pixels inside this ROI as an array of Points.
-	 * @see #getContainedFloatPoints()
-	 * @see #iterator()
+	 * @see #getContainedFloatPoints
+	 * @see #iterator
 	 */
 	public Point[] getContainedPoints() {
 		Roi roi = this;
@@ -697,8 +703,8 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 	}
 	
 	/** Returns the coordinates of the pixels inside this ROI as a FloatPolygon.
-	 * @see #getContainedPoints()
-	 * @see #iterator()
+	 * @see #getContainedPoints
+	 * @see #iterator
 	 */
 	public FloatPolygon getContainedFloatPoints() {
 		Roi roi2 = this;
@@ -798,9 +804,9 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 	public void abortModification(ImagePlus imp) {
 		if (state == CONSTRUCTING) {
 			setImage(null);
-			Roi savedPreviousRoi = previousRoi;
+			Roi savedPreviousRoi = getPreviousRoi();
 			imp.setRoi(previousRoi!=null && previousRoi.getImage() == imp ? previousRoi : null);
-			previousRoi = savedPreviousRoi;     //(overrule saving this aborted roi as previousRoi)
+			setPreviousRoi(savedPreviousRoi);     //(overrule saving this aborted roi as previousRoi)
 		} else if (state == MOVING)
 			move(previousSX, previousSY);       //move back to starting point
 		else if (state == MOVING_HANDLE)
@@ -1125,24 +1131,24 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 			cachedMask = null;
 		switch(key) {
 			case KeyEvent.VK_UP:
-				y--;
-				if (y<0 && (type!=RECTANGLE||clipboard==null))
-					y = 0;
+				this.y--;
+				if (this.y<0 && (type!=RECTANGLE||clipboard==null))
+					this.y = 0;
 				break;
 			case KeyEvent.VK_DOWN:
-				y++;
-				if ((y+height)>=yMax && (type!=RECTANGLE||clipboard==null))
-					y = yMax-height;
+				this.y++;
+				if ((this.y+height)>=yMax && (type!=RECTANGLE||clipboard==null))
+					this.y = yMax-height;
 				break;
 			case KeyEvent.VK_LEFT:
-				x--;
-				if (x<0 && (type!=RECTANGLE||clipboard==null))
-					x = 0;
+				this.x--;
+				if (this.x<0 && (type!=RECTANGLE||clipboard==null))
+					this.x = 0;
 				break;
 			case KeyEvent.VK_RIGHT:
-				x++;
-				if ((x+width)>=xMax && (type!=RECTANGLE||clipboard==null))
-					x = xMax-width;
+				this.x++;
+				if ((this.x+width)>=xMax && (type!=RECTANGLE||clipboard==null))
+					this.x = xMax-width;
 				break;
 		}
 		updateClipRect();
@@ -1150,8 +1156,9 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 			imp.draw();
 		else
 			imp.draw(clipX, clipY, clipWidth, clipHeight);
-		oldX = x; oldY = y;
+		oldX = this.x; oldY = this.y;
 		bounds = null;
+		setLocation(this.x, this.y);
 		showStatus();
 		notifyListeners(RoiListener.MOVED);
 	}
@@ -1586,7 +1593,7 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 		if (roi2!=null)
 			roi2.copyAttributes(previousRoi);
 		imp.setRoi(roi2);
-		previousRoi = previous;
+		setPreviousRoi(previous);
 	}
 	
 	void addPoint() {
@@ -1633,7 +1640,7 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 		String value;
 		if (state!=CONSTRUCTING && (type==RECTANGLE||type==POINT) && width<=25 && height<=25) {
 			ImageProcessor ip = imp.getProcessor();
-			double v = ip.getPixelValue(x,y);
+			double v = ip.getPixelValue(this.x,this.y);
 			int digits = (imp.getType()==ImagePlus.GRAY8||imp.getType()==ImagePlus.GRAY16)?0:2;
 			value = ", value="+IJ.d2s(v,digits);
 		} else
@@ -1644,7 +1651,7 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 			size = ", w="+IJ.d2s(width*cal.pixelWidth)+" ("+width+"), h="+IJ.d2s(height*cal.pixelHeight)+" ("+height+")";
 		else
 			size = ", w="+width+", h="+height;
-		IJ.showStatus(imp.getLocationAsString(x,y)+size+value);
+		IJ.showStatus(imp.getLocationAsString(this.x,this.y)+size+value);
 	}
 		
 	/** Always returns null for rectangular Roi's */
@@ -1715,7 +1722,13 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 		return defaultGroup;
 	}
 
-	/** Sets the group value assigned to newly created ROIs, and updates default group color. */
+	/** Sets the group value assigned to newly created ROIs, and also
+	 * sets the default ROI color to the group color. Set to zero to not
+	 * have a default group and to use the default ROI color.
+	 * @see #setGroup
+	 * @see #getGroup
+	 * @see #getGroupColor
+	*/
 	public static void setDefaultGroup(int group) {
 		if (group<0 || group>255)
 			throw new IllegalArgumentException("Invalid group: "+group);
@@ -1728,12 +1741,77 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 		return this.group;
 	}
 
+	/** Returns the group name associtated with the specified group. */
+	public static String getGroupName(int groupNumber) {
+		if (groupNumber<1 || groupNumber>255)
+			return null;
+		if (groupNames==null && groupNamesString==null)
+			return null;
+		if (groupNames==null)
+			groupNames = groupNamesString.split(",");
+		if (groupNumber>groupNames.length)
+			return null;
+		String name = groupNames[groupNumber-1];
+		if (name==null)
+			return null;
+		return name.length()>0?name:null;
+	}
+	
+	public static synchronized void setGroupName(int groupNumber, String name) {
+		if (groupNumber<1 || groupNumber>255)
+			return;
+		if (groupNamesString==null && groupNames==null)
+			groupNames = new String[groupNumber];
+		if (groupNames==null)
+			groupNames = groupNamesString.split(",");
+		if (groupNumber>groupNames.length) {
+			String[] temp = new String[groupNumber];
+			for (int i=0; i<groupNames.length; i++)
+				temp[i] = groupNames[i];
+			groupNames = temp;
+		}
+		//IJ.log("setGroupName: "+groupNumber+"  "+name+"  "+groupNames.length);
+		groupNames[groupNumber-1] = name;
+		groupNamesChanged = true;
+	}
+	
+	public static synchronized void saveGroupNames() {
+		if (groupNames==null)
+			return;
+		StringBuilder sb = new StringBuilder(groupNames.length*12);
+		for (int i=0; i<groupNames.length; i++) {
+			String name = groupNames[i];
+			if (name==null)
+				name = "";
+			sb.append(name);
+			if (i<groupNames.length-1)
+				sb.append(",");			
+		}
+		groupNamesString = sb.toString();
+		groupNames = null;
+		Prefs.set(NAMES_KEY, groupNamesString);
+	}
+	
+	/** Returns the group names as a comma-delimeted string. */
+	public static String getGroupNames() {
+		if (groupNamesChanged && groupNames!=null)
+			saveGroupNames();
+		groupNamesChanged = false;
+		return groupNamesString;
+	}
+
+	/** Sets the group names from a comma-delimeted string. */
+	public static void setGroupNames(String names) {
+		groupNamesString = names;
+		groupNames = null;
+	}
+
 	/** Sets the group of this Roi, and updates stroke color accordingly. */
 	public void setGroup(int group) {
 		if (group<0 || group>255)
 			throw new IllegalArgumentException("Invalid group: "+group);
 		this.group = group;
-		this.strokeColor = group>0?getGroupColor(group):null;
+		setStrokeColor(group>0?getGroupColor(group):null);
 		if (imp!=null) // Update Roi Color in the GUI
 			imp.draw();
 	}
@@ -1853,6 +1931,7 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 		this.fillColor = roi2.fillColor;
 		this.setStrokeWidth(roi2.getStrokeWidth());
 		this.setName(roi2.getName());
+		this.group = roi2.group;
 	}
 
 	/**
@@ -2512,6 +2591,20 @@ public class Roi extends Object implements Cloneable, java.io.Serializable, Iter
 	/** Returns the number of points in this selection; equivalent to getFloatPolygon().npoints. */
 	public int size() {
 		return getFloatPolygon().npoints;
+	}
+	
+	/** Saves 'roi' so it can be restored later using Edit/Selection/Restore Selection. */
+	public static void setPreviousRoi(Roi roi) {
+		if (roi!=null) {
+			previousRoi = (Roi)roi.clone();
+			previousRoi.setImage(null);
+		} else
+			previousRoi = null;
+	}
+
+	/** Returns the Roi saved by setPreviousRoi(). */
+	public static Roi getPreviousRoi() {
+		return previousRoi;
 	}
 
 	/* 
