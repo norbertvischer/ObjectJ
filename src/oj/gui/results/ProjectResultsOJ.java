@@ -22,10 +22,12 @@ import ij.gui.ImageWindow;
 import ij.gui.Plot;
 import ij.gui.PlotContentsDialog;
 import ij.gui.PlotWindow;
+import ij.util.Tools;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.Event;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -76,6 +78,7 @@ import oj.gui.settings.ColumnSettingsOJ;
 import oj.processor.events.YtemDefChangedEventOJ;
 import oj.project.CellOJ;
 import oj.project.results.statistics.StatisticsOJ;
+import oj.util.UtilsOJ;
 
 /**
  *
@@ -179,7 +182,7 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 				tableCol.setResizable(false);
 			}
 			tableCol.setCellRenderer(linkedContentRenderer);
-		} 
+		}
 //		else if (event.getSource() == tblUnlinkedHeader.getColumnModel()) {
 //			TableColumn tableCol = (TableColumn) tblUnlinkedHeader.getColumnModel().getColumn(toIndex);
 //			if (toIndex <= (((UnlinkedStatRowsModelOJ) tblUnlinkedHeader.getModel()).getVisibleSize())) {
@@ -310,7 +313,6 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 //				}
 //			}
 //		});
-
 		tblLinkedHeader.getTableHeader().addMouseListener(new java.awt.event.MouseAdapter() {
 
 			public void mousePressed(java.awt.event.MouseEvent evt) {
@@ -361,11 +363,9 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 //			public void paint(Graphics g) {
 //			}
 //		};
-
 //		unlinkedDummyBar.setPreferredSize(unlinkedScrollPane.getVerticalScrollBar().getPreferredSize());
 //		unlinkedHeaderScrollPane.setVerticalScrollBar(unlinkedDummyBar);
 //		unlinkedHeaderScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-
 //		unlinkedScrollPane.getVerticalScrollBar().addComponentListener(
 //				new ComponentListener() {
 //
@@ -383,14 +383,12 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 //				unlinkedHeaderScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
 //			}
 //		});
-
 //		unlinkedScrollPane.getHorizontalScrollBar().addAdjustmentListener(new AdjustmentListener() {
 //
 //			public void adjustmentValueChanged(AdjustmentEvent e) {
 //				unlinkedHeaderScrollPane.getHorizontalScrollBar().setValue(e.getValue());
 //			}
 //		});
-
 //		tblUnlinkedHeader.getTableHeader().addMouseListener(new java.awt.event.MouseAdapter() {
 //
 //			@Override
@@ -933,7 +931,7 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 					((LinkedTableModelOJ) tblLinkedContent.getModel()).setSortedIndexes(OJ.getData().getResults().getSortedIndexes(false));
 					((AbstractTableModel) tblLinkedContent.getModel()).fireTableDataChanged();
 				}
-			} 
+			}
 //			else {
 //				OJ.getData().getResults().getColumns().setColumnUnlinkedSortFlag(sortFlag);
 //				ColumnOJ column = ((UnlinkedStatRowsModelOJ) table.getModel()).getVisibleElementAt(index);
@@ -1125,7 +1123,7 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 
     private void mncHideAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mncHideAllActionPerformed
 		boolean isUnlinked = tabbedResultsPane.getSelectedIndex() == 1;
-		 isUnlinked = false;
+		isUnlinked = false;
 		int max_index = lstColumnSelector.getModel().getSize();
 		for (int i = 0; i
 				< max_index; i++) {
@@ -1143,8 +1141,8 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 //			((AbstractTableModel) tblUnlinkedHeader.getModel()).fireTableStructureChanged();
 //		} else 
 //		{
-			((AbstractTableModel) tblLinkedContent.getModel()).fireTableStructureChanged();
-			((AbstractTableModel) tblLinkedHeader.getModel()).fireTableStructureChanged();
+		((AbstractTableModel) tblLinkedContent.getModel()).fireTableStructureChanged();
+		((AbstractTableModel) tblLinkedHeader.getModel()).fireTableStructureChanged();
 		//}
 
 		((ColumnListModelOJ) lstColumnSelector.getModel()).fireColumChanged();
@@ -1152,9 +1150,9 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 
     private void mncShowAllActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mncShowAllActionPerformed
 		//boolean isUnlinked = tabbedResultsPane.getSelectedIndex() == 1;
-	
+
 		boolean isUnlinked = false;
-		
+
 		int max_index = lstColumnSelector.getModel().getSize();
 		for (int i = 0; i
 				< lstColumnSelector.getModel().getSize(); i++) {
@@ -1172,8 +1170,8 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 //			((AbstractTableModel) tblUnlinkedHeader.getModel()).fireTableStructureChanged();
 //		} else 
 //		{
-			((AbstractTableModel) tblLinkedContent.getModel()).fireTableStructureChanged();
-			((AbstractTableModel) tblLinkedHeader.getModel()).fireTableStructureChanged();
+		((AbstractTableModel) tblLinkedContent.getModel()).fireTableStructureChanged();
+		((AbstractTableModel) tblLinkedHeader.getModel()).fireTableStructureChanged();
 		//}
 
 		((ColumnListModelOJ) lstColumnSelector.getModel()).fireColumChanged();
@@ -1366,11 +1364,11 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
     }//GEN-LAST:event_mncLabelActionPerformed
 
     private void mncPlotActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mncPlotActionPerformed
-		plotFromOjResult(evt, false);
+		plotFromOjResult(false);
     }//GEN-LAST:event_mncPlotActionPerformed
 
     private void mncAddToPlotActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mncAddToPlotActionPerformed
-		plotFromOjResult(evt, true);
+		plotFromOjResult(true);
     }//GEN-LAST:event_mncAddToPlotActionPerformed
 
     private void tblLinkedContentMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblLinkedContentMousePressed
@@ -1502,7 +1500,29 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 		// TODO add your handling code here:
     }//GEN-LAST:event_tblLinkedHeaderMouseDragged
 
-	private void plotFromOjResult(java.awt.event.ActionEvent evt, boolean doAdd) {
+	public void plotFromOjResult(/*java.awt.event.ActionEvent evt, */boolean doAdd) {
+		boolean addErrors = false;
+		if (doAdd) {
+			GenericDialog gd = new GenericDialog("Add to existing Plot");
+
+			String[] items = new String[]{"Error Bars", "ObjectJ Results"};
+			gd.enableYesNoCancel(items[0], items[1]);
+			gd.hideCancelButton();
+			gd.showDialog();
+
+			if (gd.wasCanceled()) {
+				//IJ.log("User clicked 'Cancel'");
+			} else if (gd.wasOKed()) {
+				addErrors = true;//IJ.log("User clicked 'Yes'");
+			} else {
+				//IJ.log("User clicked 'No'");
+				addErrors = false;
+			}
+			if (addErrors) {
+				addErrorBars();
+				return;
+			}
+		}
 		String[] defaults = new String[2];
 		Plot plot = null;
 		if (doAdd) {
@@ -1529,10 +1549,18 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 			gd.enableYesNoCancel(items[0], items[1]);
 			gd.hideCancelButton();
 			gd.showDialog();
-			includeAll = !gd.wasCanceled();
+			if (gd.wasCanceled()) {
+				//IJ.log("User clicked 'Cancel'");
+			} else if (gd.wasOKed()) {
+				//IJ.log("User clicked 'Yes'");
+			} else {
+				//IJ.log("User clicked 'No'");
+				includeAll = false;
+			}
 		}
-		ColumnOJ clickedColumn = rightClickedColumn(currentHeader());
-		String from = clickedColumn.getName();
+		//ColumnOJ clickedColumn = rightClickedColumn(currentHeader());
+		//String from = clickedColumn.getName();
+		String from = "";
 		String titlesStr = "";
 		ColumnsOJ columns = OJ.getData().getResults().getColumns();
 		ArrayList<float[]> data = new ArrayList<float[]>(0);
@@ -1548,10 +1576,10 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 		defaults = new String[]{from, from};
 		PlotContentsDialog pgd = null;
 		if (!doAdd) {
-			pgd = new PlotContentsDialog("Plot...", titlesArr, defaults, data);
+			pgd = new PlotContentsDialog("Plot...", titlesArr, defaults, data);//New Plot
 		} else {
 			defaults[0] = plot.getLabel('x');
-			pgd = new PlotContentsDialog(plot, titlesArr, defaults, data);
+			pgd = new PlotContentsDialog(plot, titlesArr, defaults, data);//Existing Plot
 		}
 		pgd.noErrorBars();
 		pgd.showDialog(null);
@@ -1563,10 +1591,62 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 				if (imp.getTitle().equalsIgnoreCase("Plot...")) {
 					imp.setTitle("Plot " + plot.getLabel('y') + " vs. " + plot.getLabel('x'));
 				}
+				IJ.runMacro("selectWindow('ImageJ');");//18.6.2020 make Plot window responsive
+				//IJ.selectWindow("ImageJ");//18.6.2020 make Plot window responsive
+				//IJ.wait(50);//18.6.2020 make Plot window responsive
+				IJ.selectWindow(imp.getID());//11.6.2020
+				
 			}
 		}
-		IJ.selectWindow("ImageJ");//1.6.2020
+		//IJ.selectWindow("ImageJ");//1.6.2020
 		return;
+	}
+
+	//extracts xy data from front plot and adds 95% error bars
+	public void addErrorBars() {
+		Plot plot = null;
+
+		ImagePlus imp = IJ.getImage();
+		if (imp != null && imp.getWindow() instanceof PlotWindow) {
+			plot = ((PlotWindow) (imp.getWindow())).getPlot();
+			if (plot == null) {
+				IJ.error("Plot window must be in front");
+				return;
+			}
+
+			float[][] data = plot.getDataObjectArrays(0);
+			if (data == null) {
+				return;
+			}
+//	    String xLabel = plot.getLabel('x');
+//	    String yLabel = plot.getLabel('y');
+			double[] XX = floatToDouble(plot.getDataObjectArrays(0)[0]);
+			double[] YY = floatToDouble(plot.getDataObjectArrays(0)[1]);
+			double binWidth = IJ.getNumber("Binwidth for Error Bars (0=ignore):", 0);
+			double[][] eBars = UtilsOJ.calcErrorBars(XX, YY, binWidth, 0);
+
+			plot.setLineWidth(3);
+			plot.setColor("red");
+
+			plot.add("connected", eBars[0], eBars[1]);
+			plot.setColor("green");
+			plot.addErrorBars(eBars[2]);
+
+			plot.setLimitsToFit(true);
+			plot.show();
+
+			IJ.selectWindow("ImageJ");//1.6.2020
+		}
+		//return;
+	}
+
+	double[] floatToDouble(float[] fArr) {
+		int len = fArr.length;
+		double[] dArr = new double[len];
+		for (int jj = 0; jj < len; jj++) {
+			dArr[jj] = (double) fArr[jj];
+		}
+		return dArr;
 	}
 
 	private void resetStateMode() {
@@ -1575,19 +1655,23 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 	}
 
 	private void updateStateMode() {
-		if ((OJ.getToolStateProcessor().getToolStateObject() instanceof SelectCellStateOJ)
-				&& (((SelectCellStateOJ) OJ.getToolStateProcessor().getToolStateObject()).isQualifyMode())) {
-			setCursor(qualifyCursor);
-			stateMode
-					= Mode.QUALIFY;
-		} else if ((OJ.getToolStateProcessor().getToolStateObject() instanceof DeleteCellStateOJ)
-				&& (((DeleteCellStateOJ) OJ.getToolStateProcessor().getToolStateObject()).isExDeleteCellMode())) {
-			setCursor(qualifyCursor);
-			stateMode
-					= Mode.DELETE;
-		} else {
-			stateMode = Mode.SELECT;
-			setCursor(defaultCursor);
+		try {
+			if ((OJ.getToolStateProcessor().getToolStateObject() instanceof SelectCellStateOJ)
+					&& (((SelectCellStateOJ) OJ.getToolStateProcessor().getToolStateObject()).isQualifyMode())) {
+				setCursor(qualifyCursor);
+				stateMode
+						= Mode.QUALIFY;
+			} else if ((OJ.getToolStateProcessor().getToolStateObject() instanceof DeleteCellStateOJ)
+					&& (((DeleteCellStateOJ) OJ.getToolStateProcessor().getToolStateObject()).isExDeleteCellMode())) {
+				setCursor(qualifyCursor);
+				stateMode
+						= Mode.DELETE;
+			} else {
+				stateMode = Mode.SELECT;
+				setCursor(defaultCursor);
+			}
+		} catch (Exception e) {
+			IJ.showMessage(e.toString() + "\nError 1254, click OK to continue");//14.6.2020
 		}
 
 	}
@@ -1735,7 +1819,6 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 
 //			((AbstractTableModel) tblUnlinkedContent.getModel()).fireTableStructureChanged();//30.5.2010
 //			((AbstractTableModel) tblUnlinkedHeader.getModel()).fireTableStructureChanged();
-
 			((AbstractTableModel) tblLinkedContent.getModel()).fireTableStructureChanged();
 			((AbstractTableModel) tblLinkedHeader.getModel()).fireTableStructureChanged();
 
@@ -1788,22 +1871,22 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 		int cell = OJ.getData().getCells().getSelectedCellIndex();
 		((LinkedTableModelOJ) tblLinkedContent.getModel()).setSortedIndexes(OJ.getData().getResults().getSortedIndexes(false));
 		int row_index = 0;
-		if(cell >= 0)
+		if (cell >= 0) {
 			row_index = ((LinkedTableModelOJ) tblLinkedContent.getModel()).getCellRowIndex(cell);
-		
+		}
+
 		tblLinkedContent.setRowSelectionInterval(row_index, row_index);
 
 		Rectangle visRect = tblLinkedContent.getVisibleRect();//don't scroll horizontally
 		int top = row_index - 8;//show 8 lines if possible
-		if(top < 0)
-				top = 0;//1.6.2020
+		if (top < 0) {
+			top = 0;//1.6.2020
+		}
 		Rectangle rect = tblLinkedContent.getCellRect(top, 0, true);
 		rect.x = visRect.x;
 		rect.width = visRect.width;
 		tblLinkedContent.scrollRectToVisible(rect);
 
-
-		
 	}
 
 	public synchronized void ytemChanged(YtemChangedEventOJ evt) {//9.9.2009
@@ -1845,7 +1928,7 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 	private JTable currentHeader() {
 		int index = tabbedResultsPane.getSelectedIndex();
 		//if (index == 0) {
-			return tblLinkedHeader;
+		return tblLinkedHeader;
 		//}
 		//return tblUnlinkedHeader;
 	}
@@ -1899,8 +1982,6 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 //
 //		}
 //	}
-	
-	
 //	public void adjustVerticalScrollbar(){
 //		
 //		
@@ -1916,6 +1997,4 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 //		IJ.beep();
 //	}
 //	
-	
-	
 }

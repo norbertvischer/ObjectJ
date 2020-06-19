@@ -62,7 +62,9 @@ public class MenuManagerOJ implements ItemListener, MacroChangedListenerOJ {
 	/**/ private MenuItem itemDeleteAllObjects;
 	/**/ private MenuItem itemRoiToObject;
 	private Menu menuResults;
+	/**/ private MenuItem itemPlot;
 	/**/ private MenuItem itemRecalculate;
+	/**/ private MenuItem itemAddErrorBars;
 	//private MenuItem itemReloadMacros;
 	//---
 	private MenuItem itemShowProjectWindow;
@@ -214,12 +216,20 @@ public class MenuManagerOJ implements ItemListener, MacroChangedListenerOJ {
 			/**/ itemRoiToObject.addActionListener(CellActionsOJ.ROIToYtemAction);
 			/**/ menuObjects.add(itemRoiToObject);
 
-			menuResults = new Menu("Results");
+			menuResults = new Menu("Results & Plots");
 			mnuObjectj.add(menuResults);
 
 			/**/ itemRecalculate = new MenuItem("Recalculate");
 			/**/ itemRecalculate.addActionListener(ResultsActionsOJ.RecalculateAction);
 			/**/ menuResults.add(itemRecalculate);
+
+			/**/ itemPlot = new MenuItem("Plot Linked Results");
+			/**/ itemPlot.addActionListener(ResultsActionsOJ.PlotAction);
+			/**/ menuResults.add(itemPlot);
+
+			/**/ itemPlot = new MenuItem("Add Error Bars to Plot");
+			/**/ itemPlot.addActionListener(ResultsActionsOJ.AddErrorBarsAction);
+			/**/ menuResults.add(itemPlot);
 
 //---
 			itemShowProjectWindow = new MenuItem("Show Project Window", new MenuShortcut(KeyEvent.VK_F1, true));
