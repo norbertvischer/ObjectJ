@@ -801,7 +801,18 @@ public class UtilsOJ {
 	return position;
     }
 
-    public static double[][] calcErrorBars(double[] XX, double[] YY, double binWidth, double binStart) {
+    public static double[][] calcErrorBars(double[] XX, double[] YY, double binWidth, double binStart, int confidPercent) {
+	double confid = 0;
+	if(confidPercent == 90)
+	    confid = 1.645;
+	if(confidPercent == 95)
+	    confid = 1.9600;
+	if(confidPercent == 98)
+	    confid = 2.3264;
+	if(confidPercent == 99)
+	    confid = 2.5758;
+	if(confid == 0)
+		return null;
 	double[][] output = new double[3][];//x, y, errors
 	int nPoints = XX.length;
 	if (YY.length != nPoints) {
@@ -845,7 +856,7 @@ public class UtilsOJ {
 		    double mean = sum / groupLen;		    
 		    double stdDev = (groupLen * sum2 - sum * sum) / groupLen;
 		    stdDev = Math.sqrt(stdDev / (groupLen - 1.0));
-		    double e95 = 1.9600 * stdDev / Math.sqrt(groupLen); //95% confidence
+		    double e95 = confid * stdDev / Math.sqrt(groupLen); //95% confidence
 		    e95s[goodGroups] = e95;
 		    means[goodGroups] = mean;
 		    midBins[goodGroups] = leftBorder + 0.5 * binWidth;//

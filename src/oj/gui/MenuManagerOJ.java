@@ -62,9 +62,10 @@ public class MenuManagerOJ implements ItemListener, MacroChangedListenerOJ {
 	/**/ private MenuItem itemDeleteAllObjects;
 	/**/ private MenuItem itemRoiToObject;
 	private Menu menuResults;
-	/**/ private MenuItem itemPlot;
+//	/**/ private MenuItem itemPlot;
 	/**/ private MenuItem itemRecalculate;
-	/**/ private MenuItem itemAddErrorBars;
+	///**/ private MenuItem itemAddErrorBars;	
+	///**/ private MenuItem itemQualifyRoi;
 	//private MenuItem itemReloadMacros;
 	//---
 	private MenuItem itemShowProjectWindow;
@@ -216,20 +217,35 @@ public class MenuManagerOJ implements ItemListener, MacroChangedListenerOJ {
 			/**/ itemRoiToObject.addActionListener(CellActionsOJ.ROIToYtemAction);
 			/**/ menuObjects.add(itemRoiToObject);
 
-			menuResults = new Menu("Results & Plots");
+			menuResults = new Menu("Results");
 			mnuObjectj.add(menuResults);
+			Menu menuPlot = new Menu("Plots");
+			mnuObjectj.add(menuPlot);
 
 			/**/ itemRecalculate = new MenuItem("Recalculate");
 			/**/ itemRecalculate.addActionListener(ResultsActionsOJ.RecalculateAction);
 			/**/ menuResults.add(itemRecalculate);
+			
+			MenuItem thisItem;
+			/**/ thisItem = new MenuItem("Plot Linked Results");
+			/**/ thisItem.addActionListener(ResultsActionsOJ.PlotAction);
+			/**/ menuPlot.add(thisItem);
+			
+			/**/ thisItem = new MenuItem("Qualify Objects in Roi");
+			/**/ thisItem.addActionListener(ResultsActionsOJ.AddQualifyRoiAction);
+			/**/ menuPlot.add(thisItem);
 
-			/**/ itemPlot = new MenuItem("Plot Linked Results");
-			/**/ itemPlot.addActionListener(ResultsActionsOJ.PlotAction);
-			/**/ menuResults.add(itemPlot);
+			/**/ thisItem = new MenuItem("Add Error Bars to Plot");
+			/**/ thisItem.addActionListener(ResultsActionsOJ.AddErrorBarsAction);
+			/**/ menuPlot.add(thisItem);
+			
+			/**/ thisItem = new MenuItem("Add to Plot");
+			/**/ thisItem.addActionListener(ResultsActionsOJ.AddToPlotAction);
+			/**/ menuPlot.add(thisItem);
 
-			/**/ itemPlot = new MenuItem("Add Error Bars to Plot");
-			/**/ itemPlot.addActionListener(ResultsActionsOJ.AddErrorBarsAction);
-			/**/ menuResults.add(itemPlot);
+//			/**/ thisItem = new MenuItem("Duplicate Plot");
+//			/**/ thisItem.addActionListener(ResultsActionsOJ.DuplicatePlotAction);
+//			/**/ menuPlot.add(thisItem);
 
 //---
 			itemShowProjectWindow = new MenuItem("Show Project Window", new MenuShortcut(KeyEvent.VK_F1, true));

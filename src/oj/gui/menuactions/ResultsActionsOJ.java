@@ -42,7 +42,7 @@ public class ResultsActionsOJ {
     public static ActionListener PlotAction = new ActionListener() {
 
 	public void actionPerformed(ActionEvent e) {
-	    IJ.showMessage("You chose Results>Plot");
+	    //IJ.showMessage("You chose Results>Plot");
 	    ProjectResultsOJ.getInstance().plotFromOjResult(false);//add = false
 
 	}
@@ -52,12 +52,38 @@ public class ResultsActionsOJ {
 
 	public void actionPerformed(ActionEvent e) {
 
-	    IJ.showMessage("You chose Add ErrorBars");
+	    //IJ.showMessage("You chose Add ErrorBars");
 	    ProjectResultsOJ.getInstance().addErrorBars();
 	}
     };
 
-    public static void exportResultsToText() {
+    public static ActionListener AddQualifyRoiAction = new ActionListener() {
+
+	public void actionPerformed(ActionEvent e) {
+
+	   // IJ.showMessage("You chose Qualify Roi");
+	    ProjectResultsOJ.getInstance().qualifyRoi();
+	    
+	}
+    };
+
+
+    public static ActionListener AddToPlotAction = new ActionListener() {
+
+	public void actionPerformed(ActionEvent e) {
+
+	    ProjectResultsOJ.getInstance().plotFromOjResult(true);//add = true
+	}
+    };
+   public static ActionListener DuplicatePlotAction = new ActionListener() {
+
+	public void actionPerformed(ActionEvent e) {
+
+	    ProjectResultsOJ.getInstance().duplicatePlot();
+	}
+    };
+
+public static void exportResultsToText() {
 	closeTextPreview();
 	int ww = 500;
 	int hh = 700;
