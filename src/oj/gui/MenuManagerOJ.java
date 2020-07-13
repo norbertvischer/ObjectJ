@@ -243,8 +243,8 @@ public class MenuManagerOJ implements ItemListener, MacroChangedListenerOJ {
 			/**/ thisItem.addActionListener(ResultsActionsOJ.AddToPlotAction);
 			/**/ menuPlot.add(thisItem);
 
-//			/**/ thisItem = new MenuItem("Duplicate Plot");
-//			/**/ thisItem.addActionListener(ResultsActionsOJ.DuplicatePlotAction);
+//			/**/ thisItem = new MenuItem("Histogram");
+//			/**/ thisItem.addActionListener(ResultsActionsOJ.HistogramAction);
 //			/**/ menuPlot.add(thisItem);
 
 //---

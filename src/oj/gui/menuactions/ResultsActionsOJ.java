@@ -75,11 +75,11 @@ public class ResultsActionsOJ {
 	    ProjectResultsOJ.getInstance().plotFromOjResult(true);//add = true
 	}
     };
-   public static ActionListener DuplicatePlotAction = new ActionListener() {
+   public static ActionListener HistogramAction = new ActionListener() {
 
 	public void actionPerformed(ActionEvent e) {
 
-	    ProjectResultsOJ.getInstance().duplicatePlot();
+	    ProjectResultsOJ.getInstance().histogram();
 	}
     };
 

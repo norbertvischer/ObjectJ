@@ -1317,8 +1317,9 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 //IJ.beep();//13.5.2019
 	// TODO add your handling code here:
     }//GEN-LAST:event_tblLinkedHeaderMouseDragged
-
+    static String[] defaults = new String[]{"", ""};
     public void plotFromOjResult(boolean doAdd) {
+	
 	Plot plot = null;
 	if (doAdd) {
 	    ImagePlus imp = IJ.getImage();
@@ -1353,7 +1354,7 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 	}
 	//ColumnOJ clickedColumn = rightClickedColumn(currentHeader());
 	//String from = clickedColumn.getName();
-	String from = "";
+	//String from = "";
 	String titlesStr = "";
 	ColumnsOJ columns = OJ.getData().getResults().getColumns();
 	ArrayList<float[]> data = new ArrayList<float[]>(0);
@@ -1366,7 +1367,11 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 	    }
 	}
 	String[] titlesArr = titlesStr.split("\t");
-	String[] defaults = new String[]{from, from};
+	//String[] defaults = new String[]{from, from};
+	if(titlesArr.length >1 && defaults[0] == ""){
+	    defaults[0] = titlesArr[0];
+	    defaults[1] = titlesArr[1];
+	}
 	PlotContentsDialog pgd = null;
 	if (!doAdd) {
 	    pgd = new PlotContentsDialog("Plot...", titlesArr, defaults, data);//New Plot
@@ -1376,13 +1381,16 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 	}
 	pgd.noErrorBars();
 	pgd.showDialog(null);
-
 	if (!doAdd) {
 	    ImagePlus imp = IJ.getImage();
 	    if (imp != null && imp.getWindow() instanceof PlotWindow) {
 		plot = ((PlotWindow) (imp.getWindow())).getPlot();
 		if (imp.getTitle().equalsIgnoreCase("Plot...")) {
-		    imp.setTitle("Plot " + plot.getLabel('y') + " vs " + plot.getLabel('x'));
+		    String xLabel = plot.getLabel('x');
+		    String yLabel = plot.getLabel('y');
+		    imp.setTitle("Plot " + xLabel + " vs " + yLabel);
+		    defaults[0] = xLabel;
+		    defaults[1] = yLabel;
 		}
 		IJ.selectWindow("ImageJ");//18.6.2020 make Plot window responsive
 	    }
@@ -1390,8 +1398,11 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 	return;
     }
 
-    public void duplicatePlot() {
-//	IJ.showMessage("Duplicating Plot");
+    public void histogram() {
+		
+	IJ.showMessage("Histogram ");
+	ColumnOJ axisColumn = OJ.getData().getResults().getColumns().getColumnByName("Axis");
+	 new PlotOJ().makeHistoFromColumn2(axisColumn);//22.5.2019
 //	ImagePlus imp = IJ.getImage();
 //	if (imp.getWindow() instanceof PlotWindow) {
 //	    Plot plot = ((PlotWindow) (imp.getWindow())).getPlot();
