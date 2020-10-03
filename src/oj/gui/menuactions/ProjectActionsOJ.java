@@ -7,13 +7,10 @@
 package oj.gui.menuactions;
 
 import ij.IJ;
-import ij.WindowManager;
 import ij.gui.YesNoCancelDialog;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import oj.OJ;
-import oj.graphics.CustomCanvasOJ;
 import oj.project.DataOJ;
 import oj.gui.AboutOJ;
 import oj.macros.EmbeddedMacrosOJ;
@@ -165,11 +162,6 @@ public class ProjectActionsOJ {
 		}
 
 		MenuManagerOJ.getInstance().setEnabled(true);
-
-		CustomCanvasOJ.markerRad = 2;
-		CustomCanvasOJ.markerSize = 4;
-		CustomCanvasOJ.fontSize = 13;
-
 		OJ.getDataProcessor().qualifyCells();
 		OJ.getImageProcessor().applyImageMarkers();
 	}

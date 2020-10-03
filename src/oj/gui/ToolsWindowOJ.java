@@ -1,10 +1,9 @@
 /*
- * ObjectDefListOJ.java
+ * ToolsWindowOJ
  */
 package oj.gui;
 
 import ij.IJ;
-import ij.ImagePlus;
 import ij.Menus;
 import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
@@ -13,7 +12,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -37,7 +35,6 @@ import javax.swing.ListCellRenderer;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import oj.OJ;
-import oj.graphics.CustomCanvasOJ;
 import oj.project.YtemDefOJ;
 import oj.processor.events.CellChangedEventOJ;
 import oj.processor.events.CellChangedListenerOJ;
@@ -52,6 +49,7 @@ import oj.gui.tools.events.ToolListChangedEventOJ;
 import oj.gui.tools.events.ToolListChangedListenerOJ;
 import oj.gui.tools.events.ToolSelectionChangedEventOJ;
 import oj.gui.tools.events.ToolSelectionChangedListenerOJ;
+
 
 public class ToolsWindowOJ extends javax.swing.JPanel implements ToolListChangedListenerOJ, ToolSelectionChangedListenerOJ, /*ItemListIntfOJ,*/ KeyListener, CellChangedListenerOJ, YtemDefChangedListenerOJ, YtemDefSelectionChangedListenerOJ, DialogListener {
 
@@ -397,11 +395,12 @@ public class ToolsWindowOJ extends javax.swing.JPanel implements ToolListChanged
 
         boolean showNumber = OJ.getData().getYtemDefs().getShowCellNumber();
         gd.addCheckbox("Show Object Number", showNumber);
-
-        gd.addRadioButtonGroup("Font Size", choices, 3, 1, "" + CustomCanvasOJ.fontSize);
-//gd.addMessage("___");
+	int myFontSize = OJ.getData().getLabelFontSize();
+	int myMarkerRad = OJ.getData().getMarkerRad();
+        gd.addRadioButtonGroup("Font Size", choices, 3, 1, "" + myFontSize);
+	//gd.addMessage("___");
         choices = "Small Medium Large".split(" ");
-        gd.addRadioButtonGroup("Marker Size", choices, 3, 1, choices[CustomCanvasOJ.markerRad - 2]);
+        gd.addRadioButtonGroup("Marker Size", choices, 3, 1, choices[myMarkerRad - 2]);
         gd.addDialogListener(this);
 
         gd.showDialog();
@@ -464,7 +463,6 @@ public class ToolsWindowOJ extends javax.swing.JPanel implements ToolListChanged
             updateVisibilityPanel();
         }
     }
-//
 
     public static void clearOJToolbarSelection() {
         ytemDefList.grpEditCell.setSelected(new DefaultButtonModel(), true);
@@ -744,20 +742,17 @@ public class ToolsWindowOJ extends javax.swing.JPanel implements ToolListChanged
 
         boolean showNumber = gd.getNextBoolean();
         String fontSize = gd.getNextRadioButton();
-        String markerSizeStr = gd.getNextRadioButton();
-        int mSize = 2;
-        if (markerSizeStr.startsWith("M")) {
-            mSize = 3;
+        String markerRadStr = gd.getNextRadioButton();
+        int mRad = 2;
+        if (markerRadStr.startsWith("M")) {
+            mRad = 3;
         }
-        if (markerSizeStr.startsWith("L")) {
-            mSize = 4;
+        if (markerRadStr.startsWith("L")) {
+            mRad = 4;
         }
+	OJ.getData().setLabelFontSize(Integer.parseInt(fontSize));
+	OJ.getData().setLabelRad(mRad);
 
-        CustomCanvasOJ.markerRad = mSize;
-        CustomCanvasOJ.markerSize = mSize * 2;
-
-        CustomCanvasOJ.fontArial = Font.decode("Arial-" + fontSize);
-        CustomCanvasOJ.fontSize = Integer.parseInt(fontSize);
         OJ.getEventProcessor().fireCellChangedEvent();
         OJ.getData().getYtemDefs().setShowCellNumber(showNumber);
         OJ.getEventProcessor().fireYtemDefChangedEvent(YtemDefChangedEventOJ.LABEL_VISIBILITY_CHANGED);

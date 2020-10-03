@@ -57,15 +57,17 @@ import oj.project.results.ColumnsOJ;
 public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, CellChangedListenerOJ, YtemChangedListenerOJ, YtemDefChangedListenerOJ {
 
     public static int hits = 0;
-    public static int markerRad = 2;
-    public static int markerSize = 4;
-    public static int fontSize = 13;
+    private int markerRad;
+    private int markerSize;
+    private int fontSize;
+    private Font fontArial= Font.decode("Arial-13");
+    private Font fontArialItalic = Font.decode("Arial-ITALIC-13");
     private String imageName;
     private DataOJ dataOJ;
     private ImageOJ image;
     public BufferStrategy buforowanie;
-    public static Font fontArial = Font.decode("Arial-13");
-    public static Font fontArialItalic = Font.decode("Arial-ITALIC-13");
+    //= Font.decode("Arial-13");
+   // public static Font fontArialItalic = Font.decode("Arial-ITALIC-13");
     private Image offScreenImage;
     private int offScreenWidth = 0;
     private int offScreenHeight = 0;
@@ -75,7 +77,11 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
         super(imp);
         this.dataOJ = dataOJ;
         this.imageName = imageName;
-
+	fontSize = OJ.getData().getLabelFontSize();
+	fontArial = Font.decode("Arial-" + fontSize);
+	fontArialItalic = Font.decode("Arial-ITALIC-" + fontSize);
+ 	markerRad = OJ.getData().getMarkerRad();
+	markerSize = markerRad *2;
         addKeyListener(KeyEventManagerOJ.getInstance());
 
         image = dataOJ.getImages().getImageByName(imageName);
@@ -161,7 +167,15 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
     // problem: the entire image is
     public void paint(Graphics g) {
 		hits++;
-
+		markerRad = OJ.getData().getMarkerRad();
+		markerSize = markerRad * 2;
+		
+		fontSize = OJ.getData().getLabelFontSize();
+		//fontArial = Font.decode("Arial-" + fontSize);
+		//fontArialItalic = Font.decode("Arial-ITALIC-" + fontSize);
+		fontArial = new Font("SansSerif", Font.PLAIN,  fontSize);
+		fontArialItalic = new Font("SansSerif", Font.ITALIC + Font.BOLD,  fontSize);
+ 
 		Graphics g2 = getOffscreenGraphics();//3.2.2011
 		super.paint(g2);
 		drawOverlayoj(g2);
@@ -566,8 +580,8 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
     /**
      * draws one of the marker types plus, square, cross, dot, pixel, diamond
      */
-    private void drawMarker(Graphics2D g, int xpos, int ypos, int markerType, boolean selected) {
-        if (selected) {
+    private void drawMarker(Graphics2D g, int xpos, int ypos, int markerType, boolean selected) {       	
+	if (selected) {
             g.fillRect(xpos - markerRad - 1, ypos - markerRad - 1, 2 * markerSize - 1, 2 * markerSize - 1);
         } else {
             ((Graphics2D) g).setStroke(new BasicStroke((float) 1.0));

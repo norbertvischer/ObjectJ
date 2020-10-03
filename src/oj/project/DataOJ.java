@@ -29,10 +29,13 @@ public class DataOJ implements Cloneable, IBaseOJ, Serializable {
     public transient MacroSetOJ macroSet = new MacroSetOJ();
     public ResultsOJ results = new ResultsOJ();
     public YtemDefsOJ ytemDefs = new YtemDefsOJ();
+    private int labelFontSize;//3.10.2020
+    private int markerRadius;
     private transient String directory = "";
     private transient boolean changed = false;
     private transient String linkedMacroText = null;
     private transient String linkedPlotText = null;
+    //public static int labelFontSize = 14;
 
     public DataOJ(String name, String description) {
         this.setName(name);
@@ -49,6 +52,27 @@ public class DataOJ implements Cloneable, IBaseOJ, Serializable {
         init();
     }
 
+    public void setLabelFontSize(int size){
+	labelFontSize = size;
+    }
+    public int getLabelFontSize(){
+	if(labelFontSize < 13)
+	    labelFontSize = 13;
+	return labelFontSize;
+    }
+
+     public void setLabelRad(int rad){
+	markerRadius = rad;
+    }
+  
+    public int getMarkerRad(){
+	if(markerRadius < 2)
+	    markerRadius = 2;
+	return markerRadius;
+    }
+    
+    
+    
     public String getLinkedMacroText() {//18.3.2010
         return linkedMacroText;
     }
