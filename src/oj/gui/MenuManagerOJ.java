@@ -55,7 +55,7 @@ public class MenuManagerOJ implements ItemListener, MacroChangedListenerOJ {
 	/**/ private MenuItem itemLinkCurrentImage;
 	/**/ private MenuItem itemForgetUnmarkedImages;
 	/**/ private MenuItem itemPropagateScale;
-	//**/ private MenuItem itemFlatten;
+	/**/ private MenuItem itemFlatten;
 	private Menu menuObjects;
 	/**/ private MenuItem itemShowObject;
 	/**/ private MenuItem itemDeleteObjects;
@@ -74,7 +74,7 @@ public class MenuManagerOJ implements ItemListener, MacroChangedListenerOJ {
 	private MenuItem itemShowMacroText;
 	private MenuItem itemShowProjectFolder;
 	private static MenuManagerOJ instance;
-	private int mnuItemsCount = 11;//25.8.2010
+	private int mnuItemsCount = 12;
 	private Hashtable macroComands = new Hashtable();
 	private Hashtable macroListeners = new Hashtable();
 	private MacroActionListener macroActionListener = new MacroActionListener();
@@ -194,9 +194,9 @@ public class MenuManagerOJ implements ItemListener, MacroChangedListenerOJ {
 			/**/ itemPropagateScale.addActionListener(ImageActionsOJ.PropagateScaleAction);
 			/**/ menuLinkedImages.add(itemPropagateScale);
 
-			//**/ itemFlatten = new MenuItem("Flattened Duplicate");
-			//**/ itemFlatten.addActionListener(ImageActionsOJ.FlattenAction);
-			//**/ menuLinkedImages.add(itemFlatten);
+			/**/ itemFlatten = new MenuItem("Flattened Duplicate");
+			/**/ itemFlatten.addActionListener(ImageActionsOJ.FlattenAction);
+			/**/ menuLinkedImages.add(itemFlatten);
 
 			menuObjects = new Menu("Objects");
 			mnuObjectj.add(menuObjects);

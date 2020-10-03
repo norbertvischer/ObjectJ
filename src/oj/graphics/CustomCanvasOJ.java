@@ -13,13 +13,13 @@ import ij.ImagePlus;
 import ij.Macro;
 import ij.gui.ImageCanvas;
 import ij.gui.NewImage;
+import ij.gui.Overlay;
 import ij.gui.Roi;
 import ij.macro.Interpreter;
 import ij.plugin.Colors;
 import ij.util.Java2;
 import java.awt.BasicStroke;
 import java.awt.Color;
-import static java.awt.Color.LIGHT_GRAY;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -53,7 +53,6 @@ import oj.project.YtemDefsOJ;
 import oj.project.results.ColumnDefOJ;
 import oj.project.results.ColumnOJ;
 import oj.project.results.ColumnsOJ;
-import oj.project.results.OperandOJ;
 
 public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, CellChangedListenerOJ, YtemChangedListenerOJ, YtemDefChangedListenerOJ {
 
@@ -181,9 +180,12 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
         return offScreenImage.getGraphics();
     }
 
-    public void makeFlattenedImage() {//19.10.2011
+    public void makeFlattenedImage() {
         if (ImageProcessorOJ.isFrontImageLinked()) {
-            String name = "Flat-" + imp.getTitle();
+            String name = "Flat_" + imp.getTitle();
+			Overlay overlay1 = imp.getOverlay();
+			imp.setOverlay(null);
+			imp.killRoi();
             ImagePlus flatImp = NewImage.createRGBImage(name, imp.getWidth(), imp.getHeight(), 1, 0);
             BufferedImage bufferedImage = flatImp.getBufferedImage();
 
@@ -191,8 +193,15 @@ public class CustomCanvasOJ extends ImageCanvas implements DrawCellListenerOJ, C
             super.paint(g3);
             drawOverlayoj(g3);
             flatImp.setImage(bufferedImage);
+			imp.setOverlay(overlay1);
+			if(overlay1 != null){
+				Overlay overlay2=overlay1.duplicate();
+				flatImp.setOverlay(overlay2);
+				flatImp = flatImp.flatten();
+			}
+			flatImp.setTitle(name);
             flatImp.show();
-        } else {
+       } else {
             IJ.error("Front image is not linked");
         }
     }
