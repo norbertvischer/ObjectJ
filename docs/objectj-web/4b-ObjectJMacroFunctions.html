@@ -51,31 +51,17 @@
 
 
         </div>
-
-        <!-- #bbinclude "LinksForMacro.incl" -->
-        <ul id="manuallinks"> <li>
-                <a href="4a-ObjectJMacroFunctions.html">Usage of macros </a> &nbsp;|&nbsp;
-                <a href="4b-ObjectJMacroFunctions.html">ObjectJ functions</a>&nbsp;|&nbsp;
-            </li>
-        </ul>
-        <!-- end bbinclude -->
+        <a href="4a-ObjectJMacroFunctions.html">Usage of macros </a> &nbsp;|&nbsp;
+        <a href="4b-ObjectJMacroFunctions.html">ObjectJ functions</a>&nbsp;|&nbsp;
 
         <blockquote>
 
             <div id="Macros">
-
-
-
                 <H2>Macro functions in ObjectJ</H2>
-                <br></br>
-
                 <font size = "1">
-                    25-May-2019
-
+                    18-oct-2020
                 </font>
-
-                <p>
-                </p>
+              <br/>
 
 
 
@@ -92,7 +78,8 @@
 
                     <a name=ojCloseItem></a>
                     ojCloseItem()   </H3><H4>
-                    if an item with variable number of points such as polygon or segmented line is open, it is closed, otherwise nothing happens. (not yet implemented)   </H4><H3>
+                    if an item with variable number of points such as polygon or segmented line is open, it is closed, otherwise nothing happens. 
+                </H4><H3>
 
 
                     <a name=ojCloseObject></a>
@@ -111,8 +98,8 @@
 
 
                     <a name=ojDeleteColumn></a>
-                    ojDeleteColumn(columnTitle)   </H3><H4>
-                    Deletes the object results column with that title. Use "*" to delete all columns, or other wildcards to delete a set of columns.   </H4><H3>
+                    ojDeleteColumn(title)   </H3><H4>
+                    Deletes the ObjectJ results column with that title, or several space-separated titles. Use "*" to delete all columns, or other wildcards to delete a set of columns.   </H4><H3>
 
 
                     <a name=ojDeleteItem></a>
@@ -154,7 +141,7 @@
                                 <br/> stacksize is product of channels, slices and frames. ID is negative if image is open, otherwise zero.
                                 </H4><H3>
                     -->
-                     <a name=ojGetImageValue></a>
+                    <a name=ojGetImageValue></a>
                     ojGetImageValue(n, key)  </H3><H4>
                     returns numerical info of the n-th linked image (1-based), where key can be:
                     <br/>"width", "height", "channels", "slices", "frames", "stacksize", "ID", "frameinterval"
@@ -182,7 +169,7 @@
                     ojGetItemTypes()   </H3><H4>
                     returns the used item types (Point, Line etc) in the order they are listed in the ObjectJ Tools window, separated by spaces </H4><H3>
 
-                   <a name=ojGetObjectInfo></a>
+                    <a name=ojGetObjectInfo></a>
                     ojGetObjectInfo()   </H3><H4>
                     returns info string of selected object </H4><H3>
 
@@ -210,7 +197,7 @@
                     <a name=ojGetTarget></a>
                     ojGetTarget()   </H3><H4>
                     If in target mode,  target is returned as single string (image index and stack index, both 1-based).  Otherwise, an empty string is returned.
-                     </H4><H3>
+                </H4><H3>
 
                     <a name=ojGetVirtualFlag></a>
                     ojGetVirtualFlag()  </H3><H4>
@@ -218,39 +205,8 @@
 
                     <a name=ojGetVoxelSize></a>
                     ojGetVoxelSize(n, "x")  </H3><H4>
-                    returns x-voxelsize of n-th linked image (1-based; ditto for "y" and "z") </H4><H3>
-
-
-
-
-                    <a name=ojGlassWindow></a>
-                    ojGlassWindow("show")</H3><H4>
-                    -- "show" : shows a transparent GlassWindow<br/>
-                    -- "hide" : hides the GlassWindow (same as clicking the red "Close" icon<br/>
-
-
-                    -- "connect" : connects GlassWindow to front image, which must be linked to the ObjectJ project,
-                    and must have same size as the GlassWindow. Additionally, the current slice is refreshed.<br/>
-
-                    -- "refresh" : grabs screen content under the GlassWindow and pastes it into last slice of 
-                    connected stack<br/>
-
-                    -- "addSlice" : adds a slice to the end of connected stack, and refreshes it with the current
-                    screen content under the GlassWindow<br/> 
-
-
-                    -- "color=0x00114433" : defines the transparent color of GlassWindow in a hex string
-                    0xaarrggbb, where aa is alpha channel, rr is red, gg is green and bb is blue </H4><H3>
-
-                    <a name=ojGetGlassDimensions></a>
-                    ojGetGlassDimensions()</H3><H4>
-                    returns an array holding GlassWindows left, top, width, height </H4><H3>                     
-
-
-
-
-
-
+                    returns x-voxelsize of n-th linked image (1-based; ditto for "y" and "z") 
+                </H4><H3>
                     <a name=ojHideResults></a>
                     ojHideResults()   </H3><H4>
                     Closes the ObjectJ results window   </H4><H3>
@@ -295,7 +251,7 @@
                     ojInitColumn(columnTitle)   </H3><H4>
                     if the object results table contains a column with this title, it is cleared (i.e. it is filled with NaNs).
                     If the column was static, it is made dynamic. If no column has this title, a new dynamic column is created in the object results. 
-		    columTitle can contain several titles separated by spaces. 
+                    columTitle can contain several titles separated by spaces. 
                     No algorithms will be attached.   </H4><H3>
 
                     <a name=ojInitTextColumn></a>
@@ -505,23 +461,23 @@
                     "color": color (eg 0xff0000 is red, 0x00ff00 is green, 0x0000ff is blue, 0 is black) <br/>
                     "visible": 0= hidden, 1 = visible <br/>
                     "label": ojSetColumnProperty("Area", "label", "index: label" <br/>
-                    
-                    
+
+                </H4><H3>
 
                     <a name=ojSetComposite></a>
                     ojSetComposite(b)   </H3><H4>
                     b=false sets collect mode to "single", so that an object can only contain a single item. b=true sets collect mode to "composite", so that an object can contain a whole collection of different items, that reside under the same object number and whose results populate the same row. This command only affects future point collection - it doesn't change existing objects.   </H4><H3>
 
-                   <a name=ojSetItemInfo></a>
+                    <a name=ojSetItemInfo></a>
                     ojSetItemInfo(s)   </H3><H4>
                     sets info string of selected item  </H4><H3>
 
- 
+
                     <a name=ojSetItemVisible></a>
                     ojSetItemVisible("ItemName", b)	</H3><H4>
                     shows or hides specified items depending on boolen b	</H4><H3>
-         
-                   <a name=ojSetObjectInfo></a>
+
+                    <a name=ojSetObjectInfo></a>
                     ojSetObjectInfo(s)   </H3><H4>
                     sets info string of selected object </H4><H3>                   
 
@@ -559,15 +515,15 @@
                     <br/>
                     negative n: deselects tool in ImageJ window and selects a tool in ObjectJ Tools	
                     (also accepts name like "Pistol", "Marker", "SelectObject", "MoveObject", "ObjectToRoi").</H4><H3>
-                        
+
                     <a name=ojShowImage></a>
                     ojShowImage(n)   </H3>
                 <H4>
                     displays the n-th image as listed in the panel "Linked images" (1-based).
                 </H4><H3>
 
-                    
-                <a name=ojSetVirtualFlag></a>
+
+                    <a name=ojSetVirtualFlag></a>
                     ojSetVirtualFlag(b)  </H3><H4>
                     if b=true, linked images will be opened virtually </H4>
 
@@ -717,8 +673,8 @@
         </script>
         <script type="text/javascript">
             try {
-                var pageTracker = _gat._getTracker("UA-10085222-2");
-                pageTracker._trackPageview();
+            var pageTracker = _gat._getTracker("UA-10085222-2");
+            pageTracker._trackPageview();
             } catch (err) {
             }</script>
 
