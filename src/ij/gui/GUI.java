@@ -8,7 +8,7 @@ import javax.swing.UIManager;
 
 /** This class consists of static GUI utility methods. */
 public class GUI {
-	private static final Font DEFAULT_FONT = new Font(Font.SANS_SERIF, Font.PLAIN, 12);
+	private static final Font DEFAULT_FONT = IJ.font12;
 	private static Color lightGray = new Color(240,240,240);
 	private static boolean isWindows8;
 	private static Color scrollbarBackground = new Color(245,245,245);
@@ -258,20 +258,4 @@ public class GUI {
 			sb.setBackground(scrollbarBackground);
 	}
 	
-	/** Returns a reference to the current image window,
-	 * or to the "ImageJ" window if no images are open.
-	*/
-	public static Frame getParentFrame() {
-		Frame parent = WindowManager.getCurrentImage()!=null?
-			(Frame)WindowManager.getCurrentImage().getWindow():IJ.getInstance()!=null?IJ.getInstance():new Frame();
-		if (IJ.isMacOSX() && IJ.isJava18()) {
-			ImageJ ij = IJ.getInstance();
-			if (ij!=null && ij.isActive())
-				parent = ij;
-			else
-				parent = null;
-		}
-		return parent;
-	}
-
 }

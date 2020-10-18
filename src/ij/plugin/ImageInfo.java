@@ -40,6 +40,7 @@ public class ImageInfo implements PlugIn {
 		Dimension screen = IJ.getScreenSize();
 		s += "ImageJ home: "+IJ.getDir("imagej")+"\n";
 		s += "Java home: "+System.getProperty("java.home")+"\n";
+		s += "Java version: "+IJ.javaVersion()+"\n";
 		s += "Screen size: "+screen.width+"x"+screen.height+"\n";
 		s += "GUI scale: "+IJ.d2s(Prefs.getGuiScale(),2)+"\n";
 		//s += "Active window: "+WindowManager.getActiveWindow()+"\n";
@@ -226,6 +227,9 @@ public class ImageInfo implements PlugIn {
 	    		s += "Bits per pixel: 32 (RGB)\n";
 	    		break;
     	}
+    	String lutName = imp.getProp(LUT.nameKey);
+    	if (lutName!=null)
+			s += "LUT name: "+lutName+"\n";    		
 		double interval = cal.frameInterval;
 		double fps = cal.fps;
     	if (stackSize>1) {
@@ -503,6 +507,8 @@ public class ImageInfo implements PlugIn {
 		for (int i=0; i<props.length; i+=2) {
 			String key = props[i];
 			String value = props[i+1];
+			if (LUT.nameKey.equals(key) || "UniqueName".equals(key))
+				continue;
 			if (key!=null && value!=null && !key.equals("ShowInfo")) {
 				if (value.length()<80)
 					s += key + ": " + value + "\n";

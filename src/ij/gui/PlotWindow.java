@@ -76,7 +76,7 @@ public class PlotWindow extends ImageWindow implements ActionListener, ItemListe
 
 	private Button list, data, more, live;
 	private PopupMenu dataPopupMenu, morePopupMenu;
-	private static final int NUM_MENU_ITEMS = 20; //how many menu items we have in total
+	private static final int NUM_MENU_ITEMS = 21; //n__ how many menu items we have in total
 	private MenuItem[] menuItems = new MenuItem[NUM_MENU_ITEMS];
 	private Label statusLabel;
 	private String userStatusText;
@@ -334,10 +334,11 @@ public class PlotWindow extends ImageWindow implements ActionListener, ItemListe
 	private static int SAVE=0, COPY=1, COPY_ALL=2, LIST_SIMPLE=3, ADD_FROM_TABLE=4, ADD_FROM_PLOT=5, ADD_FIT=6, //data menu
 			SET_RANGE=7, PREV_RANGE=8, RESET_RANGE=9, FIT_RANGE=10,  //the rest is in the more menu
 			ZOOM_SELECTION=11, AXIS_OPTIONS=12, LEGEND=13, STYLE=14, TEMPLATE=15, RESET_PLOT=16,
-			FREEZE=17, HI_RESOLUTION=18, PROFILE_PLOT_OPTIONS=19;
+			FREEZE=17, HI_RESOLUTION=18, PROFILE_PLOT_OPTIONS=19,
+		REMOVE_PLOT=20;//n__
 	//the following commands are disabled when the plot is frozen
-	private static int[] DISABLED_WHEN_FROZEN = new int[]{ADD_FROM_TABLE, ADD_FROM_PLOT, ADD_FIT,
-			SET_RANGE, PREV_RANGE, RESET_RANGE, FIT_RANGE, ZOOM_SELECTION, AXIS_OPTIONS, LEGEND, STYLE, RESET_PLOT};
+	private static int[] DISABLED_WHEN_FROZEN = new int[]{ADD_FROM_TABLE, ADD_FROM_PLOT, ADD_FIT, REMOVE_PLOT,
+			SET_RANGE, PREV_RANGE, RESET_RANGE, FIT_RANGE, ZOOM_SELECTION, AXIS_OPTIONS, LEGEND, STYLE, RESET_PLOT, REMOVE_PLOT};
 
 	/** Prepares and returns the popupMenu of the Data>> button */
 	PopupMenu getDataPopupMenu() {
@@ -351,6 +352,7 @@ public class PlotWindow extends ImageWindow implements ActionListener, ItemListe
 		menuItems[ADD_FROM_TABLE] = addPopupItem(dataPopupMenu, "Add from Table...");
 		menuItems[ADD_FROM_PLOT] = addPopupItem(dataPopupMenu, "Add from Plot...");
 		menuItems[ADD_FIT] = addPopupItem(dataPopupMenu, "Add Fit...");
+		menuItems[REMOVE_PLOT] = addPopupItem(dataPopupMenu, "Remove Plot...");
 		return dataPopupMenu;
 	}
 
@@ -421,6 +423,8 @@ public class PlotWindow extends ImageWindow implements ActionListener, ItemListe
 			new PlotContentsDialog(plot, PlotContentsDialog.ADD_FROM_PLOT).showDialog(this);
 		else if (b==menuItems[ADD_FIT])
 			new PlotContentsDialog(plot, PlotContentsDialog.ADD_FIT).showDialog(this);
+		else if (b==menuItems[REMOVE_PLOT])
+			IJ.showMessage("remove");
 		else if (b==menuItems[ZOOM_SELECTION]) {
 			if (imp!=null && imp.getRoi()!=null && imp.getRoi().isArea())
 				plot.zoomToRect(imp.getRoi().getBounds());

@@ -370,7 +370,7 @@ public class Opener {
 		if (imp!=null && imp.getNChannels()>1)
 			imp = new CompositeImage(imp, IJ.COLOR);
 		this.fileType = wrap[0];
-		if (imp==null && (this.fileType==UNKNOWN||this.fileType==TIFF))
+		if (imp==null && !silentMode && (this.fileType==UNKNOWN||this.fileType==TIFF))
 			IJ.error("Opener", "Unsupported format or file not found:\n"+path);
 		return imp;
 	}
@@ -453,13 +453,17 @@ public class Opener {
 		} 
 	}
 	
-	/** Can't open imagej.nih.gov URLs due to encryption so redirect to mirror.nih.net. */
+	/** Can't open imagej.nih.gov URLs due to encryption so redirect to imagej.net mirror. */
 	public static String updateUrl(String url) {
 		if (url==null || !url.contains("nih.gov"))
 			return url;
-		url = url.replace("imagej.nih.gov/ij", "mirror.imagej.net");
-		url = url.replace("rsb.info.nih.gov/ij", "mirror.imagej.net");
-		url = url.replace("rsbweb.nih.gov/ij", "mirror.imagej.net");
+		if (IJ.isJava18())
+			url = url.replace("http:", "https:");
+		else {
+			url = url.replace("imagej.nih.gov/ij", "imagej.net");
+			url = url.replace("rsb.info.nih.gov/ij", "imagej.net");
+			url = url.replace("rsbweb.nih.gov/ij", "imagej.net");
+		}
 		return url;
 	}
 	
@@ -946,7 +950,11 @@ public class Opener {
 				imp = dcm;
 			} else {
 				zis.close();
-				IJ.error("Opener", "This ZIP archive does not appear to contain a \nTIFF (\".tif\") or DICOM (\".dcm\") file, or ROIs (\".roi\").");
+				String msg = "This ZIP archive does not contain a TIFF or DICOM file, or ROIs:\n   "+path;
+				if (silentMode)
+					IJ.log(msg);
+				else
+					IJ.error("Opener", msg);
 				return null;
 			}
 			zis.close();

@@ -369,7 +369,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
     private void initGraphics(Overlay overlay, Graphics g, Color textColor, Color defaultColor) {
 		if (smallFont==null) {
 			smallFont = new Font("SansSerif", Font.PLAIN, 9);
-			largeFont = ImageJ.SansSerif12;
+			largeFont = IJ.font12;
 		}
 		if (textColor!=null) {
 			labelColor = textColor;
@@ -1341,7 +1341,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				
 		if (roi!=null && (roi instanceof PointRoi)) {
 			int npoints = ((PolygonRoi)roi).getNCoordinates();
-			if (npoints>1 && handle==-1 && !(tool==Toolbar.POINT && !Toolbar.getMultiPointMode()&&IJ.shiftKeyDown())) {
+			if (npoints>1 && handle==-1 && !IJ.altKeyDown() && !(tool==Toolbar.POINT && !Toolbar.getMultiPointMode()&&IJ.shiftKeyDown())) {
 				String msg =  "Type shift-a (Edit>Selection>Select None) to delete\npoints. Use multi-point tool to add points.";
 				GenericDialog gd=new GenericDialog("Point Selection");
 				gd.addMessage(msg);
@@ -1542,7 +1542,11 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			if ((e.isAltDown()||e.isControlDown()||cmdDown) && roi==null) {
 				if (activateOverlayRoi(ox, oy))
 					return;
+			} else if ((System.currentTimeMillis()-mousePressedTime)>250L && !drawingTool()) { // long press
+				if (activateOverlayRoi(ox,oy))
+					return;
 			}
+
 		}
 
 		PlugInTool tool = Toolbar.getPlugInTool();

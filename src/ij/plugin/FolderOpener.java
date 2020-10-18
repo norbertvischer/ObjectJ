@@ -15,7 +15,8 @@ import ij.plugin.frame.Recorder;
 /** Implements the File/Import/Image Sequence command, which
 	opens a folder of images as a stack. */
 public class FolderOpener implements PlugIn {
-
+	private static final String DIR_KEY = "import.sequence.dir";
+	private static final String[] types = {"default", "16-bit", "32-bit", "RGB"};
 	private static String[] excludedTypes = {".txt", ".lut", ".roi", ".pty", ".hdr", ".java", ".ijm", ".py", ".js", ".bsh", ".xml"};
 	private static boolean staticSortFileNames = true;
 	private static boolean staticOpenAsVirtualStack;
@@ -23,8 +24,7 @@ public class FolderOpener implements PlugIn {
 	private boolean sortFileNames = true;
 	private boolean sortByMetaData = true;
 	private boolean openAsVirtualStack;
-	private double scale = 100.0;
-	private int n, start, increment;
+	private String directory;
 	private String filter;
 	private String legacyRegex;
 	private FileInfo fi;
@@ -32,6 +32,14 @@ public class FolderOpener implements PlugIn {
 	private ImagePlus image;
 	private boolean saveImage;
 	private long t0;
+	private int stackWidth, stackHeight;
+	private int bitDepth;
+	private int defaultBitDepth;
+	private int nFiles = 0;
+	private int start = 1;
+	private int increment = 1;
+	private double scale = 100.0;
+
 	
 	/** Opens the images in the specified directory as a stack. Displays
 		directory chooser and options dialogs if the argument is null. */
@@ -47,18 +55,40 @@ public class FolderOpener implements PlugIn {
 		Displays directory chooser and options dialogs if the the 'path'
 		argument is null. */
 	public static ImagePlus open(String path, String options) {
-		if (options==null)
-			options = "";
 		FolderOpener fo = new FolderOpener();
 		fo.saveImage = true;
-		if (options!=null) {
-			fo.openAsVirtualStack = options.contains("virtual") || options.contains("use");
-			if (options.contains("noMetaSort")) 
-				fo.sortByMetaData = false;
-		}
-		fo.filter = Macro.getValue(options, "file", "");
+		fo.setOptions(options);
 		fo.run(path);
 		return fo.image;
+	}
+
+	/** Opens the images in the specified directory as a widthxheight stack.
+ 		Opens the images as a virtual stack if the 'options' string contains
+		'virtual' or 'use'. Add ' file=abc' to the options string to only open
+		images with, for example, 'abc' in their name. Add ' noMetaSort' to
+		disable sorting of DICOM stacks by series number (0020,0011).
+	*/
+	public static ImagePlus open(String path, int width, int height, String options) {
+		FolderOpener fo = new FolderOpener();
+		fo.saveImage = true;
+		fo.stackWidth = width;
+		fo.stackHeight = height;
+		fo.setOptions(options);
+		fo.run(path);
+		return fo.image;
+	}
+	
+	private void setOptions(String options) {
+		if (options==null)
+			return;
+		openAsVirtualStack = options.contains("virtual") || options.contains("use");
+		if (options.contains("noMetaSort")) 
+			sortByMetaData = false;
+		bitDepth = (int)Tools.getNumberFromList(options,"bitdepth=",0);
+		filter = Macro.getValue(options, "filter", "");
+		this.start = (int)Tools.getNumberFromList(options,"start=",1);
+		this.increment = (int)Tools.getNumberFromList(options,"inc=",1);
+		this.scale = Tools.getNumberFromList(options,"scale=",100);
 	}
 
 	/** Opens the images in the specified directory as a stack. Displays
@@ -71,7 +101,7 @@ public class FolderOpener implements PlugIn {
 
 	public void run(String arg) {
 		boolean isMacro = Macro.getOptions()!=null;
-		String directory = null;
+		directory = null;
 		if (arg!=null && !arg.equals("")) {
 			directory = arg;
 		} else {
@@ -94,27 +124,16 @@ public class FolderOpener implements PlugIn {
 				if (legacyRegex.equals(""))
 					legacyRegex = null;
 			}
-			if (directory==null) {
-				if (Prefs.useFileChooser && !IJ.isMacOSX()) {
-					OpenDialog od = new OpenDialog(title, arg);
-					directory = od.getDirectory();
-					String name = od.getFileName();
-					if (name==null)
-						return;
-				} else
-					directory = IJ.getDirectory(title);
-			}
 		}
-		if (directory==null)
-			return;
-		if (!(directory.endsWith("/")||directory.endsWith(File.separator)))
-			directory = directory + "/";
+		if (arg==null) {
+			if (!showDialog()) return;
+		}
 		String[] list = (new File(directory)).list();
 		if (list==null) {
 			IJ.error("File>Import>Image Sequence", "Directory not found: "+directory);
 			return;
 		}
-		
+
 		//remove subdirectories from list
 		ArrayList fileList = new ArrayList();
 		for (int i=0; i<list.length; i++) {
@@ -139,11 +158,10 @@ public class FolderOpener implements PlugIn {
 		if (title.endsWith(":"))
 			title = title.substring(0, title.length()-1);
 		
-		IJ.register(FolderOpener.class);
 		list = trimFileList(list);
 		if (list==null) return;
 		if (IJ.debugMode) IJ.log("FolderOpener: "+directory+" ("+list.length+" files)");
-		int width=0, height=0, stackSize=1, bitDepth=0;
+		int width=0, height=0, stackSize=1;
 		ImageStack stack = null;
 		double min = Double.MAX_VALUE;
 		double max = -Double.MAX_VALUE;
@@ -151,9 +169,8 @@ public class FolderOpener implements PlugIn {
 		boolean allSameCalibration = true;
 		IJ.resetEscape();		
 		Overlay overlay = null;
-		n = list.length;
-		start = 1;
-		increment = 1;
+		if (this.nFiles==0)
+			this.nFiles = list.length;
 		boolean dicomImages = false;
 		try {
 			for (int i=0; i<list.length; i++) {
@@ -165,14 +182,13 @@ public class FolderOpener implements PlugIn {
 				if (imp!=null) {
 					width = imp.getWidth();
 					height = imp.getHeight();
-					bitDepth = imp.getBitDepth();
+					if (this.bitDepth==0) {
+						this.bitDepth = imp.getBitDepth();
+						this.defaultBitDepth = bitDepth;
+					}
 					String info = (String)imp.getProperty("Info");
 					if (info!=null && info.contains("7FE0,0010"))
 						dicomImages = true;
-					if (arg==null) {
-						if (!showDialog(imp, list))
-							return;
-					}
 					break;
 				}
 			}
@@ -193,12 +209,12 @@ public class FolderOpener implements PlugIn {
 			if (sortFileNames || dicomImages || IJ.isMacOSX())
 				list = StringSorter.sortNumerically(list);
 
-			if (n<1)
-				n = list.length;
-			if (start<1 || start>list.length)
-				start = 1;
-			if (start+n-1>list.length)
-				n = list.length-start+1;
+			if (this.nFiles<1)
+				this.nFiles = list.length;
+			if (this.start<1 || this.start>list.length)
+				this.start = 1;
+			if (this.start+this.nFiles-1>list.length)
+				this.nFiles = list.length-this.start+1;
 			int count = 0;
 			int counter = 0;
 			ImagePlus imp = null;
@@ -206,8 +222,8 @@ public class FolderOpener implements PlugIn {
 			boolean fileInfoStack = false;
 			
 			// open images as stack
-			for (int i=start-1; i<list.length; i++) {
-				if ((counter++%increment)!=0)
+			for (int i=this.start-1; i<list.length; i++) {
+				if ((counter++%this.increment)!=0)
 					continue;
 				Opener opener = new Opener();
 				opener.setSilentMode(true);
@@ -223,7 +239,11 @@ public class FolderOpener implements PlugIn {
 				if (imp!=null && stack==null) {
 					width = imp.getWidth();
 					height = imp.getHeight();
-					bitDepth = imp.getBitDepth();
+					if (stackWidth>0 && stackHeight>0) {
+						width = stackWidth;
+						height = stackHeight;
+					}
+					if (bitDepth==0) bitDepth = imp.getBitDepth();
 					fi = imp.getOriginalFileInfo();
 					ImageProcessor ip = imp.getProcessor();
 					min = ip.getMin();
@@ -235,20 +255,34 @@ public class FolderOpener implements PlugIn {
 						if (stackSize>1) {
 							stack = new FileInfoVirtualStack();
 							fileInfoStack = true;
-						} else
-							stack = new VirtualStack(width, height, cm, directory);
-						((VirtualStack)stack).setBitDepth(bitDepth);
-					} else if (scale<100.0)						
-						stack = new ImageStack((int)(width*scale/100.0), (int)(height*scale/100.0), cm);
+						} else {
+							if (stackWidth>0 && stackHeight>0)
+								stack = new VirtualStack(stackWidth, stackHeight, cm, directory);
+							else
+								stack = new VirtualStack(width, height, cm, directory);
+						}
+					}  else if (this.scale<100.0)						
+						stack = new ImageStack((int)(width*this.scale/100.0), (int)(height*this.scale/100.0), cm);
 					else
 						stack = new ImageStack(width, height, cm);
+					if (bitDepth!=0)
+						stack.setBitDepth(bitDepth);
 					info1 = (String)imp.getProperty("Info");
 				}
 				if (imp==null)
 					continue;
 				if (imp.getWidth()!=width || imp.getHeight()!=height) {
-					IJ.log(list[i] + ": wrong size; "+width+"x"+height+" expected, "+imp.getWidth()+"x"+imp.getHeight()+" found");
-					continue;
+					if (stackWidth>0 && stackHeight>0) {
+						ImagePlus imp2 = imp.createImagePlus();
+						ImageProcessor ip = imp.getProcessor();
+						ImageProcessor ip2 = ip.createProcessor(width,height);
+						ip2.insert(ip, 0, 0);
+						imp2.setProcessor(ip2);
+						imp = imp2;
+					} else {
+						IJ.log(list[i] + ": wrong size; "+width+"x"+height+" expected, "+imp.getWidth()+"x"+imp.getHeight()+" found");
+						continue;
+					}
 				}
 				String label = imp.getTitle();
 				if (stackSize==1) {
@@ -256,7 +290,7 @@ public class FolderOpener implements PlugIn {
 					if (info!=null) {
 						if (useInfo(info))
 							label += "\n" + info;
-					} else {
+					} else if (imp.getStackSize()>0) {
 						String sliceLabel = imp.getStack().getSliceLabel(1);
 						if (useInfo(sliceLabel))
 							label =  sliceLabel;
@@ -300,19 +334,7 @@ public class FolderOpener implements PlugIn {
 							bitDepth2 = 24;
 						}
 						if (bitDepth2!=bitDepth) {
-							if (bitDepth==8 && bitDepth2==24) {
-								ip = ip.convertToByte(true);
-								bitDepth2 = 8;
-							} else if (bitDepth==32) {
-								ip = ip.convertToFloat();
-								bitDepth2 = 32;
-							} else if (bitDepth==24) {
-								ip = ip.convertToRGB();
-								bitDepth2 = 24;
-							}
-						}
-						if (bitDepth2!=bitDepth) {
-							if (dicomImages && bitDepth==16 && bitDepth2==32 && scale==100) {
+							if (dicomImages && bitDepth==16 && bitDepth2==32 && this.scale==100) {
 								ip = ip.convertToFloat();
 								bitDepth = 32;
 								ImageStack stack2 = new ImageStack(width, height, stack.getColorModel());
@@ -324,22 +346,19 @@ public class FolderOpener implements PlugIn {
 									stack2.addSlice(sliceLabel, ip2.convertToFloat());
 								}
 								stack = stack2;
-							} else {
-								IJ.log(list[i] + ": wrong bit depth; "+bitDepth+" expected, "+bitDepth2+" found");
-								break;
 							}
 						}
-						if (scale<100.0)
-							ip = ip.resize((int)(width*scale/100.0), (int)(height*scale/100.0));
+						if (this.scale<100.0)
+							ip = ip.resize((int)(width*this.scale/100.0), (int)(height*this.scale/100.0));
 						if (ip.getMin()<min) min = ip.getMin();
 						if (ip.getMax()>max) max = ip.getMax();
 						stack.addSlice(label2, ip);
 					}
 				}
 				count++;
-				IJ.showStatus("!"+count+"/"+n);
-				IJ.showProgress(count, n);
-				if (count>=n) 
+				IJ.showStatus("!"+count+"/"+this.nFiles);
+				IJ.showProgress(count, this.nFiles);
+				if (count>=this.nFiles) 
 					break;
 				if (IJ.escapePressed())
 					{IJ.beep(); break;}
@@ -367,9 +386,9 @@ public class FolderOpener implements PlugIn {
 			}
 			if (allSameCalibration) {
 				// use calibration from first image
-				if (scale!=100.0 && cal.scaled()) {
-					cal.pixelWidth /= scale/100.0;
-					cal.pixelHeight /= scale/100.0;
+				if (this.scale!=100.0 && cal.scaled()) {
+					cal.pixelWidth /= this.scale/100.0;
+					cal.pixelHeight /= this.scale/100.0;
 				}
 				if (cal.pixelWidth!=1.0 && cal.pixelDepth==1.0)
 					cal.pixelDepth = cal.pixelWidth;
@@ -410,14 +429,23 @@ public class FolderOpener implements PlugIn {
 		IJ.showProgress(1.0);
 		if (Recorder.record) {
 			String options = openAsVirtualStack?"virtual":"";
+			if (bitDepth!=defaultBitDepth)
+				options = options + " bitdepth=" + bitDepth;				
 			if (filter!=null && filter.length()>0) {
 				if (filter.contains(" "))
 					filter = "["+filter+"]";
-				options = options + " file=" + filter;
+				options = options + " filter=" + filter;
 			}
+			if (start!=1)
+				options = options + " start=" + start;				
+			if (increment!=1)
+				options = options + " inc=" + increment;				
+			if (scale!=100)
+				options = options + " scale=" + scale;				
 			if (!sortByMetaData)
 				options = options + " noMetaSort";
-   			Recorder.recordCall("imp = FolderOpener.open(\""+directory+"\", \""+options+"\");");
+			String dir = Recorder.fixPath(directory);
+   			Recorder.recordCall("imp = FolderOpener.open(\""+dir+"\", \""+options+"\");");
 		}
 	}
 	
@@ -451,37 +479,60 @@ public class FolderOpener implements PlugIn {
 		}
 	}
 	
-	boolean showDialog(ImagePlus imp, String[] list) {
-		int fileCount = list.length;
-		FolderOpenerDialog gd = new FolderOpenerDialog("Sequence Options", imp, list);
-		gd.addNumericField("Number of images:", fileCount, 0);
-		gd.addNumericField("Starting image:", 1, 0);
-		gd.addNumericField("Increment:", 1, 0);
-		gd.addNumericField("Scale images:", scale, 0, 4, "%");
-		gd.addStringField("File name contains:", "", 10);
-		gd.setInsets(0,45,0);
-		gd.addMessage("(enclose regex in parens)", null, Color.darkGray);
-		gd.addCheckbox("Convert_to_RGB", convertToRGB);
+	boolean showDialog() {
+		String options = Macro.getOptions();
+		if  (options!=null) {  //macro
+			String optionsOrig = options;
+			options = options.replace("open=", "dir=");
+			options = options.replace("file=", "filter=");
+			options =  options.replace("starting=","start=");
+			options =  options.replace("number=","count=");
+			options =  options.replace("increment=","inc=");
+			if (!options.equals(optionsOrig))
+				Macro.setOptions(options);
+			if (options.contains("convert_to_rgb"))
+				this.bitDepth = 24;
+		}
+		directory = Prefs.get(DIR_KEY, IJ.getDir("downloads")+"stack/");
+		GenericDialog gd = new GenericDialog("Import Image Sequence");
+		gd.setInsets(5, 0, 0);
+		gd.addDirectoryField("Dir:", directory);		
+		gd.setInsets(2, 55, 10);
+		gd.addMessage("drag and drop target", IJ.font10, Color.darkGray);
+		gd.addChoice("Type:", types, bitDepthToType(bitDepth));
+		gd.addStringField("Filter:", "", 10);
+		gd.setInsets(0,55,0);
+		gd.addMessage("enclose regex in parens", IJ.font10, Color.darkGray);
+		gd.addNumericField("Start:", this.start, 0, 6, "");
+		gd.addStringField("Count:", "---", 6);
+		gd.addNumericField("Inc:", this.increment, 0, 6, "");
+		gd.addNumericField("Scale:", this.scale, 0, 6, "%");
 		gd.addCheckbox("Sort names numerically", sortFileNames);
 		gd.addCheckbox("Use virtual stack", openAsVirtualStack);
-		gd.addMessage("10000 x 10000 x 1000 (100.3MB)");
 		gd.addHelp(IJ.URL+"/docs/menus/file.html#seq1");
-		gd.setSmartRecording(true);
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;
-		n = (int)gd.getNextNumber();
-		start = (int)gd.getNextNumber();
-		increment = (int)gd.getNextNumber();
-		if (increment<1)
-			increment = 1;
-		scale = gd.getNextNumber();
-		if (scale<5.0) scale = 5.0;
-		if (scale>100.0) scale = 100.0;
+		directory = gd.getNextString();
+		Prefs.set(DIR_KEY, directory);
+		gd.setSmartRecording(true);
+		int index = gd.getNextChoiceIndex();
+		bitDepth = typeToBitDepth(types[index]);
 		filter = gd.getNextString();
 		if (legacyRegex!=null)
-			filter = "("+legacyRegex+")";
-		convertToRGB = gd.getNextBoolean();
+			filter = "("+legacyRegex+")";			
+		gd.setSmartRecording(true);
+		this.start = (int)gd.getNextNumber();
+		String countStr = gd.getNextString();
+		double count = Tools.parseDouble(countStr);
+		if (!Double.isNaN(count))
+			nFiles = (int)count;
+		this.increment = (int)gd.getNextNumber();
+		if (this.increment<1)
+			this.increment = 1;
+		this.scale = gd.getNextNumber();
+		if (this.scale<5.0) this.scale = 5.0;
+		if (this.scale>100.0) this.scale = 100.0;
 		sortFileNames = gd.getNextBoolean();
 		if (!sortFileNames)
 			sortByMetaData = false;
@@ -557,6 +608,24 @@ public class FolderOpener implements PlugIn {
 		}
 		return contains;
 	}
+	
+	private int typeToBitDepth(String type) {
+		int depth = 0;
+		if (type.equals("16-bit")) depth=16;
+		else if (type.equals("32-bit")) depth=32;
+		else if (type.equals("RGB")) depth=24;
+		return depth;
+	}
+
+	private String bitDepthToType(int bitDepth) {
+		switch (bitDepth) {
+			case 0: return types[0];
+			case 16: return types[1];
+			case 32: return types[2];
+			case 24: return types[3];
+		}
+		return types[0];
+	}
 
 	/** Removes names that start with "." or end with ".db", ".txt", ".lut", "roi", ".pty", ".hdr", ".py", etc. */
 	public String[] trimFileList(String[] rawlist) {
@@ -610,98 +679,6 @@ public class FolderOpener implements PlugIn {
 	public String[] sortFileList(String[] list) {
 		return StringSorter.sortNumerically(list);
 	}
-
-	class FolderOpenerDialog extends GenericDialog {
-		ImagePlus imp;
-		int fileCount;
-		boolean eightBits, rgb;
-		String[] list;
-		//boolean isRegex;
-	
-		public FolderOpenerDialog(String title, ImagePlus imp, String[] list) {
-			super(title);
-			this.imp = imp;
-			this.list = list;
-			this.fileCount = list.length;
-		}
-	
-		protected void setup() {
-			eightBits = ((Checkbox)checkbox.elementAt(0)).getState();
-			rgb = ((Checkbox)checkbox.elementAt(1)).getState();
-			setStackInfo();
-		}
-		
-		public void itemStateChanged(ItemEvent e) {
-		}
-		
-		public void textValueChanged(TextEvent e) {
-			setStackInfo();
-		}
-	
-		void setStackInfo() {
-			if (imp==null)
-				return;
-			int width = imp.getWidth();
-			int height = imp.getHeight();
-			int depth = imp.getStackSize();
-			int bytesPerPixel = 1;
-			int n = getNumber(numberField.elementAt(0));
-			int start = getNumber(numberField.elementAt(1));
-			int inc = getNumber(numberField.elementAt(2));
-			double scale = getNumber(numberField.elementAt(3));
-			if (scale<5.0) scale = 5.0;
-			if (scale>100.0) scale = 100.0;
-			if (n<1) n = fileCount;
-			if (start<1 || start>fileCount) start = 1;
-			if (start+n-1>fileCount)
-				n = fileCount-start+1;
-			if (inc<1) inc = 1;
-			TextField tf = (TextField)stringField.elementAt(0);
-			String filter = tf.getText();
-			int n3 = Integer.MAX_VALUE;
-			String[] filteredList = getFilteredList(list, filter, null);
-			if (filteredList!=null)
-				n3 = filteredList.length;
-			else
-				n3 = 0;
-			if (n3<n)
-				n = n3;
-			switch (imp.getType()) {
-				case ImagePlus.GRAY16:
-					bytesPerPixel=2;break;
-				case ImagePlus.COLOR_RGB:
-				case ImagePlus.GRAY32:
-					bytesPerPixel=4; break;
-			}
-			if (eightBits)
-				bytesPerPixel = 1;
-			if (rgb)
-				bytesPerPixel = 4;
-			width = (int)(width*scale/100.0);
-			height = (int)(height*scale/100.0);
-			int n2 = ((fileCount-start+1)*depth)/inc;
-			if (n2<0) n2 = 0;
-			if (n2>n) n2 = n;
-			double size = ((double)width*height*n2*bytesPerPixel)/(1024*1024);
-			((Label)theLabel).setText(width+" x "+height+" x "+n2+" ("+IJ.d2s(size,1)+"MB)");
-		}
-	
-		public int getNumber(Object field) {
-			TextField tf = (TextField)field;
-			String theText = tf.getText();
-			double value;
-			Double d;
-			try {d = new Double(theText);}
-			catch (NumberFormatException e){
-				d = null;
-			}
-			if (d!=null)
-				return (int)d.doubleValue();
-			else
-				return 0;
-		  }
-	
-	} // FolderOpenerDialog
 
 } // FolderOpener
 

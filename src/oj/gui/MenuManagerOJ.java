@@ -62,7 +62,10 @@ public class MenuManagerOJ implements ItemListener, MacroChangedListenerOJ {
 	/**/ private MenuItem itemDeleteAllObjects;
 	/**/ private MenuItem itemRoiToObject;
 	private Menu menuResults;
-//	/**/ private MenuItem itemPlot;
+
+	Menu menuPlot;
+	
+	//private MenuItem itemPlot;
 	/**/ private MenuItem itemRecalculate;
 	///**/ private MenuItem itemAddErrorBars;	
 	///**/ private MenuItem itemQualifyRoi;
@@ -219,7 +222,7 @@ public class MenuManagerOJ implements ItemListener, MacroChangedListenerOJ {
 
 			menuResults = new Menu("Results");
 			mnuObjectj.add(menuResults);
-			Menu menuPlot = new Menu("Plots");
+			menuPlot = new Menu("Plots");
 			mnuObjectj.add(menuPlot);
 
 			/**/ itemRecalculate = new MenuItem("Recalculate");
@@ -441,6 +444,7 @@ public class MenuManagerOJ implements ItemListener, MacroChangedListenerOJ {
 		itemCloseProject.setEnabled(enabled);
 		menuLinkedImages.setEnabled(enabled);
 		menuObjects.setEnabled(enabled);
+		menuPlot.setEnabled(enabled);
 		itemSaveProject.setEnabled(enabled);
 		itemExportLinkedResults.setEnabled(enabled);
 		itemSaveACopy.setEnabled(enabled);
@@ -454,7 +458,7 @@ public class MenuManagerOJ implements ItemListener, MacroChangedListenerOJ {
 		itemShowProjectWindow.setEnabled(enabled);
 		itemShowObjectjResult.setEnabled(enabled);
 		itemShowObjectjTools.setEnabled(enabled);
-		itemShowProjectFolder.setEnabled(enabled);
+		itemShowProjectFolder.setEnabled(enabled);		
 		itemAboutObjectJ.setEnabled(true);
 	}
 }

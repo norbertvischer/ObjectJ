@@ -52,7 +52,7 @@ public class ContrastAdjuster extends PlugInDialog implements Runnable,
 	int y = 0;
 	boolean windowLevel, balance;
 	Font monoFont = new Font("Monospaced", Font.PLAIN, 11);
-	Font sanFont = ImageJ.SansSerif12;
+	Font sanFont = IJ.font12;
 	int channels = 7; // RGB
 	Choice choice;
 	private String blankMinLabel = "-------";
@@ -629,6 +629,12 @@ public class ContrastAdjuster extends PlugInDialog implements Runnable,
 	void apply(ImagePlus imp, ImageProcessor ip) {
 		if (balance && imp.isComposite())
 			return;
+		int bitDepth = imp.getBitDepth();
+		if (bitDepth!=32 && !IJ.isMacro()) {
+			String msg = "WARNING: the pixel values will\nchange if you click \"OK\".";
+			if (!IJ.showMessageWithCancel("Apply Lookup Table?", msg))
+				return;
+		}
 		String option = null;
 		if (RGBImage)
 			imp.unlock();
@@ -641,10 +647,9 @@ public class ContrastAdjuster extends PlugInDialog implements Runnable,
 				applyRGB(imp,ip);
 			return;
 		}
-		int bitDepth = imp.getBitDepth();
 		if (bitDepth==32) {
 			IJ.beep();
-			IJ.showStatus("\"Apply\" does not work with 32-bit images");
+			IJ.error("\"Apply\" does not work with 32-bit images");
 			imp.unlock();
 			return;
 		}

@@ -223,7 +223,7 @@ public class PointRoi extends PolygonRoi {
 			slice = 0;
 		//IJ.log("draw: "+positions+" "+imp.getCurrentSlice());
 		for (int i=0; i<nPoints; i++) {
-			//IJ.log(i+" "+slice+" "+(positions!=null?positions[i]:-1));
+			//IJ.log(i+" "+slice+" "+(positions!=null?positions[i]:-1)+"  "+getPosition());
 			if (slice==0 || (positions!=null&&(slice==positions[i]||positions[i]==0)))
 				drawPoint(g, xp2[i], yp2[i], i+1);
 		}
@@ -476,8 +476,11 @@ public class PointRoi extends PolygonRoi {
 		}
 		if (points2.npoints==0)
 			return null;
-		else
-			return new PointRoi(points2.xpoints, points2.ypoints, points2.npoints);
+		else {
+			PointRoi roi2 = new PointRoi(points2.xpoints, points2.ypoints, points2.npoints);
+			roi2.copyAttributes(this);
+			return roi2;
+		}
 	}
 
 	public ImageProcessor getMask() {
