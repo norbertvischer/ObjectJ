@@ -955,7 +955,7 @@ public class MacroProcessorOJ {
 
 	public void deleteYtem(String ytemType, int index) {
 		CellOJ cell = OJ.getData().getCells().getSelectedCell();
-		if (cell != null) {
+		if (cell != null && index > 0) {//15.12.2020
 			WildcardMatchOJ wm = new WildcardMatchOJ();
 			wm.setCaseSensitive(false);
 			int hit = 0;
@@ -971,6 +971,34 @@ public class MacroProcessorOJ {
 
 					return;
 
+				}
+			}
+		}
+	}
+
+	public void deleteYtems(String ytemTypes) {
+		WildcardMatchOJ wm = new WildcardMatchOJ();
+		CellOJ cell = OJ.getData().getCells().getSelectedCell();
+		if (cell != null) {//1
+			int nItems = cell.getYtemsCount();
+			boolean[] hits = new boolean[nItems];
+
+			ytemTypes = ytemTypes.replace(",", " ");
+			ytemTypes = ytemTypes.replace("  ", " ");
+			ytemTypes = ytemTypes.replace("  ", " ");
+			String[] parts = ytemTypes.split(" ");
+			for (int jj = 0; jj < nItems; jj++) {
+				String itmName = cell.getYtemByIndex(jj).getYtemDef();
+				for (int pp = 0; pp < parts.length; pp++) {
+					String part = parts[pp];
+					if (wm.match(itmName, part)) {
+						hits[jj] = true;
+					}
+				}
+			}
+			for (int jj = nItems - 1; jj >= 0; jj--) {
+				if (hits[jj]) {
+					deleteYtem(jj + 1);//1-based
 				}
 			}
 		}

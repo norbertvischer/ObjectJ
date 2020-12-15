@@ -97,6 +97,11 @@ public class FunctionsOJ implements MacroExtension {
 		return null;
 	}
 
+	public String ojDeleteItems(String itemType) {
+		OJ.getMacroProcessor().deleteYtems(itemType);
+		return null;
+	}
+
 	public String ojDeleteObject(String objectIndex) {
 		OJ.getMacroProcessor().deleteCell(MacroProcessorOJ.parseInt(objectIndex));
 		return null;

@@ -848,13 +848,13 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 			//set frame settings
 			image.setFrameInterval(getDouble(props, "finterval"));
 			image.setFrameRateUnit(props.getProperty("tunit", "sec"));
-		} else {//14.8.2011
-			String title = image.getName().toLowerCase();
-			if (title.endsWith(".tif") || title.endsWith(".tiff")) {
-				image.setNumberOfSlices(-1);
-			}
-
-		}
+		} 
+//		else {//removed 30.11.2020
+//			String title = image.getName().toLowerCase();
+//			if (title.endsWith(".tif") || title.endsWith(".tiff")) {
+//				image.setNumberOfSlices(-1);
+//			}
+//		}
 
 		image.setChanged(true);
 		if (recalcFlag) {

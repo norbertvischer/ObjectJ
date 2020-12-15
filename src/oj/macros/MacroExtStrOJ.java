@@ -119,6 +119,7 @@ public class MacroExtStrOJ {
         buf.append(getFunction("ojDeleteAllObjects"));
         buf.append(getFunction("ojDeleteColumn", "columnName"));
         buf.append(getFunction("ojDeleteItem", "itemType", "itemNumber"));
+        buf.append(getFunction("ojDeleteItems", "itemTypes"));
         buf.append(getFunction("ojDeleteObject", "objectIndex"));
         buf.append(getFunction("ojExtendVisibilityDepth", "lowValue", "highValue"));
         buf.append(getIntFunction("ojFirstObject", "imageIndex"));

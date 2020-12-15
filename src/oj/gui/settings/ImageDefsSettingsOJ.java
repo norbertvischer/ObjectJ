@@ -538,6 +538,9 @@ private void jScrollPane1AncestorAdded(javax.swing.event.AncestorEvent evt) {//G
                     label.setIcon(null);
                     break;
                 case 2://stack structure
+		    int nch = imj.getNumberOfChannels();
+  		    int nfr = imj.getNumberOfFrames();
+ 		    int nsl = imj.getNumberOfSlices();
                     if ((imj.getNumberOfChannels() > 1) || (imj.getNumberOfFrames() > 1)) {
                         int stackSize = imj.getNumberOfChannels() * imj.getNumberOfSlices() * imj.getNumberOfFrames();
                         label.setText(Integer.toString(stackSize) + " = " + imj.getNumberOfChannels() + "*" + imj.getNumberOfSlices() + "*" + imj.getNumberOfFrames());
