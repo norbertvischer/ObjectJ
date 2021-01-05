@@ -1371,6 +1371,7 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 			ImagePlus imp = IJ.getImage();
 			if (imp != null && imp.getWindow() instanceof PlotWindow) {
 				frontPlot = ((PlotWindow) (imp.getWindow())).getPlot();
+				frontPlot.setLimits(Double.NaN,Double.NaN,Double.NaN,Double.NaN);//6.1.2021
 				if (imp.getTitle().equalsIgnoreCase("Plot...")) {
 					String xLabel = frontPlot.getLabel('x');
 					String yLabel = frontPlot.getLabel('y');
@@ -1413,7 +1414,13 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 
 	public void qualifyRoi() {
 		ImagePlus imp = IJ.getImage();
-
+		if (imp == null)
+			return;
+		boolean isPlot = imp.getWindow() instanceof PlotWindow;
+		if(!isPlot){
+				IJ.showMessage("'Qualify objects in Roi'  works only in Plot windows");
+				return;
+		}
 		if (imp != null && imp.getWindow() instanceof PlotWindow) {
 			Plot plot = ((PlotWindow) (imp.getWindow())).getPlot();
 			if (plot.getNumPlotObjects() != 1) {
