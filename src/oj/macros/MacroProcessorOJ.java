@@ -1637,11 +1637,12 @@ public class MacroProcessorOJ {
 			setMarker(xpoints[jj], ypoints[jj]);
 		}
 		int rt = roi.getType();
-		if (rt == roi.RECTANGLE || rt == roi.OVAL || rt == roi.POLYGON || rt == roi.FREEROI || rt == roi.TRACED_ROI) { //21.8.2009
-			if (xpoints[p.npoints - 1] != xpoints[0] || ypoints[p.npoints - 1] != ypoints[0]) {
-				setMarker(xpoints[0], ypoints[0]);
-			}
-		}
+//		boolean closedRoi = (rt == roi.RECTANGLE || rt == roi.OVAL || rt == roi.POLYGON || rt == roi.FREEROI || rt == roi.TRACED_ROI);
+//		if (false) { //9.1.2021
+//			if (xpoints[p.npoints - 1] != xpoints[0] || ypoints[p.npoints - 1] != ypoints[0]) {
+//				setMarker(xpoints[0], ypoints[0]);
+//			}
+//		}
 		closeYtem();//11.1.2017
 		Canvas canvas = imp.getCanvas();
 		if (canvas != null) {

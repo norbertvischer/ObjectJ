@@ -14,6 +14,7 @@ import ij.io.FileInfo;
 import ij.io.FileOpener;
 import ij.io.FileSaver;
 import ij.io.Opener;
+import static ij.io.Opener.AVI;
 import ij.measure.Calibration;
 import ij.plugin.AVI_Reader;
 import ij.plugin.FileInfoVirtualStack;
@@ -91,7 +92,6 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 //			return "An error occured while resolving alias";
 //		}
 //	}
-
 	/**
 	 * Opens linked image if it is not open yet. Says "Bring Project Folder to
 	 * Front" if file is not found
@@ -151,18 +151,28 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 							//imageOJ.setID(imp.getID());
 						}
 					} else {
-						
+						String ext = fName.substring(fName.lastIndexOf(".")).toLowerCase();
 						boolean virtual = OJ.getData().getImages().getVirtualFlag();
-
-						if (virtual && (fName.endsWith(".tif") || fName.endsWith(".TIF"))) {
+						if (virtual && (ext.equals(".tif") ||ext.equals(".tiff"))) {
 							(new FileInfoVirtualStack()).run(dir + fName);
 							imp = IJ.getImage();
+						} else if ((ext.equals(".avi"))) {//15.1.2021
+							if (!virtual) {
+								OJ.getData().getImages().setVirtualFlag(true);
+								OJ.getEventProcessor().fireImageChangedEvent(ImageChangedEventOJ.VIRTUAL_FLAG_CHANGED);
+								IJ.showMessage("Virtual flag was set true");
+							}
+
+							AVI_Reader reader = new AVI_Reader();
+							reader.setVirtual(true);
+							reader.displayDialog(false);
+							reader.run(dir + fName);
+							imp = reader.getImagePlus();
+						} else {
+							imp = new Opener().openImage(dir, fName);//30.6.2013						 
 						}
-						
-						else 
-							imp = new Opener().openImage(dir, fName);//30.6.2013
 						imageOJ.setImagePlus(imp);//1.10.2015
-						
+
 					}
 
 					imp.show();//30.6.2013                  
@@ -326,7 +336,6 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 		}
 	}
 
-
 	public void propagateScale(int index) {
 
 		ImagesOJ images = OJ.getData().getImages();
@@ -379,8 +388,7 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 				ImageOJ imj = images.getImageByIndex(im);
 				boolean wasOpen = imj.getImagePlus() != null;
 				boolean shouldChange = (Math.abs(1 - imj.getVoxelSizeX() / newPxSize) + Math.abs(1 - imj.getVoxelSizeY() / newPxSize) > 1e-4);//allow 0.1% difference
-				if (scaleAll || im == index) 
-				{
+				if (scaleAll || im == index) {
 					String name = imj.getFilename().toLowerCase();
 
 					boolean isTiff = name.toLowerCase().endsWith(".tif") || name.toLowerCase().endsWith(".tiff");
@@ -458,7 +466,7 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 
 	/**
 	 * Links all images in the projct folder. Does not go into subfoldeers, and
-	 * does not link .zip, .mov or .avi
+	 * does not link .zip, .mov //
 	 */
 	public void linkAllImages() {
 		File projectDirectory = new File(OJ.getData().getDirectory());
@@ -478,7 +486,7 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 			File file = files[index];
 			String name = file.getName().toLowerCase();
 			if (!file.isDirectory() && !file.isHidden()) {
-				String[] allowedExtensions = ".tif .tiff .jpg .jpeg .gif .png .bmp".split(" ");
+				String[] allowedExtensions = ".tif .tiff .jpg .jpeg .gif .png .bmp .avi".split(" ");//include avi 15.1.2021
 				for (int kk = 0; kk < allowedExtensions.length; kk++) {
 					if (name.endsWith(allowedExtensions[kk])) {
 						addImage(files[index].getName(), false, false);
@@ -587,7 +595,7 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 //		int slicesB = imOj.getNumberOfSlices();
 //		int framesB = imOj.getNumberOfFrames();
 //		int channelsB = imOj.getNumberOfChannels();
-		
+
 //		if (slicesA != slicesB || framesA != framesB || channelsA != channelsB) {
 //			// if ((imp.getNSlices() != imOj.getNumberOfSlices()) || (imp.getNFrames() != imOj.getNumberOfFrames()) || (imp.getNChannels() != imOj.getNumberOfChannels())) {
 //			boolean doChange = true;
@@ -737,7 +745,7 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 
 	public void updateImagesProperties() {
 		String dirname = OJ.getData().getDirectory();
-		for (int i = 0; i  < OJ.getData().getImages().getImagesCount(); i++) {
+		for (int i = 0; i < OJ.getData().getImages().getImagesCount(); i++) {
 			ImageOJ image = OJ.getData().getImages().getImageByIndex(i);
 			updateImageProperties(dirname, image);
 		}
@@ -848,7 +856,7 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 			//set frame settings
 			image.setFrameInterval(getDouble(props, "finterval"));
 			image.setFrameRateUnit(props.getProperty("tunit", "sec"));
-		} 
+		}
 //		else {//removed 30.11.2020
 //			String title = image.getName().toLowerCase();
 //			if (title.endsWith(".tif") || title.endsWith(".tiff")) {
@@ -1000,7 +1008,6 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 		return wasClosed;//7.12.2013
 	}
 
-
 	/**
 	 * removes linked image and its listeners
 	 *
@@ -1078,14 +1085,14 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 					File file = (File) iterator.next();
 					String fName = file.getName();
 					String path = file.getCanonicalPath() + File.separator;
-					String ojDir= OJ.getData().getDirectory();				
+					String ojDir = OJ.getData().getDirectory();
 					if (file.isDirectory() && path.equals(ojDir)) {
-						 OJ.getImageProcessor().linkAllImages();
-						 break;
+						OJ.getImageProcessor().linkAllImages();
+						break;
 					}
 					boolean good = false;
-//					String[] goodExt = ".tiff .tif .jpg .png .gif .avi".split(" ");//16.2.2019
-					String[] goodExt = ".tiff .tif .jpg .png .gif".split(" ");
+					String[] goodExt = ".tiff .tif .jpg .png .gif .avi".split(" ");//15.1.2021
+//					String[] goodExt = ".tiff .tif .jpg .png .gif".split(" ");
 					for (int jj = 0; jj < goodExt.length; jj++) {
 						if (fName.toLowerCase().endsWith(goodExt[jj])) {
 							good = true;

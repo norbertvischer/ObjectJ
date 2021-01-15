@@ -1380,6 +1380,7 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 					defaults[1] = yLabel;
 				}
 			}
+			
 		}
 		IJ.selectWindow("ImageJ");//18.6.2020 make Plot window responsive
 	}
