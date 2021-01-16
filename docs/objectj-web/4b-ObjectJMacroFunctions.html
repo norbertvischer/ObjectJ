@@ -59,7 +59,7 @@
             <div id="Macros">
                 <H2>Macro functions in ObjectJ</H2>
                 <font size = "1">
-                    18-oct-2020
+                    2-dec-2020
                 </font>
               <br/>
 
@@ -105,6 +105,11 @@
                     <a name=ojDeleteItem></a>
                     ojDeleteItem("itemType", n)   </H3><H4>
                     in the currently selected object, those markers that belong to the n-th item of itemType are deleted. Use "*" to count across all types. (1-based) </H4><H3>
+
+                    <a name=ojDeleteItems></a>
+                    ojDeleteItems("itemA itemB")   </H3><H4>
+                    in the currently selected object, all items with matching names 
+                    are deleted. Accepts wildcard characters '*' and '?' </H4><H3>
 
 
                     <a name=ojDeleteObject></a>
@@ -164,6 +169,10 @@
                     <a name=ojGetItemNames></a>
                     ojGetItemNames()   </H3><H4>
                     returns the used item names in the order they are listed in the ObjectJ Tools window, separated by spaces </H4><H3>
+
+                    <a name=ojGetItemColors></a>
+                    ojGetItemColors()   </H3><H4>
+                    returns the used item colors in the order they are listed in the ObjectJ Tools window, separated by spaces </H4><H3>
 
                     <a name=ojGetItemTypes></a>
                     ojGetItemTypes()   </H3><H4>
@@ -460,7 +469,7 @@
                     "width": column width in pixels; 0 is automatic <br/>
                     "color": color (eg 0xff0000 is red, 0x00ff00 is green, 0x0000ff is blue, 0 is black) <br/>
                     "visible": 0= hidden, 1 = visible <br/>
-                    "label": ojSetColumnProperty("Area", "label", "index: label" <br/>
+                    "label": show result as text overlay, 0= hidden, 1 = visible <br/> <br/>
 
                 </H4><H3>
 
