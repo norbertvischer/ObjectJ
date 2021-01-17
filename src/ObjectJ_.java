@@ -48,7 +48,7 @@ public class ObjectJ_ implements PlugIn, CommandListener {
 						OJ.getData().setDirectory(ojdir + File.separator);
 						InputOutputOJ.setCurrentDirectory(ojdir + File.separator);
 						OJ.getData().setFilename(ojName);
-						OJ.getData().setChanged(false);//4.1.2020
+						//OJ.getData().setChanged(false);//4.1.2020
 						if (isInstalled > 1) {//this shouyldn't happen
 							IJ.showMessage("ObjectJ installed twice");
 						}
@@ -56,11 +56,13 @@ public class ObjectJ_ implements PlugIn, CommandListener {
 						//double x = 1/OJ.getData().getImages().getImageByIndex(0).getVoxelSizeX();
 						//IJ.log("x=" + x);
 						OJ.getImageProcessor().updateImagesProperties();
+						OJ.getData().setChanged(false);//17.1.2021
 						//OJ.getData().updateImagesProperties() 
  					}
 					
                 }
 				busyOpeningProject = 0;//4.1.2020
+				
             } else {
                 ij.IJ.showMessage("Could not open .ojj file (was it an alias?)");
             }
