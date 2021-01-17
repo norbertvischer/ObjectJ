@@ -38,183 +38,184 @@ public class DataOJ implements Cloneable, IBaseOJ, Serializable {
     //public static int labelFontSize = 14;
 
     public DataOJ(String name, String description) {
-        this.setName(name);
-        this.description = description;
-        init();
+	this.setName(name);
+	this.description = description;
+	init();
     }
 
     public DataOJ(String name) {
-        this.setName(name);
-        init();
+	this.setName(name);
+	init();
     }
 
     public DataOJ() {
-        init();
+	init();
     }
 
-    public void setLabelFontSize(int size){
+    public void setLabelFontSize(int size) {
 	labelFontSize = size;
     }
-    public int getLabelFontSize(){
-	if(labelFontSize < 13)
+
+    public int getLabelFontSize() {
+	if (labelFontSize < 13) {
 	    labelFontSize = 13;
+	}
 	return labelFontSize;
     }
 
-     public void setLabelRad(int rad){
+    public void setLabelRad(int rad) {
 	markerRadius = rad;
     }
-  
-    public int getMarkerRad(){
-	if(markerRadius < 2)
+
+    public int getMarkerRad() {
+	if (markerRadius < 2) {
 	    markerRadius = 2;
+	}
 	return markerRadius;
     }
-    
-    
-    
+
     public String getLinkedMacroText() {//18.3.2010
-        return linkedMacroText;
+	return linkedMacroText;
     }
 
     public void setLinkedMacroText(String txt) {
-        linkedMacroText = txt;
+	linkedMacroText = txt;
     }
 
     public String getLinkedPlotText() {
-        return linkedPlotText;
+	return linkedPlotText;
     }
 
     public void setLinkedPlotText(String txt) {
-        linkedPlotText = txt;
+	linkedPlotText = txt;
     }
 
     public void init() {
 
-        cells.setParent(this);
-        images.setParent(this);
-        //macros.setParent(this);
-        results.setParent(this);
-        ytemDefs.setParent(this);
+	cells.setParent(this);
+	images.setParent(this);
+	//macros.setParent(this);
+	results.setParent(this);
+	ytemDefs.setParent(this);
     }
 
     public boolean getChanged() {
-        if (changed) {
-            return true;
-        } else if (cells.getChanged()) {
-            return true;
-        } else if (images.getChanged()) {
-            return true;
+	if (changed) {
+	    return true;
+	} else if (cells.getChanged()) {
+	    return true;
+	} else if (images.getChanged()) {
+	    return true;
 //        } else if (macroSet!=null && macroSet.getChanged()) {//19.10.2010
 //            return true;
-        } else if (results.getChanged()) {
-            return true;
-        } else if (ytemDefs.getChanged()) {
-            return true;
-        } else {
-            return false;
-        }
+	} else if (results.getChanged()) {
+	    return true;
+	} else if (ytemDefs.getChanged()) {
+	    return true;
+	} else {
+	    return false;
+	}
     }
 
     public void setChanged(boolean isChanged) {
-		if(isChanged){
-			this.changed = isChanged;//for breakpoint
-		}
-        this.changed = isChanged;
-        cells.setChanged(isChanged);
-        images.setChanged(isChanged);
-        //macroSet.setChanged(isChanged);
-        results.setChanged(isChanged);
-        ytemDefs.setChanged(isChanged);
+	if (isChanged) {
+	    this.changed = isChanged;//for breakpoint
+	}
+	this.changed = isChanged;
+	cells.setChanged(isChanged);
+	images.setChanged(isChanged);
+	//macroSet.setChanged(isChanged);
+	results.setChanged(isChanged);
+	ytemDefs.setChanged(isChanged);
     }
 
     public void updateChangeDate() {
-        updated = new Date();
+	updated = new Date();
     }
 
     public Date getUpdated() {
-        updateChangeDate();
-        return updated;
+	updateChangeDate();
+	return updated;
     }
 
     public void setVersion(String version) {
-        this.version = version;
+	this.version = version;
     }
 
     public String getVersion() {
-        return version;
+	return version;
     }
 
     public YtemDefsOJ getYtemDefs() {
-        return ytemDefs;
+	return ytemDefs;
     }
 
     public void setYtemDefs(YtemDefsOJ ytemDefs) {
-        this.ytemDefs = ytemDefs;
-        changed = true;
+	this.ytemDefs = ytemDefs;
+	changed = true;
     }
 
     public MacroSetOJ getMacroSet() {
-        return macroSet;
+	return macroSet;
     }
 
     public void setResults(ResultsOJ results) {
-        this.results = results;
-        setChanged(true);
+	this.results = results;
+	setChanged(true);
     }
 
     public ResultsOJ getResults() {
-        return results;
+	return results;
     }
 
     public void setMacroSet(MacroSetOJ macroset) {
-        this.macroSet = macroset;
-        setChanged(true);
+	this.macroSet = macroset;
+	setChanged(true);
     }
 
     public ImagesOJ getImages() {
-        return images;
+	return images;
     }
 
     public void setImages(ImagesOJ images) {
-        this.images = images;
-        setChanged(true);
+	this.images = images;
+	setChanged(true);
     }
 
     public CellsOJ getCells() {
-        return cells;
+	return cells;
     }
 
     public void setCells(CellsOJ cells) {
-        this.cells = cells;
-        setChanged(true);
+	this.cells = cells;
+	setChanged(true);
     }
 
     public String getName() {
-        return name;
+	return name;
     }
 
     public String getDescription() {
-        return description;
+	return description;
     }
 
     public String getDirectory() {
-        return directory;
+	return directory;
     }
 
     public void setDescription(String description) {
-        this.description = description;
-        changed = true;
+	this.description = description;
+	changed = true;
     }
 
     public void setDirectory(String directory) {
-        this.directory = directory;
-        changed = true;
+	this.directory = directory;
+	changed = true;
     }
 
     public void setName(String name) {
-        this.name = name;
-        changed = true;
+	this.name = name;
+	changed = true;
     }
 
     /**
@@ -222,50 +223,50 @@ public class DataOJ implements Cloneable, IBaseOJ, Serializable {
      *
      */
     public Object clone() {
-        try {
-            return super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new InternalError();
-        }
+	try {
+	    return super.clone();
+	} catch (CloneNotSupportedException e) {
+	    throw new InternalError();
+	}
     }
 
     public String toString() {
-        return "File: ImageCount=" + getImages().getImagesCount() + ", CellsCount=" + getCells().getCellsCount();
+	return "File: ImageCount=" + getImages().getImagesCount() + ", CellsCount=" + getCells().getCellsCount();
     }
 
     public String getFilename() {
-        return filename;
+	return filename;
     }
 
     public void setFilename(String filename) {
-        this.filename = filename;
+	this.filename = filename;
     }
 
     public void initAfterUnmarshalling() {
-        changed = false;
-        version = VERSION_1_2;
-        if (cells == null) {
-            cells = new CellsOJ();
-        }
-        if (images == null) {
-            images = new ImagesOJ();
-        }
+	changed = false;
+	version = VERSION_1_2;
+	if (cells == null) {
+	    cells = new CellsOJ();
+	}
+	if (images == null) {
+	    images = new ImagesOJ();
+	}
 
-        if (results == null) {
-            results = new ResultsOJ();
-        }
-        if (ytemDefs == null) {
-            ytemDefs = new YtemDefsOJ();
-        }
-        cells.initAfterUnmarshalling(this);
-        images.initAfterUnmarshalling(this);
-        //macros.initAfterUnmarshalling(this);
-        results.initAfterUnmarshalling(this);
-        ytemDefs.initAfterUnmarshalling(this);
+	if (results == null) {
+	    results = new ResultsOJ();
+	}
+	if (ytemDefs == null) {
+	    ytemDefs = new YtemDefsOJ();
+	}
+	cells.initAfterUnmarshalling(this);
+	images.initAfterUnmarshalling(this);
+	//macros.initAfterUnmarshalling(this);
+	results.initAfterUnmarshalling(this);
+	ytemDefs.initAfterUnmarshalling(this);
     }
 
     public IBaseOJ getParent() {
-        return null;
+	return null;
     }
 
     public void setParent(IBaseOJ parent) {
