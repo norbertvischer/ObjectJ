@@ -2038,6 +2038,12 @@ public class MacroProcessorOJ {
 		} else if (str.startsWith("partialpositiony")) {
 			vc.calc(str);
 			return vc.partialPositionY;
+		} else if (str.startsWith("offpointx")) {
+			vc.calc(str);
+			return vc.offPointX;
+		} else if (str.startsWith("offpointy")) {
+			vc.calc(str);
+			return vc.offPointY;
 		} else {
 			ImageJAccessOJ.InterpreterAccess.interpError("Algorithm '" + str + "' not found");
 		}

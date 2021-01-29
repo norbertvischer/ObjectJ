@@ -7,7 +7,11 @@
 package oj.gui.menuactions;
 
 import ij.IJ;
+import ij.WindowManager;
 import ij.gui.YesNoCancelDialog;
+import ij.plugin.frame.Editor;
+import ij.util.Tools;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import oj.OJ;
@@ -21,7 +25,6 @@ import oj.gui.ToolsWindowOJ;
 import oj.io.InputOutputOJ;
 import oj.gui.settings.ProjectSettingsOJ;
 import oj.gui.tools.ToolManagerOJ;
-import oj.plugin.GlassWindowOJ;
 import oj.processor.state.CreateCellStateOJ;
 import oj.processor.state.ToolStateOJ;
 import oj.project.ImagesOJ;
@@ -68,15 +71,62 @@ public class ProjectActionsOJ {
 			new AboutOJ(IJ.getInstance(), true).setVisible(true);
 		}
 	};
+
+	public static ActionListener UpdateObjectJAction = new ActionListener() {//not used yet
+		public void actionPerformed(ActionEvent e) {
+			String url = OJ.URLcurrent + "objectj_info.txt";
+
+			IJ.runMacro("open('" + url + "');");
+			Window win = WindowManager.getActiveWindow();
+			if (win instanceof Editor) {
+				String text = ((Editor) win).getText();
+				String[] parts = Tools.split(text, ":\n");
+				String webVersion = parts[1].replace(" ", "");
+				String installedVersion = OJ.releaseVersion;
+				((Editor) win).close();
+				int i = installedVersion.compareToIgnoreCase(webVersion);
+				String msg = "Installed version: " + installedVersion;
+				msg += "\nDownloadable version is: " + webVersion;
+				if (i >= 0) {
+					msg += "\n \nYour ObjectJ is up-to-date";
+					IJ.showMessage("Update ObjectJ", msg);
+				}
+				if (i < 0) {
+					msg += "\n \nObjectJ is not up-to-date, \nClick 'OK' to update";
+					boolean doIt = IJ.showMessageWithCancel("Update ObjectJ", msg);
+					if (doIt) {
+						updateObjectJ();
+					}
+
+				}
+			}
+		}
+	};
+
+	private static void updateObjectJ() {//not used yet
+		boolean b;
+		ProjectActionsOJ.resetProjectData();
+		String msg = "You will be asked to replace objectj_.jar and to relaunch ImageJ";
+		msg += "\nClick OK to continue";
+		b = IJ.showMessageWithCancel("Updating ObjectJ", msg);
+		if (!b) {
+			return;
+		}
+		IJ.runMacro("open('" + OJ.URLcurrent + "objectj_.jar');");
+		//this.dispose();
+		IJ.showMessage("If update was successful, click 'OK' and relaunch ImageJ");
+
+	}
+
 	public static ActionListener ExportEmbeddedMacrosAction = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
-		     InputOutputOJ.exportEmbeddedMacros();
+			InputOutputOJ.exportEmbeddedMacros();
 		}
 	};
 	public static ActionListener ReplaceEmbeddedMacrosAction = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
-		    boolean altKey = (e.getModifiers() & 8)>0;
-		     InputOutputOJ.replaceEmbeddedMacros(altKey);
+			boolean altKey = (e.getModifiers() & 8) > 0;
+			InputOutputOJ.replaceEmbeddedMacros(altKey);
 		}
 	};
 	public static ActionListener SaveProjectAction = new ActionListener() {
@@ -112,17 +162,7 @@ public class ProjectActionsOJ {
 
 		}
 	};
-	/**
-	 * saves data (without macros) as old XML file
-	 */
-//	public static ActionListener ExportAsXMLAction = new ActionListener() {
-//		public void actionPerformed(ActionEvent e) {
-//			oj.OJ.saveAsBinary = false;//29.4.2010
-//			saveProjectDataAsXML();
-//			oj.OJ.saveAsBinary = true;
-//			IJ.showStatus("Exporting as XML");
-//		}
-//	};
+	
 	public static ActionListener ExportLinkedResultsAction = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
 			ResultsActionsOJ.exportResultsToText();
@@ -193,27 +233,27 @@ public class ProjectActionsOJ {
 		}
 	}
 
-	private static void saveProjectDataAsXML() {
-		DataOJ data = OJ.getData();
+//	private static void saveProjectDataAsXML() {
+//		DataOJ data = OJ.getData();
+//
+//		if (data != null) {
+//			String tmpDir = data.getDirectory();
+//			String tmpFileName = data.getFilename();
+//			String tmpProjectName = data.getName();
+//			boolean pathMayChange = true;
+//			if (new InputOutputOJ().saveProjectAs(OJ.getData(), false, pathMayChange)) {//20.8.2010
+//				if (ProjectSettingsOJ.getInstance() != null) {
+//					ProjectSettingsOJ.getInstance().setTitle(OJ.getData().getName());
+//				}
+//			}
+//
+//			data.setDirectory(tmpDir);
+//			data.setFilename(tmpFileName);
+//			data.setName(tmpProjectName);
+//		}
+//	}
 
-		if (data != null) {
-			String tmpDir = data.getDirectory();
-			String tmpFileName = data.getFilename();
-			String tmpProjectName = data.getName();
-			boolean pathMayChange = true;
-			if (new InputOutputOJ().saveProjectAs(OJ.getData(), false, pathMayChange)) {//20.8.2010
-				if (ProjectSettingsOJ.getInstance() != null) {
-					ProjectSettingsOJ.getInstance().setTitle(OJ.getData().getName());
-				}
-			}
-
-			data.setDirectory(tmpDir);
-			data.setFilename(tmpFileName);
-			data.setName(tmpProjectName);
-		}
-	}
-
-	private static boolean closeProjectData() {
+	public static boolean closeProjectData() {
 		if (OJ.getData() != null) {
 			ToolStateOJ state = OJ.getToolStateProcessor().getToolStateObject();
 			if (state != null && (state instanceof CreateCellStateOJ)) {
@@ -234,52 +274,37 @@ public class ProjectActionsOJ {
             Prefs.set("objectj.projecty", "" + projectY);
         }
 			 */
-			
+
 		}
-
-
 
 		if ((OJ.getData() != null) && (OJ.getData().getChanged() == true)) {
 			if (ProjectSettingsOJ.getInstance() != null) {
 				ProjectSettingsOJ.getInstance().setVisible(true);
 			}
 			String filename = OJ.getData().getFilename();
-				YesNoCancelDialog d = new YesNoCancelDialog(IJ.getInstance(), "Closing Project ", "Save Changes to Project \n\"" + filename + "\" ?");
+			YesNoCancelDialog d = new YesNoCancelDialog(IJ.getInstance(), "Closing Project ", "Save Changes to Project \n\"" + filename + "\" ?");
 
-				if (d.cancelPressed()) {
-					return false;
-				}
+			if (d.cancelPressed()) {
+				return false;
+			}
 
-				if (d.yesPressed()) {
-					saveProjectData();
-				}
-
-//			DataOJ data = OJ.getData();
-//			if (data != null) {
-//				ImagesOJ imgs = data.getImages();
-//				if (imgs != null) {
-//					imgs.removeAllImages();
-//				}
-//			}
+			if (d.yesPressed()) {
+				saveProjectData();
+			}
 			OJ.isProjectOpen = false;
 		}
 
-
-
-			DataOJ data = OJ.getData();
-			if (data != null) {
-				ImagesOJ imgs = data.getImages();
-				if (imgs != null) {
-					imgs.removeAllImages();
-				}
+		DataOJ data = OJ.getData();
+		if (data != null) {
+			ImagesOJ imgs = data.getImages();
+			if (imgs != null) {
+				imgs.removeAllImages();
 			}
+		}
 		return true;
 	}
 
-	static boolean resetProjectData() {
-//		if (GlassWindowOJ.exists()) {
-//			IJ.runMacro("ojGlassWindow(\"hide\");");//15.10.2012
-//		}
+	public static boolean resetProjectData() {
 		if (closeProjectData()) {
 			if (OJ.editorWindow != null) {
 				OJ.editorWindow.dispose();//24.6.2010

@@ -292,17 +292,6 @@ public class ToolManagerOJ {
                     ex.printStackTrace();
                 }
             }
-            if ("previous".equals(fields[i].getName())) {
-                fields[i].setAccessible(true);
-                try {
-                   // fields[i].set(Toolbar.getInstance(), new Integer(22));
-                   fields[i].set(Toolbar.getInstance(), new Integer(77));
-                } catch (IllegalArgumentException ex) {
-                    ex.printStackTrace();
-                } catch (IllegalAccessException ex) {
-                    ex.printStackTrace();
-                }
-            }
         }
         Toolbar.getInstance().repaint();
     }
