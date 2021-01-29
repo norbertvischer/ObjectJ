@@ -7,7 +7,7 @@
     <Property name="resizable" type="boolean" value="false"/>
   </Properties>
   <SyntheticProperties>
-    <SyntheticProperty name="formSize" type="java.awt.Dimension" value="-84,-19,0,5,115,114,0,18,106,97,118,97,46,97,119,116,46,68,105,109,101,110,115,105,111,110,65,-114,-39,-41,-84,95,68,20,2,0,2,73,0,6,104,101,105,103,104,116,73,0,5,119,105,100,116,104,120,112,0,0,2,59,0,0,1,-38"/>
+    <SyntheticProperty name="formSize" type="java.awt.Dimension" value="-84,-19,0,5,115,114,0,18,106,97,118,97,46,97,119,116,46,68,105,109,101,110,115,105,111,110,65,-114,-39,-41,-84,95,68,20,2,0,2,73,0,6,104,101,105,103,104,116,73,0,5,119,105,100,116,104,120,112,0,0,2,59,0,0,2,69"/>
     <SyntheticProperty name="formSizePolicy" type="int" value="0"/>
     <SyntheticProperty name="generateSize" type="boolean" value="true"/>
     <SyntheticProperty name="generateCenter" type="boolean" value="true"/>
@@ -46,14 +46,11 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" alignment="0" attributes="0">
-                  <Group type="103" groupAlignment="1" max="-2" attributes="0">
-                      <Component id="jScrollPane2" alignment="0" max="32767" attributes="1"/>
-                      <Component id="jLabel1" alignment="0" min="-2" pref="558" max="-2" attributes="1"/>
-                      <Component id="jScrollPane1" alignment="0" min="-2" pref="457" max="-2" attributes="1"/>
-                  </Group>
-                  <EmptySpace min="-2" max="-2" attributes="0"/>
+              <Group type="102" attributes="0">
+                  <Component id="jLabel1" min="-2" pref="558" max="-2" attributes="1"/>
+                  <EmptySpace max="32767" attributes="0"/>
               </Group>
+              <Component id="jScrollPane1" max="32767" attributes="1"/>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
@@ -61,9 +58,8 @@
               <Group type="102" alignment="0" attributes="0">
                   <Component id="jLabel1" min="-2" pref="115" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="jScrollPane1" pref="274" max="32767" attributes="0"/>
-                  <EmptySpace type="separate" max="-2" attributes="0"/>
-                  <Component id="jScrollPane2" min="-2" pref="66" max="-2" attributes="0"/>
+                  <Component id="jScrollPane1" min="-2" pref="372" max="-2" attributes="0"/>
+                  <EmptySpace max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -88,27 +84,6 @@
                 <Property name="columns" type="int" value="20"/>
                 <Property name="rows" type="int" value="5"/>
                 <Property name="text" type="java.lang.String" value="Version:&#x9;&#x9;0.98i6&#xa;Date:&#x9;&#x9;15-sep-2010   15:36&#xa;&#xa;project file:&#x9;&#x9;Filaments-98.ojj&#xa;#linked images:&#x9;3&#xa;#objects&#x9;&#x9;22&#xa;#points&#x9;&#x9;8765&#xa;#macros&#x9;&#x9;12"/>
-              </Properties>
-            </Component>
-          </SubComponents>
-        </Container>
-        <Container class="javax.swing.JScrollPane" name="jScrollPane2">
-          <Properties>
-            <Property name="horizontalScrollBarPolicy" type="int" value="31"/>
-            <Property name="verticalScrollBarPolicy" type="int" value="21"/>
-          </Properties>
-          <AuxValues>
-            <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
-          </AuxValues>
-
-          <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
-          <SubComponents>
-            <Component class="javax.swing.JTextArea" name="textAreaUpdateAnswer">
-              <Properties>
-                <Property name="columns" type="int" value="20"/>
-                <Property name="rows" type="int" value="5"/>
-                <Property name="autoscrolls" type="boolean" value="false"/>
-                <Property name="requestFocusEnabled" type="boolean" value="false"/>
               </Properties>
             </Component>
           </SubComponents>
@@ -138,11 +113,10 @@
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" attributes="0">
+              <Group type="102" alignment="0" attributes="0">
+                  <EmptySpace pref="201" max="32767" attributes="0"/>
                   <Component id="jButtonWebSite" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Component id="jButtonCheckUpdate" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace pref="32" max="32767" attributes="0"/>
+                  <EmptySpace min="-2" pref="97" max="-2" attributes="0"/>
                   <Component id="buttOk" min="-2" pref="101" max="-2" attributes="0"/>
               </Group>
           </Group>
@@ -152,10 +126,10 @@
               <Group type="102" attributes="0">
                   <EmptySpace min="1" pref="1" max="1" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="jButtonCheckUpdate" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="buttOk" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="jButtonWebSite" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
+                  <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -168,14 +142,6 @@
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="buttOkActionPerformed"/>
-          </Events>
-        </Component>
-        <Component class="javax.swing.JButton" name="jButtonCheckUpdate">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Check for Update"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonCheckUpdateActionPerformed"/>
           </Events>
         </Component>
         <Component class="javax.swing.JButton" name="jButtonWebSite">

@@ -47,6 +47,7 @@ public class MenuManagerOJ implements ItemListener, MacroChangedListenerOJ {
 	/**/ private MenuItem itemCloseProject;
 	/**/ private MenuItem itemExportEmbeddedMacros;
 	/**/ private MenuItem replaceEmbeddedMacros;
+	/**/ private MenuItem updateObjectJ;
 	private MenuItem itemSaveProject;
 	//---
 	private Menu menuLinkedImages;
@@ -131,6 +132,13 @@ public class MenuManagerOJ implements ItemListener, MacroChangedListenerOJ {
 			/**/ itemAboutObjectJ.addActionListener(ProjectActionsOJ.AboutObjectJAction);
 			/**/ menuProjectFile.add(itemAboutObjectJ);
 
+			/**/ updateObjectJ = new MenuItem("Update ObjectJ ...");
+			/**/ updateObjectJ.addActionListener(ProjectActionsOJ.UpdateObjectJAction);
+			/**/ menuProjectFile.add(updateObjectJ);
+			/**/ menuProjectFile.addSeparator();
+
+			
+
 			/**/ itemNewProject = new MenuItem("New Project...");
 			/**/ itemNewProject.addActionListener(ProjectActionsOJ.NewProjectAction);
 			/**/ menuProjectFile.add(itemNewProject);
@@ -167,7 +175,6 @@ public class MenuManagerOJ implements ItemListener, MacroChangedListenerOJ {
 			/**/ replaceEmbeddedMacros.addActionListener(ProjectActionsOJ.ReplaceEmbeddedMacrosAction);
 			/**/ menuProjectFile.add(replaceEmbeddedMacros);
 
-			
 			itemSaveProject = new MenuItem("Save Project");
 			itemSaveProject.addActionListener(ProjectActionsOJ.SaveProjectAction);
 			mnuObjectj.add(itemSaveProject);
@@ -458,7 +465,9 @@ public class MenuManagerOJ implements ItemListener, MacroChangedListenerOJ {
 		itemShowProjectWindow.setEnabled(enabled);
 		itemShowObjectjResult.setEnabled(enabled);
 		itemShowObjectjTools.setEnabled(enabled);
-		itemShowProjectFolder.setEnabled(enabled);		
+		itemShowProjectFolder.setEnabled(enabled);	
+		itemExportEmbeddedMacros.setEnabled(enabled);
+		replaceEmbeddedMacros.setEnabled(enabled);
 		itemAboutObjectJ.setEnabled(true);
 	}
 }

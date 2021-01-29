@@ -11,9 +11,11 @@ import ij.WindowManager;
 import ij.gui.YesNoCancelDialog;
 import ij.plugin.frame.Editor;
 import ij.util.Tools;
+import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import oj.OJ;
 import oj.project.DataOJ;
 import oj.gui.AboutOJ;
@@ -85,14 +87,19 @@ public class ProjectActionsOJ {
 				String installedVersion = OJ.releaseVersion;
 				((Editor) win).close();
 				int i = installedVersion.compareToIgnoreCase(webVersion);
-				String msg = "Installed version: " + installedVersion;
+				String msg = "You ave the latest version:  ObjectJ  " + installedVersion;
 				msg += "\nDownloadable version is: " + webVersion;
-				if (i >= 0) {
-					msg += "\n \nYour ObjectJ is up-to-date";
+				//boolean capsDown = Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_CAPS_LOCK);
+				boolean altDown = IJ.altKeyDown();
+				if (i >= 0 && !altDown) {
+					msg = "You are running   ObjectJ  " + installedVersion + "\nwhich is the latest version";
+					//msg += "\n \nYour ObjectJ is up-to-date";
 					IJ.showMessage("Update ObjectJ", msg);
 				}
-				if (i < 0) {
-					msg += "\n \nObjectJ is not up-to-date, \nClick 'OK' to update";
+				if (i < 0 || altDown) {
+					msg = "You are running   ObjectJ  " + installedVersion;
+					msg += "\n \nClick OK to install version " + webVersion;
+
 					boolean doIt = IJ.showMessageWithCancel("Update ObjectJ", msg);
 					if (doIt) {
 						updateObjectJ();
@@ -103,11 +110,14 @@ public class ProjectActionsOJ {
 		}
 	};
 
-	private static void updateObjectJ() {//not used yet
+	private static void updateObjectJ() {
+		if (ProjectResultsOJ.getInstance() != null) {
+			ProjectResultsOJ.close();
+		} //30.1.2021
 		boolean b;
 		ProjectActionsOJ.resetProjectData();
-		String msg = "You will be asked to replace objectj_.jar and to relaunch ImageJ";
-		msg += "\nClick OK to continue";
+		String msg = "After clicking 'OK', you may be asked \nto replace objectj_.jar in Plugins folder.";
+		msg += "\nThen click 'Replace' and relaunch ImageJ";
 		b = IJ.showMessageWithCancel("Updating ObjectJ", msg);
 		if (!b) {
 			return;
@@ -162,7 +172,7 @@ public class ProjectActionsOJ {
 
 		}
 	};
-	
+
 	public static ActionListener ExportLinkedResultsAction = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
 			ResultsActionsOJ.exportResultsToText();
@@ -252,7 +262,6 @@ public class ProjectActionsOJ {
 //			data.setName(tmpProjectName);
 //		}
 //	}
-
 	public static boolean closeProjectData() {
 		if (OJ.getData() != null) {
 			ToolStateOJ state = OJ.getToolStateProcessor().getToolStateObject();

@@ -4,10 +4,12 @@
  */
 package oj.gui;
 
+import ij.IJ;
 import ij.plugin.BrowserLauncher;
-import java.awt.Color;
 import java.io.IOException;
 import oj.OJ;
+import oj.gui.menuactions.ProjectActionsOJ;
+import oj.io.InputOutputOJ;
 //import oj.plugin.ImageJUpdaterOJ;
 import oj.project.CellsOJ;
 import oj.project.DataOJ;
@@ -66,11 +68,8 @@ public class AboutOJ extends javax.swing.JDialog {
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         textAreaAbout = new javax.swing.JTextArea();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        textAreaUpdateAnswer = new javax.swing.JTextArea();
         jPanel2 = new javax.swing.JPanel();
         buttOk = new javax.swing.JButton();
-        jButtonCheckUpdate = new javax.swing.JButton();
         jButtonWebSite = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -87,34 +86,22 @@ public class AboutOJ extends javax.swing.JDialog {
         textAreaAbout.setText("Version:\t\t0.98i6\nDate:\t\t15-sep-2010   15:36\n\nproject file:\t\tFilaments-98.ojj\n#linked images:\t3\n#objects\t\t22\n#points\t\t8765\n#macros\t\t12");
         jScrollPane1.setViewportView(textAreaAbout);
 
-        jScrollPane2.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        jScrollPane2.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-
-        textAreaUpdateAnswer.setColumns(20);
-        textAreaUpdateAnswer.setRows(5);
-        textAreaUpdateAnswer.setAutoscrolls(false);
-        textAreaUpdateAnswer.setRequestFocusEnabled(false);
-        jScrollPane2.setViewportView(textAreaUpdateAnswer);
-
         org.jdesktop.layout.GroupLayout jPanel1Layout = new org.jdesktop.layout.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(jPanel1Layout.createSequentialGroup()
-                .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING, false)
-                    .add(org.jdesktop.layout.GroupLayout.LEADING, jScrollPane2)
-                    .add(org.jdesktop.layout.GroupLayout.LEADING, jLabel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 558, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(org.jdesktop.layout.GroupLayout.LEADING, jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 457, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                .add(jLabel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 558, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .add(jScrollPane1)
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(jPanel1Layout.createSequentialGroup()
                 .add(jLabel1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 115, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 274, Short.MAX_VALUE)
-                .add(18, 18, 18)
-                .add(jScrollPane2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 66, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .add(jScrollPane1, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 372, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         getContentPane().add(jPanel1, java.awt.BorderLayout.CENTER);
@@ -131,13 +118,6 @@ public class AboutOJ extends javax.swing.JDialog {
             }
         });
 
-        jButtonCheckUpdate.setText("Check for Update");
-        jButtonCheckUpdate.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonCheckUpdateActionPerformed(evt);
-            }
-        });
-
         jButtonWebSite.setText("ObjectJ Website");
         jButtonWebSite.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -150,10 +130,9 @@ public class AboutOJ extends javax.swing.JDialog {
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(jPanel2Layout.createSequentialGroup()
+                .addContainerGap(201, Short.MAX_VALUE)
                 .add(jButtonWebSite)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
-                .add(jButtonCheckUpdate)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 32, Short.MAX_VALUE)
+                .add(97, 97, 97)
                 .add(buttOk, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 101, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
         );
         jPanel2Layout.setVerticalGroup(
@@ -161,47 +140,36 @@ public class AboutOJ extends javax.swing.JDialog {
             .add(jPanel2Layout.createSequentialGroup()
                 .add(1, 1, 1)
                 .add(jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                    .add(jButtonCheckUpdate)
                     .add(buttOk)
-                    .add(jButtonWebSite)))
+                    .add(jButtonWebSite))
+                .add(5, 5, 5))
         );
 
         getContentPane().add(jPanel2, java.awt.BorderLayout.SOUTH);
 
-        setSize(new java.awt.Dimension(474, 571));
+        setSize(new java.awt.Dimension(581, 571));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
+    private void jButtonWebSiteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonWebSiteActionPerformed
+        try {
+            BrowserLauncher.openURL(OJ.URL);
+        } catch (IOException e) {
+        }
+        this.dispose();
+    }//GEN-LAST:event_jButtonWebSiteActionPerformed
+
     private void buttOkActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_buttOkActionPerformed
-		setVisible(false);
+        setVisible(false);
     }//GEN-LAST:event_buttOkActionPerformed
 
-    private void jButtonCheckUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCheckUpdateActionPerformed
-
-		try {
-			BrowserLauncher.openURL(OJ.URLcurrent);
-		} catch (IOException e) {
-		}
-		this.dispose();
-    }//GEN-LAST:event_jButtonCheckUpdateActionPerformed
-
-    private void jButtonWebSiteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonWebSiteActionPerformed
-		try {
-			BrowserLauncher.openURL(OJ.URL);
-		} catch (IOException e) {
-		}
-		this.dispose();
-    }//GEN-LAST:event_jButtonWebSiteActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton buttOk;
-    private javax.swing.JButton jButtonCheckUpdate;
     private javax.swing.JButton jButtonWebSite;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTextArea textAreaAbout;
-    private javax.swing.JTextArea textAreaUpdateAnswer;
     // End of variables declaration//GEN-END:variables
 }
