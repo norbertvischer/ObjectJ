@@ -1472,6 +1472,7 @@ public class MacroProcessorOJ {
 				}
 				OJ.getData().getResults().getColumns().addColumn(newestColumn, true);//15.3.2009
 			}
+			IJ.wait(50);//31.1.2021
 		}
 	}
 

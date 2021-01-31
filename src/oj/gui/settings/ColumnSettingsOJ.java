@@ -1198,6 +1198,7 @@ public class ColumnSettingsOJ extends javax.swing.JPanel implements TableColumnM
         }
         ColumnsOJ columns = OJ.getData().getResults().getColumns();
         int atPosition = columns.addColumn(new ColumnOJ(name), true);//1.2.2014
+		IJ.wait(50);//31.1.2021
         tblColumns.getSelectionModel().setSelectionInterval(atPosition, atPosition);
         // tblColumns.scrollRectToVisible(new Rectangle(0,0,1,1));
         tblColumns.scrollRectToVisible(tblColumns.getCellRect(atPosition, 0, true));
