@@ -1419,6 +1419,9 @@ public class MacroProcessorOJ {
 			ImageJAccessOJ.InterpreterAccess.interpError(msg);
 			return;
 		}
+		if (ProjectResultsOJ.getInstance() != null) {
+			ProjectResultsOJ.close();
+		} //1.2.2021
 		String[] parts = Tools.split(columnNames, " ,");
 		for (int nn = 0; nn < parts.length; nn++) {
 			String columnName = parts[nn];
