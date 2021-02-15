@@ -1,6 +1,7 @@
 package ij.measure;
 import ij.*;
 import ij.plugin.filter.Analyzer;
+import ij.plugin.frame.Editor;
 import ij.text.*;
 import ij.process.*;
 import ij.gui.Roi;
@@ -58,6 +59,7 @@ public class ResultsTable implements Cloneable {
 	private char delimiter = '\t';
 	private boolean headingSet; 
 	private boolean showRowNumbers;
+	private boolean showRowNumbersSet;
 	private int baseRowNumber = 1;
 	private Hashtable stringColumns;
 	private boolean NaNEmptyCells;
@@ -104,6 +106,17 @@ public class ResultsTable implements Cloneable {
 		else
 			return null;
 	}
+	
+	/** Returns the active (front most) displayed ResultsTable. */
+	public static ResultsTable getActiveTable() {
+		ResultsTable rt = null;
+		Window win = WindowManager.getActiveTable();
+		if (win!=null && (win instanceof TextWindow)) {
+			TextPanel tp = ((TextWindow)win).getTextPanel();
+			rt = tp.getOrCreateResultsTable();
+		}
+		return rt;
+	}
 		
 	/** Obsolete. */
 	public static TextWindow getResultsWindow() {
@@ -114,7 +127,12 @@ public class ResultsTable implements Cloneable {
 			return (TextWindow)f;
 	}
 
-	/** Increments the measurement counter by one. */
+	/** Adds a row to the table. */
+	public void addRow() {
+		incrementCounter();
+	}
+
+	/** Adds a row to the table. */
 	public synchronized void incrementCounter() {
 		counter++;
 		if (counter==maxRows) {
@@ -168,14 +186,21 @@ public class ResultsTable implements Cloneable {
 		return counter;
 	}
 
-	/** Adds a value to the end of the given column. */
+	/** Adds a numeric value to the specified column, on the last
+	 * table row. Use addRow() to add another row to
+	 * the table.
+	 * @see #addRow
+	 * @see #addValue(String,double)
+	 * @see #addValue(String,String)
+	 * @see #size
+	*/
 	public void addValue(int column, double value) {
 		if (column>=maxColumns)
 			addColumns();
 		if (column<0 || column>=maxColumns)
 			throw new IllegalArgumentException("Column out of range");
 		if (counter==0)
-			throw new IllegalArgumentException("Counter==0");
+			incrementCounter();
 		if (columns[column]==null) {
 			columns[column] = new double[maxRows];
 			if (NaNEmptyCells)
@@ -191,11 +216,24 @@ public class ResultsTable implements Cloneable {
 		}
 	}
 	
-	/** Adds a value to the end of the given column. If the column
-		does not exist, it is created.
-		There is an example at:<br>
-		http://imagej.nih.gov/ij/plugins/sine-cosine.html
-	*/
+	/** Adds a numeric value to the specified column, on the last
+	 * table row. If the column does not exist, it is created.
+	 * Use addRow() to add another row to the table.
+	 * <p>JavaScript example:
+	 * <pre>
+	 * rt = new ResultsTable();
+	 * for (n=0; n<=2*Math.PI; n+=0.1) {
+	 *    rt.addRow();
+	 *    rt.addValue("n", n);
+	 *    rt.addValue("Sine(n)", Math.sin(n));
+	 *    rt.addValue("Cos(n)", Math.cos(n));
+	 * }
+	 * rt.show("Sine/Cosine Table");
+	 * <pre>
+	 * @see #addRow
+	 * @see #addValue(String,String)
+	 * @see #size
+	 */
 	public void addValue(String column, double value) {
 		if (column==null)
 			throw new IllegalArgumentException("Column is null");
@@ -206,8 +244,13 @@ public class ResultsTable implements Cloneable {
 		keep[index] = true;
 	}
 	
-	/** Adds a string value to the end of the given column. If the column
-		does not exist, it is created. */
+	/** Adds a string value to the specified column, on the last
+	 * table row. If the column does not exist, it is created.
+	 * Use addRow() to add another row to the table.
+	 * @see #addRow
+	 * @see #addValue(String,double)
+	 * @see #size
+	 */
 	public void addValue(String column, String value) {
 		if (column==null)
 			throw new IllegalArgumentException("Column is null");
@@ -260,6 +303,32 @@ public class ResultsTable implements Cloneable {
 			rowLabels = null;
 	}
 	
+	/** Returns a copy of the given column as a double array,
+		or null if the column is not found. */
+	public double[] getColumn(String column) {
+		int col = getColumnIndex(column);
+		if (col==COLUMN_NOT_FOUND || columns[col]==null)
+			throw new IllegalArgumentException("\""+column+"\" column not found");
+		return getColumnAsDoubles(col);
+	}
+
+	/** Returns a copy of the given column as a String array,
+		or null if the column is not found. */
+	public String[] getColumnAsStrings(String column) {
+		String[] array = new String[size()];
+		if ("Label".equals(column) && rowLabels!=null) {
+			for (int i=0; i<size(); i++)
+				array[i] = getLabel(i);
+			return array;
+		}
+		int col = getColumnIndex(column);
+		if (col==COLUMN_NOT_FOUND || columns[col]==null)
+			throw new IllegalArgumentException("\""+column+"\" column not found");
+		for (int i=0; i<size(); i++)
+			array[i] = getStringValue(col, i);
+		return array;
+	}
+
 	/** Returns a copy of the given column as a float array,
 		or null if the column is empty. */
 	public float[] getColumn(int column) {
@@ -612,7 +681,7 @@ public class ResultsTable implements Cloneable {
 			if (columns[i]!=null) {
 				String value = getValueAsString(i,row);
 				if (quoteCommas) {
-					if (value.contains(","))
+					if (value!=null && value.contains(","))
 						value = "\""+value+"\"";
 				}
 				sb.append(value);
@@ -783,6 +852,7 @@ public class ResultsTable implements Cloneable {
 	public void showRowNumbers(boolean showNumbers) {
 		showRowNumbers = showNumbers;
 		baseRowNumber = 1;
+		showRowNumbersSet = true;
 	}
 
 	public void showRowIndexes(boolean showIndexes) {
@@ -956,6 +1026,8 @@ public class ResultsTable implements Cloneable {
 		title = windowTitle;
 		if (!windowTitle.equals("Results") && this==Analyzer.getResultsTable())
 			IJ.log("ResultsTable.show(): the system ResultTable should only be displayed in the \"Results\" window.");
+		if (windowTitle.equals("Results") && !showRowNumbersSet)
+			showRowNumbers(true);
 		String tableHeadings = getColumnHeadings();		
 		TextPanel tp;
 		boolean newWindow = false;

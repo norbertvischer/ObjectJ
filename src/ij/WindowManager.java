@@ -143,7 +143,9 @@ public class WindowManager {
 		return frontWindow;
 	}
 
-	/** Returns the Window containing the active table, or null. */
+	/** Returns the Window containing the active table, or null.
+	 * @see ij.measure.ResultsTable#getActiveTable
+	*/
 	public static Window getActiveTable() {
 		return frontTable;
 	}
@@ -320,6 +322,8 @@ public class WindowManager {
     }
 
 	static boolean isDuplicateName(String name) {
+		if (name==null)
+			return false;
 		int n = imageList.size();
 		for (int i=0; i<n; i++) {
 			ImageWindow win = (ImageWindow)imageList.get(i);

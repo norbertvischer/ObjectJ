@@ -21,6 +21,13 @@ import ij.io.SaveDialog;
 public class PlotWindow extends ImageWindow implements ActionListener, ItemListener,
 	ClipboardOwner, ImageListener, RoiListener, Runnable {
 
+	private static final int WIDTH = 600;
+	private static final int HEIGHT = 340;
+	private static final int FONT_SIZE = 14;
+	private static final String PREFS_WIDTH = "pp.width";
+	private static final String PREFS_HEIGHT = "pp.height";
+	private static final String PREFS_FONT_SIZE = "pp.fontsize";
+
 	/** @deprecated */
 	public static final int CIRCLE = Plot.CIRCLE;
 	/** @deprecated */
@@ -42,9 +49,7 @@ public class PlotWindow extends ImageWindow implements ActionListener, ItemListe
 	/** Interpolate line profiles. To set, use Edit/Options/Plots or setOption("InterpolateLines",boolean). */
 	public static boolean interpolate = true;
 	// default values for new installations; values will be then saved in prefs
-	private static final int WIDTH = 600;
-	private static final int HEIGHT = 340;
-	private static int defaultFontSize = 14; 
+	private static int defaultFontSize = Prefs.getInt(PREFS_FONT_SIZE, FONT_SIZE);
 	/** The width of the plot (without frame) in pixels. */
 	public static int plotWidth = WIDTH;
 	/** The height of the plot in pixels. */
@@ -58,10 +63,6 @@ public class PlotWindow extends ImageWindow implements ActionListener, ItemListe
 	 *	only min&max value of the axes are given */
 	public static boolean noTicks;
 
-
-	private static final String PREFS_WIDTH = "pp.width";
-	private static final String PREFS_HEIGHT = "pp.height";
-	private static final String PREFS_FONT_SIZE = "pp.fontsize";
 	private static final String OPTIONS = "pp.options";
 	private static final int SAVE_X_VALUES = 1;
 	private static final int AUTO_CLOSE = 2;
@@ -76,7 +77,7 @@ public class PlotWindow extends ImageWindow implements ActionListener, ItemListe
 
 	private Button list, data, more, live;
 	private PopupMenu dataPopupMenu, morePopupMenu;
-	private static final int NUM_MENU_ITEMS = 21; //n__ how many menu items we have in total
+	private static final int NUM_MENU_ITEMS = 20; //how many menu items we have in total
 	private MenuItem[] menuItems = new MenuItem[NUM_MENU_ITEMS];
 	private Label statusLabel;
 	private String userStatusText;
@@ -106,7 +107,6 @@ public class PlotWindow extends ImageWindow implements ActionListener, ItemListe
 		autoClose = (options&AUTO_CLOSE)!=0;
 		plotWidth = Prefs.getInt(PREFS_WIDTH, WIDTH);
 		plotHeight = Prefs.getInt(PREFS_HEIGHT, HEIGHT);
-		defaultFontSize = fontSize = Prefs.getInt(PREFS_FONT_SIZE, defaultFontSize);
 		Dimension screen = IJ.getScreenSize();
 		if (plotWidth>screen.width && plotHeight>screen.height) {
 			plotWidth = WIDTH;
@@ -334,11 +334,10 @@ public class PlotWindow extends ImageWindow implements ActionListener, ItemListe
 	private static int SAVE=0, COPY=1, COPY_ALL=2, LIST_SIMPLE=3, ADD_FROM_TABLE=4, ADD_FROM_PLOT=5, ADD_FIT=6, //data menu
 			SET_RANGE=7, PREV_RANGE=8, RESET_RANGE=9, FIT_RANGE=10,  //the rest is in the more menu
 			ZOOM_SELECTION=11, AXIS_OPTIONS=12, LEGEND=13, STYLE=14, TEMPLATE=15, RESET_PLOT=16,
-			FREEZE=17, HI_RESOLUTION=18, PROFILE_PLOT_OPTIONS=19,
-		REMOVE_PLOT=20;//n__
+			FREEZE=17, HI_RESOLUTION=18, PROFILE_PLOT_OPTIONS=19;
 	//the following commands are disabled when the plot is frozen
-	private static int[] DISABLED_WHEN_FROZEN = new int[]{ADD_FROM_TABLE, ADD_FROM_PLOT, ADD_FIT, REMOVE_PLOT,
-			SET_RANGE, PREV_RANGE, RESET_RANGE, FIT_RANGE, ZOOM_SELECTION, AXIS_OPTIONS, LEGEND, STYLE, RESET_PLOT, REMOVE_PLOT};
+	private static int[] DISABLED_WHEN_FROZEN = new int[]{ADD_FROM_TABLE, ADD_FROM_PLOT, ADD_FIT,
+			SET_RANGE, PREV_RANGE, RESET_RANGE, FIT_RANGE, ZOOM_SELECTION, AXIS_OPTIONS, LEGEND, STYLE, RESET_PLOT};
 
 	/** Prepares and returns the popupMenu of the Data>> button */
 	PopupMenu getDataPopupMenu() {
@@ -352,7 +351,6 @@ public class PlotWindow extends ImageWindow implements ActionListener, ItemListe
 		menuItems[ADD_FROM_TABLE] = addPopupItem(dataPopupMenu, "Add from Table...");
 		menuItems[ADD_FROM_PLOT] = addPopupItem(dataPopupMenu, "Add from Plot...");
 		menuItems[ADD_FIT] = addPopupItem(dataPopupMenu, "Add Fit...");
-		menuItems[REMOVE_PLOT] = addPopupItem(dataPopupMenu, "Remove Plot...");
 		return dataPopupMenu;
 	}
 
@@ -423,8 +421,6 @@ public class PlotWindow extends ImageWindow implements ActionListener, ItemListe
 			new PlotContentsDialog(plot, PlotContentsDialog.ADD_FROM_PLOT).showDialog(this);
 		else if (b==menuItems[ADD_FIT])
 			new PlotContentsDialog(plot, PlotContentsDialog.ADD_FIT).showDialog(this);
-		else if (b==menuItems[REMOVE_PLOT])
-			IJ.showMessage("remove");
 		else if (b==menuItems[ZOOM_SELECTION]) {
 			if (imp!=null && imp.getRoi()!=null && imp.getRoi().isArea())
 				plot.zoomToRect(imp.getRoi().getBounds());
@@ -911,7 +907,6 @@ public class PlotWindow extends ImageWindow implements ActionListener, ItemListe
 	
 	public static void setDefaultFontSize(int size) {
 		if (size < 9) size = 9;
-		if (size > 36) size = 36;
 		defaultFontSize = size;
 	}
 

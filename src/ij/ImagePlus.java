@@ -6,6 +6,7 @@ import java.util.*;
 import ij.process.*;
 import ij.io.*;
 import ij.gui.*;
+
 import ij.measure.*;
 import ij.plugin.filter.Analyzer;
 import ij.util.*;
@@ -54,7 +55,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	protected ImageWindow win;
 	protected Roi roi;
 	protected int currentSlice; // current stack index (one-based)
-	protected static final int OPENED=0, CLOSED=1, UPDATED=2;
+	protected static final int OPENED=0, CLOSED=1, UPDATED=2, SAVED=3;
 	protected boolean compositeImage;
 	protected int width;
 	protected int height;
@@ -514,7 +515,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			notifyListeners(OPENED);
 		}
 	}
-
+	
 	void invertLookupTable() {
 		int nImages = getStackSize();
 		ip.invertLut();
@@ -636,6 +637,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		}
 		setFileInfo(imp.getOriginalFileInfo());
 		setProperty ("Info", imp.getProperty ("Info"));
+		setProperties(imp.getPropertiesAsArray());
 	}
 
 	/** Replaces the ImageProcessor with the one specified and updates the
@@ -665,7 +667,6 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	}
 
 	void setProcessor2(String title, ImageProcessor ip, ImageStack newStack) {
-		//IJ.log("setProcessor2: "+ip+" "+this.ip+" "+newStack);
 		if (title!=null) setTitle(title);
 		if (ip==null)
 			return;
@@ -717,7 +718,6 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	/** Replaces the image with the specified stack and updates
 		the display. Set 'title' to null to leave the title unchanged. */
     public void setStack(String title, ImageStack newStack) {
-		//IJ.log("setStack1: "+nChannels+" "+nSlices+" "+nFrames);
 		int bitDepth1 = getBitDepth();
 		int previousStackSize = getStackSize();
 		int newStackSize = newStack.getSize();
@@ -817,8 +817,13 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	/**	Saves this image's FileInfo so it can be later
 		retieved using getOriginalFileInfo(). */
 	public void setFileInfo(FileInfo fi) {
-		if (fi!=null)
+		if (fi!=null) {
 			fi.pixels = null;
+			if (fi.imageSaved) {
+				notifyListeners(SAVED);
+				fi.imageSaved = false;
+			}
+		}
 		fileInfo = fi;
 	}
 
@@ -1500,8 +1505,13 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		return imageProperties.size() + info2;			
 	}
 	
-	/** Used for restoring string properties from TIFF header. */
+	/** Creates a set of image properties from an array of strings.
+	 * @see #getPropertiesAsArray
+	 * @see #getProp(String)
+	 * @see #setProp(String,String)
+	*/
 	public void setProperties(String[] props) {
+		imageProperties = null;
 		if (props==null)
 			return;
 		//IJ.log("setProperties: "+props.length+" "+getTitle());
@@ -1606,6 +1616,10 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 				pvalue[3] = index;
 				// fall through to get rgb values
 			case COLOR_RGB:
+				if (ip!=null && ip.getNChannels()==1) {
+					pvalue[0] = ip.getPixel(x, y);
+					return pvalue;
+				}
 				int c = 0;
 				if (imageType==COLOR_RGB && ip!=null)
 					c = ip.getPixel(x, y);
@@ -2724,8 +2738,12 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
     			String s = (int)value==value?IJ.d2s(value,0)+".0":IJ.d2s(value,4,7);
     			return(", value=" + s);
 			case COLOR_RGB:
-				String hex = Colors.colorToString(new Color(v[0],v[1],v[2]));
-				return(", value=" + IJ.pad(v[0],3) + "," + IJ.pad(v[1],3) + "," + IJ.pad(v[2],3) + " ("+hex + ")");
+				if (ip!=null && ip.getNChannels()==1)
+	 				return(", value=" + v[0]);
+	 			else {
+					String hex = Colors.colorToString(new Color(v[0],v[1],v[2]));
+					return(", value=" + IJ.pad(v[0],3) + "," + IJ.pad(v[1],3) + "," + IJ.pad(v[2],3) + " ("+hex + ")");
+				}
     		default: return("");
 		}
     }
@@ -2804,7 +2822,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			cr = cRoi.getBounds();
 		if (cr==null)
 			cr = new Rectangle(0, 0, w, h);
-		if (r==null || (cr.width!=r.width || cr.height!=r.height)) {
+		if (r==null || Math.abs(cr.width-r.width)>10 || Math.abs(cr.height-r.height)>10) {
 			// Create a new roi centered on visible part of image, or centered on image if clipboard is >= image
 			ImageCanvas ic = win!=null?ic = win.getCanvas():null;
 			Rectangle srcRect = ic!=null?ic.getSrcRect():new Rectangle(0,0,width,height);
@@ -2841,11 +2859,44 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		}
 		changes = true;
     }
-
-	/** Returns the internal clipboard or null if the internal clipboard is empty. */
-	public static ImagePlus getClipboard() {
-		return clipboard;
+    
+    /** Inserts the contents of the internal clipboard at the
+    	specified location, without updating the display. */
+	 public void paste(int x, int y) {
+	 	paste(x, y, null);
 	}
+
+    /** Copies the contents of the internal clipboard to the
+	 * specified location using the specified transfer mode
+	 * ("Copy", "Blend", "Average", "Difference", "Transparent",
+	 * "Transparent2", "AND", "OR", "XOR", "Add", "Subtract",
+	 * "Multiply", or "Divide"). The display is not updating.
+    */
+	 public void paste(int x, int y, String mode) {
+		if (clipboard==null)
+			return;
+		Roi roi = clipboard.getRoi();
+		boolean nonRect = roi!=null && roi.getType()!=Roi.RECTANGLE;
+		if (nonRect)
+			ip.snapshot();
+		if (mode==null)
+			ip.insert(clipboard.getProcessor(), x, y);
+		else {
+			int pasteMode = IJ.stringToPasteMode(mode);
+			ip.copyBits(clipboard.getProcessor(), x, y, pasteMode);
+		}
+		if (nonRect) {
+			ImageProcessor mask = roi.getMask();
+			ip.setRoi(x, y, mask.getWidth(), mask.getHeight());
+			ip.setMask(mask);
+			ip.reset(ip.getMask());
+		}
+	}
+
+   /** Returns the internal clipboard or null if the internal clipboard is empty. */
+    public static ImagePlus getClipboard() {
+        return clipboard;
+    }
 
 	/** Clears the internal clipboard. */
 	public static void resetClipboard() {
@@ -2874,6 +2925,9 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 						case UPDATED:
 							listener.imageUpdated(imp);
 							break;
+						case SAVED:
+							//listener.imageSaved(imp);
+							break;
 					}
 				}
 			}
@@ -2886,6 +2940,10 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 
 	public static void removeImageListener(ImageListener listener) {
 		listeners.removeElement(listener);
+	}
+	
+	public static Vector getListeners() {
+		return listeners;
 	}
 	
 	/** For debug purposes, writes all registered (and possibly,
@@ -3274,6 +3332,10 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
     	if (imageProperties==null)
     		imageProperties = new Properties();
     	return imageProperties;
+    }
+    
+    public boolean isRGB() {
+		return ip!=null && ip.getNChannels()==3;
     }
     
 }
