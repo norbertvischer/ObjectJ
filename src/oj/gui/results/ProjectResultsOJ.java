@@ -1371,7 +1371,7 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 			ImagePlus imp = IJ.getImage();
 			if (imp != null && imp.getWindow() instanceof PlotWindow) {
 				frontPlot = ((PlotWindow) (imp.getWindow())).getPlot();
-				frontPlot.setLimits(Double.NaN,Double.NaN,Double.NaN,Double.NaN);//6.1.2021
+				frontPlot.setLimits(Double.NaN, Double.NaN, Double.NaN, Double.NaN);//6.1.2021
 				if (imp.getTitle().equalsIgnoreCase("Plot...")) {
 					String xLabel = frontPlot.getLabel('x');
 					String yLabel = frontPlot.getLabel('y');
@@ -1380,7 +1380,7 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 					defaults[1] = yLabel;
 				}
 			}
-			
+
 		}
 		IJ.selectWindow("ImageJ");//18.6.2020 make Plot window responsive
 	}
@@ -1413,26 +1413,50 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 	}
 	static double binWidth = Double.NaN;
 
-	public void qualifyRoi() {
+	public void handleRoiInPlot() {
 		ImagePlus imp = IJ.getImage();
-		if (imp == null)
+		if (imp == null) {
 			return;
-		boolean isPlot = imp.getWindow() instanceof PlotWindow;
-		if(!isPlot){
-				IJ.showMessage("'Qualify objects in Roi'  works only in Plot windows");
-				return;
 		}
+		boolean isPlot = imp.getWindow() instanceof PlotWindow;
+		if (!isPlot) {
+			IJ.showMessage("Front window must be a Plot");
+			return;
+		}
+		int nInside = 0;
+		int nOutside = 0;
+		int nObjects = OJ.getData().getCells().getCellsCount();
 		if (imp != null && imp.getWindow() instanceof PlotWindow) {
 			Plot plot = ((PlotWindow) (imp.getWindow())).getPlot();
-			if (plot.getNumPlotObjects() != 1) {
-				IJ.showMessage("'Qualify objects in Roi' only works in single plots");
+			String[] dd = plot.getDataObjectDesignations();
+			boolean okay = (plot.getNumPlotObjects() == 1) || (dd.length == 2 && dd[1].contains("Binned"));
+			
+			if (!okay) {
+				IJ.showMessage("'Handle ROI in Plot' only works in single plots");
 				return;
 			}
-			float[] xVals = plot.getXValues();
-			float[] yVals = plot.getYValues();
+			String[] style = plot.getPlotObjectStyle(0).split(",");
+			String thisStyle = style[3];
+
+			boolean ok = ("Circle,X,Box,Triangle,+,Dot,Diamond,Custom,".indexOf(thisStyle + ",") >= 0);
+			if (!ok) {
+				IJ.showMessage("'Handle ROI in Plot' works only \nfor scatter plots (circle, dot, box etc)");
+				return;
+			}
+			float[] xPlotValues = plot.getXValues();
+			float[] yPlotValues = plot.getYValues();
+
+			if (xPlotValues.length != nObjects) {
+				IJ.showMessage("Cannot qualify this Plot (mismatch number of objects)");
+				return;
+			}
+			Roi roi = imp.getRoi();
+			Color color = new Color(0, 255, 0, 80);
+			roi.setFillColor(color);
+
 			String xLabel = plot.getLabel('x');
 			String yLabel = plot.getLabel('y');
-			CellsOJ cells = OJ.getData().getCells();
+
 			ColumnsOJ columns = OJ.getData().getResults().getColumns();
 			ColumnOJ xCol = columns.getColumnByName(xLabel);
 			ColumnOJ yCol = columns.getColumnByName(yLabel);
@@ -1447,36 +1471,84 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 				IJ.error(err);
 				return;
 			}
-			Roi roi = imp.getRoi();
-			int nObjects = xCol.getResultCount();
-			int nQ = 0;
+			if (roi == null) {
+				IJ.showMessage("Plot did not contain a ROI");
+				return;
+			}
+			float[] xObjValues = xCol.getFloatArray(true);
+			float[] yObjValues = yCol.getFloatArray(true);
+			//int first = -1;
+			int topMost = 99999;
+			int topObj = -1;
+			int[] inside = new int[nObjects];
 			for (int obj = 0; obj < nObjects; obj++) {
-				double x = xCol.getDoubleResult(obj);
-				double y = yCol.getDoubleResult(obj);
-				if (!Double.isNaN(x + y)) {
-					double valX = plot.scaleXtoPxl(x);
-					double valY = plot.scaleYtoPxl(y);
-					if (roi.contains((int) valX, (int) valY)) {
-						//cells.qualifyCell(obj);
-						xVals[obj] = (float) x;
-						yVals[obj] = (float) y;
 
-						OJ.getDataProcessor().qualifyCell(obj, true);
-						nQ++;
+				float x = xObjValues[obj];
+				float y = yObjValues[obj];
+
+				if (!Double.isNaN(x + y)) {
+					int valX = (int) plot.scaleXtoPxl(x);
+					int valY = (int) plot.scaleYtoPxl(y);
+					if (roi.contains(valX, valY)) {
+						if ((int) valY < topMost) {
+							topMost = valY;
+							topObj = obj;
+						}
+
+						inside[obj] = 1;
+						nInside++;
 					} else {
-						xVals[obj] = Float.NaN;
-						yVals[obj] = Float.NaN;
+						inside[obj] = -1;
+						nOutside++;
+					}
+				}
+			}
+
+			OJ.getData().getResults().getQualifiers().setQualifyMethod(QualifiersOJ.QUALIFY_METHOD_ARBITRARY, true);
+			plot.updateImage();
+			int nPlotted = nInside + nOutside;
+			GenericDialog gd = new GenericDialog("Handle ROI in Plot...");
+			String msg = "";
+			msg += "Number of objects= " + nObjects + "\n";
+			msg += "  plotted points= " + nPlotted + "\n";
+			msg += "  points inside ROI= " + nInside + "\n";
+			msg += "* points outside ROI= " + nOutside + "\n";
+
+			String[] itemsArr = new String[3];
+			itemsArr[0] = "Show topmost object of ROI (#" + (topObj + 1) + ")";
+			itemsArr[1] = "Disqualify " + nOutside + " objects outside ROI*";
+			itemsArr[2] = "Delete " + nOutside + " objects outside ROI *";
+
+			gd.addRadioButtonGroup("", itemsArr, 3, 1, itemsArr[0]);
+
+			gd.addMessage(msg, new Font("SansSerif", Font.PLAIN, 9));
+			gd.showDialog();
+			boolean canceled = (gd.wasCanceled());
+			String s = gd.getNextRadioButton();
+			if (!canceled && s.equals(itemsArr[1])) {//disqualify
+				OJ.getData().getResults().getQualifiers().setQualifyMethod(QualifiersOJ.QUALIFY_METHOD_ARBITRARY, true);
+				for (int obj = 0; obj < nObjects; obj++) {
+					if (inside[obj] == -1) {
 						OJ.getDataProcessor().qualifyCell(obj, false);
 					}
 				}
 			}
-			OJ.getData().getResults().getQualifiers().setQualifyMethod(QualifiersOJ.QUALIFY_METHOD_ARBITRARY, true);
-			plot.updateImage();
-		}
+			if (!canceled && s.equals(itemsArr[2])) {//delete
 
+				for (int obj = nObjects - 1; obj >= 0; obj--) {
+					if (inside[obj] == -1) {
+						OJ.getDataProcessor().removeCellByIndex(obj);
+					}
+				}
+			}
+			if (!canceled && s.equals(itemsArr[0]) && topObj >= 0) {//show object
+				OJ.getDataProcessor().showCell(topObj);
+			}
+
+			roi.setFillColor(null);
+		}
 	}
 
-	//extracts xy data from front plot and adds 95% error bars
 	public void addErrorBars() {
 		Plot plot = null;
 		ImagePlus imp = IJ.getImage();

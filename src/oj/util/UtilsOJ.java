@@ -801,6 +801,12 @@ public class UtilsOJ {
 		return position;
 	}
 
+/**
+	 * Calculates error bars
+	 *
+	 * @param
+	 * @return 3 arrays containing midX, meanY, errY
+	 */
 	public static double[][] calcErrorBars(double[] XX, double[] YY, double binWidth, double binStart, int confidPercent) {
 		double confid = 0;
 		if (confidPercent == 90) {
@@ -819,71 +825,114 @@ public class UtilsOJ {
 			return null;
 		}
 		double[][] output = new double[3][];//x, y, errors
+
 		int nPoints = XX.length;
+
 		if (YY.length != nPoints) {
 			return null;
+		}
+		double[] xx = new double[nPoints];//Remove NaNs
+		double[] yy = new double[nPoints];
+		int newSize = 0;
+		for (int jj = 0; jj < nPoints; jj++) {
+			if (!Double.isNaN(XX[jj] + YY[jj])) {
+				xx[newSize] = XX[jj];
+				yy[newSize] = YY[jj];
+				newSize++;
+			}
+		}
+		if (newSize < nPoints) {
+			double[] tmpx = new double[newSize];
+			double[] tmpy = new double[newSize];
+			System.arraycopy(xx, 0, tmpx, 0, newSize);
+			System.arraycopy(yy, 0, tmpy, 0, newSize);
+			xx = tmpx;
+			yy = tmpy;
+			nPoints = newSize;
+		} else {
+			xx = XX;
+			yy = YY;
 		}
 		if (!(binWidth > 0)) {
 			return null;
 		}
-		int[] indexes = Tools.rank(XX);
-		double minVal = XX[indexes[0]];
 
+		int[] indexes = Tools.rank(xx);
+		double minVal = xx[indexes[0]];
 		double leftBorder = binStart;
-
 		while (leftBorder > minVal)
 			leftBorder -= binWidth;
 		while (leftBorder < minVal - binWidth)
 			leftBorder += binWidth;
 
-		int groupLen = 0;
-		double[] groupY = new double[nPoints];
+		double[] sortedX = new double[nPoints];
+		double[] sortedY = new double[nPoints];
+		int[] group = new int[nPoints];
+		String[] g_x_y = new String[nPoints];//for test only
+		for (int jj = 0; jj < nPoints; jj++) {
+			double x = xx[indexes[jj]];//group
+			double y = yy[indexes[jj]];//group
+			sortedX[jj] = x;
+			sortedY[jj] = y;
+			group[jj] = (int) Math.floor((x - leftBorder) / binWidth);
+			g_x_y[jj] = "" + group[jj] + "_" + (float) x + "_" + (float) y;
+		}
+
 		double[] midBins = new double[nPoints];
 		double[] means = new double[nPoints];
-		double[] e95s = new double[nPoints];
+		double[] errs = new double[nPoints];
+
 		int goodGroups = 0;
-		for (int jj = 0; jj < nPoints; jj++) {
-			double x = XX[indexes[jj]];
-			double y = YY[indexes[jj]];
-			if (x <= leftBorder + binWidth) {
-				groupY[groupLen++] = y;
-			}
-			if (x >= leftBorder + binWidth || jj == nPoints - 1) {
-				if (groupLen >= 2) {//group is full
-					double sum = 0.0, sum2 = 0.0, value;
-					for (int i = 0; i < groupLen; i++) {
-						value = groupY[i];
-						sum += value;
-						sum2 += value * value;
-					}
-					double mean = sum / groupLen;
-					double stdDev = (groupLen * sum2 - sum * sum) / groupLen;
-					stdDev = Math.sqrt(stdDev / (groupLen - 1.0));
-					double e95 = confid * stdDev / Math.sqrt(groupLen); //95% confidence
-					e95s[goodGroups] = e95;
-					means[goodGroups] = mean;
-					midBins[goodGroups] = leftBorder + 0.5 * binWidth;//
+
+		int left = 0;
+	
+		for (int jj = 1; jj < nPoints + 1; jj++) {
+			if (jj == nPoints || group[jj-1] < group[jj]) {//second OR not executed if jj==nPoints
+				int groupSize = jj - left;
+				if (groupSize >= 2) {
+					double[] yGroup = new double[groupSize];
+					System.arraycopy(sortedY, left, yGroup, 0, groupSize);
+					double results[] = getEValues(yGroup, confid);
+					midBins[goodGroups] = (group[left] + 0.5) * binWidth + leftBorder;
+					means[goodGroups] = results[0];
+					errs[goodGroups] = results[1];
+
 					goodGroups++;
+
 				}
-				groupLen = 0;
-
-				while (leftBorder < x - binWidth)
-					leftBorder += binWidth;
-				groupY[groupLen++] = y;
-
+				left = jj;
 			}
+
 		}
+
 		//trim arrays
-		double[] e95T = new double[goodGroups];
+		double[] errsT = new double[goodGroups];//trimmed
 		double[] midBinsT = new double[goodGroups];
 		double[] meansT = new double[goodGroups];
-		System.arraycopy(e95s, 0, e95T, 0, goodGroups);
+		System.arraycopy(errs, 0, errsT, 0, goodGroups);
 		System.arraycopy(midBins, 0, midBinsT, 0, goodGroups);
 		System.arraycopy(means, 0, meansT, 0, goodGroups);
 		output[0] = midBinsT;
 		output[1] = meansT;
-		output[2] = e95T;
+		output[2] = errsT;
 		return output;
 
+	}
+	
+//returns  mean and error as array
+	static double[] getEValues(double[] yGroup, double confid) {
+		double sum = 0.0, sum2 = 0.0, value;
+		int groupLen = yGroup.length;
+		for (int i = 0; i < groupLen; i++) {
+			value = yGroup[i];
+			sum += value;
+			sum2 += value * value;
+		}
+		double mean = sum / groupLen;
+		double stdDev = (groupLen * sum2 - sum * sum) / groupLen;
+		stdDev = Math.sqrt(stdDev / (groupLen - 1.0));
+		double e90_99 = confid * stdDev / Math.sqrt(groupLen); //typically 95% confidence
+
+		return new double[]{mean, e90_99};
 	}
 }

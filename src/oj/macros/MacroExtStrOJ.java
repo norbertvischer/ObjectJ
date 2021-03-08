@@ -188,6 +188,8 @@ public class MacroExtStrOJ {
         buf.append(getFunction("ojRoiToItem"));
         buf.append(getFunction("ojRecalculate"));
         buf.append(getFunction("ojRepositionItem", "fromIndex", "toIndex"));
+		buf.append(getFunction("ojRunMacro", "arg"));
+
         buf.append(getFunction("ojSelectItem", "name", "index"));
         buf.append(getFloatFunction("ojGetItemLength"));
 
@@ -255,6 +257,8 @@ public class MacroExtStrOJ {
 
         buf.append(getFunction("ojZoom", "factor", "xHook", "yHook"));
         buf.append(getFunction("ojTest", "arg"));
+				
+				
         buf.append(getStrFunction("ojTmpFunction", "anything"));
         
         buf.append("function ojIntArray(){J__s = call(\"oj.macros.ExtensionOJ.ojIntArray\"); J__A = split(J__s, fromCharCode(10)); for (J__j = 0; J__j < lengthOf(J__A); J__j++) J__A[J__j] = parseInt(J__A[J__j]); return J__A;}\n");

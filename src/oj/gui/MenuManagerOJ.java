@@ -241,10 +241,6 @@ public class MenuManagerOJ implements ItemListener, MacroChangedListenerOJ {
 			/**/ thisItem.addActionListener(ResultsActionsOJ.PlotAction);
 			/**/ menuPlot.add(thisItem);
 			
-			/**/ thisItem = new MenuItem("Qualify Objects in Roi");
-			/**/ thisItem.addActionListener(ResultsActionsOJ.AddQualifyRoiAction);
-			/**/ menuPlot.add(thisItem);
-
 			/**/ thisItem = new MenuItem("Add Error Bars to Plot");
 			/**/ thisItem.addActionListener(ResultsActionsOJ.AddErrorBarsAction);
 			/**/ menuPlot.add(thisItem);
@@ -252,6 +248,11 @@ public class MenuManagerOJ implements ItemListener, MacroChangedListenerOJ {
 			/**/ thisItem = new MenuItem("Add to Plot");
 			/**/ thisItem.addActionListener(ResultsActionsOJ.AddToPlotAction);
 			/**/ menuPlot.add(thisItem);
+
+			/**/ thisItem = new MenuItem("Handle ROI in Plot...");
+			/**/ thisItem.addActionListener(ResultsActionsOJ.AddQualifyRoiAction);
+			/**/ menuPlot.add(thisItem);
+
 
 //			/**/ thisItem = new MenuItem("Histogram");
 //			/**/ thisItem.addActionListener(ResultsActionsOJ.HistogramAction);

@@ -62,7 +62,7 @@ public class ResultsActionsOJ {
 	public void actionPerformed(ActionEvent e) {
 
 	   // IJ.showMessage("You chose Qualify Roi");
-	    ProjectResultsOJ.getInstance().qualifyRoi();
+	    ProjectResultsOJ.getInstance().handleRoiInPlot();
 	    
 	}
     };

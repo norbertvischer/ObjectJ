@@ -142,7 +142,7 @@ public class ColumnSettingsOJ extends javax.swing.JPanel implements TableColumnM
         cbxOperation.addItem("Path");
         cbxOperation.addItem("Partial Path");
         cbxOperation.addItem("Relative Partial Path");
-        //cbxOperation.addItem("Offroad");//
+        cbxOperation.addItem("Offroad");//22.2.2021
         cbxOperation.addItem("XPos");
         cbxOperation.addItem("YPos");
         cbxOperation.addItem("ZPos");
@@ -356,7 +356,7 @@ public class ColumnSettingsOJ extends javax.swing.JPanel implements TableColumnM
                 ColumnDefOJ colDef = column.getColumnDef();
                 updateHistoSettings(colDef);
                 int alg = column.getColumnDef().getAlgorithm();
-                boolean nonAutomatic = alg > ColumnDefOJ.ALGORITHM_LAST_AUTOMATIC && alg != ColumnDefOJ.ALGORITHM_CALC_OFFROAD;//10.2.2010
+                boolean nonAutomatic = alg > ColumnDefOJ.ALGORITHM_LAST_AUTOMATIC && alg != ColumnDefOJ.ALGORITHM_CALC_OFFROAD;//22.2.021
                 if (nonAutomatic) {//27.9.2009
                     if ((column.getColumnDef().getAlgorithm() == ColumnDefOJ.ALGORITHM_CALC_LINKED_NUMBER)
                             || (column.getColumnDef().getAlgorithm() == ColumnDefOJ.ALGORITHM_CALC_LINKED_TEXT)) {
