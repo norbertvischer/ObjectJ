@@ -7,12 +7,18 @@ import java.awt.Desktop;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.MessageDigest;
+
 import oj.OJ;
 
 /**
@@ -801,7 +807,7 @@ public class UtilsOJ {
 		return position;
 	}
 
-/**
+	/**
 	 * Calculates error bars
 	 *
 	 * @param
@@ -885,9 +891,9 @@ public class UtilsOJ {
 		int goodGroups = 0;
 
 		int left = 0;
-	
+
 		for (int jj = 1; jj < nPoints + 1; jj++) {
-			if (jj == nPoints || group[jj-1] < group[jj]) {//second OR not executed if jj==nPoints
+			if (jj == nPoints || group[jj - 1] < group[jj]) {//second OR not executed if jj==nPoints
 				int groupSize = jj - left;
 				if (groupSize >= 2) {
 					double[] yGroup = new double[groupSize];
@@ -918,7 +924,7 @@ public class UtilsOJ {
 		return output;
 
 	}
-	
+
 //returns  mean and error as array
 	static double[] getEValues(double[] yGroup, double confid) {
 		double sum = 0.0, sum2 = 0.0, value;
@@ -935,4 +941,48 @@ public class UtilsOJ {
 
 		return new double[]{mean, e90_99};
 	}
+
+	//returns the checksum of a string or file, or null if no success
+	static public String getHash( String method, boolean fromFile, String pathOrString) {
+		method = method.toUpperCase();
+		boolean md5 = method.indexOf("MD5") >= 0;
+		boolean sha_256 = method.indexOf("SHA-256") >= 0;
+
+
+		try {
+			MessageDigest digest = null;
+			if (md5)
+				digest = MessageDigest.getInstance("MD5");
+			else if(sha_256)
+				 digest = MessageDigest.getInstance("SHA-256");
+			else
+				return "0";
+			Path path = Paths.get(pathOrString);
+			byte[] encodedhash;
+			if (fromFile) {
+				encodedhash = digest.digest(Files.readAllBytes(path));
+			} else {
+				encodedhash = digest.digest(pathOrString.getBytes());
+			}
+
+			return bytesToHex(encodedhash);
+
+		} catch (Exception e) {
+		}
+
+		return "0";
+	}
+
+	private static String bytesToHex(byte[] hash) {
+		StringBuilder hexString = new StringBuilder(2 * hash.length);
+		for (int i = 0; i < hash.length; i++) {
+			String hex = Integer.toHexString(0xff & hash[i]);
+			if (hex.length() == 1) {
+				hexString.append('0');
+			}
+			hexString.append(hex);
+		}
+		return hexString.toString();
+	}
+
 }

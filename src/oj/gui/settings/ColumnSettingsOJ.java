@@ -142,7 +142,7 @@ public class ColumnSettingsOJ extends javax.swing.JPanel implements TableColumnM
         cbxOperation.addItem("Path");
         cbxOperation.addItem("Partial Path");
         cbxOperation.addItem("Relative Partial Path");
-        cbxOperation.addItem("Offroad");//22.2.2021
+        //cbxOperation.addItem("Offroad");//22.2.2021
         cbxOperation.addItem("XPos");
         cbxOperation.addItem("YPos");
         cbxOperation.addItem("ZPos");

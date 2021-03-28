@@ -174,7 +174,7 @@ public class MacroProcessorOJ {
 		return "image=" + index + " stackindex=" + stackIndexT;
 	}
 
-	void switchToItemT(String name) {
+	void switchToItemInTargetMode(String name) {
 		if (ytemT != null && ytemT.getLocationsCount() > 0) {
 			if (cellT == null) {
 				cellT = new CellOJ(targetImageOJ.getName(), stackIndexT);
@@ -713,12 +713,16 @@ public class MacroProcessorOJ {
 	 * activates item type in ObjectJ Tools window
 	 */
 	public void switchToItem(String name) {
+		if(name.equals("")){
+		    ToolManagerOJ.getInstance().selectTool(0);
+		    OJ.getData().getYtemDefs().setSelectedYtemDef(name);
+		}
 		if (null == OJ.getData().getYtemDefs().getYtemDefByName(name)) {
 			ImageJAccessOJ.InterpreterAccess.interpError("'" + name + "' is not a defined item");
 			return;
 		}
 		if (targetImageOJ != null) {
-			switchToItemT(name);
+			switchToItemInTargetMode(name);
 			return;
 		}
 //

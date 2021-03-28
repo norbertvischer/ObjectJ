@@ -81,7 +81,7 @@ public class LinkedStatRowsModelOJ extends AbstractTableModel {
                             int digits = column.getColumnDef().getColumnDigits();
                             double value = column.getStatistics().getStatisticsValueByName(statOperation);
 
-                            if ("StDev".equals(statOperation) & (digits < 2)) {
+                            if (("StDev".equals(statOperation)||"Mean".equals(statOperation)) && (digits < 2)) {
                                 return UtilsOJ.doubleToString(value, 2);//at least 2
                             } else if ("Count".equals(statOperation)) {
                                 return UtilsOJ.doubleToString(value, 0);//always integer

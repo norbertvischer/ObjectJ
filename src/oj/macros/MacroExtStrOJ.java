@@ -256,7 +256,7 @@ public class MacroExtStrOJ {
 		buf.append(getFunction("ojSetObjectInfo", "info"));//6.2.2019
 
         buf.append(getFunction("ojZoom", "factor", "xHook", "yHook"));
-        buf.append(getFunction("ojTest", "arg"));
+        buf.append(getFunction("ojTest", "method", "str"));
 				
 				
         buf.append(getStrFunction("ojTmpFunction", "anything"));

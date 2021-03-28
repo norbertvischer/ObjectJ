@@ -233,6 +233,7 @@ public class InputOutputOJ {
 			ed.getTextArea().setSelectionEnd(0);//13.10.2019
 			ed.getTextArea().setSelectionStart(0);
 			ed.getTextArea().setCaretPosition(0);
+			EmbeddedMacrosOJ.getInstance().setEditorUnchanged(ed);//29.3.2021
 		}
 		int nMacros = OJ.getData().getMacroSet().getMacrosCount();
 		IJ.selectWindow("ImageJ");

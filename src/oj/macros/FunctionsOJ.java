@@ -27,6 +27,7 @@ import ij.gui.GenericDialog;
 import ij.macro.Interpreter;
 import ij.macro.MacroRunner;
 import oj.processor.events.ImageChangedEventOJ;
+import oj.util.UtilsOJ;
 
 /**
  *
@@ -849,7 +850,17 @@ public class FunctionsOJ implements MacroExtension {
 	return s;
     }
 
-    public String ojTest(String arg) {//5.1. 2018
+	
+	
+	
+	 public String ojTest(String method, String str) {//5.1. 2018
+
+		if(str.startsWith("/"))
+			return UtilsOJ.getHash(method, true, str);
+		return UtilsOJ.getHash(method, false, str);
+	}
+
+    public String ojTestNotUsed(String arg) {//5.1. 2018
 
 	if (true) {
 	    return (getChecksum(new String[3]));
