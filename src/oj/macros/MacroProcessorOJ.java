@@ -1921,22 +1921,22 @@ public class MacroProcessorOJ {
 		oj.gui.menuactions.ViewActionsOJ.YtemListAction.actionPerformed(null);
 	}
 
-	public void showMap(String pattern) {
-		ij.IJ.showStatus("showMap " + pattern);
-	}
-
-	public void deleteMap(String pattern) {
-		ij.IJ.showStatus("deleteMap " + pattern);
-	}
-
-	public int ojMapCount(String pattern) {
-		ij.IJ.showStatus("ojMapCount " + pattern);
-		return -999;
-	}
-
-	public void storeMap(boolean keepFlag) {
-		ij.IJ.showStatus("storeMap " + keepFlag);
-	}
+//	public void showMap(String pattern) {
+//		ij.IJ.showStatus("showMap " + pattern);
+//	}
+//
+//	public void deleteMap(String pattern) {
+//		ij.IJ.showStatus("deleteMap " + pattern);
+//	}
+//
+//	public int ojMapCount(String pattern) {
+//		ij.IJ.showStatus("ojMapCount " + pattern);
+//		return -999;
+//	}
+//
+//	public void storeMap(boolean keepFlag) {
+//		ij.IJ.showStatus("storeMap " + keepFlag);
+//	}
 
 	public void initVertexStack(String dim) {
 		VertexCalculatorOJ vc = OJ.getVertexCalculator();

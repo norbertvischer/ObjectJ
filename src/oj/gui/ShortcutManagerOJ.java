@@ -136,39 +136,41 @@ public class ShortcutManagerOJ {
                     if (!evt.isConsumed()) {
                         if (control && shift) {
                             switch (keyCode) {
-                                case KeyEvent.VK_F1: {
-                                    ViewActionsOJ.SettingsAction.actionPerformed(null);
-                                    evt.consume();
-                                }
-                                break;
-                                case KeyEvent.VK_F2: {
-                                    ViewActionsOJ.YtemListAction.actionPerformed(null);
-                                    evt.consume();
-                                }
-                                break;
-                                case KeyEvent.VK_F3: {
-                                    ViewActionsOJ.ResultsViewAction.actionPerformed(null);
-                                    evt.consume();
-                                }
-                                break;
-//                                case KeyEvent.VK_F4: {
-//                                    ViewActionsOJ.ShowEmbeddedMacroAction.actionPerformed(null);
+//                                case KeyEvent.VK_F1: {
+//                                    ViewActionsOJ.SettingsAction.actionPerformed(null);
 //                                    evt.consume();
 //                                }
 //                                break;
-                                case KeyEvent.VK_F5: {
-                                    ViewActionsOJ.ShowProjectFolderAction.actionPerformed(null);
-                                    evt.consume();
-                                }
-                                break;
-//                                case KeyEvent.VK_C:
-//                                    YtemDefActionsOJ.SwitchCompositeModeAction.actionPerformed(null);
+//                                case KeyEvent.VK_F2: {
+//                                    ViewActionsOJ.YtemListAction.actionPerformed(null);
 //                                    evt.consume();
-//                                    break;
+//                                }
+//                                break;
+//                                case KeyEvent.VK_F3: {
+//                                    //ViewActionsOJ.ResultsViewAction.actionPerformed(null);
+//                                    //evt.consume();
+//                                }
+//                                break;
+////                                case KeyEvent.VK_F4: {
+////                                    ViewActionsOJ.ShowEmbeddedMacroAction.actionPerformed(null);
+////                                    evt.consume();
+////                                }
+////                                break;
+//                                case KeyEvent.VK_F5: {
+//                                    ViewActionsOJ.ShowProjectFolderAction.actionPerformed(null);
+//                                    evt.consume();
+//                                }
+//                                break;
+////                                case KeyEvent.VK_C:
+////                                    YtemDefActionsOJ.SwitchCompositeModeAction.actionPerformed(null);
+////                                    evt.consume();
+////                                    break;
                             }
                         } else {
                             if (ShortcutManagerOJ.isFocusedWindowSupportingShortcuts() && !meta) {  //16.11.2008
-                                if ((!evt.isConsumed()) && (isShortcutDefined(evt.getKeyCode(), shift))) {
+				control = (evt.getModifiers() & KeyEvent.CTRL_MASK) != 0;
+				
+                                if (!control && (!evt.isConsumed()) && (isShortcutDefined(evt.getKeyCode(), shift))) {//29.3.2021
                                     runMacro(evt.getKeyCode(), shift);
                                     evt.consume();
                                 }

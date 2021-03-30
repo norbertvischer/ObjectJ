@@ -592,15 +592,15 @@ public class FunctionsOJ implements MacroExtension {
 	return null;
     }
 
-    public String ojShowMap(String pattern) {
-	OJ.getMacroProcessor().showMap(pattern);
-	return null;
-    }
-
-    public String ojDeleteMap(String pattern) {
-	OJ.getMacroProcessor().deleteMap(pattern);
-	return null;
-    }
+//    public String ojShowMap(String pattern) {
+//	OJ.getMacroProcessor().showMap(pattern);
+//	return null;
+//    }
+//
+//    public String ojDeleteMap(String pattern) {
+//	OJ.getMacroProcessor().deleteMap(pattern);
+//	return null;
+//    }
 
 //    public String ojRunMacro(String arg) {//5.2. 2021
 //	IJ.wait(50);
@@ -623,10 +623,10 @@ public class FunctionsOJ implements MacroExtension {
 	return null;
     }
 
-    public String ojStoreMap(String keepFlag) {
-	OJ.getMacroProcessor().storeMap(MacroProcessorOJ.parseBoolean(keepFlag));
-	return null;
-    }
+//    public String ojStoreMap(String keepFlag) {
+//	OJ.getMacroProcessor().storeMap(MacroProcessorOJ.parseBoolean(keepFlag));
+//	return null;
+//    }
 
     public String ojSwapSlices(String sliceA, String sliceB) {
 	OJ.getMacroProcessor().swapSlices(MacroProcessorOJ.parseInt(sliceA), MacroProcessorOJ.parseInt(sliceB));
