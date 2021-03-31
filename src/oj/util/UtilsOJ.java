@@ -941,48 +941,4 @@ public class UtilsOJ {
 
 		return new double[]{mean, e90_99};
 	}
-
-	//returns the checksum of a string or file, or null if no success
-	static public String getHash( String method, boolean fromFile, String pathOrString) {
-		method = method.toUpperCase();
-		boolean md5 = method.indexOf("MD5") >= 0;
-		boolean sha_256 = method.indexOf("SHA-256") >= 0;
-
-
-		try {
-			MessageDigest digest = null;
-			if (md5)
-				digest = MessageDigest.getInstance("MD5");
-			else if(sha_256)
-				 digest = MessageDigest.getInstance("SHA-256");
-			else
-				return "0";
-			Path path = Paths.get(pathOrString);
-			byte[] encodedhash;
-			if (fromFile) {
-				encodedhash = digest.digest(Files.readAllBytes(path));
-			} else {
-				encodedhash = digest.digest(pathOrString.getBytes());
-			}
-
-			return bytesToHex(encodedhash);
-
-		} catch (Exception e) {
-		}
-
-		return "0";
-	}
-
-	private static String bytesToHex(byte[] hash) {
-		StringBuilder hexString = new StringBuilder(2 * hash.length);
-		for (int i = 0; i < hash.length; i++) {
-			String hex = Integer.toHexString(0xff & hash[i]);
-			if (hex.length() == 1) {
-				hexString.append('0');
-			}
-			hexString.append(hex);
-		}
-		return hexString.toString();
-	}
-
 }

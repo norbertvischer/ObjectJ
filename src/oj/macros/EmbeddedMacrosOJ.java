@@ -3,6 +3,7 @@ package oj.macros;
 import ij.IJ;
 import ij.ImageJ;
 import ij.WindowManager;
+import ij.gui.Toolbar;
 import ij.macro.Interpreter;
 import ij.plugin.frame.Editor;
 import java.awt.*;
@@ -259,7 +260,11 @@ public class EmbeddedMacrosOJ {
 		OJ.getData().setMacroSet(macroSet);
 		OJ.getEventProcessor().fireMacroChangedEvent(project_name, MacroChangedEventOJ.MACROSET_EDITED);
 		ij.IJ.showStatus("" + numMacros + " embedded macros have been loaded");
+		ToolManagerOJ.getInstance().selectTool("");
+		Toolbar.getInstance().setTool(0);
 		ToolManagerOJ.getInstance().reload();
+	
+
 		//setEditorUnchanged(OJ.editor);
 
 	}

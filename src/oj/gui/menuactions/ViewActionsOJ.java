@@ -61,7 +61,7 @@ public class ViewActionsOJ {
 		public void actionPerformed(ActionEvent e) {
 			if (ToolsWindowOJ.getInstance() == null) {
 				if (IJ.isMacintosh()) {
-					ToolsWindowOJ.setInstance(new JFrame());
+					ToolsWindowOJ.setInstance(new JFrame("OjTools"));//31.3.2021
 					ToolsWindowOJ.getInstance().addKeyListener(KeyEventManagerOJ.getInstance());
 					ToolsWindowOJ.getInstance().addWindowListener(new java.awt.event.WindowAdapter() {
 

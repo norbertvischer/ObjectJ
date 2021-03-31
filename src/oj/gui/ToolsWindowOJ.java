@@ -107,7 +107,6 @@ public class ToolsWindowOJ extends javax.swing.JPanel implements ToolListChanged
         ToolsWindowOJ.instance.setMinimumSize(new Dimension(124, 260));
         ToolsWindowOJ.instance.setMaximumSize(new Dimension(124, 900));
         ToolsWindowOJ.instance.setSize(new Dimension(124, 260));
-
         if (instance instanceof JFrame) {
             instance_type = ToolsWindowOJ.JFRAME_TYPE;
             ((JFrame) ToolsWindowOJ.instance).getContentPane().add(new ToolsWindowOJ());
