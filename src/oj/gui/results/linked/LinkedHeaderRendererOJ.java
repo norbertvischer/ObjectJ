@@ -68,7 +68,7 @@ public class LinkedHeaderRendererOJ extends JLabel implements TableCellRenderer 
         int count = 0;
         ColumnsOJ columns = OJ.getData().getResults().getColumns();
         for (int i = 0; i < columns.getAllColumnsCount(); i++) {
-            if (!((ColumnOJ) columns.getColumnByIndex(i)).isUnlinkedColumn()) {
+            if (true) {
                 if (!((ColumnOJ) columns.getColumnByIndex(i)).getColumnDef().isHidden()) {
                     count = count + 1;
                 }
@@ -84,7 +84,7 @@ public class LinkedHeaderRendererOJ extends JLabel implements TableCellRenderer 
         int count = -1;
         ColumnsOJ columns = OJ.getData().getResults().getColumns();
         for (int i = 0; i < columns.getAllColumnsCount(); i++) {
-            if (!((ColumnOJ) columns.getColumnByIndex(i)).isUnlinkedColumn()) {
+            if (true) {
                 if (!((ColumnOJ) columns.getColumnByIndex(i)).getColumnDef().isHidden()) {
                     count = count + 1;
                     if (count == index) {

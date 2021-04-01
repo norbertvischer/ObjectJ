@@ -956,8 +956,7 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 	boolean isUnlinked = tabbedResultsPane.getSelectedIndex() == 1;
 	isUnlinked = false;
 	int max_index = lstColumnSelector.getModel().getSize();
-	for (int i = 0; i
-		< max_index; i++) {
+	for (int i = 0; i < max_index; i++) {
 	    if (((ColumnOJ) lstColumnSelector.getModel().getElementAt(i)) != null) {
 		ColumnDefOJ colDef = ((ColumnOJ) lstColumnSelector.getModel().getElementAt(i)).getColumnDef();
 		if (!colDef.isHidden() && ((isUnlinked && colDef.isUnlinked()) || (!isUnlinked && !colDef.isUnlinked()))) {
