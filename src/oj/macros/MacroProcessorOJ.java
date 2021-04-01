@@ -33,7 +33,6 @@ import oj.project.results.ColumnDefOJ;
 import oj.graphics.CustomCanvasOJ;
 import oj.processor.state.CreateCellStateOJ;
 import oj.gui.tools.ToolManagerOJ;
-import oj.plugin.GlassWindowOJ;
 
 import oj.gui.results.ProjectResultsOJ;
 import oj.io.InputOutputOJ;
@@ -2284,63 +2283,6 @@ public class MacroProcessorOJ {
 			int dia = Math.max(rr.width, rr.height);
 			//to be continued, 10.7.2008, n_
 		}
-	}
-
-	public double[] getGlass() {
-		double[] ar = new double[4];
-
-		GlassWindowOJ glassWindow = GlassWindowOJ.getInstance();
-		ar[0] = GlassWindowOJ.getInstance().getComponent(0).getLocationOnScreen().x;
-		ar[1] = GlassWindowOJ.getInstance().getComponent(0).getLocationOnScreen().y;
-		ar[2] = GlassWindowOJ.getInstance().getComponent(0).getWidth();
-		ar[3] = GlassWindowOJ.getInstance().getComponent(0).getHeight();
-		return ar;
-	}
-
-	public void setGlass(String properties) {
-		if (properties.equals("")) {
-			GlassWindowOJ glassWindow = GlassWindowOJ.getInstance();
-			return;
-		}
-		properties = properties.toLowerCase();
-
-		if (properties.equals("connect")) {
-			GlassWindowOJ glassWindow = GlassWindowOJ.getInstance();
-			glassWindow.setImagePlus(IJ.getImage());
-			glassWindow.update();
-		}
-		if (properties.equals("show")) {
-			//if (GlassWindowOJ.exists()) {
-			GlassWindowOJ glassWindow = GlassWindowOJ.getInstance();
-			glassWindow.setVisible(true);
-			//}
-		}
-
-		if (properties.startsWith("color=0x")) {
-			String s = properties.substring(8);
-
-			int backgroundColor = Integer.parseInt(s, 16);
-			if (backgroundColor == 0) {
-				IJ.error("GlassWindow color must be > 0");
-			} else {
-				GlassWindowOJ.backgroundColor = backgroundColor;
-			}
-		}
-		if (properties.equals("hide")) {
-			if (GlassWindowOJ.exists()) {
-				GlassWindowOJ glassWindow = GlassWindowOJ.getInstance();
-				glassWindow.setVisible(false);
-				GlassWindowOJ.glassWin = null;
-			}
-		}
-		if (properties.equals("refresh")) {
-			GlassWindowOJ.robotCommand = GlassWindowOJ.GRAB_TO_CURRENT;
-		}
-
-		if (properties.equals("addslice")) {
-			GlassWindowOJ.robotCommand = GlassWindowOJ.GRAB_TO_CURRENT;
-		}
-
 	}
 
 	public int rankToIndex(int rank) {

@@ -16,7 +16,6 @@ import oj.project.results.QualifiersOJ;
 import oj.graphics.CustomCanvasOJ;
 import oj.processor.ToolStateProcessorOJ;
 import oj.gui.tools.ToolManagerOJ;
-import oj.plugin.GlassWindowOJ;
 
 public class SelectCellStateOJ extends ToolStateAdaptorOJ {
 
@@ -84,9 +83,6 @@ public class SelectCellStateOJ extends ToolStateAdaptorOJ {
     public void mouseEntered(String imageName, int stackIndex, double x, double y, int flags) {
         super.mouseEntered(imageName, stackIndex, x, y, flags);
         setCanvasCursor();
-        if (GlassWindowOJ.exists()) {// &&  false) {
-            GlassWindowOJ.getInstance().setCursor(selectCursor);
-        }
     }
 
     public void keyPressed(String imageName, int stackIndex, int keyCode, int flags) {
@@ -129,9 +125,6 @@ public class SelectCellStateOJ extends ToolStateAdaptorOJ {
         }
         if (cursor != null){
            ic.setCursor(cursor);
-           if (GlassWindowOJ.exists()) {
-                GlassWindowOJ.getInstance().setCursor(cursor);
-            }
         }
     }
 }

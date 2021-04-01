@@ -141,7 +141,6 @@ public class MacroExtStrOJ {
         buf.append(getFloatFunction("ojGetStatistics", "columnName", "rowIndex"));
         buf.append(getFloatFunction("ojGetVoxelSize", "imageIndex", "xyz"));//17.9.2009
         buf.append(getFunction("ojHideResults"));//24.2.2009
-        buf.append(getFloatArrayFunction("ojGetGlassDimensions"));
         buf.append(getIntFunction("ojImageLink"));
 
         buf.append(getIntFunction("ojIndexToRow", "index"));//14.7.2010
@@ -200,7 +199,6 @@ public class MacroExtStrOJ {
         buf.append(getFunction("ojSetColumnProperty", "columnName", "propertyName", "propertyValue"));
         buf.append(getFunction("ojSetColumnProperties", "columnName", "properties"));
         buf.append(getFunction("ojSetComposite", "mode"));
-        buf.append(getFunction("ojGlassWindow", "properties"));
 
         buf.append(getFunction("ojSetItemVisible", "itemType", "visible"));
         buf.append(getFunction("ojSetMarker", "xPos", "yPos"));

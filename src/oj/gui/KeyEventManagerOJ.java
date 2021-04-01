@@ -12,7 +12,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import oj.OJ;
 import oj.graphics.CustomCanvasOJ;
-import oj.plugin.GlassWindowOJ;
 import oj.processor.state.CreateCellStateOJ;
 
 /**

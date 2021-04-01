@@ -13,7 +13,6 @@ import oj.OJ;
 import oj.project.CellOJ;
 import oj.project.YtemDefOJ;
 import oj.graphics.CustomCanvasOJ;
-import oj.plugin.GlassWindowOJ;
 import oj.processor.DataProcessorOJ;
 import oj.processor.ToolStateProcessorOJ;
 import oj.processor.events.CellChangedEventOJ;
@@ -333,9 +332,6 @@ public class CreateCellStateOJ extends ToolStateAdaptorOJ implements YtemDefSele
         }
         if (ic != null) {
             ic.setCursor(cursor);
-            if (GlassWindowOJ.showing()) {
-                GlassWindowOJ.getInstance().setCursor(cursor);
-            }
         }
     }
 }

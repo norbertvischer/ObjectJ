@@ -15,7 +15,6 @@ import oj.project.LocationOJ;
 import oj.project.YtemOJ;
 import oj.graphics.CustomCanvasOJ;
 import oj.gui.ShortcutManagerOJ;
-import oj.plugin.GlassWindowOJ;
 import oj.processor.ToolStateProcessorOJ;
 
 public class DeleteCellStateOJ extends ToolStateAdaptorOJ {
@@ -165,9 +164,6 @@ public class DeleteCellStateOJ extends ToolStateAdaptorOJ {
         }
         if (cursor != null) {
             ic.setCursor(cursor);
-            if (GlassWindowOJ.exists()) {
-                GlassWindowOJ.getInstance().setCursor(cursor);
-            }
         }
     }
 }

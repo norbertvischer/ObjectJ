@@ -40,7 +40,6 @@ import oj.util.UtilsOJ;
 import oj.graphics.CustomCanvasOJ;
 import oj.gui.MouseEventManagerOJ;
 import oj.gui.settings.ProjectSettingsOJ;
-import oj.plugin.GlassWindowOJ;
 import oj.processor.events.CellChangedListenerOJ;
 import oj.processor.events.ImageChangedEventOJ;
 import oj.processor.events.ImageChangedListener2OJ;
@@ -1040,9 +1039,6 @@ public class ImageProcessorOJ implements ImageChangedListener2OJ, DropTargetList
 				imp.getWindow().getCanvas().repaint();
 
 			}
-		}
-		if (GlassWindowOJ.showing()) {
-			GlassWindowOJ.getInstance().repaint();
 		}
 
 	}
