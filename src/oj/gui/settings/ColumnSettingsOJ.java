@@ -136,7 +136,6 @@ public class ColumnSettingsOJ extends javax.swing.JPanel implements TableColumnM
 	private void fillOperations() {
 		cbxOperation.setMaximumRowCount(100);
 		cbxOperation.addItem(".None");
-		//cbxOperation.addItem("..Unlinked User Column");
 		cbxOperation.addItem("-");
 		cbxOperation.addItem("Distance");
 		cbxOperation.addItem("Path");
@@ -1680,27 +1679,8 @@ private void cbxOperationItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-F
 				case ColumnDefOJ.ALGORITHM_CALC_LINKED_TEXT:
 					column.getColumnDef().setColumnDigits(0);
 					updateOperands(column.getColumnDef(), 0);
-				case ColumnDefOJ.ALGORITHM_CALC_UNLINKED_NUMBER:
-					column.getColumnDef().setColumnDigits(2);
-					updateOperands(column.getColumnDef(), 0);
-				case ColumnDefOJ.ALGORITHM_CALC_UNLINKED_TEXT:
-					column.getColumnDef().setColumnDigits(0);
-					updateOperands(column.getColumnDef(), 0);
-					break;
 				default:
 					updateOperandsView(0, false, false);
-			}
-
-			int alg = column.getColumnDef().getAlgorithm();
-			if ((alg == ColumnDefOJ.ALGORITHM_CALC_UNLINKED_NUMBER)
-					|| (alg == ColumnDefOJ.ALGORITHM_CALC_UNLINKED_TEXT)) {
-				if (!column.getName().startsWith("_")) {
-					column.setName("_" + column.getName());
-				}
-			} else {
-				if (column.getName().startsWith("_")) {
-					//column.setName(column.getName().substring(1)); removed 21.1.2015
-				}
 			}
 
 			ColumnsOJ columns = OJ.getData().getResults().getColumns();  //2.2.2014    

@@ -1724,7 +1724,7 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
     // End of variables declaration//GEN-END:variables
 
 	public JPopupMenu getColumnPopupMenu(final JTable table) {
-		return popUpColumn;//same for linked and unlinked column
+		return popUpColumn;
 	}
 
 	public JPopupMenu getStatisticsPopupMenu() {//2.6.2010
@@ -1888,8 +1888,6 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 		int index = tabbedResultsPane.getSelectedIndex();
 		//if (index == 0) {
 		return tblLinkedHeader;
-		//}
-		//return tblUnlinkedHeader;
 	}
 
 	private void showHideStatistics(String itemName, boolean flag) {

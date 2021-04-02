@@ -29,19 +29,6 @@ public class ColumnConverterOJ implements Converter {
         writer.startNode("statistics");
         context.convertAnother(column.getStatistics());
         writer.endNode();
-        if (column.isUnlinkedColumn() && (column.getResultCount() > 0)) {
-            writer.startNode("rows");
-            for (int i = 0; i < column.getResultCount(); i++) {
-                writer.startNode("row");
-                if (column.getColumnDef().isTextMode()) {
-                    writer.addAttribute("value", column.getStringResult(i));
-                } else {
-                    writer.addAttribute("value", Double.toString(column.getDoubleResult(i)));
-                }
-                writer.endNode();
-            }
-            writer.endNode();
-        }
     }
 
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
@@ -62,7 +49,8 @@ public class ColumnConverterOJ implements Converter {
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
-            } else if ("rows".equals(reader.getNodeName())) {
+            }
+			else if ("rows".equals(reader.getNodeName())) {
                 while (reader.hasMoreChildren()) {
                     reader.moveDown();
                     if ("row".equals(reader.getNodeName())) {

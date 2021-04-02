@@ -712,9 +712,9 @@ public class MacroProcessorOJ {
 	 * activates item type in ObjectJ Tools window
 	 */
 	public void switchToItem(String name) {
-		if(name.equals("")){
-		    ToolManagerOJ.getInstance().selectTool(0);
-		    OJ.getData().getYtemDefs().setSelectedYtemDef(name);
+		if (name.equals("")) {
+			ToolManagerOJ.getInstance().selectTool(0);
+			OJ.getData().getYtemDefs().setSelectedYtemDef(name);
 		}
 		if (null == OJ.getData().getYtemDefs().getYtemDefByName(name)) {
 			ImageJAccessOJ.InterpreterAccess.interpError("'" + name + "' is not a defined item");
@@ -888,33 +888,9 @@ public class MacroProcessorOJ {
 		}
 
 		if ((index - one) >= theColumn.getResultCount()) {
-			if (theColumn.isUnlinkedColumn()) {
-				for (int i = (theColumn.getResultCount() - 1); i < (index - 2); i++) {
-					if (theColumn.getColumnDef().isTextMode()) {
-						OJ.getDataProcessor().addStringResult(columnName, "");
-					} else {
-						OJ.getDataProcessor().addDoubleResult(columnName, Double.NaN);
-					}
-
-				}
-				if (theColumn.getColumnDef().isTextMode()) {
-					OJ.getDataProcessor().addStringResult(columnName, value);
-				} else {
-					OJ.getDataProcessor().addDoubleResult(columnName, MacroProcessorOJ.parseDouble(value));
-				}
-
-			}
+			
 		} else {
-			if (theColumn.isUnlinkedColumn()) {
-				if (UtilsOJ.inRange(1, theColumn.getResultCount(), index)) {
-					if (theColumn.getColumnDef().isTextMode()) {
-						OJ.getDataProcessor().setStringResult(columnName, index - one, value);
-					} else {
-						OJ.getDataProcessor().setDoubleResult(columnName, index - one, MacroProcessorOJ.parseDouble(value));
-					}
-
-				}
-			} else {
+			{
 				if (UtilsOJ.inRange(1, OJ.getData().getCells().getCellsCount(), index)) {
 					if (theColumn.getColumnDef().isTextMode()) {
 						OJ.getDataProcessor().setStringResult(columnName, index - one, value);
@@ -1417,11 +1393,7 @@ public class MacroProcessorOJ {
 			ImageJAccessOJ.InterpreterAccess.interpError("Illegal character");
 			return;
 		}
-		if (isUnlinked) {
-			String msg = "Unlinked columns (whose titles start with '_') \nare not supported after ObjectJ version 1.04w";
-			ImageJAccessOJ.InterpreterAccess.interpError(msg);
-			return;
-		}
+
 		if (ProjectResultsOJ.getInstance() != null) {
 			ProjectResultsOJ.close();
 		} //1.2.2021
@@ -1431,16 +1403,7 @@ public class MacroProcessorOJ {
 			newestColumn = OJ.getData().getResults().getColumns().getColumnByName(columnName);//used for subsequent addition of properties like color or algor);
 			if (newestColumn != null) {//column already exists
 				newestColumn.getColumnDef().clearOperands();//don't appearance like color or precision
-				if (isUnlinked) {
-					if (isTextMode) {
-						newestColumn.getColumnDef().setAlgorithm(ColumnDefOJ.ALGORITHM_CALC_UNLINKED_TEXT);
-					} else {
-						newestColumn.getColumnDef().setAlgorithm(ColumnDefOJ.ALGORITHM_CALC_UNLINKED_NUMBER);
-					}
-					newestColumn.rows.clear();
-
-				}
-				if (!isUnlinked) {//if linked
+				if (true) {//if linked
 					if (isTextMode) {
 						newestColumn.getColumnDef().setAlgorithm(ColumnDefOJ.ALGORITHM_CALC_LINKED_TEXT);
 					} else {
@@ -1461,21 +1424,12 @@ public class MacroProcessorOJ {
 				newestColumn = new ColumnOJ();
 				newestColumn.getColumnDef().setName(columnName);
 
-				if (isUnlinked) {
-					if (isTextMode) {
-						newestColumn.getColumnDef().setAlgorithm(ColumnDefOJ.ALGORITHM_CALC_UNLINKED_TEXT);
-					} else {
-						newestColumn.getColumnDef().setAlgorithm(ColumnDefOJ.ALGORITHM_CALC_UNLINKED_NUMBER);
-					}
-
+				if (isTextMode) {
+					newestColumn.getColumnDef().setAlgorithm(ColumnDefOJ.ALGORITHM_CALC_LINKED_TEXT);
 				} else {
-					if (isTextMode) {
-						newestColumn.getColumnDef().setAlgorithm(ColumnDefOJ.ALGORITHM_CALC_LINKED_TEXT);
-					} else {
-						newestColumn.getColumnDef().setAlgorithm(ColumnDefOJ.ALGORITHM_CALC_LINKED_NUMBER);
-					}
-
+					newestColumn.getColumnDef().setAlgorithm(ColumnDefOJ.ALGORITHM_CALC_LINKED_NUMBER);
 				}
+
 				OJ.getData().getResults().getColumns().addColumn(newestColumn, true);//15.3.2009
 			}
 			IJ.wait(50);//31.1.2021
@@ -1884,18 +1838,6 @@ public class MacroProcessorOJ {
 
 	public int lastRow(String columnName) {
 		int last = 0;
-		ColumnsOJ columns = OJ.getData().getResults().getColumns();
-		ArrayList matchingColumns = columns.getColumnsByWildcard(columnName);
-		for (int jj = 0; jj
-				< matchingColumns.size(); jj++) {
-			ColumnOJ col = (ColumnOJ) matchingColumns.get(jj);
-			if (col.isUnlinkedColumn()) {
-				int value = col.getResultCount();
-				last
-						= value > last ? value : last;
-			}
-
-		}
 		return last;
 	}
 
@@ -1936,7 +1878,6 @@ public class MacroProcessorOJ {
 //	public void storeMap(boolean keepFlag) {
 //		ij.IJ.showStatus("storeMap " + keepFlag);
 //	}
-
 	public void initVertexStack(String dim) {
 		VertexCalculatorOJ vc = OJ.getVertexCalculator();
 		vc.init(dim);

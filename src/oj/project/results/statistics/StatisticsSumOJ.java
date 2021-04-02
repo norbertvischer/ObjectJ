@@ -26,18 +26,12 @@ public class StatisticsSumOJ extends StatisticsAdapterOJ {
         }
         double value = 0.0;
         for (int i = 0; i < column.getResultCount(); i++) {
-            if ((column.getColumnDef().isUnlinked())) {
-                if (!Double.isNaN(column.getDoubleResult(i))) {
-                    value = value + column.getDoubleResult(i);
-                }
-            } else {
+            
                 CellOJ cell = ((DataOJ) parent.getParent().getParent()).getCells().getCellByIndex(i);
                 if ((cell.isQualified()) && (!Double.isNaN(column.getDoubleResult(i)))) {
                     value = value + column.getDoubleResult(i);
-                }
-            }
+                }           
         }
-
         return value;
     }
 }

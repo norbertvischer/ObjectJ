@@ -29,8 +29,6 @@ public class ColumnsOJ extends BaseAdapterOJ implements StatisticsChangedListene
 	private int columnLinkedSortFlag = COLUM_SORT_FLAG_NONE;
 	private String columnLinkedSortName = "";
 	private ArrayList columns = new ArrayList();
-	private transient int columnUnlinkedSortFlag = COLUM_SORT_FLAG_NONE;
-	private transient String columnUnlinkedSortName;
 
 	/**
 	 * Creates a new instance of StatisticsOJ
@@ -118,30 +116,7 @@ public class ColumnsOJ extends BaseAdapterOJ implements StatisticsChangedListene
 	}
 
 	public void fixColumnsOrder() {//20.7.2009
-		//inserts linked columns
-		int firstUnlinked = -1;//unlinked columns must be in second part
 		int max = columns.size();
-		for (int jj = 0; jj < max; jj++) {
-			if (columns.get(jj) != null) {
-				String name = ((ColumnOJ) columns.get(jj)).getName();
-				boolean isUnlinked = name.startsWith("_");
-				if (isUnlinked) {
-					if (firstUnlinked == -1) {
-						firstUnlinked = jj;
-					}
-
-				} else {
-					if (firstUnlinked > -1) {
-						Object thisCol = columns.get(jj);
-						columns.set(jj, null);
-						columns.add(firstUnlinked, thisCol);
-						firstUnlinked++;
-						max++;
-					}
-				}
-			}
-		}
-		max = columns.size();
 		for (int jj = max - 1; jj >= 0; jj--) {
 			if (columns.get(jj) == null) {
 				columns.remove(jj);
@@ -218,7 +193,7 @@ public class ColumnsOJ extends BaseAdapterOJ implements StatisticsChangedListene
 	public String[] columnLinkedNamesToArray() {
 		ArrayList names = new ArrayList();
 		for (int i = 0; i < getAllColumnsCount(); i++) {
-			if (!getColumnByIndex(i).isUnlinkedColumn()) {
+			if (true) {
 				names.add(getColumnByIndex(i).getName());
 			}
 		}
@@ -226,31 +201,11 @@ public class ColumnsOJ extends BaseAdapterOJ implements StatisticsChangedListene
 		return result;
 	}
 
-	public String[] columnUnlinkedNamesToArray() {
-		ArrayList names = new ArrayList();
-		for (int i = 0; i < getAllColumnsCount(); i++) {
-			if (getColumnByIndex(i).isUnlinkedColumn()) {
-				names.add(getColumnByIndex(i).getName());
-			}
-		}
-		String[] result = (String[]) names.toArray(new String[names.size()]);
-		return result;
-	}
-
-	public int getUnlinkedColumnsCount() {
-		int jj = 0;
-		for (int i = 0; i < getAllColumnsCount(); i++) {
-			if (getColumnByIndex(i).isUnlinkedColumn()) {
-				jj++;
-			}
-		}
-		return jj;
-	}
 
 	public int getLinkedColumnsCount() {
 		int jj = 0;
 		for (int i = 0; i < getAllColumnsCount(); i++) {
-			if (!getColumnByIndex(i).isUnlinkedColumn()) {
+			if (true) {
 				jj++;
 			}
 		}
@@ -265,13 +220,7 @@ public class ColumnsOJ extends BaseAdapterOJ implements StatisticsChangedListene
 		return columnLinkedSortName;
 	}
 
-	public int getColumnUnlinkedSortFlag() {
-		return columnUnlinkedSortFlag;
-	}
 
-	public String getColumnUnlinkedSortName() {
-		return columnUnlinkedSortName;
-	}
 
 	public void setColumnLinkedSortFlag(int columnSortFlag) {
 		this.columnLinkedSortFlag = columnSortFlag;
@@ -279,14 +228,6 @@ public class ColumnsOJ extends BaseAdapterOJ implements StatisticsChangedListene
 
 	public void setColumnLinkedSortName(String columnSortName) {
 		this.columnLinkedSortName = columnSortName;
-	}
-
-	public void setColumnUnlinkedSortFlag(int columnSortFlag) {
-		this.columnUnlinkedSortFlag = columnSortFlag;
-	}
-
-	public void setColumnUnlinkedSortName(String columnSortName) {
-		this.columnUnlinkedSortName = columnSortName;
 	}
 
 	public int addColumn(ColumnOJ column, boolean initialize) {

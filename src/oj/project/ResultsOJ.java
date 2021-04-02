@@ -92,15 +92,11 @@ public class ResultsOJ extends BaseAdapterOJ {
 //        plots.initAfterUnmarshalling(this);
     }
 
-    public int[] getSortedIndexes(boolean unlinkedResults) {
+    public int[] getSortedIndexes(boolean ignored) {
         int[] result = new int[0];
         String sort_name = null;
         int sort_flag = ColumnsOJ.COLUM_SORT_FLAG_NONE;
-        if (unlinkedResults) {
-            sort_name = columns.getColumnUnlinkedSortName();
-            sort_flag = columns.getColumnUnlinkedSortFlag();
-            result = new int[getUnlinkedResultsCount()];
-        } else {
+         {
             sort_name = columns.getColumnLinkedSortName();
             sort_flag = columns.getColumnLinkedSortFlag();
             result = new int[((DataOJ) parent).getCells().getCellsCount()];
@@ -313,9 +309,7 @@ public class ResultsOJ extends BaseAdapterOJ {
     //narrows selection by disqualifying more cells in qualified_cells array
     private void applyOneCondition(String columnName, int operation, double minValue, double maxValue, boolean[] qualified_cells) {
         ColumnOJ column = columns.getColumnByName(columnName);
-        if (column.isUnlinkedColumn()) {//1.2.2014
-            return;
-        }
+        
         if ((operation == QualifierOJ.OPERATION_NOT_WITHIN) || (operation == QualifierOJ.OPERATION_WITHIN)) {
             for (int i = 0; i < column.getResultCount(); i++) {
                 if (!QualifierOJ.qualify(column.getDoubleResult(i), minValue, maxValue, operation)) {
@@ -430,16 +424,7 @@ public class ResultsOJ extends BaseAdapterOJ {
         return ((DataOJ) parent).getCells().getCellsCount();
     }
 
-    public int getUnlinkedResultsCount() {
-        int count = 0;
-        for (int i = 0; i < columns.getAllColumnsCount(); i++) {
-            if (columns.getColumnByIndex(i).isUnlinkedColumn()) {
-                count = count > columns.getColumnByIndex(i).getResultCount() ? count : columns.getColumnByIndex(i).getResultCount();
-            }
-        }
-        return count;
-    }
-
+ 
     class StringComparator implements Comparator {
 
         public int compare(Object arg0, Object arg1) {

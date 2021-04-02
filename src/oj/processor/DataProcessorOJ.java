@@ -918,25 +918,6 @@ public class DataProcessorOJ implements QualifierChangedListenerOJ {
 		OJ.getEventProcessor().fireCellChangedEvent();
 	}
 
-	/**
-	 * Adds one more string result to the bottom of a unlinked column (used by
-	 * MacroProcessor). (Also used to fill the holes with "")
-	 */
-	public void addStringResult(String columnName, String value) {
-		OJ.getData().getResults().getColumns().getColumnByName(columnName).addStringResult(value);
-		int row = OJ.getData().getResults().getColumns().getColumnByName(columnName).getResultCount() - 1;
-		OJ.getEventProcessor().fireResultChangedEvent(columnName, row, ResultChangedEventOJ.RESULTS_ADDED);
-	}
-
-	/**
-	 * Adds one more numeric result to the bottom of a unlinked column (used by
-	 * MacroProcessor). (Also used to fill the holes with NaN)
-	 */
-	public void addDoubleResult(String columnName, double value) {
-		OJ.getData().getResults().getColumns().getColumnByName(columnName).addDoubleResult(value);
-		int row = OJ.getData().getResults().getColumns().getColumnByName(columnName).getResultCount() - 1;
-		OJ.getEventProcessor().fireResultChangedEvent(columnName, row, ResultChangedEventOJ.RESULTS_ADDED);
-	}
 
 	/**
 	 * Sets a string result into an unlinked or linked column
