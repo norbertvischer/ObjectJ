@@ -58,459 +58,451 @@ import oj.project.results.ColumnsOJ;
  */
 public class ColumnSettingsOJ extends javax.swing.JPanel implements TableColumnModelListener, IControlPanelOJ, ColumnChangedListenerOJ, YtemDefChangedListenerOJ {
 
-    private static int suffix = 0;
-    private JTextField nameEditor = new JTextField();
-    private Dimension panelSize = new Dimension(585, 600);
-    private ColumnsTableRenderer columnsTableRenderer = new ColumnsTableRenderer();
-    private ColumnsHeaderTableRendererOJ columnsHeaderTableRenderer = new ColumnsHeaderTableRendererOJ();
+	private static int suffix = 0;
+	private JTextField nameEditor = new JTextField();
+	private Dimension panelSize = new Dimension(585, 600);
+	private ColumnsTableRenderer columnsTableRenderer = new ColumnsTableRenderer();
+	private ColumnsHeaderTableRendererOJ columnsHeaderTableRenderer = new ColumnsHeaderTableRendererOJ();
 
-    public ColumnSettingsOJ() {
-        initComponents();
-        initComponentsExt();
+	public ColumnSettingsOJ() {
+		initComponents();
+		initComponentsExt();
 
-        updateView();
-        OJ.getEventProcessor().addColumnChangedListener(this);
-        OJ.getEventProcessor().addYtemDefChangedListener(this);
-    }
+		updateView();
+		OJ.getEventProcessor().addColumnChangedListener(this);
+		OJ.getEventProcessor().addYtemDefChangedListener(this);
+	}
 
-    public void newColumn() {
-        btnNewActionPerformed(null);
-    }
+	public void newColumn() {
+		btnNewActionPerformed(null);
+	}
 
-    /**
-     * Selects a column for editing
-     */
-    public void editColumn(String columnName) {
-        for (int i = 0; i < tblColumns.getRowCount(); i++) {
-            if (OJ.getData().getResults().getColumns().getColumnByIndex(i).getColumnDef().getName().equals(columnName)) {
-                tblColumns.getSelectionModel().setSelectionInterval(i, i);
-                updateView();
-                break;
-            }
-        }
-    }
+	/**
+	 * Selects a column for editing
+	 */
+	public void editColumn(String columnName) {
+		for (int i = 0; i < tblColumns.getRowCount(); i++) {
+			if (OJ.getData().getResults().getColumns().getColumnByIndex(i).getColumnDef().getName().equals(columnName)) {
+				tblColumns.getSelectionModel().setSelectionInterval(i, i);
+				updateView();
+				break;
+			}
+		}
+	}
 
-    /**
-     * only one column can be selected
-     */
-    private ColumnOJ getSelectedColumn() {
-        if (tblColumns.getSelectedRowCount() != 1) {
-            return null;
-        }
-        int index = tblColumns.getSelectedRow();
-        if ((index >= 0) && (index < OJ.getData().getResults().getColumns().getAllColumnsCount())) {
-            return OJ.getData().getResults().getColumns().getColumnByIndex(index);
-        }
-        return null;
-    }
+	/**
+	 * only one column can be selected
+	 */
+	private ColumnOJ getSelectedColumn() {
+		if (tblColumns.getSelectedRowCount() != 1) {
+			return null;
+		}
+		int index = tblColumns.getSelectedRow();
+		if ((index >= 0) && (index < OJ.getData().getResults().getColumns().getAllColumnsCount())) {
+			return OJ.getData().getResults().getColumns().getColumnByIndex(index);
+		}
+		return null;
+	}
 
-    /**
-     * Fills the combo boxes with the available ytem names
-     */
-    private void fillObjectDefs() {
-        Object firstItem = cbxFirstObjectType.getSelectedItem();
-        Object secondItem = cbxSecondObjectType.getSelectedItem();
-        Object thirdItem = cbxThirdObjectType.getSelectedItem();
-        cbxFirstObjectType.removeAllItems();
-        cbxSecondObjectType.removeAllItems();
-        cbxThirdObjectType.removeAllItems();
-        for (int i = 0; i < OJ.getData().getYtemDefs().getYtemDefsCount(); i++) {
-            cbxFirstObjectType.addItem(OJ.getData().getYtemDefs().getYtemDefByIndex(i).getYtemDefName());
-            cbxSecondObjectType.addItem(OJ.getData().getYtemDefs().getYtemDefByIndex(i).getYtemDefName());
-            cbxThirdObjectType.addItem(OJ.getData().getYtemDefs().getYtemDefByIndex(i).getYtemDefName());
-        }
-        if (firstItem != null) {
-            cbxFirstObjectType.setSelectedItem(firstItem);
-        }
-        if (secondItem != null) {
-            cbxSecondObjectType.setSelectedItem(secondItem);
-        }
-        if (thirdItem != null) {
-            cbxThirdObjectType.setSelectedItem(thirdItem);
-        }
-    }
+	/**
+	 * Fills the combo boxes with the available ytem names
+	 */
+	private void fillObjectDefs() {
+		Object firstItem = cbxFirstObjectType.getSelectedItem();
+		Object secondItem = cbxSecondObjectType.getSelectedItem();
+		Object thirdItem = cbxThirdObjectType.getSelectedItem();
+		cbxFirstObjectType.removeAllItems();
+		cbxSecondObjectType.removeAllItems();
+		cbxThirdObjectType.removeAllItems();
+		for (int i = 0; i < OJ.getData().getYtemDefs().getYtemDefsCount(); i++) {
+			cbxFirstObjectType.addItem(OJ.getData().getYtemDefs().getYtemDefByIndex(i).getYtemDefName());
+			cbxSecondObjectType.addItem(OJ.getData().getYtemDefs().getYtemDefByIndex(i).getYtemDefName());
+			cbxThirdObjectType.addItem(OJ.getData().getYtemDefs().getYtemDefByIndex(i).getYtemDefName());
+		}
+		if (firstItem != null) {
+			cbxFirstObjectType.setSelectedItem(firstItem);
+		}
+		if (secondItem != null) {
+			cbxSecondObjectType.setSelectedItem(secondItem);
+		}
+		if (thirdItem != null) {
+			cbxThirdObjectType.setSelectedItem(thirdItem);
+		}
+	}
 
-    /**
-     * Fills the combo boxes with the available algorithms
-     */
-    private void fillOperations() {
-        cbxOperation.setMaximumRowCount(100);
-        cbxOperation.addItem(".None");
-        //cbxOperation.addItem("..Unlinked User Column");
-        cbxOperation.addItem("-");
-        cbxOperation.addItem("Distance");
-        cbxOperation.addItem("Path");
-        cbxOperation.addItem("Partial Path");
-        cbxOperation.addItem("Relative Partial Path");
-        //cbxOperation.addItem("Offroad");//22.2.2021
-        cbxOperation.addItem("XPos");
-        cbxOperation.addItem("YPos");
-        cbxOperation.addItem("ZPos");
-        cbxOperation.addItem("Orientation");
-        cbxOperation.addItem("Angle");
-        cbxOperation.addItem("Count");
-        cbxOperation.addItem("Area");
-        cbxOperation.addItem("Slice");
-        cbxOperation.addItem("Image");
-        cbxOperation.addItem("Index");
-        cbxOperation.addItem("ID");
-        cbxOperation.addItem("Exists");
-        cbxOperation.addItem("Length");
-        cbxOperation.addItem("File Name");
-        cbxOperation.addItem("Item Name");
+	/**
+	 * Fills the combo boxes with the available algorithms
+	 */
+	private void fillOperations() {
+		cbxOperation.setMaximumRowCount(100);
+		cbxOperation.addItem(".None");
+		//cbxOperation.addItem("..Unlinked User Column");
+		cbxOperation.addItem("-");
+		cbxOperation.addItem("Distance");
+		cbxOperation.addItem("Path");
+		cbxOperation.addItem("Partial Path");
+		cbxOperation.addItem("Relative Partial Path");
+		//cbxOperation.addItem("Offroad");//22.2.2021
+		cbxOperation.addItem("XPos");
+		cbxOperation.addItem("YPos");
+		cbxOperation.addItem("ZPos");
+		cbxOperation.addItem("Orientation");
+		cbxOperation.addItem("Angle");
+		cbxOperation.addItem("Count");
+		cbxOperation.addItem("Area");
+		cbxOperation.addItem("Slice");
+		cbxOperation.addItem("Image");
+		cbxOperation.addItem("Index");
+		cbxOperation.addItem("ID");
+		cbxOperation.addItem("Exists");
+		cbxOperation.addItem("Length");
+		cbxOperation.addItem("File Name");
+		cbxOperation.addItem("Item Name");
 
-    }
+	}
 
-    /**
-     * For the color of the column, combo box is filled with available colors
-     */
-    private void fillColors() {
-        cbxColor.setMaximumRowCount(100);//5.7.2009
-        DefaultComboBoxModel model = (DefaultComboBoxModel) cbxColor.getModel();
-        model.removeAllElements();
-        model.addElement(Color.BLACK);
-        model.addElement(Color.BLUE);
-        model.addElement(Color.CYAN);
-        model.addElement(Color.DARK_GRAY);
-        model.addElement(Color.GRAY);
-        model.addElement(Color.GREEN);
-        model.addElement(new Color(0, 153, 0));
-        model.addElement(Color.MAGENTA);
-        model.addElement(Color.ORANGE);
-        model.addElement(Color.PINK);
-        model.addElement(Color.RED);
-        model.addElement(Color.WHITE);
-        model.addElement(Color.YELLOW);
-        model.addElement(new String("Custom..."));
+	/**
+	 * For the color of the column, combo box is filled with available colors
+	 */
+	private void fillColors() {
+		cbxColor.setMaximumRowCount(100);//5.7.2009
+		DefaultComboBoxModel model = (DefaultComboBoxModel) cbxColor.getModel();
+		model.removeAllElements();
+		model.addElement(Color.BLACK);
+		model.addElement(Color.BLUE);
+		model.addElement(Color.CYAN);
+		model.addElement(Color.DARK_GRAY);
+		model.addElement(Color.GRAY);
+		model.addElement(Color.GREEN);
+		model.addElement(new Color(0, 153, 0));
+		model.addElement(Color.MAGENTA);
+		model.addElement(Color.ORANGE);
+		model.addElement(Color.PINK);
+		model.addElement(Color.RED);
+		model.addElement(Color.WHITE);
+		model.addElement(Color.YELLOW);
+		model.addElement(new String("Custom..."));
 
-    }
+	}
 
-    /**
-     * Depending on the algorithm, a certain amount of parameters can be defined
-     * by the user, while the rest remains invisible
-     */
-    private void updateOperandsView(int operandsCount, boolean cloneEnabled, boolean pointEnabled) {
-        //first operand
-        boolean firstEnabled = operandsCount > 0;
-        pnlFirstOperand.setVisible(firstEnabled);
-        if (cloneEnabled) {
-            lblFirstClone.setText("Clone#");
-        } else {
-            lblFirstClone.setText("");
-        }
-        txtFirstClone.setVisible(firstEnabled && cloneEnabled);
-        if (pointEnabled) {
-            lblFirstPoint.setText("Point#");
-        } else {
-            lblFirstPoint.setText("");
-        }
-        txtFirstPoint.setVisible(firstEnabled && pointEnabled);
+	/**
+	 * Depending on the algorithm, a certain amount of parameters can be defined
+	 * by the user, while the rest remains invisible
+	 */
+	private void updateOperandsView(int operandsCount, boolean cloneEnabled, boolean pointEnabled) {
+		//first operand
+		boolean firstEnabled = operandsCount > 0;
+		pnlFirstOperand.setVisible(firstEnabled);
+		if (cloneEnabled) {
+			lblFirstClone.setText("Clone#");
+		} else {
+			lblFirstClone.setText("");
+		}
+		txtFirstClone.setVisible(firstEnabled && cloneEnabled);
+		if (pointEnabled) {
+			lblFirstPoint.setText("Point#");
+		} else {
+			lblFirstPoint.setText("");
+		}
+		txtFirstPoint.setVisible(firstEnabled && pointEnabled);
 
-        //second operand
-        boolean secondEnabled = operandsCount > 1;
-        pnlSecondOperand.setVisible(secondEnabled);
-        if (cloneEnabled) {
-            lblSecondClone.setText("Clone#");
-        } else {
-            lblSecondClone.setText("");
-        }
-        txtSecondClone.setVisible(secondEnabled && cloneEnabled);
-        if (pointEnabled) {
-            lblSecondPoint.setText("Point#");
-        } else {
-            lblSecondPoint.setText("");
-        }
-        txtSecondPoint.setVisible(secondEnabled && pointEnabled);
+		//second operand
+		boolean secondEnabled = operandsCount > 1;
+		pnlSecondOperand.setVisible(secondEnabled);
+		if (cloneEnabled) {
+			lblSecondClone.setText("Clone#");
+		} else {
+			lblSecondClone.setText("");
+		}
+		txtSecondClone.setVisible(secondEnabled && cloneEnabled);
+		if (pointEnabled) {
+			lblSecondPoint.setText("Point#");
+		} else {
+			lblSecondPoint.setText("");
+		}
+		txtSecondPoint.setVisible(secondEnabled && pointEnabled);
 
-        //third operand
-        boolean thirdEnabled = operandsCount > 2;
-        pnlThirdOperand.setVisible(thirdEnabled);
-        if (cloneEnabled) {
-            lblThirdClone.setText("Clone#");
-        } else {
-            lblThirdClone.setText("");
-        }
-        txtThirdClone.setVisible(thirdEnabled && cloneEnabled);
-        if (pointEnabled) {
-            lblThirdPoint.setText("Point#");
-        } else {
-            lblThirdPoint.setText("");
-        }
-        txtThirdPoint.setVisible(thirdEnabled && pointEnabled);
+		//third operand
+		boolean thirdEnabled = operandsCount > 2;
+		pnlThirdOperand.setVisible(thirdEnabled);
+		if (cloneEnabled) {
+			lblThirdClone.setText("Clone#");
+		} else {
+			lblThirdClone.setText("");
+		}
+		txtThirdClone.setVisible(thirdEnabled && cloneEnabled);
+		if (pointEnabled) {
+			lblThirdPoint.setText("Point#");
+		} else {
+			lblThirdPoint.setText("");
+		}
+		txtThirdPoint.setVisible(thirdEnabled && pointEnabled);
 
-        if (operandsCount <= 1) {
-            ((TitledBorder) ((CompoundBorder) pnlFirstOperand.getBorder()).getInsideBorder()).setTitle("Operand");
-        } else {
-            ((TitledBorder) ((CompoundBorder) pnlFirstOperand.getBorder()).getInsideBorder()).setTitle("1st Operand");
-        }
-    }
+		if (operandsCount <= 1) {
+			((TitledBorder) ((CompoundBorder) pnlFirstOperand.getBorder()).getInsideBorder()).setTitle("Operand");
+		} else {
+			((TitledBorder) ((CompoundBorder) pnlFirstOperand.getBorder()).getInsideBorder()).setTitle("1st Operand");
+		}
+	}
 
-    /**
-     * updates Ytem names in comboboxes
-     */
-    private void updateYtemTypeText(ColumnOJ column, int index) {
-        JComboBox cbxField = null;
+	/**
+	 * updates Ytem names in comboboxes
+	 */
+	private void updateYtemTypeText(ColumnOJ column, int index) {
+		JComboBox cbxField = null;
 
-        switch (index) {
-            case 0:
-                cbxField = cbxFirstObjectType;
-                break;
-            case 1:
-                cbxField = cbxSecondObjectType;
-                break;
-            case 2:
-                cbxField = cbxThirdObjectType;
-                break;
-        }
+		switch (index) {
+			case 0:
+				cbxField = cbxFirstObjectType;
+				break;
+			case 1:
+				cbxField = cbxSecondObjectType;
+				break;
+			case 2:
+				cbxField = cbxThirdObjectType;
+				break;
+		}
 
-        OperandOJ operand = column.getColumnDef().getOperand(index);
-        if ((cbxField != null) && ((cbxField.getSelectedItem() == null) || ((operand != null) && (!((String) cbxField.getSelectedItem()).equals(operand.getObjectName()))))) {
-            cbxField.getModel().setSelectedItem(operand.getObjectName());
-        }
-    }
+		OperandOJ operand = column.getColumnDef().getOperand(index);
+		if ((cbxField != null) && ((cbxField.getSelectedItem() == null) || ((operand != null) && (!((String) cbxField.getSelectedItem()).equals(operand.getObjectName()))))) {
+			cbxField.getModel().setSelectedItem(operand.getObjectName());
+		}
+	}
 
-    /**
-     * updates clone numbers
-     */
-    private void updateCloneText(ColumnOJ column, int index) {
-        JTextField txtField = null;
-        switch (index) {
-            case 0:
-                txtField = txtFirstClone;
-                break;
-            case 1:
-                txtField = txtSecondClone;
-                break;
-            case 2:
-                txtField = txtThirdClone;
-                break;
-        }
+	/**
+	 * updates clone numbers
+	 */
+	private void updateCloneText(ColumnOJ column, int index) {
+		JTextField txtField = null;
+		switch (index) {
+			case 0:
+				txtField = txtFirstClone;
+				break;
+			case 1:
+				txtField = txtSecondClone;
+				break;
+			case 2:
+				txtField = txtThirdClone;
+				break;
+		}
 
-        OperandOJ operand = column.getColumnDef().getOperand(index);
-        if ((txtField != null) && ((txtField.getText() == null) || ((operand != null) && (!txtField.getText().equals(Integer.toString(operand.getYtemClone() + 1)))))) {
-            txtField.setText(Integer.toString(operand.getYtemClone() + 1));
-        }
-    }
+		OperandOJ operand = column.getColumnDef().getOperand(index);
+		if ((txtField != null) && ((txtField.getText() == null) || ((operand != null) && (!txtField.getText().equals(Integer.toString(operand.getYtemClone() + 1)))))) {
+			txtField.setText(Integer.toString(operand.getYtemClone() + 1));
+		}
+	}
 
-    /**
-     * updates point numbers
-     */
-    private void updatePointText(ColumnOJ column, int index) {
-        JTextField txtField = null;
-        switch (index) {
-            case 0:
-                txtField = txtFirstPoint;
-                break;
-            case 1:
-                txtField = txtSecondPoint;
-                break;
-            case 2:
-                txtField = txtThirdPoint;
-                break;
-        }
+	/**
+	 * updates point numbers
+	 */
+	private void updatePointText(ColumnOJ column, int index) {
+		JTextField txtField = null;
+		switch (index) {
+			case 0:
+				txtField = txtFirstPoint;
+				break;
+			case 1:
+				txtField = txtSecondPoint;
+				break;
+			case 2:
+				txtField = txtThirdPoint;
+				break;
+		}
 
-        OperandOJ operand = column.getColumnDef().getOperand(index);
-        if ((txtField != null) && ((txtField.getText() == null) || ((operand != null) && (!txtField.getText().equals(Integer.toString(operand.getRelPosition() + 1)))))) {
-            txtField.setText(Integer.toString(operand.getRelPosition() + 1));
-        }
-    }
+		OperandOJ operand = column.getColumnDef().getOperand(index);
+		if ((txtField != null) && ((txtField.getText() == null) || ((operand != null) && (!txtField.getText().equals(Integer.toString(operand.getRelPosition() + 1)))))) {
+			txtField.setText(Integer.toString(operand.getRelPosition() + 1));
+		}
+	}
 
-    /**
-     * uses column definition to update panel showing histogram parameters
-     * (xmin, xmax, binwidth etc)
-     */
-    private void updateHistoSettings(ColumnDefOJ colDef) {
-        double val = colDef.getHistoXMin();
-        String txt = Double.isNaN(val) ? "auto" : "" + colDef.getHistoXMin();
-        tfXMin.setText(txt);
+	/**
+	 * uses column definition to update panel showing histogram parameters
+	 * (xmin, xmax, binwidth etc)
+	 */
+	private void updateHistoSettings(ColumnDefOJ colDef) {
+		double val = colDef.getHistoXMin();
+		String txt = Double.isNaN(val) ? "auto" : "" + colDef.getHistoXMin();
+		tfXMin.setText(txt);
 
-        val = colDef.getHistoXMax();
-        txt = Double.isNaN(val) ? "auto" : "" + colDef.getHistoXMax();
-        tfXMax.setText(txt);
+		val = colDef.getHistoXMax();
+		txt = Double.isNaN(val) ? "auto" : "" + colDef.getHistoXMax();
+		tfXMax.setText(txt);
 
-        val = colDef.getHistoBinWidth();
-        txt = (val <= 0) || Double.isNaN(val) ? "auto" : "" + colDef.getHistoBinWidth();
-        tfBinWidth.setText(txt);
+		val = colDef.getHistoBinWidth();
+		txt = (val <= 0) || Double.isNaN(val) ? "auto" : "" + colDef.getHistoBinWidth();
+		tfBinWidth.setText(txt);
 
-        val = colDef.getHistoYMax();
-        txt = val < 1 ? "auto" : "" + colDef.getHistoYMax();
-        tfYMax.setText(txt);
+		val = colDef.getHistoYMax();
+		txt = val < 1 ? "auto" : "" + colDef.getHistoYMax();
+		tfYMax.setText(txt);
 
-        tfXMin.setVisible(true);
-        tfXMax.setVisible(true);
-        tfBinWidth.setVisible(true);
-        tfYMax.setVisible(true);
-    }
+		tfXMin.setVisible(true);
+		tfXMax.setVisible(true);
+		tfBinWidth.setVisible(true);
+		tfYMax.setVisible(true);
+	}
 
-    /**
-     * updates the two tabbed panels for operands and presentation
-     */
-    private void updateView() {
-        try {//20.1.2015
-            ColumnOJ column = getSelectedColumn();
-            if (column != null) {
-                String name = column.getName();
-                if (name.startsWith("Column")) {
-                    name = name + "";
-                }
-                ColumnDefOJ colDef = column.getColumnDef();
-                updateHistoSettings(colDef);
-                int alg = column.getColumnDef().getAlgorithm();
-                boolean nonAutomatic = alg > ColumnDefOJ.ALGORITHM_LAST_AUTOMATIC && alg != ColumnDefOJ.ALGORITHM_CALC_OFFROAD;//22.2.021
-                if (nonAutomatic) {//27.9.2009
-                    if ((column.getColumnDef().getAlgorithm() == ColumnDefOJ.ALGORITHM_CALC_LINKED_NUMBER)
-                            || (column.getColumnDef().getAlgorithm() == ColumnDefOJ.ALGORITHM_CALC_LINKED_TEXT)) {
-                        if (cbxOperation.getSelectedIndex() != 0) {
-                            cbxOperation.setSelectedIndex(0);
-                        }
-                    }
-                    if ((column.getColumnDef().getAlgorithm() == ColumnDefOJ.ALGORITHM_CALC_UNLINKED_NUMBER)
-                            || (column.getColumnDef().getAlgorithm() == ColumnDefOJ.ALGORITHM_CALC_UNLINKED_TEXT)) {
-                        if (cbxOperation.getSelectedIndex() != 1) {
-                            cbxOperation.setSelectedIndex(1);
-                        }
-                    }
-                } else {
-                    if (cbxOperation.getSelectedIndex() != (column.getColumnDef().getAlgorithm() + 1)) {
-                        cbxOperation.setSelectedIndex(column.getColumnDef().getAlgorithm() + 1);
-                    }
-                }
-                pnlTextMode.setVisible(false);
+	/**
+	 * updates the two tabbed panels for operands and presentation
+	 */
+	private void updateView() {
+		try {//20.1.2015
+			ColumnOJ column = getSelectedColumn();
+			if (column != null) {
+				String name = column.getName();
+				if (name.startsWith("Column")) {
+					name = name + "";
+				}
+				ColumnDefOJ colDef = column.getColumnDef();
+				updateHistoSettings(colDef);
+				int alg = column.getColumnDef().getAlgorithm();
+				boolean nonAutomatic = alg > ColumnDefOJ.ALGORITHM_LAST_AUTOMATIC && alg != ColumnDefOJ.ALGORITHM_CALC_OFFROAD;//22.2.021
+				if (nonAutomatic) {//27.9.2009
+					if ((column.getColumnDef().getAlgorithm() == ColumnDefOJ.ALGORITHM_CALC_LINKED_NUMBER)
+							|| (column.getColumnDef().getAlgorithm() == ColumnDefOJ.ALGORITHM_CALC_LINKED_TEXT)) {
+						if (cbxOperation.getSelectedIndex() != 0) {
+							cbxOperation.setSelectedIndex(0);
+						}
+					}
+				} else {
+					if (cbxOperation.getSelectedIndex() != (column.getColumnDef().getAlgorithm() + 1)) {
+						cbxOperation.setSelectedIndex(column.getColumnDef().getAlgorithm() + 1);
+					}
+				}
+				pnlTextMode.setVisible(false);
 
-                switch (column.getColumnDef().getAlgorithm()) {
-                    case ColumnDefOJ.ALGORITHM_CALC_ABS_PARTIAL_PATH:
-                    case ColumnDefOJ.ALGORITHM_CALC_REL_PARTIAL_PATH:
-                    case ColumnDefOJ.ALGORITHM_CALC_DISTANCE:
-                    case ColumnDefOJ.ALGORITHM_CALC_ORIENTATION:
-                    case ColumnDefOJ.ALGORITHM_CALC_OFFROAD:
-                        updateOperandsView(2, true, true);
-                        updateYtemTypeText(column, 0);
-                        updateYtemTypeText(column, 1);
-                        updateCloneText(column, 0);
-                        updateCloneText(column, 1);
-                        updatePointText(column, 0);
-                        updatePointText(column, 1);
-                        break;
+				switch (column.getColumnDef().getAlgorithm()) {
+					case ColumnDefOJ.ALGORITHM_CALC_ABS_PARTIAL_PATH:
+					case ColumnDefOJ.ALGORITHM_CALC_REL_PARTIAL_PATH:
+					case ColumnDefOJ.ALGORITHM_CALC_DISTANCE:
+					case ColumnDefOJ.ALGORITHM_CALC_ORIENTATION:
+					case ColumnDefOJ.ALGORITHM_CALC_OFFROAD:
+						updateOperandsView(2, true, true);
+						updateYtemTypeText(column, 0);
+						updateYtemTypeText(column, 1);
+						updateCloneText(column, 0);
+						updateCloneText(column, 1);
+						updatePointText(column, 0);
+						updatePointText(column, 1);
+						break;
 
-                    case ColumnDefOJ.ALGORITHM_CALC_PATH:
+					case ColumnDefOJ.ALGORITHM_CALC_PATH:
 
-                    case ColumnDefOJ.ALGORITHM_CALC_XPOS:
-                    case ColumnDefOJ.ALGORITHM_CALC_YPOS:
-                    case ColumnDefOJ.ALGORITHM_CALC_ZPOS:
-                        updateOperandsView(1, true, true);
-                        updateYtemTypeText(column, 0);
-                        updateCloneText(column, 0);
-                        updatePointText(column, 0);
-                        break;
-                    case ColumnDefOJ.ALGORITHM_CALC_ANGLE:
-                        updateOperandsView(3, true, true);
-                        updateYtemTypeText(column, 0);
-                        updateYtemTypeText(column, 1);
-                        updateYtemTypeText(column, 2);
-                        updateCloneText(column, 0);
-                        updateCloneText(column, 1);
-                        updateCloneText(column, 2);
-                        updatePointText(column, 0);
-                        updatePointText(column, 1);
-                        updatePointText(column, 2);
-                        break;
-                    case ColumnDefOJ.ALGORITHM_CALC_COUNT:
-                        updateOperandsView(1, false, false);
-                        updateYtemTypeText(column, 0);//29.9.2009
-                        break;
-                    case ColumnDefOJ.ALGORITHM_CALC_AREA:
-                    case ColumnDefOJ.ALGORITHM_CALC_LENGTH:
-                    case ColumnDefOJ.ALGORITHM_CALC_SLICE:
-                    case ColumnDefOJ.ALGORITHM_CALC_EXISTS:
-                        updateOperandsView(1, true, false);
-                        updateYtemTypeText(column, 0);
-                        updateCloneText(column, 0);
-                        break;
-                    case ColumnDefOJ.ALGORITHM_CALC_IMAGE:
-                    case ColumnDefOJ.ALGORITHM_CALC_ID:
-                    case ColumnDefOJ.ALGORITHM_CALC_INDEX://21.9.2009
-                    case ColumnDefOJ.ALGORITHM_CALC_FILE_NAME:
-                        updateOperandsView(0, false, false);
-                        break;
-                    case ColumnDefOJ.ALGORITHM_CALC_LINKED_NUMBER:
-                    case ColumnDefOJ.ALGORITHM_CALC_LINKED_TEXT:
-                    case ColumnDefOJ.ALGORITHM_CALC_UNLINKED_NUMBER:
-                    case ColumnDefOJ.ALGORITHM_CALC_UNLINKED_TEXT:
-                        pnlTextMode.setVisible(true);
-                        updateOperandsView(0, false, false);
-                        break;
-                    default:
-                        updateOperandsView(0, false, false);
-                }
+					case ColumnDefOJ.ALGORITHM_CALC_XPOS:
+					case ColumnDefOJ.ALGORITHM_CALC_YPOS:
+					case ColumnDefOJ.ALGORITHM_CALC_ZPOS:
+						updateOperandsView(1, true, true);
+						updateYtemTypeText(column, 0);
+						updateCloneText(column, 0);
+						updatePointText(column, 0);
+						break;
+					case ColumnDefOJ.ALGORITHM_CALC_ANGLE:
+						updateOperandsView(3, true, true);
+						updateYtemTypeText(column, 0);
+						updateYtemTypeText(column, 1);
+						updateYtemTypeText(column, 2);
+						updateCloneText(column, 0);
+						updateCloneText(column, 1);
+						updateCloneText(column, 2);
+						updatePointText(column, 0);
+						updatePointText(column, 1);
+						updatePointText(column, 2);
+						break;
+					case ColumnDefOJ.ALGORITHM_CALC_COUNT:
+						updateOperandsView(1, false, false);
+						updateYtemTypeText(column, 0);//29.9.2009
+						break;
+					case ColumnDefOJ.ALGORITHM_CALC_AREA:
+					case ColumnDefOJ.ALGORITHM_CALC_LENGTH:
+					case ColumnDefOJ.ALGORITHM_CALC_SLICE:
+					case ColumnDefOJ.ALGORITHM_CALC_EXISTS:
+						updateOperandsView(1, true, false);
+						updateYtemTypeText(column, 0);
+						updateCloneText(column, 0);
+						break;
+					case ColumnDefOJ.ALGORITHM_CALC_IMAGE:
+					case ColumnDefOJ.ALGORITHM_CALC_ID:
+					case ColumnDefOJ.ALGORITHM_CALC_INDEX://21.9.2009
+					case ColumnDefOJ.ALGORITHM_CALC_FILE_NAME:
+						updateOperandsView(0, false, false);
+						break;
+					case ColumnDefOJ.ALGORITHM_CALC_LINKED_NUMBER:
+					case ColumnDefOJ.ALGORITHM_CALC_LINKED_TEXT:
+						pnlTextMode.setVisible(true);
+						updateOperandsView(0, false, false);
+						break;
+					default:
+						updateOperandsView(0, false, false);
+				}
 
-                spinDigits.setValue(new Integer(column.getColumnDef().getColumnDigits()));
+				spinDigits.setValue(new Integer(column.getColumnDef().getColumnDigits()));
 
-                int colorIndex = getColorIndex(column.getColumnDef().getColumnColor());
-                if (colorIndex < 13) {
-                    if (cbxColor.getSelectedIndex() != colorIndex) {
-                        cbxColor.setSelectedIndex(colorIndex);
-                    }
-                } else {
-                    ((DefaultComboBoxModel) cbxColor.getModel()).setSelectedItem(column.getColumnDef().getColumnColor());
-                }
-                tabbedColumnDetail.setVisible(true);
-            } else {
-                tabbedColumnDetail.setVisible(false);
-            }
+				int colorIndex = getColorIndex(column.getColumnDef().getColumnColor());
+				if (colorIndex < 13) {
+					if (cbxColor.getSelectedIndex() != colorIndex) {
+						cbxColor.setSelectedIndex(colorIndex);
+					}
+				} else {
+					((DefaultComboBoxModel) cbxColor.getModel()).setSelectedItem(column.getColumnDef().getColumnColor());
+				}
+				tabbedColumnDetail.setVisible(true);
+			} else {
+				tabbedColumnDetail.setVisible(false);
+			}
 
-            //btnRemove.setEnabled(column != null);
-            btnRemove.setEnabled(tblColumns.getSelectedRowCount() > 0);
-        } catch (Exception e) {//20.1.2015
-            IJ.beep();
-            IJ.showStatus("Error= 6488 " + e.toString());
-        }
-    }
+			//btnRemove.setEnabled(column != null);
+			btnRemove.setEnabled(tblColumns.getSelectedRowCount() > 0);
+		} catch (Exception e) {//20.1.2015
+			IJ.beep();
+			IJ.showStatus("Error= 6488 " + e.toString());
+		}
+	}
 
-    /**
-     * get index from predefined colors, such as red = 10
-     */
-    private static int getColorIndex(Color color) {
-        if (color.getRGB() == Color.BLACK.getRGB()) {
-            return 0;
-        }
-        if (color.getRGB() == Color.BLUE.getRGB()) {
-            return 1;
-        }
-        if (color.getRGB() == Color.CYAN.getRGB()) {
-            return 2;
-        }
-        if (color.getRGB() == Color.DARK_GRAY.getRGB()) {
-            return 3;
-        }
-        if (color.getRGB() == Color.GRAY.getRGB()) {
-            return 4;
-        }
-        if (color.getRGB() == Color.GREEN.getRGB()) {
-            return 5;
-        }
-        if (color.getRGB() == new Color(0, 153, 0).getRGB()) {
-            return 6;
-        }
-        if (color.getRGB() == Color.MAGENTA.getRGB()) {
-            return 7;
-        }
-        if (color.getRGB() == Color.ORANGE.getRGB()) {
-            return 8;
-        }
-        if (color.getRGB() == Color.PINK.getRGB()) {
-            return 9;
-        }
-        if (color.getRGB() == Color.RED.getRGB()) {
-            return 10;
-        }
-        if (color.getRGB() == Color.WHITE.getRGB()) {
-            return 11;
-        }
-        if (color.getRGB() == Color.YELLOW.getRGB()) {
-            return 12;
-        }
-        return 13;
-    }
+	/**
+	 * get index from predefined colors, such as red = 10
+	 */
+	private static int getColorIndex(Color color) {
+		if (color.getRGB() == Color.BLACK.getRGB()) {
+			return 0;
+		}
+		if (color.getRGB() == Color.BLUE.getRGB()) {
+			return 1;
+		}
+		if (color.getRGB() == Color.CYAN.getRGB()) {
+			return 2;
+		}
+		if (color.getRGB() == Color.DARK_GRAY.getRGB()) {
+			return 3;
+		}
+		if (color.getRGB() == Color.GRAY.getRGB()) {
+			return 4;
+		}
+		if (color.getRGB() == Color.GREEN.getRGB()) {
+			return 5;
+		}
+		if (color.getRGB() == new Color(0, 153, 0).getRGB()) {
+			return 6;
+		}
+		if (color.getRGB() == Color.MAGENTA.getRGB()) {
+			return 7;
+		}
+		if (color.getRGB() == Color.ORANGE.getRGB()) {
+			return 8;
+		}
+		if (color.getRGB() == Color.PINK.getRGB()) {
+			return 9;
+		}
+		if (color.getRGB() == Color.RED.getRGB()) {
+			return 10;
+		}
+		if (color.getRGB() == Color.WHITE.getRGB()) {
+			return 11;
+		}
+		if (color.getRGB() == Color.YELLOW.getRGB()) {
+			return 12;
+		}
+		return 13;
+	}
 
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -1162,606 +1154,573 @@ public class ColumnSettingsOJ extends javax.swing.JPanel implements TableColumnM
         add(leftPanel, java.awt.BorderLayout.WEST);
     }// </editor-fold>//GEN-END:initComponents
 
-    /**
-     * Removes a column and it's entries when Remove button is clicked
-     */
+	/**
+	 * Removes a column and it's entries when Remove button is clicked
+	 */
     private void btnRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveActionPerformed
-        //nameEditor.getFocusListeners()[0].focusLost(null);
+		//nameEditor.getFocusListeners()[0].focusLost(null);
 
-        if (ProjectResultsOJ.getInstance() != null) {
-            ij.IJ.showStatus("Project results window was automatically closed");
-        }
-        ProjectResultsOJ.close();//15.1.2012
+		if (ProjectResultsOJ.getInstance() != null) {
+			ij.IJ.showStatus("Project results window was automatically closed");
+		}
+		ProjectResultsOJ.close();//15.1.2012
 
-        int[] indexes = tblColumns.getSelectedRows();
-        for (int jj = indexes.length - 1; jj >= 0; jj--) {
-            ColumnOJ column = OJ.getData().getResults().getColumns().getColumnByIndex(indexes[jj]);
-            String column_name = column.getName();
-            OJ.getData().getResults().getColumns().removeColumnByName(column_name);
-        }
+		int[] indexes = tblColumns.getSelectedRows();
+		for (int jj = indexes.length - 1; jj >= 0; jj--) {
+			ColumnOJ column = OJ.getData().getResults().getColumns().getColumnByIndex(indexes[jj]);
+			String column_name = column.getName();
+			OJ.getData().getResults().getColumns().removeColumnByName(column_name);
+		}
     }//GEN-LAST:event_btnRemoveActionPerformed
-    /**
-     * creates a new column with default name when New Column button is pressed
-     *
-     * @param evt
-     */
+	/**
+	 * creates a new column with default name when New Column button is pressed
+	 *
+	 * @param evt
+	 */
     private void btnNewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNewActionPerformed
-        if (ProjectResultsOJ.getInstance() != null) {
-            ij.IJ.showStatus("Project results window was automatically closed");
-        }
-        ProjectResultsOJ.close();//15.1.2012
-        suffix += 1;
-        String name = "Column" + Integer.toString(suffix);
-        while (OJ.getData().getResults().getColumns().getColumnByName(name) != null) {
-            suffix += 1;
-            name = "Column" + Integer.toString(suffix);
-        }
-        ColumnsOJ columns = OJ.getData().getResults().getColumns();
-        int atPosition = columns.addColumn(new ColumnOJ(name), true);//1.2.2014
+		if (ProjectResultsOJ.getInstance() != null) {
+			ij.IJ.showStatus("Project results window was automatically closed");
+		}
+		ProjectResultsOJ.close();//15.1.2012
+		suffix += 1;
+		String name = "Column" + Integer.toString(suffix);
+		while (OJ.getData().getResults().getColumns().getColumnByName(name) != null) {
+			suffix += 1;
+			name = "Column" + Integer.toString(suffix);
+		}
+		ColumnsOJ columns = OJ.getData().getResults().getColumns();
+		int atPosition = columns.addColumn(new ColumnOJ(name), true);//1.2.2014
 		IJ.wait(50);//31.1.2021
-        tblColumns.getSelectionModel().setSelectionInterval(atPosition, atPosition);
-        // tblColumns.scrollRectToVisible(new Rectangle(0,0,1,1));
-        tblColumns.scrollRectToVisible(tblColumns.getCellRect(atPosition, 0, true));
-        updateView();//2.2.2014
+		tblColumns.getSelectionModel().setSelectionInterval(atPosition, atPosition);
+		// tblColumns.scrollRectToVisible(new Rectangle(0,0,1,1));
+		tblColumns.scrollRectToVisible(tblColumns.getCellRect(atPosition, 0, true));
+		updateView();//2.2.2014
     }//GEN-LAST:event_btnNewActionPerformed
 
-    /**
-     * Extra initialisations
-     */
-    private void initComponentsExt() {
-        fillOperations();
-        fillObjectDefs();
-        fillColors();
+	/**
+	 * Extra initialisations
+	 */
+	private void initComponentsExt() {
+		fillOperations();
+		fillObjectDefs();
+		fillColors();
 
-        //if (IJ.isMacintosh()) {
-        ((TitledBorder) ((CompoundBorder) pnlOperation.getBorder()).getInsideBorder()).setBorder(new EmptyBorder(1, 1, 1, 1));
-        ((TitledBorder) ((CompoundBorder) pnlFirstOperand.getBorder()).getInsideBorder()).setBorder(new EmptyBorder(1, 1, 1, 1));
-        ((TitledBorder) ((CompoundBorder) pnlSecondOperand.getBorder()).getInsideBorder()).setBorder(new EmptyBorder(1, 1, 1, 1));
-        ((TitledBorder) ((CompoundBorder) pnlThirdOperand.getBorder()).getInsideBorder()).setBorder(new EmptyBorder(1, 1, 1, 1));
-        ((TitledBorder) ((CompoundBorder) pnlTextMode.getBorder()).getInsideBorder()).setBorder(new EmptyBorder(1, 1, 1, 1));
-        // ((TitledBorder) ((CompoundBorder) pnlColor.getBorder()).getInsideBorder()).setBorder(new EmptyBorder(1, 1, 1, 1));
-        // ((TitledBorder) ((CompoundBorder) pnlPrecision.getBorder()).getInsideBorder()).setBorder(new EmptyBorder(1, 1, 1, 1));
-        //}
+		//if (IJ.isMacintosh()) {
+		((TitledBorder) ((CompoundBorder) pnlOperation.getBorder()).getInsideBorder()).setBorder(new EmptyBorder(1, 1, 1, 1));
+		((TitledBorder) ((CompoundBorder) pnlFirstOperand.getBorder()).getInsideBorder()).setBorder(new EmptyBorder(1, 1, 1, 1));
+		((TitledBorder) ((CompoundBorder) pnlSecondOperand.getBorder()).getInsideBorder()).setBorder(new EmptyBorder(1, 1, 1, 1));
+		((TitledBorder) ((CompoundBorder) pnlThirdOperand.getBorder()).getInsideBorder()).setBorder(new EmptyBorder(1, 1, 1, 1));
+		((TitledBorder) ((CompoundBorder) pnlTextMode.getBorder()).getInsideBorder()).setBorder(new EmptyBorder(1, 1, 1, 1));
+		// ((TitledBorder) ((CompoundBorder) pnlColor.getBorder()).getInsideBorder()).setBorder(new EmptyBorder(1, 1, 1, 1));
+		// ((TitledBorder) ((CompoundBorder) pnlPrecision.getBorder()).getInsideBorder()).setBorder(new EmptyBorder(1, 1, 1, 1));
+		//}
 
-        tblColumns.setEnabled(true);
-        tblColumns.getTableHeader().setOpaque(true);
-        tblColumns.getTableHeader().setDefaultRenderer(columnsHeaderTableRenderer);
+		tblColumns.setEnabled(true);
+		tblColumns.getTableHeader().setOpaque(true);
+		tblColumns.getTableHeader().setDefaultRenderer(columnsHeaderTableRenderer);
 
-        //tblColumns.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tblColumns.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);//4.1.2013
+		//tblColumns.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		tblColumns.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);//4.1.2013
 
-        /**
-         * nameEditor is used when double-clicking on a column name in left
-         * table, or creating a new column
-         */
-        nameEditor.addFocusListener(new FocusListener() {
-            int index;
-            ColumnOJ column;
+		/**
+		 * nameEditor is used when double-clicking on a column name in left
+		 * table, or creating a new column
+		 */
+		nameEditor.addFocusListener(new FocusListener() {
+			int index;
+			ColumnOJ column;
 
-            public void focusGained(FocusEvent event) {
-                index = tblColumns.getSelectedRow();
-                if ((index >= 0) && (index < OJ.getData().getResults().getColumns().getAllColumnsCount())) {//9.9.2009
-                    column = OJ.getData().getResults().getColumns().getColumnByIndex(index);
-                    nameEditor.setText(column.getName());
-                } else {
-                    nameEditor.setText("");
-                    column = null;
-                }
-            }
-
-            public void focusLost(FocusEvent event) {
-                if ((column != null) && (nameEditor.getText().trim().length() > 0)) {
-
-                    String oldName = column.getName();
-                    boolean oldIsUnlinked = oldName.startsWith("_");
-                    String newName = nameEditor.getText().trim();//5.7.2009
-                    boolean newIsUnlinked = newName.startsWith("_");
-                    ColumnsOJ columns = oj.OJ.getData().getResults().getColumns();
-
-                    ColumnOJ col = columns.getColumnByName(newName);
-                    if (col != null && col != column) {
-                        ij.IJ.showMessage(newName + ": column already exists");
-                        return;
-                    }
-                    String notAllowed = ("* \t,\n?");//2017 added question mark
-                    for (int jj = 0; jj < notAllowed.length(); jj++) {
-                        if (newName.indexOf(notAllowed.charAt(jj)) >= 0) {
-                            ij.IJ.showMessage(newName + ": illegal character");			    
-                            return;
-                        }
-			if (newName.startsWith("_")) {
-			      ij.IJ.showMessage(newName + ": cannot start with '_'");
-			      return;
+			public void focusGained(FocusEvent event) {
+				index = tblColumns.getSelectedRow();
+				if ((index >= 0) && (index < OJ.getData().getResults().getColumns().getAllColumnsCount())) {//9.9.2009
+					column = OJ.getData().getResults().getColumns().getColumnByIndex(index);
+					nameEditor.setText(column.getName());
+				} else {
+					nameEditor.setText("");
+					column = null;
+				}
 			}
-                     }
 
-                    if (oldIsUnlinked && !newIsUnlinked) {
-                        IJ.showMessage("Column Settings", "Cannot change from 'unlinked' to 'linked'. \nBetter remove and re-create column ");
-                            return;
-                    }
+			public void focusLost(FocusEvent event) {
+				if ((column != null) && (nameEditor.getText().trim().length() > 0)) {
 
-                     if (oldIsUnlinked != newIsUnlinked) {
-                        if (IJ.showMessageWithCancel("Column Settings", "Changing from 'unlinked' to 'linked' or vice versa will clear contents of this column")) {
-                            column.clear();
-                            column.setName(newName);
+					String newName = nameEditor.getText().trim();//5.7.2009
+					ColumnsOJ columns = oj.OJ.getData().getResults().getColumns();
 
-                            column.getColumnDef().clearOperands();
-                            if (newIsUnlinked) {
+					ColumnOJ col = columns.getColumnByName(newName);
+					if (col != null && col != column) {
+						ij.IJ.showMessage(newName + ": column already exists");
+						return;
+					}
+					String notAllowed = ("* \t,\n?");//2017 added question mark
+					for (int jj = 0; jj < notAllowed.length(); jj++) {
+						if (newName.indexOf(notAllowed.charAt(jj)) >= 0) {
+							ij.IJ.showMessage(newName + ": illegal character");
+							return;
+						}
+						if (newName.startsWith("_")) {
+							ij.IJ.showMessage(newName + ": cannot start with '_'");
+							return;
+						}
+					}
 
-                                column.getColumnDef().setAlgorithm(ColumnDefOJ.ALGORITHM_CALC_UNLINKED_NUMBER);
-                            }
+					column.setName(nameEditor.getText().trim());
+					((ColumnsTableModel) tblColumns.getModel()).fireTableRowUpdated(index);
+				}
+			}
+		});
+	}
 
-                            if (!newIsUnlinked) {
-
-                                column.getColumnDef().setAlgorithm(ColumnDefOJ.ALGORITHM_CALC_LINKED_NUMBER);
-                            }
-
-                            columns.fixColumnsOrder();//20.7.2009
-                            ((ColumnsTableModel) tblColumns.getModel()).fireTableRowUpdated(index);
-                            ((ColumnsTableModel) tblColumns.getModel()).fireTableDataChanged();//my guess
-                            return;
-                        } else {
-                            return;
-                        }
-                    }
-
-                    column.setName(nameEditor.getText().trim());
-                    ((ColumnsTableModel) tblColumns.getModel()).fireTableRowUpdated(index);
-                }
-            }
-        });
-    }
-
-    /**
-     * first removes all operands from columnDef's operand array list, then
-     * creates new ones and gives tham by default the name of the first ytemdefs
-     * such as "axis"
-     */
-    private void updateOperands(ColumnDefOJ columnDef, int count) {
-        switch (count) {
-            case 0:
-                for (int i = columnDef.getOperandCount() - 1; i == 0; i--) {
-                    columnDef.removeOperand(i);
-                }
-                break;
-            case 1:
-                for (int i = columnDef.getOperandCount() - 1; i == 1; i--) {
-                    columnDef.removeOperand(i);
-                }
-                for (int i = columnDef.getOperandCount(); i < 1; i++) {
-                    columnDef.addOperand(new OperandOJ());
-                    columnDef.getOperand(i).setYtemName(OJ.getData().getYtemDefs().getYtemDefByIndex(0).getYtemDefName());
-                }
-                break;
-            case 2:
-                for (int i = columnDef.getOperandCount() - 1; i == 2; i--) {
-                    columnDef.removeOperand(i);
-                }
-                for (int i = columnDef.getOperandCount(); i < 2; i++) {
-                    columnDef.addOperand(new OperandOJ());
-                    columnDef.getOperand(i).setYtemName(OJ.getData().getYtemDefs().getYtemDefByIndex(0).getYtemDefName());
-                }
-                break;
-            case 3:
-                for (int i = columnDef.getOperandCount() - 1; i == 3; i--) {
-                    columnDef.removeOperand(i);
-                }
-                for (int i = columnDef.getOperandCount(); i < 3; i++) {
-                    columnDef.addOperand(new OperandOJ());
-                    columnDef.getOperand(i).setYtemName(OJ.getData().getYtemDefs().getYtemDefByIndex(0).getYtemDefName());
-                }
-                break;
-        }
-    }
+	/**
+	 * first removes all operands from columnDef's operand array list, then
+	 * creates new ones and gives tham by default the name of the first ytemdefs
+	 * such as "axis"
+	 */
+	private void updateOperands(ColumnDefOJ columnDef, int count) {
+		switch (count) {
+			case 0:
+				for (int i = columnDef.getOperandCount() - 1; i == 0; i--) {
+					columnDef.removeOperand(i);
+				}
+				break;
+			case 1:
+				for (int i = columnDef.getOperandCount() - 1; i == 1; i--) {
+					columnDef.removeOperand(i);
+				}
+				for (int i = columnDef.getOperandCount(); i < 1; i++) {
+					columnDef.addOperand(new OperandOJ());
+					columnDef.getOperand(i).setYtemName(OJ.getData().getYtemDefs().getYtemDefByIndex(0).getYtemDefName());
+				}
+				break;
+			case 2:
+				for (int i = columnDef.getOperandCount() - 1; i == 2; i--) {
+					columnDef.removeOperand(i);
+				}
+				for (int i = columnDef.getOperandCount(); i < 2; i++) {
+					columnDef.addOperand(new OperandOJ());
+					columnDef.getOperand(i).setYtemName(OJ.getData().getYtemDefs().getYtemDefByIndex(0).getYtemDefName());
+				}
+				break;
+			case 3:
+				for (int i = columnDef.getOperandCount() - 1; i == 3; i--) {
+					columnDef.removeOperand(i);
+				}
+				for (int i = columnDef.getOperandCount(); i < 3; i++) {
+					columnDef.addOperand(new OperandOJ());
+					columnDef.getOperand(i).setYtemName(OJ.getData().getYtemDefs().getYtemDefByIndex(0).getYtemDefName());
+				}
+				break;
+		}
+	}
 
 private void tblColumnsMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblColumnsMousePressed
-    updateView();
+	updateView();
 }//GEN-LAST:event_tblColumnsMousePressed
 
-    /**
-     * not used
-     */
+	/**
+	 * not used
+	 */
 private void tblColumnsKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tblColumnsKeyTyped
 
-    IJ.showStatus("Key typed " + evt.getKeyCode());
-    if (true) {
-        return;
-    }
-    IJ.wait(500);
-    int jj = tblColumns.getSelectedRow();
-    if (evt.getKeyCode() == evt.VK_UP && jj > 0) {
-        tblColumns.editCellAt(0, jj - 1, null);
+	IJ.showStatus("Key typed " + evt.getKeyCode());
+	if (true) {
+		return;
+	}
+	IJ.wait(500);
+	int jj = tblColumns.getSelectedRow();
+	if (evt.getKeyCode() == evt.VK_UP && jj > 0) {
+		tblColumns.editCellAt(0, jj - 1, null);
 
-    }
-    tblColumns.editingCanceled(null);
+	}
+	tblColumns.editingCanceled(null);
 
-    evt.consume();
-    tblColumns.repaint();
+	evt.consume();
+	tblColumns.repaint();
 
-    updateView();
+	updateView();
 }//GEN-LAST:event_tblColumnsKeyTyped
 
-    /**
-     * not used
-     */
+	/**
+	 * not used
+	 */
 private void tblColumnsFocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_tblColumnsFocusGained
 }//GEN-LAST:event_tblColumnsFocusGained
 
 private void tblColumnsKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tblColumnsKeyPressed
-    int flags = evt.getModifiers();
-    boolean up = evt.getKeyCode() == KeyEvent.VK_UP;
-    boolean down = evt.getKeyCode() == KeyEvent.VK_DOWN;
-    boolean control = (flags & KeyEvent.CTRL_MASK) != 0;
-    if (control && (up || down)) {
-        shiftColumns(up, down);
-    } else {
-        int jj = tblColumns.getSelectedRow();
-        if (evt.getKeyCode() == KeyEvent.VK_UP && jj > 0) {
-            tblColumns.setRowSelectionInterval(jj - 1, jj - 1);
-        }
-        if (evt.getKeyCode() == KeyEvent.VK_DOWN && jj < tblColumns.getRowCount() - 1) {
-            tblColumns.setRowSelectionInterval(jj + 1, jj + 1);
-        }
-    }
-    evt.consume();
-    updateView();
+	int flags = evt.getModifiers();
+	boolean up = evt.getKeyCode() == KeyEvent.VK_UP;
+	boolean down = evt.getKeyCode() == KeyEvent.VK_DOWN;
+	boolean control = (flags & KeyEvent.CTRL_MASK) != 0;
+	if (control && (up || down)) {
+		shiftColumns(up, down);
+	} else {
+		int jj = tblColumns.getSelectedRow();
+		if (evt.getKeyCode() == KeyEvent.VK_UP && jj > 0) {
+			tblColumns.setRowSelectionInterval(jj - 1, jj - 1);
+		}
+		if (evt.getKeyCode() == KeyEvent.VK_DOWN && jj < tblColumns.getRowCount() - 1) {
+			tblColumns.setRowSelectionInterval(jj + 1, jj + 1);
+		}
+	}
+	evt.consume();
+	updateView();
 }//GEN-LAST:event_tblColumnsKeyPressed
 
-    private void shiftColumns(boolean left, boolean right) {
+	private void shiftColumns(boolean left, boolean right) {
 
-        ProjectResultsOJ.close();
-        int[] selColumns = tblColumns.getSelectedRows();
-        int selCount = selColumns.length;
-        if (selCount > 0) {
+		ProjectResultsOJ.close();
+		int[] selColumns = tblColumns.getSelectedRows();
+		int selCount = selColumns.length;
+		if (selCount > 0) {
 
-            ColumnsOJ columns = OJ.getData().getResults().getColumns();
-            if (left && selColumns[0] > 0 && selColumns[selCount - 1] < columns.getLinkedColumnsCount()) {
-                for (int jj = 0; jj < selCount; jj++) {
-                    int oldIndex = selColumns[jj];
-                    int newIndex = oldIndex - 1;
-                    ColumnOJ column1 = columns.getColumnByIndex(oldIndex);
-                    ColumnOJ column2 = columns.getColumnByIndex(newIndex);
-                    columns.setColumn(newIndex, column1);
-                    columns.setColumn(oldIndex, column2);
-                }
-                for (int jj = 0; jj < selCount; jj++) {
-                    selColumns[jj]--;
-                }
+			ColumnsOJ columns = OJ.getData().getResults().getColumns();
+			if (left && selColumns[0] > 0 && selColumns[selCount - 1] < columns.getLinkedColumnsCount()) {
+				for (int jj = 0; jj < selCount; jj++) {
+					int oldIndex = selColumns[jj];
+					int newIndex = oldIndex - 1;
+					ColumnOJ column1 = columns.getColumnByIndex(oldIndex);
+					ColumnOJ column2 = columns.getColumnByIndex(newIndex);
+					columns.setColumn(newIndex, column1);
+					columns.setColumn(oldIndex, column2);
+				}
+				for (int jj = 0; jj < selCount; jj++) {
+					selColumns[jj]--;
+				}
 
-            }
-            if (right && selColumns[selCount - 1] < columns.getLinkedColumnsCount() - 1) {
-                for (int jj = selCount - 1; jj >= 0; jj--) {
-                    int oldIndex = selColumns[jj];
-                    int newIndex = oldIndex + 1;
-                    ColumnOJ column1 = columns.getColumnByIndex(oldIndex);
-                    ColumnOJ column2 = columns.getColumnByIndex(newIndex);
-                    columns.setColumn(newIndex, column1);
-                    columns.setColumn(oldIndex, column2);
+			}
+			if (right && selColumns[selCount - 1] < columns.getLinkedColumnsCount() - 1) {
+				for (int jj = selCount - 1; jj >= 0; jj--) {
+					int oldIndex = selColumns[jj];
+					int newIndex = oldIndex + 1;
+					ColumnOJ column1 = columns.getColumnByIndex(oldIndex);
+					ColumnOJ column2 = columns.getColumnByIndex(newIndex);
+					columns.setColumn(newIndex, column1);
+					columns.setColumn(oldIndex, column2);
 
-                }
-                for (int jj = 0; jj < selCount; jj++) {
-                    selColumns[jj]++;
-                }
+				}
+				for (int jj = 0; jj < selCount; jj++) {
+					selColumns[jj]++;
+				}
 
-            }
-            if (right || left) {
-                ((ColumnsTableModel) tblColumns.getModel()).fireTableDataChanged();
-                for (int jj = 0; jj < selCount; jj++) {
-                    tblColumns.getSelectionModel().addSelectionInterval(selColumns[jj], selColumns[jj]);
-                }
-            }
-            updateView();
-        }
-    }
+			}
+			if (right || left) {
+				((ColumnsTableModel) tblColumns.getModel()).fireTableDataChanged();
+				for (int jj = 0; jj < selCount; jj++) {
+					tblColumns.getSelectionModel().addSelectionInterval(selColumns[jj], selColumns[jj]);
+				}
+			}
+			updateView();
+		}
+	}
 
 private void tblColumnsCaretPositionChanged(java.awt.event.InputMethodEvent evt) {//GEN-FIRST:event_tblColumnsCaretPositionChanged
 }//GEN-LAST:event_tblColumnsCaretPositionChanged
 
 private void btnShowHistoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnShowHistoActionPerformed
-    ColumnOJ column = getSelectedColumn();
-    if (column != null) {
-        new PlotOJ().makeHistoFromColumn2(column);//22.5.2019
-    }
+	ColumnOJ column = getSelectedColumn();
+	if (column != null) {
+		new PlotOJ().makeHistoFromColumn2(column);//22.5.2019
+	}
 }//GEN-LAST:event_btnShowHistoActionPerformed
 
 private void cbxColorItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbxColorItemStateChanged
-    ColumnOJ column = getSelectedColumn();
-    int index = cbxColor.getSelectedIndex();
-    if (index == 13) {
-        Color initColor = Color.BLACK;
-        if (column != null) {
-            initColor = column.getColumnDef().getColumnColor();
-        }
-        Color color = JColorChooser.showDialog(this, "Choose Column Color", initColor);
-        ((DefaultComboBoxModel) cbxColor.getModel()).setSelectedItem(color);
-        if (column != null) {
-            if (color.getRGB() != column.getColumnDef().getColumnColor().getRGB()) {
-                column.getColumnDef().setColumnColor(color);
-            }
-        }
-    } else {
-        if (column != null) {
-            if (((Color) cbxColor.getSelectedItem()).getRGB() != column.getColumnDef().getColumnColor().getRGB()) {
-                column.getColumnDef().setColumnColor((Color) cbxColor.getSelectedItem());
-            }
-        }
-    }
-    if (column != null) {
-        OJ.getEventProcessor().fireColumnChangedEvent(column.getName(), column.getName(), ColumnChangedEventOJ.COLUMN_EDITED);
-        updateView();
-    }
+	ColumnOJ column = getSelectedColumn();
+	int index = cbxColor.getSelectedIndex();
+	if (index == 13) {
+		Color initColor = Color.BLACK;
+		if (column != null) {
+			initColor = column.getColumnDef().getColumnColor();
+		}
+		Color color = JColorChooser.showDialog(this, "Choose Column Color", initColor);
+		((DefaultComboBoxModel) cbxColor.getModel()).setSelectedItem(color);
+		if (column != null) {
+			if (color.getRGB() != column.getColumnDef().getColumnColor().getRGB()) {
+				column.getColumnDef().setColumnColor(color);
+			}
+		}
+	} else {
+		if (column != null) {
+			if (((Color) cbxColor.getSelectedItem()).getRGB() != column.getColumnDef().getColumnColor().getRGB()) {
+				column.getColumnDef().setColumnColor((Color) cbxColor.getSelectedItem());
+			}
+		}
+	}
+	if (column != null) {
+		OJ.getEventProcessor().fireColumnChangedEvent(column.getName(), column.getName(), ColumnChangedEventOJ.COLUMN_EDITED);
+		updateView();
+	}
 }//GEN-LAST:event_cbxColorItemStateChanged
 
 private void txtThirdPointKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtThirdPointKeyReleased
-    ColumnOJ column = getSelectedColumn();
-    if (column != null) {
-        OperandOJ operand = column.getColumnDef().getOperand(2);
-        try {
-            int value = Integer.parseInt(txtThirdPoint.getText()) - 1;
-            if (value != operand.getRelPosition()) {
-                operand.setRelPosition(value);
-            }
-        } catch (NumberFormatException e) {
-            if (!txtThirdPoint.getText().equals("")) {
-                txtThirdPoint.setText(Integer.toString(operand.getRelPosition() + 1));
-            }
-        }
-        column.reset();
-        OJ.getEventProcessor().fireColumnChangedEvent(column.getName(), column.getName(), ColumnChangedEventOJ.COLUMN_EDITED);
-    } else {
-        txtThirdPoint.setText("");
-    }
+	ColumnOJ column = getSelectedColumn();
+	if (column != null) {
+		OperandOJ operand = column.getColumnDef().getOperand(2);
+		try {
+			int value = Integer.parseInt(txtThirdPoint.getText()) - 1;
+			if (value != operand.getRelPosition()) {
+				operand.setRelPosition(value);
+			}
+		} catch (NumberFormatException e) {
+			if (!txtThirdPoint.getText().equals("")) {
+				txtThirdPoint.setText(Integer.toString(operand.getRelPosition() + 1));
+			}
+		}
+		column.reset();
+		OJ.getEventProcessor().fireColumnChangedEvent(column.getName(), column.getName(), ColumnChangedEventOJ.COLUMN_EDITED);
+	} else {
+		txtThirdPoint.setText("");
+	}
 }//GEN-LAST:event_txtThirdPointKeyReleased
 
 private void txtThirdCloneKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtThirdCloneKeyReleased
-    ColumnOJ column = getSelectedColumn();
-    if (column != null) {
-        OperandOJ operand = column.getColumnDef().getOperand(2);
-        try {
-            int value = Integer.parseInt(txtThirdClone.getText()) - 1;
-            if (value != operand.getYtemClone()) {
-                operand.setYtemClone(value);
-            }
-        } catch (NumberFormatException e) {
-            if (!txtThirdClone.getText().equals("")) {
-                txtThirdClone.setText(Integer.toString(operand.getYtemClone() + 1));
-            }
-        }
-        column.reset();
-        OJ.getEventProcessor().fireColumnChangedEvent(column.getName(), column.getName(), ColumnChangedEventOJ.COLUMN_EDITED);
-    } else {
-        txtThirdClone.setText("");
-    }
+	ColumnOJ column = getSelectedColumn();
+	if (column != null) {
+		OperandOJ operand = column.getColumnDef().getOperand(2);
+		try {
+			int value = Integer.parseInt(txtThirdClone.getText()) - 1;
+			if (value != operand.getYtemClone()) {
+				operand.setYtemClone(value);
+			}
+		} catch (NumberFormatException e) {
+			if (!txtThirdClone.getText().equals("")) {
+				txtThirdClone.setText(Integer.toString(operand.getYtemClone() + 1));
+			}
+		}
+		column.reset();
+		OJ.getEventProcessor().fireColumnChangedEvent(column.getName(), column.getName(), ColumnChangedEventOJ.COLUMN_EDITED);
+	} else {
+		txtThirdClone.setText("");
+	}
 }//GEN-LAST:event_txtThirdCloneKeyReleased
 
 private void cbxThirdObjectTypeItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbxThirdObjectTypeItemStateChanged
-    ColumnOJ column = getSelectedColumn();
-    if ((column != null) && (column.getColumnDef().getOperand(2) != null) && (cbxThirdObjectType.getSelectedIndex() >= 0)) {
-        if (!column.getColumnDef().getOperand(2/*3*/).getObjectName().equals((String) cbxThirdObjectType.getSelectedItem())) {//7.4.2009
-            column.getColumnDef().getOperand(2).setYtemName((String) cbxThirdObjectType.getSelectedItem());
-            column.reset();
-            OJ.getEventProcessor().fireColumnChangedEvent(column.getName(), column.getName(), ColumnChangedEventOJ.COLUMN_EDITED);
-            updateView();
-        }
-    }
+	ColumnOJ column = getSelectedColumn();
+	if ((column != null) && (column.getColumnDef().getOperand(2) != null) && (cbxThirdObjectType.getSelectedIndex() >= 0)) {
+		if (!column.getColumnDef().getOperand(2/*3*/).getObjectName().equals((String) cbxThirdObjectType.getSelectedItem())) {//7.4.2009
+			column.getColumnDef().getOperand(2).setYtemName((String) cbxThirdObjectType.getSelectedItem());
+			column.reset();
+			OJ.getEventProcessor().fireColumnChangedEvent(column.getName(), column.getName(), ColumnChangedEventOJ.COLUMN_EDITED);
+			updateView();
+		}
+	}
 }//GEN-LAST:event_cbxThirdObjectTypeItemStateChanged
 
 private void txtSecondPointKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSecondPointKeyReleased
-    ColumnOJ column = getSelectedColumn();
-    if (column != null) {
-        OperandOJ operand = column.getColumnDef().getOperand(1);
-        try {
-            int value = Integer.parseInt(txtSecondPoint.getText()) - 1;
-            if (value != operand.getRelPosition()) {
-                operand.setRelPosition(value);
-            }
-        } catch (NumberFormatException e) {
-            if (!txtSecondPoint.getText().equals("")) {
-                txtSecondPoint.setText(Integer.toString(operand.getRelPosition() + 1));
-            }
-        }
-        column.reset();
-        OJ.getEventProcessor().fireColumnChangedEvent(column.getName(), column.getName(), ColumnChangedEventOJ.COLUMN_EDITED);
-    } else {
-        txtSecondPoint.setText("");
-    }
+	ColumnOJ column = getSelectedColumn();
+	if (column != null) {
+		OperandOJ operand = column.getColumnDef().getOperand(1);
+		try {
+			int value = Integer.parseInt(txtSecondPoint.getText()) - 1;
+			if (value != operand.getRelPosition()) {
+				operand.setRelPosition(value);
+			}
+		} catch (NumberFormatException e) {
+			if (!txtSecondPoint.getText().equals("")) {
+				txtSecondPoint.setText(Integer.toString(operand.getRelPosition() + 1));
+			}
+		}
+		column.reset();
+		OJ.getEventProcessor().fireColumnChangedEvent(column.getName(), column.getName(), ColumnChangedEventOJ.COLUMN_EDITED);
+	} else {
+		txtSecondPoint.setText("");
+	}
 }//GEN-LAST:event_txtSecondPointKeyReleased
 
 private void txtSecondCloneKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtSecondCloneKeyReleased
-    ColumnOJ column = getSelectedColumn();
-    if (column != null) {
-        OperandOJ operand = column.getColumnDef().getOperand(1);
-        try {
-            int value = Integer.parseInt(txtSecondClone.getText()) - 1;
-            if (value != operand.getYtemClone()) {
-                operand.setYtemClone(value);
-            }
-        } catch (NumberFormatException e) {
-            if (!txtSecondClone.getText().equals("")) {
-                txtSecondClone.setText(Integer.toString(operand.getYtemClone() + 1));
-            }
-        }
-        column.reset();
-        OJ.getEventProcessor().fireColumnChangedEvent(column.getName(), column.getName(), ColumnChangedEventOJ.COLUMN_EDITED);
-    } else {
-        txtSecondClone.setText("");
-    }
+	ColumnOJ column = getSelectedColumn();
+	if (column != null) {
+		OperandOJ operand = column.getColumnDef().getOperand(1);
+		try {
+			int value = Integer.parseInt(txtSecondClone.getText()) - 1;
+			if (value != operand.getYtemClone()) {
+				operand.setYtemClone(value);
+			}
+		} catch (NumberFormatException e) {
+			if (!txtSecondClone.getText().equals("")) {
+				txtSecondClone.setText(Integer.toString(operand.getYtemClone() + 1));
+			}
+		}
+		column.reset();
+		OJ.getEventProcessor().fireColumnChangedEvent(column.getName(), column.getName(), ColumnChangedEventOJ.COLUMN_EDITED);
+	} else {
+		txtSecondClone.setText("");
+	}
 }//GEN-LAST:event_txtSecondCloneKeyReleased
 
 private void cbxSecondObjectTypeItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbxSecondObjectTypeItemStateChanged
-    ColumnOJ column = getSelectedColumn();
-    if ((column != null) && (column.getColumnDef().getOperand(1) != null) && (cbxSecondObjectType.getSelectedIndex() >= 0)) {
-        if (!column.getColumnDef().getOperand(1).getObjectName().equals((String) cbxSecondObjectType.getSelectedItem())) {
-            column.getColumnDef().getOperand(1).setYtemName((String) cbxSecondObjectType.getSelectedItem());
-            column.reset();
-            OJ.getEventProcessor().fireColumnChangedEvent(column.getName(), column.getName(), ColumnChangedEventOJ.COLUMN_EDITED);
-            updateView();
-        }
-    }
+	ColumnOJ column = getSelectedColumn();
+	if ((column != null) && (column.getColumnDef().getOperand(1) != null) && (cbxSecondObjectType.getSelectedIndex() >= 0)) {
+		if (!column.getColumnDef().getOperand(1).getObjectName().equals((String) cbxSecondObjectType.getSelectedItem())) {
+			column.getColumnDef().getOperand(1).setYtemName((String) cbxSecondObjectType.getSelectedItem());
+			column.reset();
+			OJ.getEventProcessor().fireColumnChangedEvent(column.getName(), column.getName(), ColumnChangedEventOJ.COLUMN_EDITED);
+			updateView();
+		}
+	}
 }//GEN-LAST:event_cbxSecondObjectTypeItemStateChanged
 
 private void txtFirstPointKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFirstPointKeyReleased
-    ColumnOJ column = getSelectedColumn();
-    if (column != null) {
-        OperandOJ operand = column.getColumnDef().getOperand(0);
-        try {
-            int value = Integer.parseInt(txtFirstPoint.getText()) - 1;
-            if (value != operand.getRelPosition()) {
-                operand.setRelPosition(value);
-            }
-        } catch (NumberFormatException e) {
-            if (!txtFirstPoint.getText().equals("")) {
-                txtFirstPoint.setText(Integer.toString(operand.getRelPosition() + 1));
-            }
-        }
-        column.reset();
-        OJ.getEventProcessor().fireColumnChangedEvent(column.getName(), column.getName(), ColumnChangedEventOJ.COLUMN_EDITED);
-    } else {
-        txtFirstPoint.setText("");
-    }
+	ColumnOJ column = getSelectedColumn();
+	if (column != null) {
+		OperandOJ operand = column.getColumnDef().getOperand(0);
+		try {
+			int value = Integer.parseInt(txtFirstPoint.getText()) - 1;
+			if (value != operand.getRelPosition()) {
+				operand.setRelPosition(value);
+			}
+		} catch (NumberFormatException e) {
+			if (!txtFirstPoint.getText().equals("")) {
+				txtFirstPoint.setText(Integer.toString(operand.getRelPosition() + 1));
+			}
+		}
+		column.reset();
+		OJ.getEventProcessor().fireColumnChangedEvent(column.getName(), column.getName(), ColumnChangedEventOJ.COLUMN_EDITED);
+	} else {
+		txtFirstPoint.setText("");
+	}
 }//GEN-LAST:event_txtFirstPointKeyReleased
 
 private void txtFirstCloneKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtFirstCloneKeyReleased
-    ColumnOJ column = getSelectedColumn();
-    if (column != null) {
-        OperandOJ operand = column.getColumnDef().getOperand(0);
-        try {
-            int value = Integer.parseInt(txtFirstClone.getText()) - 1;
-            if (value != operand.getYtemClone()) {
-                operand.setYtemClone(value);
-            }
-        } catch (NumberFormatException e) {
-            if (!txtFirstClone.getText().equals("")) {
-                txtFirstClone.setText(Integer.toString(operand.getYtemClone() + 1));
-            }
-        }
-        column.reset();
-        OJ.getEventProcessor().fireColumnChangedEvent(column.getName(), column.getName(), ColumnChangedEventOJ.COLUMN_EDITED);
-    } else {
-        txtFirstClone.setText("");
-    }
+	ColumnOJ column = getSelectedColumn();
+	if (column != null) {
+		OperandOJ operand = column.getColumnDef().getOperand(0);
+		try {
+			int value = Integer.parseInt(txtFirstClone.getText()) - 1;
+			if (value != operand.getYtemClone()) {
+				operand.setYtemClone(value);
+			}
+		} catch (NumberFormatException e) {
+			if (!txtFirstClone.getText().equals("")) {
+				txtFirstClone.setText(Integer.toString(operand.getYtemClone() + 1));
+			}
+		}
+		column.reset();
+		OJ.getEventProcessor().fireColumnChangedEvent(column.getName(), column.getName(), ColumnChangedEventOJ.COLUMN_EDITED);
+	} else {
+		txtFirstClone.setText("");
+	}
 }//GEN-LAST:event_txtFirstCloneKeyReleased
 
 private void cbxFirstObjectTypeItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbxFirstObjectTypeItemStateChanged
-    ColumnOJ column = getSelectedColumn();
-    if ((column != null) && (column.getColumnDef().getOperand(0) != null) && (cbxFirstObjectType.getSelectedIndex() >= 0)) {
-        if (!column.getColumnDef().getOperand(0).getObjectName().equals((String) cbxFirstObjectType.getSelectedItem())) {
-            column.getColumnDef().getOperand(0).setYtemName((String) cbxFirstObjectType.getSelectedItem());
-            column.reset();
-            OJ.getEventProcessor().fireColumnChangedEvent(column.getName(), column.getName(), ColumnChangedEventOJ.COLUMN_EDITED);
-            updateView();
-        }
-    }
+	ColumnOJ column = getSelectedColumn();
+	if ((column != null) && (column.getColumnDef().getOperand(0) != null) && (cbxFirstObjectType.getSelectedIndex() >= 0)) {
+		if (!column.getColumnDef().getOperand(0).getObjectName().equals((String) cbxFirstObjectType.getSelectedItem())) {
+			column.getColumnDef().getOperand(0).setYtemName((String) cbxFirstObjectType.getSelectedItem());
+			column.reset();
+			OJ.getEventProcessor().fireColumnChangedEvent(column.getName(), column.getName(), ColumnChangedEventOJ.COLUMN_EDITED);
+			updateView();
+		}
+	}
 }//GEN-LAST:event_cbxFirstObjectTypeItemStateChanged
 
 private void cbxOperationActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxOperationActionPerformed
-    // TODO add your handling code here:
+	// TODO add your handling code here:
 }//GEN-LAST:event_cbxOperationActionPerformed
 
-    /**
-     * Fill operations panel with default operands when changing the algorithm
-     */
+	/**
+	 * Fill operations panel with default operands when changing the algorithm
+	 */
 private void cbxOperationItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_cbxOperationItemStateChanged
-    try {
-        ColumnOJ column = getSelectedColumn();
-        if (column != null) {
-            int old_algorithm = column.getColumnDef().getAlgorithm();
-            if (cbxOperation.getSelectedIndex() > 1) {//0 and 1 are "no algorithm"
-                column.setAlgorithm(cbxOperation.getSelectedIndex() - 1);
-            } else {
-                if (cbxOperation.getSelectedIndex() == 0) {
-                    column.setAlgorithm(ColumnDefOJ.ALGORITHM_CALC_LINKED_NUMBER);
-                }
-                if (cbxOperation.getSelectedIndex() == 1) {
-                    column.setAlgorithm(ColumnDefOJ.ALGORITHM_CALC_LINKED_NUMBER);//8.5.2014
-                }
+	try {
+		ColumnOJ column = getSelectedColumn();
+		if (column != null) {
+			int old_algorithm = column.getColumnDef().getAlgorithm();
+			if (cbxOperation.getSelectedIndex() > 1) {//0 and 1 are "no algorithm"
+				column.setAlgorithm(cbxOperation.getSelectedIndex() - 1);
+			} else {
+				if (cbxOperation.getSelectedIndex() == 0) {
+					column.setAlgorithm(ColumnDefOJ.ALGORITHM_CALC_LINKED_NUMBER);
+				}
+				if (cbxOperation.getSelectedIndex() == 1) {
+					column.setAlgorithm(ColumnDefOJ.ALGORITHM_CALC_LINKED_NUMBER);//8.5.2014
+				}
 
-            }
-            switch (column.getColumnDef().getAlgorithm()) {
-                case ColumnDefOJ.ALGORITHM_CALC_DISTANCE:
+			}
+			switch (column.getColumnDef().getAlgorithm()) {
+				case ColumnDefOJ.ALGORITHM_CALC_DISTANCE:
 
-                case ColumnDefOJ.ALGORITHM_CALC_ABS_PARTIAL_PATH:
-                case ColumnDefOJ.ALGORITHM_CALC_REL_PARTIAL_PATH:
-                case ColumnDefOJ.ALGORITHM_CALC_ORIENTATION:
-                case ColumnDefOJ.ALGORITHM_CALC_OFFROAD:
-                    column.getColumnDef().setColumnDigits(2);
-                    updateOperands(column.getColumnDef(), 2);
-                    break;
-                case ColumnDefOJ.ALGORITHM_CALC_ANGLE:
-                    column.getColumnDef().setColumnDigits(2);
-                    updateOperands(column.getColumnDef(), 3);
-                    break;
-                case ColumnDefOJ.ALGORITHM_CALC_PATH:
-                case ColumnDefOJ.ALGORITHM_CALC_LENGTH:
-                case ColumnDefOJ.ALGORITHM_CALC_XPOS:
-                case ColumnDefOJ.ALGORITHM_CALC_YPOS:
-                case ColumnDefOJ.ALGORITHM_CALC_ZPOS:
-                case ColumnDefOJ.ALGORITHM_CALC_AREA:
-                    column.getColumnDef().setColumnDigits(2);
-                    updateOperands(column.getColumnDef(), 1);
-                    break;
-                case ColumnDefOJ.ALGORITHM_CALC_COUNT:
-                case ColumnDefOJ.ALGORITHM_CALC_SLICE:
-                case ColumnDefOJ.ALGORITHM_CALC_EXISTS:
-                    column.getColumnDef().setColumnDigits(0);
-                    updateOperands(column.getColumnDef(), 1);
-                    break;
-                case ColumnDefOJ.ALGORITHM_CALC_IMAGE:
-                case ColumnDefOJ.ALGORITHM_CALC_INDEX:
-                case ColumnDefOJ.ALGORITHM_CALC_ID:
-                    column.getColumnDef().setColumnDigits(0);
-                    updateOperands(column.getColumnDef(), 0);
-                    break;
-                case ColumnDefOJ.ALGORITHM_CALC_FILE_NAME:
-                    updateOperands(column.getColumnDef(), 0);
-                    break;
-                case ColumnDefOJ.ALGORITHM_CALC_LINKED_NUMBER:
-                    column.getColumnDef().setColumnDigits(2);
-                    updateOperands(column.getColumnDef(), 0);
-                case ColumnDefOJ.ALGORITHM_CALC_LINKED_TEXT:
-                    column.getColumnDef().setColumnDigits(0);
-                    updateOperands(column.getColumnDef(), 0);
-                case ColumnDefOJ.ALGORITHM_CALC_UNLINKED_NUMBER:
-                    column.getColumnDef().setColumnDigits(2);
-                    updateOperands(column.getColumnDef(), 0);
-                case ColumnDefOJ.ALGORITHM_CALC_UNLINKED_TEXT:
-                    column.getColumnDef().setColumnDigits(0);
-                    updateOperands(column.getColumnDef(), 0);
-                    break;
-                default:
-                    updateOperandsView(0, false, false);
-            }
+				case ColumnDefOJ.ALGORITHM_CALC_ABS_PARTIAL_PATH:
+				case ColumnDefOJ.ALGORITHM_CALC_REL_PARTIAL_PATH:
+				case ColumnDefOJ.ALGORITHM_CALC_ORIENTATION:
+				case ColumnDefOJ.ALGORITHM_CALC_OFFROAD:
+					column.getColumnDef().setColumnDigits(2);
+					updateOperands(column.getColumnDef(), 2);
+					break;
+				case ColumnDefOJ.ALGORITHM_CALC_ANGLE:
+					column.getColumnDef().setColumnDigits(2);
+					updateOperands(column.getColumnDef(), 3);
+					break;
+				case ColumnDefOJ.ALGORITHM_CALC_PATH:
+				case ColumnDefOJ.ALGORITHM_CALC_LENGTH:
+				case ColumnDefOJ.ALGORITHM_CALC_XPOS:
+				case ColumnDefOJ.ALGORITHM_CALC_YPOS:
+				case ColumnDefOJ.ALGORITHM_CALC_ZPOS:
+				case ColumnDefOJ.ALGORITHM_CALC_AREA:
+					column.getColumnDef().setColumnDigits(2);
+					updateOperands(column.getColumnDef(), 1);
+					break;
+				case ColumnDefOJ.ALGORITHM_CALC_COUNT:
+				case ColumnDefOJ.ALGORITHM_CALC_SLICE:
+				case ColumnDefOJ.ALGORITHM_CALC_EXISTS:
+					column.getColumnDef().setColumnDigits(0);
+					updateOperands(column.getColumnDef(), 1);
+					break;
+				case ColumnDefOJ.ALGORITHM_CALC_IMAGE:
+				case ColumnDefOJ.ALGORITHM_CALC_INDEX:
+				case ColumnDefOJ.ALGORITHM_CALC_ID:
+					column.getColumnDef().setColumnDigits(0);
+					updateOperands(column.getColumnDef(), 0);
+					break;
+				case ColumnDefOJ.ALGORITHM_CALC_FILE_NAME:
+					updateOperands(column.getColumnDef(), 0);
+					break;
+				case ColumnDefOJ.ALGORITHM_CALC_LINKED_NUMBER:
+					column.getColumnDef().setColumnDigits(2);
+					updateOperands(column.getColumnDef(), 0);
+				case ColumnDefOJ.ALGORITHM_CALC_LINKED_TEXT:
+					column.getColumnDef().setColumnDigits(0);
+					updateOperands(column.getColumnDef(), 0);
+				case ColumnDefOJ.ALGORITHM_CALC_UNLINKED_NUMBER:
+					column.getColumnDef().setColumnDigits(2);
+					updateOperands(column.getColumnDef(), 0);
+				case ColumnDefOJ.ALGORITHM_CALC_UNLINKED_TEXT:
+					column.getColumnDef().setColumnDigits(0);
+					updateOperands(column.getColumnDef(), 0);
+					break;
+				default:
+					updateOperandsView(0, false, false);
+			}
 
-            int alg = column.getColumnDef().getAlgorithm();
-            if ((alg == ColumnDefOJ.ALGORITHM_CALC_UNLINKED_NUMBER)
-                    || (alg == ColumnDefOJ.ALGORITHM_CALC_UNLINKED_TEXT)) {
-                if (!column.getName().startsWith("_")) {
-                    column.setName("_" + column.getName());
-                }
-            } else {
-                if (column.getName().startsWith("_")) {
-                    //column.setName(column.getName().substring(1)); removed 21.1.2015
-                }
-            }
+			int alg = column.getColumnDef().getAlgorithm();
+			if ((alg == ColumnDefOJ.ALGORITHM_CALC_UNLINKED_NUMBER)
+					|| (alg == ColumnDefOJ.ALGORITHM_CALC_UNLINKED_TEXT)) {
+				if (!column.getName().startsWith("_")) {
+					column.setName("_" + column.getName());
+				}
+			} else {
+				if (column.getName().startsWith("_")) {
+					//column.setName(column.getName().substring(1)); removed 21.1.2015
+				}
+			}
 
-            ColumnsOJ columns = OJ.getData().getResults().getColumns();  //2.2.2014    
-            columns.fixColumnsOrder();
-            int index = columns.indexOfColumn(column);
-            ((ColumnsTableModel) tblColumns.getModel()).fireTableDataChanged();//my guess//2.2.2014    
+			ColumnsOJ columns = OJ.getData().getResults().getColumns();  //2.2.2014    
+			columns.fixColumnsOrder();
+			int index = columns.indexOfColumn(column);
+			((ColumnsTableModel) tblColumns.getModel()).fireTableDataChanged();//my guess//2.2.2014    
 
-            if (column.getColumnDef().getAlgorithm() != old_algorithm) {
-                column.init();
-            }
-            OJ.getEventProcessor().fireColumnChangedEvent(column.getName(), column.getName(), ColumnChangedEventOJ.COLUMN_EDITED);
-            tblColumns.getSelectionModel().setSelectionInterval(index, index);
+			if (column.getColumnDef().getAlgorithm() != old_algorithm) {
+				column.init();
+			}
+			OJ.getEventProcessor().fireColumnChangedEvent(column.getName(), column.getName(), ColumnChangedEventOJ.COLUMN_EDITED);
+			tblColumns.getSelectionModel().setSelectionInterval(index, index);
 
-        }
-        updateView();
+		}
+		updateView();
 
-    } catch (Exception eee) {
-        IJ.beep();
-        IJ.showStatus("_Error 8550 " + eee.toString());
-    }
+	} catch (Exception eee) {
+		IJ.beep();
+		IJ.showStatus("_Error 8550 " + eee.toString());
+	}
 }//GEN-LAST:event_cbxOperationItemStateChanged
 
 private void tfYMaxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tfYMaxActionPerformed
@@ -1771,98 +1730,98 @@ private void tfXMinActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:
 }//GEN-LAST:event_tfXMinActionPerformed
 
 private void tfXMinKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tfXMinKeyReleased
-    String txt = tfXMin.getText();
-    double xMin;
-    try {
-        xMin = Double.parseDouble(txt);
+	String txt = tfXMin.getText();
+	double xMin;
+	try {
+		xMin = Double.parseDouble(txt);
 
-    } catch (NumberFormatException e) {
-        xMin = Double.NaN;
-    }
-    ColumnOJ column = getSelectedColumn();
-    if (column != null) {
-        ColumnDefOJ colDef = column.getColumnDef();
-        colDef.setHistoXMin(xMin);
-    }
+	} catch (NumberFormatException e) {
+		xMin = Double.NaN;
+	}
+	ColumnOJ column = getSelectedColumn();
+	if (column != null) {
+		ColumnDefOJ colDef = column.getColumnDef();
+		colDef.setHistoXMin(xMin);
+	}
 }//GEN-LAST:event_tfXMinKeyReleased
 
 private void tfXMaxKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tfXMaxKeyReleased
-    String txt = tfXMax.getText();
-    double xMax;
-    try {
-        xMax = Double.parseDouble(txt);
+	String txt = tfXMax.getText();
+	double xMax;
+	try {
+		xMax = Double.parseDouble(txt);
 
-    } catch (NumberFormatException e) {
-        xMax = Double.NaN;
-    }
-    ColumnOJ column = getSelectedColumn();
-    if (column != null) {
-        ColumnDefOJ colDef = column.getColumnDef();
-        colDef.setHistoXMax(xMax);
-    }
+	} catch (NumberFormatException e) {
+		xMax = Double.NaN;
+	}
+	ColumnOJ column = getSelectedColumn();
+	if (column != null) {
+		ColumnDefOJ colDef = column.getColumnDef();
+		colDef.setHistoXMax(xMax);
+	}
 }//GEN-LAST:event_tfXMaxKeyReleased
 
 private void tfBinWidthKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tfBinWidthKeyReleased
-    String txt = tfBinWidth.getText();
-    double binWidth;
-    try {
-        binWidth = Double.parseDouble(txt);
+	String txt = tfBinWidth.getText();
+	double binWidth;
+	try {
+		binWidth = Double.parseDouble(txt);
 
-    } catch (NumberFormatException e) {
-        binWidth = Double.NaN;
-    }
-    ColumnOJ column = getSelectedColumn();
-    if (column != null) {
-        ColumnDefOJ colDef = column.getColumnDef();
-        colDef.setHistoBinWidth(binWidth);
-    }
+	} catch (NumberFormatException e) {
+		binWidth = Double.NaN;
+	}
+	ColumnOJ column = getSelectedColumn();
+	if (column != null) {
+		ColumnDefOJ colDef = column.getColumnDef();
+		colDef.setHistoBinWidth(binWidth);
+	}
 }//GEN-LAST:event_tfBinWidthKeyReleased
 
 private void tfYMaxKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_tfYMaxKeyReleased
-    String txt = tfYMax.getText();
-    int yMax = -1;
-    try {
-        yMax = Integer.parseInt(txt);
+	String txt = tfYMax.getText();
+	int yMax = -1;
+	try {
+		yMax = Integer.parseInt(txt);
 
-    } catch (NumberFormatException e) {
-        yMax = -1;
-    }
-    ColumnOJ column = getSelectedColumn();
-    if (column != null) {
-        ColumnDefOJ colDef = column.getColumnDef();
-        colDef.setHistoYMax(yMax);
-    }
+	} catch (NumberFormatException e) {
+		yMax = -1;
+	}
+	ColumnOJ column = getSelectedColumn();
+	if (column != null) {
+		ColumnDefOJ colDef = column.getColumnDef();
+		colDef.setHistoYMax(yMax);
+	}
 }//GEN-LAST:event_tfYMaxKeyReleased
 
 private void cbxColorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxColorActionPerformed
-    // TODO add your handling code here:
+	// TODO add your handling code here:
 }//GEN-LAST:event_cbxColorActionPerformed
 
 private void spinDigitsStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_spinDigitsStateChanged
-    ColumnOJ column = getSelectedColumn();
-    if (column != null) {
-        column.getColumnDef().setColumnDigits(((Integer) spinDigits.getValue()).intValue());
-        OJ.getEventProcessor().fireColumnChangedEvent(column.getName(), column.getName(), ColumnChangedEventOJ.COLUMN_EDITED);
-        updateView();
-    }
+	ColumnOJ column = getSelectedColumn();
+	if (column != null) {
+		column.getColumnDef().setColumnDigits(((Integer) spinDigits.getValue()).intValue());
+		OJ.getEventProcessor().fireColumnChangedEvent(column.getName(), column.getName(), ColumnChangedEventOJ.COLUMN_EDITED);
+		updateView();
+	}
 }//GEN-LAST:event_spinDigitsStateChanged
 
     private void tblColumnsMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblColumnsMouseReleased
-        updateView();
+		updateView();
     }//GEN-LAST:event_tblColumnsMouseReleased
 
     private void tabbedColumnDetailMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tabbedColumnDetailMouseClicked
-        ProjectSettingsOJ prSettings = ProjectSettingsOJ.getInstance();
-        if (prSettings == null) {
-            return;
-        }
-        if (tabbedColumnDetail.getSelectedIndex() == 1) {
-            Rectangle rect = prSettings.getBounds();//19.6.2014
-            if (rect.height < 500) {
-                rect.height = 500;
-                prSettings.setBounds(rect);
-            }
-        }
+		ProjectSettingsOJ prSettings = ProjectSettingsOJ.getInstance();
+		if (prSettings == null) {
+			return;
+		}
+		if (tabbedColumnDetail.getSelectedIndex() == 1) {
+			Rectangle rect = prSettings.getBounds();//19.6.2014
+			if (rect.height < 500) {
+				rect.height = 500;
+				prSettings.setBounds(rect);
+			}
+		}
     }//GEN-LAST:event_tabbedColumnDetailMouseClicked
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -1920,404 +1879,404 @@ private void spinDigitsStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FI
     private javax.swing.JTextField txtThirdPoint;
     // End of variables declaration//GEN-END:variables
 
-    /**
-     * Two classes, ColorModelOJ and ColorRendererOJ to get fancy color icons
-     * while selecting column/histogram color
-     */
-    class ColorModelOJ extends DefaultComboBoxModel {
+	/**
+	 * Two classes, ColorModelOJ and ColorRendererOJ to get fancy color icons
+	 * while selecting column/histogram color
+	 */
+	class ColorModelOJ extends DefaultComboBoxModel {
 
-        public int getSize() {
-            return 14;
-        }
+		public int getSize() {
+			return 14;
+		}
 
-        public Object getElementAt(int index) {
-            if (index < 14) {
-                switch (index) {
-                    case 0:
-                        return Color.BLACK;
-                    case 1:
-                        return Color.BLUE;
-                    case 2:
-                        return Color.CYAN;
-                    case 3:
-                        return Color.DARK_GRAY;
-                    case 4:
-                        return Color.GRAY;
-                    case 5:
-                        return Color.GREEN;
-                    case 6:
-                        return new Color(0, 153, 0);
-                    case 7:
-                        return Color.MAGENTA;
-                    case 8:
-                        return Color.ORANGE;
-                    case 9:
-                        return Color.PINK;
-                    case 10:
-                        return Color.RED;
-                    case 11:
-                        return Color.WHITE;
-                    case 12:
-                        return Color.YELLOW;
-                    case 13:
-                        return new String("Custom...");
-                }
-                return null;
-            } else {
-                return null;
-            }
-        }
-    }
+		public Object getElementAt(int index) {
+			if (index < 14) {
+				switch (index) {
+					case 0:
+						return Color.BLACK;
+					case 1:
+						return Color.BLUE;
+					case 2:
+						return Color.CYAN;
+					case 3:
+						return Color.DARK_GRAY;
+					case 4:
+						return Color.GRAY;
+					case 5:
+						return Color.GREEN;
+					case 6:
+						return new Color(0, 153, 0);
+					case 7:
+						return Color.MAGENTA;
+					case 8:
+						return Color.ORANGE;
+					case 9:
+						return Color.PINK;
+					case 10:
+						return Color.RED;
+					case 11:
+						return Color.WHITE;
+					case 12:
+						return Color.YELLOW;
+					case 13:
+						return new String("Custom...");
+				}
+				return null;
+			} else {
+				return null;
+			}
+		}
+	}
 
-    class ColorRendererOJ extends JLabel implements ListCellRenderer {
+	class ColorRendererOJ extends JLabel implements ListCellRenderer {
 
-        private Border cellBorder = new EmptyBorder(3, 8, 3, 3);
-        private final Icon blackIcon = getColorIcon(Color.BLACK);
-        private final Icon blueIcon = getColorIcon(Color.BLUE);
-        private final Icon cyanIcon = getColorIcon(Color.CYAN);
-        private final Icon darkGrayIcon = getColorIcon(Color.DARK_GRAY);
-        private final Icon grayIcon = getColorIcon(Color.GRAY);
-        private final Icon greenIcon = getColorIcon(Color.GREEN);
-        private final Icon darkGreenIcon = getColorIcon(new Color(0, 153, 0));
-        private final Icon magentaIcon = getColorIcon(Color.MAGENTA);
-        private final Icon orangeIcon = getColorIcon(Color.ORANGE);
-        private final Icon pinkIcon = getColorIcon(Color.PINK);
-        private final Icon redIcon = getColorIcon(Color.RED);
-        private final Icon whiteIcon = getColorIcon(Color.WHITE);
-        private final Icon yellowIcon = getColorIcon(Color.YELLOW);
+		private Border cellBorder = new EmptyBorder(3, 8, 3, 3);
+		private final Icon blackIcon = getColorIcon(Color.BLACK);
+		private final Icon blueIcon = getColorIcon(Color.BLUE);
+		private final Icon cyanIcon = getColorIcon(Color.CYAN);
+		private final Icon darkGrayIcon = getColorIcon(Color.DARK_GRAY);
+		private final Icon grayIcon = getColorIcon(Color.GRAY);
+		private final Icon greenIcon = getColorIcon(Color.GREEN);
+		private final Icon darkGreenIcon = getColorIcon(new Color(0, 153, 0));
+		private final Icon magentaIcon = getColorIcon(Color.MAGENTA);
+		private final Icon orangeIcon = getColorIcon(Color.ORANGE);
+		private final Icon pinkIcon = getColorIcon(Color.PINK);
+		private final Icon redIcon = getColorIcon(Color.RED);
+		private final Icon whiteIcon = getColorIcon(Color.WHITE);
+		private final Icon yellowIcon = getColorIcon(Color.YELLOW);
 
-        public Component getListCellRendererComponent(JList list, Object value, // value to display
-                int index, // cell index
-                boolean isSelected, // is the cell selected
-                boolean cellHasFocus) {
-            if (value == null) {
-                return new JLabel();
-            }
-            setOpaque(true);
-            setBorder(cellBorder);
-            setBackground(Color.WHITE);
-            setEnabled(list.isEnabled());
-            setFont(list.getFont());
-            if (value instanceof String) {
-                setText((String) value);
-                setIcon(null);
-            } else {
-                Color color = (Color) value;
-                setText(getColorName(color));
-                switch (index) {
-                    case 0:
-                        setIcon(blackIcon);
-                        break;
-                    case 1:
-                        setIcon(blueIcon);
-                        break;
-                    case 2:
-                        setIcon(cyanIcon);
-                        break;
-                    case 3:
-                        setIcon(darkGrayIcon);
-                        break;
-                    case 4:
-                        setIcon(grayIcon);
-                        break;
-                    case 5:
-                        setIcon(greenIcon);
-                        break;
-                    case 6:
-                        setIcon(darkGreenIcon);
-                        break;
-                    case 7:
-                        setIcon(magentaIcon);
-                        break;
-                    case 8:
-                        setIcon(orangeIcon);
-                        break;
-                    case 9:
-                        setIcon(pinkIcon);
-                        break;
-                    case 10:
-                        setIcon(redIcon);
-                        break;
-                    case 11:
-                        setIcon(whiteIcon);
-                        break;
-                    case 12:
-                        setIcon(yellowIcon);
-                        break;
-                    default:
-                        setIcon(getColorIcon(color));
-                }
-            }
-            return this;
-        }
+		public Component getListCellRendererComponent(JList list, Object value, // value to display
+				int index, // cell index
+				boolean isSelected, // is the cell selected
+				boolean cellHasFocus) {
+			if (value == null) {
+				return new JLabel();
+			}
+			setOpaque(true);
+			setBorder(cellBorder);
+			setBackground(Color.WHITE);
+			setEnabled(list.isEnabled());
+			setFont(list.getFont());
+			if (value instanceof String) {
+				setText((String) value);
+				setIcon(null);
+			} else {
+				Color color = (Color) value;
+				setText(getColorName(color));
+				switch (index) {
+					case 0:
+						setIcon(blackIcon);
+						break;
+					case 1:
+						setIcon(blueIcon);
+						break;
+					case 2:
+						setIcon(cyanIcon);
+						break;
+					case 3:
+						setIcon(darkGrayIcon);
+						break;
+					case 4:
+						setIcon(grayIcon);
+						break;
+					case 5:
+						setIcon(greenIcon);
+						break;
+					case 6:
+						setIcon(darkGreenIcon);
+						break;
+					case 7:
+						setIcon(magentaIcon);
+						break;
+					case 8:
+						setIcon(orangeIcon);
+						break;
+					case 9:
+						setIcon(pinkIcon);
+						break;
+					case 10:
+						setIcon(redIcon);
+						break;
+					case 11:
+						setIcon(whiteIcon);
+						break;
+					case 12:
+						setIcon(yellowIcon);
+						break;
+					default:
+						setIcon(getColorIcon(color));
+				}
+			}
+			return this;
+		}
 
-        public String getColorName(Color color) {
-            if (color.getRGB() == Color.BLACK.getRGB()) {
-                return "Black";
-            }
-            if (color.getRGB() == Color.BLUE.getRGB()) {
-                return "Blue";
-            }
-            if (color.getRGB() == Color.CYAN.getRGB()) {
-                return "Cyan";
-            }
-            if (color.getRGB() == Color.DARK_GRAY.getRGB()) {
-                return "Dark Gray";
-            }
-            if (color.getRGB() == Color.GRAY.getRGB()) {
-                return "Gray";
-            }
-            if (color.getRGB() == Color.GREEN.getRGB()) {
-                return "Green";
-            }
-            if (color.getRGB() == new Color(0, 153, 0).getRGB()) {
-                return "Dark Green";
-            }
-            if (color.getRGB() == Color.MAGENTA.getRGB()) {
-                return "Magenta";
-            }
-            if (color.getRGB() == Color.ORANGE.getRGB()) {
-                return "Orange";
-            }
-            if (color.getRGB() == Color.PINK.getRGB()) {
-                return "Pink";
-            }
-            if (color.getRGB() == Color.RED.getRGB()) {
-                return "Red";
-            }
-            if (color.getRGB() == Color.WHITE.getRGB()) {
-                return "White";
-            }
-            if (color.getRGB() == Color.YELLOW.getRGB()) {
-                return "Yellow";
-            }
-            return "[" + Integer.toString(color.getRed()) + "," + Integer.toString(color.getGreen()) + "," + Integer.toString(color.getBlue()) + "]";
-        }
+		public String getColorName(Color color) {
+			if (color.getRGB() == Color.BLACK.getRGB()) {
+				return "Black";
+			}
+			if (color.getRGB() == Color.BLUE.getRGB()) {
+				return "Blue";
+			}
+			if (color.getRGB() == Color.CYAN.getRGB()) {
+				return "Cyan";
+			}
+			if (color.getRGB() == Color.DARK_GRAY.getRGB()) {
+				return "Dark Gray";
+			}
+			if (color.getRGB() == Color.GRAY.getRGB()) {
+				return "Gray";
+			}
+			if (color.getRGB() == Color.GREEN.getRGB()) {
+				return "Green";
+			}
+			if (color.getRGB() == new Color(0, 153, 0).getRGB()) {
+				return "Dark Green";
+			}
+			if (color.getRGB() == Color.MAGENTA.getRGB()) {
+				return "Magenta";
+			}
+			if (color.getRGB() == Color.ORANGE.getRGB()) {
+				return "Orange";
+			}
+			if (color.getRGB() == Color.PINK.getRGB()) {
+				return "Pink";
+			}
+			if (color.getRGB() == Color.RED.getRGB()) {
+				return "Red";
+			}
+			if (color.getRGB() == Color.WHITE.getRGB()) {
+				return "White";
+			}
+			if (color.getRGB() == Color.YELLOW.getRGB()) {
+				return "Yellow";
+			}
+			return "[" + Integer.toString(color.getRed()) + "," + Integer.toString(color.getGreen()) + "," + Integer.toString(color.getBlue()) + "]";
+		}
 
-        private Icon getColorIcon(Color color) {
-            BufferedImage bimg = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
-            if (color != null) {
-                for (int i = 0; i < 10; i++) {
-                    for (int j = 0; j < 10; j++) {
-                        bimg.setRGB(i, j, color.getRGB());
-                    }
-                }
-                for (int i = 0; i < 10; i++) {
-                    bimg.setRGB(i, 0, Color.BLACK.getRGB());
-                }
-                for (int i = 0; i < 10; i++) {
-                    bimg.setRGB(i, 9, Color.BLACK.getRGB());
-                }
-                for (int i = 0; i < 10; i++) {
-                    bimg.setRGB(0, i, Color.BLACK.getRGB());
-                }
-                for (int i = 0; i < 10; i++) {
-                    bimg.setRGB(9, i, Color.BLACK.getRGB());
-                }
-            }
-            ImageIcon icon = new ImageIcon(bimg);
-            return icon;
-        }
-    }
+		private Icon getColorIcon(Color color) {
+			BufferedImage bimg = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+			if (color != null) {
+				for (int i = 0; i < 10; i++) {
+					for (int j = 0; j < 10; j++) {
+						bimg.setRGB(i, j, color.getRGB());
+					}
+				}
+				for (int i = 0; i < 10; i++) {
+					bimg.setRGB(i, 0, Color.BLACK.getRGB());
+				}
+				for (int i = 0; i < 10; i++) {
+					bimg.setRGB(i, 9, Color.BLACK.getRGB());
+				}
+				for (int i = 0; i < 10; i++) {
+					bimg.setRGB(0, i, Color.BLACK.getRGB());
+				}
+				for (int i = 0; i < 10; i++) {
+					bimg.setRGB(9, i, Color.BLACK.getRGB());
+				}
+			}
+			ImageIcon icon = new ImageIcon(bimg);
+			return icon;
+		}
+	}
 
-    public void close() {
-        OJ.getEventProcessor().removeColumnChangedListener(this);
-        OJ.getEventProcessor().removeYtemDefChangedListener(this);
-    }
+	public void close() {
+		OJ.getEventProcessor().removeColumnChangedListener(this);
+		OJ.getEventProcessor().removeYtemDefChangedListener(this);
+	}
 
-    /**
-     *
-     * called when adding, deleting or changing a column
-     */
-    public synchronized void columnChanged(ColumnChangedEventOJ evt) {//9.9.2009
-        int colCount = OJ.getData().getResults().getColumns().getAllColumnsCount();//10.2.2010
-        int selRow = tblColumns.getSelectedRow();
-        if (evt.getOperation() == ColumnChangedEventOJ.COLUMN_ADDED) {
-            ((ColumnsTableModel) tblColumns.getModel()).fireTableRowsInserted(colCount - 1, colCount - 1);
-            tblColumns.getSelectionModel().setSelectionInterval(colCount - 1, colCount - 1);
-        } else if (evt.getOperation() == ColumnChangedEventOJ.COLUMN_DELETED) {
-            ((ColumnsTableModel) tblColumns.getModel()).fireTableRowsDeleted(selRow, selRow);
-        } else {
-            ((ColumnsTableModel) tblColumns.getModel()).fireTableRowUpdated(selRow);
-        }
+	/**
+	 *
+	 * called when adding, deleting or changing a column
+	 */
+	public synchronized void columnChanged(ColumnChangedEventOJ evt) {//9.9.2009
+		int colCount = OJ.getData().getResults().getColumns().getAllColumnsCount();//10.2.2010
+		int selRow = tblColumns.getSelectedRow();
+		if (evt.getOperation() == ColumnChangedEventOJ.COLUMN_ADDED) {
+			((ColumnsTableModel) tblColumns.getModel()).fireTableRowsInserted(colCount - 1, colCount - 1);
+			tblColumns.getSelectionModel().setSelectionInterval(colCount - 1, colCount - 1);
+		} else if (evt.getOperation() == ColumnChangedEventOJ.COLUMN_DELETED) {
+			((ColumnsTableModel) tblColumns.getModel()).fireTableRowsDeleted(selRow, selRow);
+		} else {
+			((ColumnsTableModel) tblColumns.getModel()).fireTableRowUpdated(selRow);
+		}
 
-        updateView();
-    }
+		updateView();
+	}
 
-    public synchronized void ytemDefChanged(YtemDefChangedEventOJ evt) {//9.9.2009
-        fillObjectDefs();
-        btnNew.setEnabled(OJ.getData().getYtemDefs().getYtemDefsCount() > 0);
-    }
+	public synchronized void ytemDefChanged(YtemDefChangedEventOJ evt) {//9.9.2009
+		fillObjectDefs();
+		btnNew.setEnabled(OJ.getData().getYtemDefs().getYtemDefsCount() > 0);
+	}
 
-    /**
-     * three classes to handle the table of columns in the left panel:
-     * ColumnsTableModel, ColumnsHeaderTableRendererOJ and ColumnsTableRenderer
-     */
-    private class ColumnsTableModel extends AbstractTableModel {
+	/**
+	 * three classes to handle the table of columns in the left panel:
+	 * ColumnsTableModel, ColumnsHeaderTableRendererOJ and ColumnsTableRenderer
+	 */
+	private class ColumnsTableModel extends AbstractTableModel {
 
-        public String getColumnName(int col) {
+		public String getColumnName(int col) {
 
-            switch (col) {
-                case 0:
-                    return "Column Title";
-            }
-            return "";
-        }
+			switch (col) {
+				case 0:
+					return "Column Title";
+			}
+			return "";
+		}
 
-        public int getRowCount() {
-            return OJ.getData().getResults().getColumns().getAllColumnsCount();
-        }
+		public int getRowCount() {
+			return OJ.getData().getResults().getColumns().getAllColumnsCount();
+		}
 
-        public int getColumnCount() {
-            return 1;
-        }
+		public int getColumnCount() {
+			return 1;
+		}
 
-        public Object getValueAt(int rowIndex, int columnIndex) {
-            JLabel label = new JLabel();
-            if (rowIndex >= OJ.getData().getResults().getColumns().getAllColumnsCount()) {
-                label.setText("");
-                label.setIcon(null);
-                return label;
-            }
-            ColumnDefOJ columnDef = OJ.getData().getResults().getColumns().getColumnByIndex(rowIndex).getColumnDef();
-            switch (columnIndex) {
-                case 0:
-                    label.setText(columnDef.getName());
-                    label.setIcon(null);
-                    break;
-            }
-            return label;
-        }
+		public Object getValueAt(int rowIndex, int columnIndex) {
+			JLabel label = new JLabel();
+			if (rowIndex >= OJ.getData().getResults().getColumns().getAllColumnsCount()) {
+				label.setText("");
+				label.setIcon(null);
+				return label;
+			}
+			ColumnDefOJ columnDef = OJ.getData().getResults().getColumns().getColumnByIndex(rowIndex).getColumnDef();
+			switch (columnIndex) {
+				case 0:
+					label.setText(columnDef.getName());
+					label.setIcon(null);
+					break;
+			}
+			return label;
+		}
 
-        public boolean isCellEditable(int row, int col) {
-            return (row <= OJ.getData().getResults().getColumns().getAllColumnsCount());
-        }
+		public boolean isCellEditable(int row, int col) {
+			return (row <= OJ.getData().getResults().getColumns().getAllColumnsCount());
+		}
 
-        public void fireTableUpdated() {
-            fireTableRowsUpdated(0, getRowCount());
-        }
+		public void fireTableUpdated() {
+			fireTableRowsUpdated(0, getRowCount());
+		}
 
-        public void fireTableRowUpdated(int index) {
-            fireTableRowsUpdated(index, index);
-        }
-    }
+		public void fireTableRowUpdated(int index) {
+			fireTableRowsUpdated(index, index);
+		}
+	}
 
-    public void columnAdded(TableColumnModelEvent event) {
-        int toIndex = event.getToIndex();
-        if (event.getSource() == tblColumns.getColumnModel()) {
-            TableColumn tableCol = (TableColumn) tblColumns.getColumnModel().getColumn(toIndex);
-            tableCol.setCellRenderer(columnsTableRenderer);
-            switch (toIndex) {
-                case 0:
-                    tableCol.setWidth(100);
-                    tableCol.setPreferredWidth(100);
-                    tableCol.setCellEditor(new DefaultCellEditor(nameEditor));
-                    ((DefaultCellEditor) tableCol.getCellEditor()).setClickCountToStart(2);
-                    break;
-            }
-        }
-    }
+	public void columnAdded(TableColumnModelEvent event) {
+		int toIndex = event.getToIndex();
+		if (event.getSource() == tblColumns.getColumnModel()) {
+			TableColumn tableCol = (TableColumn) tblColumns.getColumnModel().getColumn(toIndex);
+			tableCol.setCellRenderer(columnsTableRenderer);
+			switch (toIndex) {
+				case 0:
+					tableCol.setWidth(100);
+					tableCol.setPreferredWidth(100);
+					tableCol.setCellEditor(new DefaultCellEditor(nameEditor));
+					((DefaultCellEditor) tableCol.getCellEditor()).setClickCountToStart(2);
+					break;
+			}
+		}
+	}
 
-    class ColumnsHeaderTableRendererOJ extends JLabel implements TableCellRenderer {
+	class ColumnsHeaderTableRendererOJ extends JLabel implements TableCellRenderer {
 
-        private Font fontArialBold = Font.decode("Arial-BOLD-12");
-        private Border headerBorder = new CompoundBorder(new LineBorder(Color.GRAY, 1, false), new EmptyBorder(2, 8, 2, 8));
+		private Font fontArialBold = Font.decode("Arial-BOLD-12");
+		private Border headerBorder = new CompoundBorder(new LineBorder(Color.GRAY, 1, false), new EmptyBorder(2, 8, 2, 8));
 
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            setHorizontalAlignment(SwingConstants.CENTER);
-            setBackground(oj.OJ.headerBackground);//.darker().darker());setBackground(headerBackground.darker().darker());//Linux exception
-            setForeground(Color.WHITE);
-            setBorder(headerBorder);
-            setOpaque(true);
-            if (value != null) {
-                setText(value.toString());
-            } else {
-                setText("");
-            }
-            if (column == 0) {
-                setHorizontalAlignment(SwingConstants.LEFT);
-            } else {
-                setHorizontalAlignment(SwingConstants.RIGHT);
-            }
-            setFont(fontArialBold);
-            return this;
-        }
-    }
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+			setHorizontalAlignment(SwingConstants.CENTER);
+			setBackground(oj.OJ.headerBackground);//.darker().darker());setBackground(headerBackground.darker().darker());//Linux exception
+			setForeground(Color.WHITE);
+			setBorder(headerBorder);
+			setOpaque(true);
+			if (value != null) {
+				setText(value.toString());
+			} else {
+				setText("");
+			}
+			if (column == 0) {
+				setHorizontalAlignment(SwingConstants.LEFT);
+			} else {
+				setHorizontalAlignment(SwingConstants.RIGHT);
+			}
+			setFont(fontArialBold);
+			return this;
+		}
+	}
 
-    public class ColumnsTableRenderer extends JLabel implements TableCellRenderer {
+	public class ColumnsTableRenderer extends JLabel implements TableCellRenderer {
 
-        private boolean isSelected;
-        private boolean hasFocus;
-        private Font fontArial = Font.decode("Arial-12");
-        private Color rowBackground = new Color(236, 241, 244);
+		private boolean isSelected;
+		private boolean hasFocus;
+		private Font fontArial = Font.decode("Arial-12");
+		private Color rowBackground = new Color(236, 241, 244);
 
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            this.setOpaque(true);
-            this.setBorder(new EmptyBorder(1, 8, 1, 8));
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+			this.setOpaque(true);
+			this.setBorder(new EmptyBorder(1, 8, 1, 8));
 
-            if (isSelected) {
-                setForeground(Color.WHITE);
-                setBackground(table.getSelectionBackground());
-            } else {
-                setForeground(Color.BLACK);
-                //if (row % 2 == 0) {
-                setBackground(Color.WHITE);
-            }
+			if (isSelected) {
+				setForeground(Color.WHITE);
+				setBackground(table.getSelectionBackground());
+			} else {
+				setForeground(Color.BLACK);
+				//if (row % 2 == 0) {
+				setBackground(Color.WHITE);
+			}
 
-            this.isSelected = isSelected;
-            this.hasFocus = hasFocus;
-            if (value != null) {
-                this.setText(((JLabel) value).getText());
-            } else if (IJ.debugMode) {
-                ij.IJ.showMessage("was Null 86654");
-            }
+			this.isSelected = isSelected;
+			this.hasFocus = hasFocus;
+			if (value != null) {
+				this.setText(((JLabel) value).getText());
+			} else if (IJ.debugMode) {
+				ij.IJ.showMessage("was Null 86654");
+			}
 //            Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException
 //        at oj.settings.ColumnSettingsOJ$ColumnsTableRenderer.getTableCellRendererComponent(ColumnSettingsOJ.java:2179)
-            //this.setIcon(((JLabel) value).getIcon()); removed 9.12.2018
-            setHorizontalAlignment(SwingConstants.LEFT);
-            switch (column) {
-                case 0:
-                    setHorizontalAlignment(SwingConstants.LEFT);
-                    break;
-            }
-            setFont(fontArial);
-            return this;
-        }
-    }
+			//this.setIcon(((JLabel) value).getIcon()); removed 9.12.2018
+			setHorizontalAlignment(SwingConstants.LEFT);
+			switch (column) {
+				case 0:
+					setHorizontalAlignment(SwingConstants.LEFT);
+					break;
+			}
+			setFont(fontArial);
+			return this;
+		}
+	}
 
-    public void columnRemoved(TableColumnModelEvent e) {
-    }
+	public void columnRemoved(TableColumnModelEvent e) {
+	}
 
-    public void columnMoved(TableColumnModelEvent e) {
-    }
+	public void columnMoved(TableColumnModelEvent e) {
+	}
 
-    public void columnMarginChanged(ChangeEvent e) {
-    }
+	public void columnMarginChanged(ChangeEvent e) {
+	}
 
-    public void columnSelectionChanged(ListSelectionEvent e) {
-    }
+	public void columnSelectionChanged(ListSelectionEvent e) {
+	}
 
-    public Dimension getPanelSize() {
-        return panelSize;
-    }
+	public Dimension getPanelSize() {
+		return panelSize;
+	}
 
-    public void setPanelSize(Dimension panelSize) {
-        this.panelSize = panelSize;
-    }
+	public void setPanelSize(Dimension panelSize) {
+		this.panelSize = panelSize;
+	}
 
-    public void selectColumn(String title) {//9.2.2010
+	public void selectColumn(String title) {//9.2.2010
 
-        for (int i = 0; i < tblColumns.getRowCount(); i++) {
-            if (OJ.getData().getResults().getColumns().getColumnByIndex(i).getColumnDef().getName().equalsIgnoreCase(title)) {
-                tblColumns.getSelectionModel().setSelectionInterval(i, i);
-                updateView();
-                break;
-            }
-        }
-    }
+		for (int i = 0; i < tblColumns.getRowCount(); i++) {
+			if (OJ.getData().getResults().getColumns().getColumnByIndex(i).getColumnDef().getName().equalsIgnoreCase(title)) {
+				tblColumns.getSelectionModel().setSelectionInterval(i, i);
+				updateView();
+				break;
+			}
+		}
+	}
 
-    public void selectPresentationTab() {
-        tabbedColumnDetail.setSelectedIndex(1);
-        tabbedColumnDetail.setVisible(true);
-    }
+	public void selectPresentationTab() {
+		tabbedColumnDetail.setSelectedIndex(1);
+		tabbedColumnDetail.setVisible(true);
+	}
 }

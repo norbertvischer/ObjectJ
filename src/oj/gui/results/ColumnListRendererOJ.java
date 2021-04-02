@@ -38,8 +38,7 @@ public class ColumnListRendererOJ extends JCheckBox implements ListCellRenderer 
             setText(((ColumnOJ) value).getName());
             setEnabled(list.isEnabled());
             ColumnsOJ columns = oj.OJ.getData().getResults().getColumns();
-            int lastLinked = columns.getAllColumnsCount() - columns.getUnlinkedColumnsCount();
-            int jj = oj.OJ.getData().getResults().getColumns().getUnlinkedColumnsCount();
+            int lastLinked = columns.getAllColumnsCount();
             if (index >= lastLinked) {
                 setBackground(new Color(236, 236, 188));
             } else {

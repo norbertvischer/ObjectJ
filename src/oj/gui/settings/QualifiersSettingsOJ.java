@@ -79,9 +79,7 @@ public class QualifiersSettingsOJ extends javax.swing.JPanel implements TableCol
         if (OJ.isValidData()) {
             for (int i = 0; i < OJ.getData().getResults().getColumns().getAllColumnsCount(); i++) {
                 ColumnOJ column = OJ.getData().getResults().getColumns().getColumnByIndex(i);
-                if (!column.isUnlinkedColumn()) {//1.2.2014
-                    columnSelector.addItem(column.getName());
-                }
+                columnSelector.addItem(column.getName());
             }
         }
         if (OJ.getData().getResults().getQualifiers().getQualifyMethod() == QualifiersOJ.QUALIFY_METHOD_IF) {
