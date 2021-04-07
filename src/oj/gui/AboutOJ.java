@@ -5,6 +5,7 @@
 package oj.gui;
 
 import ij.IJ;
+import ij.Prefs;
 import ij.plugin.BrowserLauncher;
 import java.io.IOException;
 import oj.OJ;
@@ -26,12 +27,15 @@ public class AboutOJ extends javax.swing.JDialog {
 		DataOJ data = OJ.getData();
 		textAreaAbout.setTabSize(12);
 
-		String thisVersion = OJ.releaseVersion;
 		String aboutText = "";
-		aboutText = aboutText + "ObjectJ plugin:";
-		aboutText = aboutText + "\n   Version:\t" + thisVersion;
-		aboutText = aboutText + "\n   Build:\t" + OJ.build;
-		aboutText = aboutText + "\n   Date:\t" + OJ.buildDate;
+		String ijVersion = IJ.getFullVersion();
+		if(ijVersion.endsWith("99"))
+			ijVersion = ijVersion.replace("99", "");
+		aboutText += "\nImageJ version:  " + ijVersion;
+		aboutText += "\n\nObjectJ plugin:";
+		aboutText += "\n   Version:\t" + OJ.releaseVersion;
+		aboutText += "\n   Build:\t" + OJ.build;
+		aboutText += "\n   Date:\t" + OJ.buildDate;
 		if (data == null) {
 			aboutText = aboutText + "\n\nFile:\tNo project is loaded";
 
@@ -71,6 +75,7 @@ public class AboutOJ extends javax.swing.JDialog {
         jPanel2 = new javax.swing.JPanel();
         buttOk = new javax.swing.JButton();
         jButtonWebSite = new javax.swing.JButton();
+        btnCopy = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setModal(true);
@@ -83,7 +88,6 @@ public class AboutOJ extends javax.swing.JDialog {
 
         textAreaAbout.setColumns(20);
         textAreaAbout.setRows(5);
-        textAreaAbout.setText("Version:\t\t0.98i6\nDate:\t\t15-sep-2010   15:36\n\nproject file:\t\tFilaments-98.ojj\n#linked images:\t3\n#objects\t\t22\n#points\t\t8765\n#macros\t\t12");
         jScrollPane1.setViewportView(textAreaAbout);
 
         org.jdesktop.layout.GroupLayout jPanel1Layout = new org.jdesktop.layout.GroupLayout(jPanel1);
@@ -125,12 +129,21 @@ public class AboutOJ extends javax.swing.JDialog {
             }
         });
 
+        btnCopy.setText("Copy");
+        btnCopy.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCopyActionPerformed(evt);
+            }
+        });
+
         org.jdesktop.layout.GroupLayout jPanel2Layout = new org.jdesktop.layout.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(jPanel2Layout.createSequentialGroup()
-                .addContainerGap(201, Short.MAX_VALUE)
+                .add(21, 21, 21)
+                .add(btnCopy)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 104, Short.MAX_VALUE)
                 .add(jButtonWebSite)
                 .add(97, 97, 97)
                 .add(buttOk, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 101, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
@@ -141,7 +154,8 @@ public class AboutOJ extends javax.swing.JDialog {
                 .add(1, 1, 1)
                 .add(jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(buttOk)
-                    .add(jButtonWebSite))
+                    .add(jButtonWebSite)
+                    .add(btnCopy))
                 .add(5, 5, 5))
         );
 
@@ -163,7 +177,14 @@ public class AboutOJ extends javax.swing.JDialog {
         setVisible(false);
     }//GEN-LAST:event_buttOkActionPerformed
 
+    private void btnCopyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCopyActionPerformed
+		textAreaAbout.selectAll();
+		textAreaAbout.copy();
+		textAreaAbout.select(0,0);
+    }//GEN-LAST:event_btnCopyActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnCopy;
     private javax.swing.JButton buttOk;
     private javax.swing.JButton jButtonWebSite;
     private javax.swing.JLabel jLabel1;
