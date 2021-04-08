@@ -83,6 +83,7 @@
               <Properties>
                 <Property name="columns" type="int" value="20"/>
                 <Property name="rows" type="int" value="5"/>
+                <Property name="text" type="java.lang.String" value="Version:&#x9;&#x9;0.98i6&#xa;Date:&#x9;&#x9;15-sep-2010   15:36&#xa;&#xa;project file:&#x9;&#x9;Filaments-98.ojj&#xa;#linked images:&#x9;3&#xa;#objects&#x9;&#x9;22&#xa;#points&#x9;&#x9;8765&#xa;#macros&#x9;&#x9;12"/>
               </Properties>
             </Component>
           </SubComponents>
@@ -113,9 +114,7 @@
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
-                  <EmptySpace min="-2" pref="21" max="-2" attributes="0"/>
-                  <Component id="btnCopy" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace pref="104" max="32767" attributes="0"/>
+                  <EmptySpace pref="201" max="32767" attributes="0"/>
                   <Component id="jButtonWebSite" min="-2" max="-2" attributes="0"/>
                   <EmptySpace min="-2" pref="97" max="-2" attributes="0"/>
                   <Component id="buttOk" min="-2" pref="101" max="-2" attributes="0"/>
@@ -129,7 +128,6 @@
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="buttOk" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="jButtonWebSite" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="btnCopy" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
               </Group>
@@ -152,14 +150,6 @@
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonWebSiteActionPerformed"/>
-          </Events>
-        </Component>
-        <Component class="javax.swing.JButton" name="btnCopy">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Copy"/>
-          </Properties>
-          <Events>
-            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnCopyActionPerformed"/>
           </Events>
         </Component>
       </SubComponents>
