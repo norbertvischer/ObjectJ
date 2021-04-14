@@ -6,14 +6,11 @@ package oj.gui;
 
 import ij.IJ;
 import ij.plugin.BrowserLauncher;
+import java.io.File;
 import java.io.IOException;
 import oj.OJ;
-import oj.gui.menuactions.ProjectActionsOJ;
-import oj.io.InputOutputOJ;
-//import oj.plugin.ImageJUpdaterOJ;
 import oj.project.CellsOJ;
 import oj.project.DataOJ;
-
 /**
  *
  * For displaying the ObjectJ Aboutbox
@@ -26,9 +23,22 @@ public class AboutOJ extends javax.swing.JDialog {
 	DataOJ data = OJ.getData();
 	textAreaAbout.setTabSize(12);
 	String ijVersion = IJ.getFullVersion();
+	String objJarPath = IJ.getDirectory("plugins") + "objectj_.jar";
+	boolean found = true;
+	if(!new File(objJarPath).exists()){
+	    	 objJarPath = IJ.getDirectory("plugins") + "jars/objectj_.jar";
+		 if(!new File(objJarPath).exists())
+			 found = false;
+	};
+	String MD5 = "0";
+	if (found && IJ.getFullVersion().compareTo("1.53j12") >= 0) {
+	    MD5 = IJ.runMacro("return IJ.checksum('MD5 file', '" + objJarPath + "');");
+	}
 	if (ijVersion.endsWith("99")) {
 	    ijVersion = ijVersion.replace("99", "");
 	}
+	if(MD5.length() > 6)
+	    MD5 = MD5.substring(0, 6) + "...";
 	String thisVersion = OJ.releaseVersion;
 	String aboutText = "";
 	aboutText += "ImageJ version:   \t" + ijVersion + "\n\n";
@@ -36,6 +46,8 @@ public class AboutOJ extends javax.swing.JDialog {
 	aboutText = aboutText + "\n   Version:\t" + thisVersion;
 	aboutText = aboutText + "\n   Build:\t" + OJ.build;
 	aboutText = aboutText + "\n   Date:\t" + OJ.buildDate;
+	aboutText = aboutText + "\n   MD5 checksum:\t" + MD5;
+
 	if (data == null) {
 	    aboutText = aboutText + "\n\nFile:\tNo project is loaded";
 
