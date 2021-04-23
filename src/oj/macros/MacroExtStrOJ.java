@@ -240,6 +240,7 @@ public class MacroExtStrOJ {
         buf.append(getFunction("ojvPushItem"));
         buf.append(getFunction("ojvPushVertex", "v"));
         buf.append(getFunction("ojvPushPoint", "index"));
+        buf.append(getFunction("ojvUndoPush"));
         buf.append(getFunction("ojPluginTest", "v"));
 
         buf.append(getFloatFunction("ojXPos", "n"));

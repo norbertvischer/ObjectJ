@@ -1,7 +1,7 @@
 /**
  * ExtensionOJ.java -- documented
  *
- * general mechanism to handle oj macor functions with different number of
+ * general mechanism to handle oj macro functions with different number of
  * arguments
  */
 package oj.macros;
@@ -23,7 +23,7 @@ public class ExtensionOJ implements MacroExtension {
 
     static ExtensionOJ instance = null;
     String[] noProjectNeeded = {"ojRequires", "ojvInitStack", "ojvCalculate", "ojvGetVertexX",
-        "ojvGetVertexY", "ojvGetVertexZ", "ojvPushVertex", "ojvPushRoi",
+        "ojvGetVertexY", "ojvGetVertexZ", "ojvPushVertex", "ojvPushRoi", "ojvUndoPush",
         "ojMatches", "ojvPushPoint", "ojvGetStackSize", "ojPluginTest", "ojCopyFromScreen", "ojTest", "ojLineToPolygon"};
     FunctionsOJ functions = new FunctionsOJ();
 

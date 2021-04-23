@@ -669,6 +669,11 @@ public class FunctionsOJ implements MacroExtension {
 		return null;
 	}
 
+	public String ojvUndoPush() {
+		OJ.getMacroProcessor().ojvUndoPush();
+		return null;
+	}
+
 	String floatArrayToString(double[] fa) {
 		String ss = "";
 		for (int jj = 0; jj < fa.length; jj++) {

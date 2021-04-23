@@ -57,6 +57,7 @@ public class VertexCalculatorOJ extends Stack {
 	public double offPointX = 0;
 	public double offPointY = 0;
 	double nan = Double.NaN;
+	public int previousSize = 0;//22.4.2021
 
 //    public VertexCalculatorOJ() {
 //    }
@@ -65,7 +66,7 @@ public class VertexCalculatorOJ extends Stack {
 	 *
 	 * @param ytem
 	 */
-	public void pushYtem(YtemOJ ytem) {
+	public void pushYtem(YtemOJ ytem) {//not used
 		for (int pt = 0; pt < ytem.getLocationsCount(); pt++) {
 			LocationOJ loc = ytem.getLocation(pt);
 			if (threeD) {
@@ -156,6 +157,7 @@ public class VertexCalculatorOJ extends Stack {
 	public void init(String dim) {
 		clear();//the stack
 		threeD = false;
+		previousSize = 0;
 	}
 
 	/**
