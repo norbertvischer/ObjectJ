@@ -443,7 +443,11 @@ public class CellsOJ extends BaseAdapterOJ implements ImageChangedListener2OJ, C
 
     public CellOJ[] cellsToArray() {
         CellOJ[] result = new CellOJ[cells.size()];
-        System.arraycopy(cells, 0, result, 0, cells.size());
+		for(int jj = 0; jj < cells.size(); jj++){
+			result[jj] = getCellByIndex(jj);
+			
+		}
+       // System.arraycopy(cells, 0, result, 0, cells.size());
         return result;
     }
 

@@ -212,6 +212,7 @@ public class MacroExtStrOJ {
         buf.append(getFunction("ojSetVirtualFlag", "virtualFlag"));
         buf.append(getIntFunction("ojGetVirtualFlag"));
         buf.append(getFunction("ojOrderObjectsInZ", "imageNumber"));
+		buf.append(getFunction("ojRenumberObjects", "src", "dest"));
 
         buf.append(getFunction("ojShowImage", "imageIndex"));
         buf.append(getFunction("ojGetImageName", "imageIndex"));

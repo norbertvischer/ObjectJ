@@ -21,13 +21,13 @@ import oj.util.ImageJAccessOJ;
 import oj.util.WildcardMatchOJ;
 
 import java.awt.*;
-import java.io.*;
 import ij.*;
 import ij.gui.GenericDialog;
 import ij.macro.Interpreter;
-import ij.macro.MacroRunner;
+import ij.util.Tools;
+import java.util.Arrays;
+import oj.processor.events.CellChangedEventOJ;
 import oj.processor.events.ImageChangedEventOJ;
-import oj.util.UtilsOJ;
 
 /**
  *
@@ -128,8 +128,6 @@ public class FunctionsOJ implements MacroExtension {
 		int objectIndex = OJ.getMacroProcessor().getFirstCell(MacroProcessorOJ.parseInt(imageIndex));
 		return Integer.toString(objectIndex);
 	}
-
-
 
 	/**
 	 *
@@ -252,6 +250,41 @@ public class FunctionsOJ implements MacroExtension {
 		return null;
 	}
 
+//Example:
+//ojRenumberObjects("1 3 8", "8 1 3")
+//Object #1 will be labeled #8, #3 becomes #1 etc 
+
+	public String ojRenumberObjects(String src, String dest) {//1-based
+		String[] srcA = Tools.split(src);
+		String[] destA = Tools.split(dest);
+		int len = srcA.length;
+		if (len != destA.length) {
+			ImageJAccessOJ.InterpreterAccess.interpError("Not same length");
+			return null;
+		}
+		int[] srcI = new int[len];
+		int[] destI = new int[len];
+		int[] srcTest = new int[len];//for testing same numbers
+		int[] destTest = new int[len];
+		for (int jj = 0; jj < len; jj++) {
+			srcI[jj] = MacroProcessorOJ.parseInt(srcA[jj]) - 1;//to zero-based
+			destI[jj] = MacroProcessorOJ.parseInt(destA[jj]) - 1;
+			srcTest [jj]= srcI[jj];
+			destTest[jj] = destI[jj];
+		}
+		Arrays.sort(srcTest);
+		Arrays.sort(destTest);
+		for (int jj = 0; jj < len; jj++) {
+			if(srcTest [jj] != destTest[jj]){
+				ImageJAccessOJ.InterpreterAccess.interpError("Both arrays must contain same numbers");
+				return null;
+			}
+		}
+		OJ.getMacroProcessor().renumberObjects(srcI, destI);
+		OJ.getEventProcessor().fireCellChangedEvent(1, CellChangedEventOJ.CELL_SELECT_EVENT);
+		return null;
+	}
+
 	public String ojGetTarget() {
 
 		return OJ.getMacroProcessor().getTargetAsString();
@@ -309,7 +342,6 @@ public class FunctionsOJ implements MacroExtension {
 		MacroProcessorOJ.makeBoundingRoi(param);
 		return null;
 	}
-
 
 	public String ojMovePoint(String pointIndex, String xPos, String yPos, String zPos) {
 		OJ.getMacroProcessor().movePoint(MacroProcessorOJ.parseInt(pointIndex), MacroProcessorOJ.parseDouble(xPos), MacroProcessorOJ.parseDouble(yPos), MacroProcessorOJ.parseDouble(zPos));
@@ -580,7 +612,7 @@ public class FunctionsOJ implements MacroExtension {
 		OJ.getMacroProcessor().showProject();
 		return null;
 	}
-    
+
 	public String ojShowResults() {
 		OJ.getMacroProcessor().showResults();
 		return null;
@@ -842,6 +874,7 @@ public class FunctionsOJ implements MacroExtension {
 	}
 
 	public static class ValidateExceptionOJ extends Exception {
+
 		public ValidateExceptionOJ(String message) {
 			super(message);
 		}
