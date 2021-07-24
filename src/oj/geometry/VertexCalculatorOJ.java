@@ -57,7 +57,7 @@ public class VertexCalculatorOJ extends Stack {
 	public double offPointX = 0;
 	public double offPointY = 0;
 	double nan = Double.NaN;
-	public int previousSize = 0;//22.4.2021
+	public int previousSize = 0;//for undo push 22.4.2021
 
 //    public VertexCalculatorOJ() {
 //    }

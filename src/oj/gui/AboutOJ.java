@@ -41,7 +41,7 @@ public class AboutOJ extends javax.swing.JDialog {
 	    MD5 = MD5.substring(0, 6) + "...";
 	String thisVersion = OJ.releaseVersion;
 	String aboutText = "";
-	aboutText += "ImageJ version:   \t" + ijVersion + "\n\n";
+	//aboutText += "ImageJ version:   \t" + ijVersion + "\n\n";
 	aboutText = aboutText + "ObjectJ plugin:";
 	aboutText = aboutText + "\n   Version:\t" + thisVersion;
 	aboutText = aboutText + "\n   Build:\t" + OJ.build;
