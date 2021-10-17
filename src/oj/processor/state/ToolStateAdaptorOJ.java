@@ -128,6 +128,8 @@ public class ToolStateAdaptorOJ implements ToolStateOJ {
 
   protected void showMouseStatus(double x, double y) {
     ImagePlus imp = getImagePlus();
+    if(imp == null)//29.9.2021
+	return;
     IJ.showStatus(imp.getLocationAsString((int) x, (int) y) + getValueAsString(imp, (int) x, (int) y));
   }
 

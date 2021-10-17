@@ -215,6 +215,8 @@ public class MouseEventManagerOJ implements MouseListener, MouseMotionListener {
 
 		if (KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow() instanceof ImageWindow) {
 			ImagePlus imp = ((ImageWindow) KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow()).getImagePlus();
+			if(imp == null)//29.9.2021
+			    return;
 			if (impLinked(imp) && (OJ.isValidData()) && (OJ.getToolStateProcessor().getToolState() != ToolStateProcessorOJ.STATE_NONE) && (!IJ.spaceBarDown())) {
 				double x = imp.getCanvas().offScreenXD(e.getX());
 				double y = imp.getCanvas().offScreenYD(e.getY());
