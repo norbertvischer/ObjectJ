@@ -303,7 +303,6 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
 	 */
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
 
         popStatistics = new javax.swing.JPopupMenu();
         mniShowAll = new javax.swing.JMenuItem();
@@ -671,9 +670,7 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
         linkedScrollPane.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
         linkedScrollPane.setOpaque(false);
 
-        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, linkedHeaderScrollPane, org.jdesktop.beansbinding.ELProperty.create("${columnHeader}"), linkedScrollPane, org.jdesktop.beansbinding.BeanProperty.create("columnHeader"));
-        bindingGroup.addBinding(binding);
-
+        tblLinkedContent.setBackground(new java.awt.Color(255, 204, 0));
         tblLinkedContent.setFont(new java.awt.Font("SansSerif", 0, 12)); // NOI18N
         tblLinkedContent.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
         tblLinkedContent.setDoubleBuffered(true);
@@ -732,8 +729,6 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
         splitPaneBig.setRightComponent(tabbedResultsPane);
 
         getContentPane().add(splitPaneBig, java.awt.BorderLayout.CENTER);
-
-        bindingGroup.bind();
 
         setSize(new java.awt.Dimension(735, 540));
         setLocationRelativeTo(null);
@@ -1695,7 +1690,6 @@ public class ProjectResultsOJ extends javax.swing.JFrame implements TableColumnM
     private javax.swing.JTabbedPane tabbedResultsPane;
     private javax.swing.JTable tblLinkedContent;
     private javax.swing.JTable tblLinkedHeader;
-    private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 
 	public JPopupMenu getColumnPopupMenu(final JTable table) {

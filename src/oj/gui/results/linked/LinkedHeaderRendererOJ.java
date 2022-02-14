@@ -46,7 +46,7 @@ public class LinkedHeaderRendererOJ extends JLabel implements TableCellRenderer 
             }
             //setIcon(triangleIcon);
         } else {
-            setForeground(Color.WHITE);
+            setForeground(Color.GREEN);//14.2.2022
             //setIcon(null);
         }
         //setFont(fontArialBold);

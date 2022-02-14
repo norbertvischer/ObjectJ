@@ -112,6 +112,7 @@ public class LinkedTableModelOJ extends AbstractTableModel {
 	 * Returns table's column name (or blanks if out of range)
 	 */
 	public String getColumnName(int visColumn) {
+		if(true) return "";//14.2.2022 leave header row empty
 		if (visColumn == 0) {
 			return "n";
 		} else {
