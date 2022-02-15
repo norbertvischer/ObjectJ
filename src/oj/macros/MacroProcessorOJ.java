@@ -1565,6 +1565,7 @@ public class MacroProcessorOJ {
 	}
 
 	public void setItemInfo(String s) { //21.1.2019
+	    String abc = "hello;";
 		OJ.getData().getCells().getSelectedCell().getSelectedYtem().setInfo(s);
 	}
 

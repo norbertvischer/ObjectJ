@@ -82,7 +82,7 @@ public class Opener {
 	 * @see ij.IJ#openImage(String)
 	*/
 	public void open(String path) {
-		boolean isURL = path.indexOf("://")>0;
+		boolean isURL = path.contains("://") || path.contains("file:/");
 		if (isURL && isText(path)) {
 			openTextURL(path);
 			return;
@@ -182,6 +182,8 @@ public class Opener {
 				public void run() {
 					JFileChooser fc = new JFileChooser();
 					fc.setMultiSelectionEnabled(true);
+					fc.setDragEnabled(true);
+					fc.setTransferHandler(new DragAndDropHandler(fc));
 					File dir = null;
 					String sdir = OpenDialog.getDefaultDirectory();
 					if (sdir!=null)
@@ -227,7 +229,7 @@ public class Opener {
 			path = getPath();
 		if (path==null) return null;
 		ImagePlus img = null;
-		if (path.indexOf("://")>0)
+		if (path.contains("://") || path.contains("file:/")) // path is a URL
 			img = openURL(path);
 		else
 			img = openImage(getDir(path), getName(path));
@@ -370,6 +372,13 @@ public class Opener {
 			default:
 				return null;
 		}
+	}
+	
+	public ImagePlus openTempImage(String directory, String name) {
+		ImagePlus imp = openImage(directory, name);
+		if (imp!=null)
+			imp.setTemporary();
+		return imp;
 	}
 	
 	// Call HandleExtraFileTypes plugin to see if it can handle unknown formats
@@ -1164,9 +1173,10 @@ public class Opener {
 	public static void openResultsTable(String path) {
 		try {
 			ResultsTable rt = ResultsTable.open(path);
-			rt.showRowNumbers(true);
-			if (rt!=null)
+			if (rt!=null) {
+				rt.showRowNumbers(true);
 				rt.show("Results");
+			}
 		} catch(IOException e) {
 			IJ.error("Open Results", e.getMessage());
 		}

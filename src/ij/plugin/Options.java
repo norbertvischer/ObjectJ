@@ -48,6 +48,7 @@ public class Options implements PlugIn {
 			gd.addCheckbox("Save window locations", !Prefs.doNotSaveWindowLocations);
 		gd.addCheckbox("Non-blocking filter dialogs", Prefs.nonBlockingFilterDialogs);
 		gd.addCheckbox("Debug mode", IJ.debugMode);
+		//gd.addCheckbox("Modern mode", Prefs.modernMode);
 		gd.addHelp(IJ.URL+"/docs/menus/edit.html#misc");
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -83,6 +84,7 @@ public class Options implements PlugIn {
 			Prefs.doNotSaveWindowLocations = !gd.getNextBoolean();
 		Prefs.nonBlockingFilterDialogs = gd.getNextBoolean();
 		IJ.setDebugMode(gd.getNextBoolean());
+		//Prefs.modernMode = gd.getNextBoolean();
 	}
 
 	void lineWidth() {
@@ -182,8 +184,9 @@ public class Options implements PlugIn {
 	void dicom() {
 		GenericDialog gd = new GenericDialog("DICOM Options");
 		gd.addCheckbox("Open as 32-bit float", Prefs.openDicomsAsFloat);
-		gd.addCheckbox("Ignore Rescale Slope", Prefs.ignoreRescaleSlope);
-		gd.addMessage("Orthogonal Views");
+		gd.addCheckbox("Ignore rescale slope", Prefs.ignoreRescaleSlope);
+		gd.addCheckbox("Fixed Z slope and intercept", Prefs.fixedDicomScaling);
+		gd.addMessage("Orthogonal views");
 		gd.setInsets(5, 40, 0);
 		gd.addCheckbox("Rotate YZ", Prefs.rotateYZ);
 		gd.setInsets(0, 40, 0);
@@ -193,6 +196,7 @@ public class Options implements PlugIn {
 			return;
 		Prefs.openDicomsAsFloat = gd.getNextBoolean();
 		Prefs.ignoreRescaleSlope = gd.getNextBoolean();
+		Prefs.fixedDicomScaling = gd.getNextBoolean();
 		Prefs.rotateYZ = gd.getNextBoolean();
 		Prefs.flipXZ = gd.getNextBoolean();
 	}

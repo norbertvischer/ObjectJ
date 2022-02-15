@@ -96,7 +96,7 @@ public class AboutOJ extends javax.swing.JDialog {
 
         textAreaAbout.setColumns(20);
         textAreaAbout.setRows(5);
-        textAreaAbout.setText("Version:\t\t0.98i6\nDate:\t\t15-sep-2010   15:36\n\nproject file:\t\tFilaments-98.ojj\n#linked images:\t3\n#objects\t\t22\n#points\t\t8765\n#macros\t\t12");
+        textAreaAbout.setText("Version:\t\t0.98i6\nDate:\t\t15-sep-2010   15:36\n\nproject file:\t\t\n#linked images:\t\n#objects\t\t22\n#points\t\t8765\n#macros\t\t12");
         jScrollPane1.setViewportView(textAreaAbout);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -127,7 +127,7 @@ public class AboutOJ extends javax.swing.JDialog {
             }
         });
 
-        jButtonWebSite.setText("ObjectJ Website");
+        jButtonWebSite.setText("ObjectJ Website:");
         jButtonWebSite.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonWebSiteActionPerformed(evt);
@@ -139,7 +139,7 @@ public class AboutOJ extends javax.swing.JDialog {
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap(201, Short.MAX_VALUE)
+                .addContainerGap(197, Short.MAX_VALUE)
                 .addComponent(jButtonWebSite)
                 .addGap(97, 97, 97)
                 .addComponent(buttOk, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE))
