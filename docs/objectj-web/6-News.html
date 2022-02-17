@@ -2,9 +2,17 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
-
-
     <head>
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-10085222-2"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'UA-10085222-2');
+        </script>
+
         <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
         <meta name="generator" content="BBEdit 8.7" />
         <meta name="author" content="Norbert Vischer" />
@@ -23,7 +31,6 @@
                 <div id="bar">
 
                     <ul>
-
                         <li id="Home"><a href="index.html" name="Home">Home</a></li>
                         <li id="Concept"><a href="5-Concept.html" name="Concept">Concept+Tips</a></li>
                         <li id="Tutorial"><a href="2-Tutorial.html" name="Tutorial">Tutorial</a></li>
@@ -46,13 +53,37 @@
         <H2>&nbsp;News </H2>
 
 
-        <H3>version 1.05f  &nbsp;&nbsp;&nbsp;  16-jan-2021
+        <H3>version 1.05i  &nbsp;&nbsp;&nbsp;  08-Apr-2021
+        </H3>  <H4><ul>
+		<li>  Improved ObjectJ>Project>Update ObjectJ command</li> 
+            </ul></H4>
+
+        <H3>version 1.05h  &nbsp;&nbsp;&nbsp;  01-apr-2021
+        </H3>  <H4><ul>
+		<li>  Changed ObjectJ> Plot> Handle Objects in ROI</li> 
+                <li>  ObjectJ> Plot> Add Error Bars to Plot can be limited to current ROI width</li> 
+                <li>  ObjectJ macro shortcuts are now ignored when ctrl-key is down </li> 
+                <li>  Fixed the problem that ObjectJ Tools could not be un-docked </li> 
+                <li>  No "save changes of embedded macros" after installing them </li> 
+		<li>  ObjectJ>Project>Update ObjectJ did not work with closed project: this is fixed </li> 
+            </ul></H4>
+
+	<H3>version 1.05g  &nbsp;&nbsp;&nbsp;  4-feb-2021
+        </H3>  <H4><ul>
+		<li>  new ObjectJ update command</li> 
+		<li>  ObjectJ Results window is closed after ojInitColumn</li> 
+		<li>  added offPoint method to vertexCalculator </li> 
+		<li> </li> 
+            </ul></H4>
+
+	<H3>version 1.05f  &nbsp;&nbsp;&nbsp;  18-jan-2021
         </H3>  <H4><ul>
                 <li> Removed trailing zero-length segments in closed-shape items</li> 
                 <li> Added macro funcion ojDeleteItems(itemName)</li> 
                 <li> .avi files are accepted as linked stacks if virtual flag is on</li> 
-                <li> Avoid "Save Project?" dialog when nothing was changed</li> 
+                <li> "Save Project?" dialog is now avoided if nothing was changed</li> 
                 <li> Added ojSetUnchanged() macro function</li> 
+                <li> Pistol tool etc. did not switch well after ImageJ1.53e (Aug. 2020). This is fixed.</li> 
             </ul></H4>
 
         <H3>version 1.05e  &nbsp;&nbsp;&nbsp;  18-oct-2020
@@ -988,23 +1019,6 @@
                     cells or items, and removes them if found-improved version
                 </li></ul>
         </H4>
-
-
-
-
-        <!-- begin google analytics, 20.6.2010 -->
-        <script type="text/javascript">
-            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-        </script>
-        <script type="text/javascript">
-            try {
-            var pageTracker = _gat._getTracker("UA-10085222-2");
-            pageTracker._trackPageview();
-            } catch (err) {
-            }</script>
-
-        <!-- end google analytics, 1.9.2009 -->
 
 
     </body>
