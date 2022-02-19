@@ -42,6 +42,7 @@ public class FolderOpener implements PlugIn, TextListener {
 	private int step = 1;
 	private double scale = 100.0;
 	private boolean openAsSeparateImages;
+	private boolean runningOpen;	
 	private TextField dirField, filterField, startField, countField, stepField;
 
 	
@@ -53,11 +54,14 @@ public class FolderOpener implements PlugIn, TextListener {
 
 	/** Opens the images in the specified directory as a stack. Opens
 		the images as a virtual stack if the 'options' string contains
-		'virtual' or 'use'. Add ' file=abc' to the options string to only open
-		images with, for example, 'abc' in their name. Add ' noMetaSort' to
-		disable sorting of DICOM stacks by series number (0020,0011).
-		Displays directory chooser and options dialogs if the the 'path'
-		argument is null. */
+		'virtual' or 'use'. Add ' filter=abc' to the options string to only open
+		images with, for example, 'abc' in their name. The image type, start,
+		step, count and scale can also be set, for example
+		"bitdepth=32 start=10 step=2 count=10 scale=50".
+		Add ' noMetaSort' to disable sorting of DICOM stacks by series
+		number (0020,0011). Displays the Import/Sequence dialog if the
+		the 'path' argument is null.
+	*/
 	public static ImagePlus open(String path, String options) {
 		FolderOpener fo = new FolderOpener();
 		fo.saveImage = true;
@@ -68,9 +72,10 @@ public class FolderOpener implements PlugIn, TextListener {
 
 	/** Opens the images in the specified directory as a widthxheight stack.
  		Opens the images as a virtual stack if the 'options' string contains
-		'virtual' or 'use'. Add ' file=abc' to the options string to only open
-		images with, for example, 'abc' in their name. Add ' noMetaSort' to
-		disable sorting of DICOM stacks by series number (0020,0011).
+		'virtual'. Add ' filter=abc' to the options string to only open
+		images with, for example, 'abc' in their name. The image type, start,
+		step, count and scale can also be set, for example
+		"bitdepth=32 start=10 step=2 count=10 scale=50".
 	*/
 	public static ImagePlus open(String path, int width, int height, String options) {
 		FolderOpener fo = new FolderOpener();
@@ -93,6 +98,13 @@ public class FolderOpener implements PlugIn, TextListener {
 		this.start = (int)Tools.getNumberFromList(options,"start=",1);
 		this.step = (int)Tools.getNumberFromList(options,"step=",1);
 		this.scale = Tools.getNumberFromList(options,"scale=",100);
+		this.nFiles = (int)Tools.getNumberFromList(options,"count=",0);
+		if (options.contains(" open")) {
+			this.openAsSeparateImages = true;
+			this.openAsVirtualStack = true;
+			this.saveImage = false;
+			this.runningOpen = true;
+		}
 	}
 
 	/** Opens the images in the specified directory as a stack. Displays
@@ -115,16 +127,8 @@ public class FolderOpener implements PlugIn, TextListener {
 				openAsVirtualStack = staticOpenAsVirtualStack;
 			}
 			arg = null;
-			String title = "Open Image Sequence...";
 			String macroOptions = Macro.getOptions();
 			if (macroOptions!=null) {
-				directory = Macro.getValue(macroOptions, title, null);
-				if (directory!=null) {
-					directory = OpenDialog.lookupPathVariable(directory);
-					File f = new File(directory);
-					if (!f.isDirectory() && (f.exists()||directory.lastIndexOf(".")>directory.length()-5))
-						directory = f.getParent();
-				}
 				legacyRegex = Macro.getValue(macroOptions, "or", "");
 				if (legacyRegex.equals(""))
 					legacyRegex = null;
@@ -138,15 +142,13 @@ public class FolderOpener implements PlugIn, TextListener {
 			return;
 		}
 		File file = new File(directory);
-		if (!file.exists()) {
-			error("Directory not found: "+directory);
-			return;
-		}
 		String[] list = file.list();
 		if (list==null) {
 			String parent = file.getParent();
-			file = new File(parent);
-			list = file.list();
+			if (parent!=null) {
+				file = new File(parent);
+				list = file.list();
+			}
 			if (list!=null)
 				directory = parent;
 			else {
@@ -154,6 +156,10 @@ public class FolderOpener implements PlugIn, TextListener {
 				return;
 			}
 		}
+		if (!(directory.endsWith("/")||directory.endsWith("\\")))
+			directory += "/";
+		if (arg==null && !isMacro)
+			Prefs.set(DIR_KEY, directory);
 		//remove subdirectories from list
 		ArrayList fileList = new ArrayList();
 		for (int i=0; i<list.length; i++) {
@@ -436,7 +442,7 @@ public class FolderOpener implements PlugIn, TextListener {
 				if (info1!=null)
 					imp2.setProperty("Info", info1);
 			}
-			if (arg==null && !saveImage) {
+			if ((arg==null||runningOpen) && !saveImage) {
 				String time = (System.currentTimeMillis()-t0)/1000.0 + " seconds";
 				if (openAsSeparateImages) {
 					if (imp2.getStackSize()>MAX_SEPARATE && !IJ.isMacro()) {
@@ -459,7 +465,7 @@ public class FolderOpener implements PlugIn, TextListener {
 		}
 		IJ.showProgress(1.0);
 		if (Recorder.record) {
-			String options = openAsVirtualStack?"virtual":"";
+			String options = openAsVirtualStack&&!openAsSeparateImages?"virtual":"";
 			if (bitDepth!=defaultBitDepth)
 				options = options + " bitdepth=" + bitDepth;				
 			if (filter!=null && filter.length()>0) {
@@ -475,8 +481,18 @@ public class FolderOpener implements PlugIn, TextListener {
 				options = options + " scale=" + scale;				
 			if (!sortByMetaData)
 				options = options + " noMetaSort";
+			if (!Recorder.scriptMode() && openAsSeparateImages)
+				options = options + " open";
 			String dir = Recorder.fixPath(directory);
-   			Recorder.recordCall("imp = FolderOpener.open(\""+dir+"\", \""+options+"\");");
+			if (Recorder.scriptMode())
+   				Recorder.recordCall("imp = FolderOpener.open(\""+dir+"\", \""+options+"\");");
+   			else {
+   				if (options.length()==0)
+   					Recorder.recordString("File.openSequence(\""+dir+"\");\n");
+   				else
+   					Recorder.recordString("File.openSequence(\""+dir+"\", \""+options+"\");\n");
+   				Recorder.disableCommandRecording();
+   			}
 		}
 	}
 	
@@ -544,7 +560,7 @@ public class FolderOpener implements PlugIn, TextListener {
 				this.bitDepth = 24;
 		}
 		String countStr = "---";
-		if (!directorySet)
+		if (!directorySet && options==null)
 			directory = Prefs.get(DIR_KEY, IJ.getDir("downloads")+"stack/");
 		if (directory!=null && !IJ.isMacro()) {			
 			File f = new File(directory);
@@ -586,7 +602,6 @@ public class FolderOpener implements PlugIn, TextListener {
 		if (gd.wasCanceled())
 			return false;
 		directory = gd.getNextString();
-		Prefs.set(DIR_KEY, directory);
 		gd.setSmartRecording(true);
 		int index = gd.getNextChoiceIndex();
 		bitDepth = typeToBitDepth(types[index]);
@@ -750,6 +765,7 @@ public class FolderOpener implements PlugIn, TextListener {
 		sortByMetaData = b;
 	}
 
+	/** Used by DragAndDrop when a directory is dragged onto the ImageJ window. */
 	public void setDirectory(String path) {
 		directory = path;
 		directorySet = true;

@@ -825,7 +825,7 @@ public class Menus {
 
 	/** Returns the specified ImageJ menu (e.g., "File>New") or null if it is not found. */
 	public static Menu getImageJMenu(String menuPath) {
-		if (menus==null)
+		if (menus==null && !GraphicsEnvironment.isHeadless())
 			IJ.init();
 		if (menus==null)
 			return null;
@@ -995,27 +995,21 @@ public class Menus {
 		if (currentDir.endsWith("plugins"))
 			ImageJPath = pluginsPath = currentDir+File.separator;
 		else {
-			String pluginsDir = System.getProperty("plugins.dir");
-			if (pluginsDir!=null) {
-				if (pluginsDir.endsWith("/")||pluginsDir.endsWith("\\"))
-					pluginsDir = pluginsDir.substring(0, pluginsDir.length()-1);
-				if (pluginsDir.endsWith("/plugins")||pluginsDir.endsWith("\\plugins"))
-					pluginsDir = pluginsDir.substring(0, pluginsDir.length()-8);
-			}
-			if (pluginsDir==null)
-				pluginsDir = currentDir;
-			else if (pluginsDir.equals("user.home")) {
-				pluginsDir = System.getProperty("user.home");
-				if (!(new File(pluginsDir+File.separator+"plugins")).isDirectory()) 
-					pluginsDir = pluginsDir + File.separator + "ImageJ";
+			String ijDir = Prefs.getPluginsDirProperty();
+			if (ijDir==null)
+				ijDir = currentDir;
+			else if (ijDir.equals("user.home")) {
+				ijDir = System.getProperty("user.home");
+				if (!(new File(ijDir+File.separator+"plugins")).isDirectory()) 
+					ijDir = ijDir + File.separator + "ImageJ";
 				// needed to run plugins when ImageJ launched using Java WebStart
 				if (applet==null)
 					System.setSecurityManager(null);
 				jnlp = true;
 			}
-			pluginsPath = pluginsDir+File.separator+"plugins"+File.separator;
-			macrosPath = pluginsDir+File.separator+"macros"+File.separator;
-			ImageJPath = pluginsDir+File.separator;
+			pluginsPath = ijDir+File.separator+"plugins"+File.separator;
+			macrosPath = ijDir+File.separator+"macros"+File.separator;
+			ImageJPath = ijDir+File.separator;
 		}
 		File f = pluginsPath!=null?new File(pluginsPath):null;
 		if (f==null || !f.isDirectory()) {
@@ -1335,7 +1329,7 @@ public class Menus {
         
 	/** Returns the hashtable that associates commands with plugins. */
 	public static Hashtable getCommands() {
-		if (pluginsTable==null)
+		if (pluginsTable==null && !GraphicsEnvironment.isHeadless())
 			IJ.init();
 		return pluginsTable;
 	}

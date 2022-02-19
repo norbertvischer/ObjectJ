@@ -120,7 +120,7 @@ public class Functions implements MacroConstants, Measurements {
 			case DRAW_LINE: drawLine(); break;
 			case REQUIRES: requires(); break;
 			case AUTO_UPDATE: autoUpdate = getBooleanArg(); break;
-			case UPDATE_DISPLAY: interp.getParens(); updateDisplay(); break;
+			case UPDATE_DISPLAY: interp.getParens(); updateNeeded=true; updateDisplay(); break;
 			case DRAW_STRING: drawString(); break;
 			case SET_PASTE_MODE: IJ.setPasteMode(getStringArg()); break;
 			case DO_COMMAND: doCommand(); break;
@@ -1819,9 +1819,13 @@ public class Functions implements MacroConstants, Measurements {
 			title = "";
 		}
 		interp.getRightParen();
-		if (withCancel)
-			IJ.showMessageWithCancel(title, message);
-		else
+		if (withCancel) {
+			boolean rtn = IJ.showMessageWithCancel(title, message);
+			if (!rtn) {
+				interp.finishUp();
+				throw new RuntimeException(Macro.MACRO_CANCELED);
+			}
+		} else
 			IJ.showMessage(title, message);
 	}
 
@@ -4335,6 +4339,9 @@ public class Functions implements MacroConstants, Measurements {
 		} else if (name.startsWith("getDefaultDir")) {
 			String dir = OpenDialog.getDefaultDirectory();
 			return dir!=null?dir:"";
+		} else if (name.equals("openSequence")) {
+			openSequence();
+			return null;
 		}
 
 		File f = new File(getStringArg());
@@ -4367,11 +4374,22 @@ public class Functions implements MacroConstants, Measurements {
 			return ""+f.lastModified();
 		else if (name.equals("dateLastModified"))
 			return (new Date(f.lastModified())).toString();
-		else if (name.equals("delete")) {
+		else if (name.equals("delete"))
 			return f.delete()?"1":"0";
-		} else
+		else
 			interp.error("Unrecognized File function "+name);
 		return null;
+	}
+	
+	private void openSequence() {
+		String path = getFirstString();
+		String options = "";
+		if (interp.nextToken()==',')
+			options = getNextString();
+		interp.getRightParen();
+		ImagePlus imp = FolderOpener.open(path, options);
+		if (imp!=null)
+			imp.show();
 	}
 
 	String nameWithoutExtension() {
@@ -7315,7 +7333,7 @@ public class Functions implements MacroConstants, Measurements {
 		ImagePlus imp = WindowManager.getCurrentImage();
 		if (imp!=null)
 			Overlay.updateTableOverlay(imp, row1, row2, tableSize);
-		rt.show(title);
+		rt.show(rt.getTitle());
 		return null;
 	}
 

@@ -338,10 +338,10 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			if (overlay==null) break;
 			Roi roi = overlay.get(i);
 			if (roi==null) break;
+			int c = roi.getCPosition();
+			int z = roi.getZPosition();
+			int t = roi.getTPosition();
 			if (hyperstack) {
-				int c = roi.getCPosition();
-				int z = roi.getZPosition();
-				int t = roi.getTPosition();
 				int position = roi.getPosition();
 				//IJ.log(c+" "+z+" "+t+"  "+position+" "+roiManagerShowAllMode);
 				if (position>0) {
@@ -353,12 +353,18 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				if (((c==0||c==channel) && (z==0||z==slice) && (t==0||t==frame)) || roiManagerShowAllMode)
 					drawRoi(g, roi, drawLabels?i+LIST_OFFSET:-1);
 			} else {
-				int position =  stackSize>1?roi.getPosition():0;
+				int position = stackSize>1?roi.getPosition():0;
+				if (position==0 && c==1) {
+					if (z==1)
+						position = t;
+					else if (t==1)
+						position = z;
+				}
 				if (position==0 && stackSize>1)
 					position = getSliceNumber(roi.getName());
 				if (position>0 && imp.getCompositeMode()==IJ.COMPOSITE)
 					position = 0;
-				//IJ.log(position+"  "+currentImage+" "+roiManagerShowAllMode);
+				//IJ.log(position+"  "+currentImage+" "+roiManagerShowAllMode+" "+c+" "+z+" "+t);
 				if (position==0 || position==currentImage || roiManagerShowAllMode)
 					drawRoi(g, roi, drawLabels?i+LIST_OFFSET:-1);
 			}
@@ -1301,6 +1307,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		int ox = offScreenX(sx);
 		int oy = offScreenY(sy);
 		Roi roi = imp.getRoi();
+		if (roi!=null && roi.getType()==Roi.COMPOSITE && Toolbar.getToolId()==Toolbar.OVAL && Toolbar.getBrushSize()>0)
+			return; // selection brush tool
 		if (roi!=null && (roi.getType()==Roi.POLYGON || roi.getType()==Roi.POLYLINE || roi.getType()==Roi.ANGLE)
 		&& roi.getState()==roi.CONSTRUCTING) {
 			roi.handleMouseUp(sx, sy); // simulate double-click to finalize
@@ -1685,7 +1693,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					Toolbar.getInstance().setTool(Toolbar.RECTANGLE);
 				roi.setImage(null);
 				imp.setRoi(roi);
-				//roi.handleMouseDown(sx, sy);
+				roi.handleMouseDown(sx, sy);
 				roiManagerSelect(roi, false);
 				ResultsTable.selectRow(roi);
 				return true;

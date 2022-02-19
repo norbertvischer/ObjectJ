@@ -78,8 +78,8 @@ public class ImageJ extends Frame implements ActionListener,
 	MouseListener, KeyListener, WindowListener, ItemListener, Runnable {
 
 	/** Plugins should call IJ.getVersion() or IJ.getFullVersion() to get the version string. */
-	public static final String VERSION = "1.53n";
-	public static final String BUILD = ""; //25
+	public static final String VERSION = "1.53p";
+	public static final String BUILD = "24";
 	public static Color backgroundColor = new Color(237,237,237);
 	/** SansSerif, 12-point, plain font. */
 	public static final Font SansSerif12 = new Font("SansSerif", Font.PLAIN, 12);
@@ -95,6 +95,9 @@ public class ImageJ extends Frame implements ActionListener,
 	/** Run embedded and invisible in another application. */
 	public static final int NO_SHOW = 2;
 	
+	/** Run as the ImageJ application. */
+	public static final int IMAGEJ_APP = 3;
+
 	/** Run ImageJ in debug mode. */
 	public static final int DEBUG = 256;
 
@@ -144,6 +147,11 @@ public class ImageJ extends Frame implements ActionListener,
 		if ((mode&DEBUG)!=0)
 			IJ.setDebugMode(true);
 		mode = mode & 255;
+		boolean useExceptionHandler = false;
+		if (mode==IMAGEJ_APP) {
+			mode = STANDALONE;
+			useExceptionHandler = true;
+		}
 		if (IJ.debugMode) IJ.log("ImageJ starting in debug mode: "+mode);
 		embedded = applet==null && (mode==EMBEDDED||mode==NO_SHOW);
 		this.applet = applet;
@@ -225,7 +233,7 @@ public class ImageJ extends Frame implements ActionListener,
 		} 
 		if (applet==null)
 			IJ.runPlugIn("ij.plugin.DragAndDrop", "");
-		if (!getTitle().contains("Fiji")) {
+		if (!getTitle().contains("Fiji") && useExceptionHandler) {
 			Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler());
 			System.setProperty("sun.awt.exception.handler",ExceptionHandler.class.getName());
 		}
@@ -704,7 +712,7 @@ public class ImageJ extends Frame implements ActionListener,
 
 	public static void main(String args[]) {
 		boolean noGUI = false;
-		int mode = STANDALONE;
+		int mode = IMAGEJ_APP;
 		arguments = args;
 		int nArgs = args!=null?args.length:0;
 		boolean commandLine = false;
@@ -733,7 +741,7 @@ public class ImageJ extends Frame implements ActionListener,
 			} 
 		}
   		// If existing ImageJ instance, pass arguments to it and quit.
-  		boolean passArgs = mode==STANDALONE && !noGUI;
+  		boolean passArgs = (mode==IMAGEJ_APP||mode==STANDALONE) && !noGUI;
 		if (IJ.isMacOSX() && !commandLine)
 			passArgs = false;
 		if (passArgs && isRunning(args)) 

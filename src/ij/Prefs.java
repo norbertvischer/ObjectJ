@@ -90,7 +90,7 @@ public class Prefs {
 	/** Draw tool icons using antialiasing (always true). */
 	public static boolean antialiasedTools = true;
 	/** Export TIFF and Raw using little-endian byte order. */
-	public static boolean intelByteOrder;
+	public static boolean intelByteOrder = true;
 	/** No longer used */
 	public static boolean doubleBuffer = true;
 	/** Do not label multiple points created using point tool. */
@@ -197,6 +197,7 @@ public class Prefs {
 	static String prefsDir;
 	static String imagesURL;
 	static String ImageJDir;
+	static String pluginsDirProperty;
 	static int threads;
 	static int transparentIndex = -1;
 	private static boolean resetPreferences;
@@ -367,24 +368,54 @@ public class Prefs {
 	/** Returns the path, ending in File.separator, to the ImageJ directory. */
 	public static String getImageJDir() {
 		String path = Menus.getImageJPath();
-		if (path==null)
-			return ImageJDir + File.separator;
-		else
+		if (path==null) {
+			String ijPath = getPluginsDirProperty();
+			//if (ijPath==null)
+			//	ijPath = ImageJDir;
+			if (ijPath==null)
+				ijPath = System.getProperty("user.dir");
+			return ijPath + File.separator;
+		} else
 			return path;
+	}
+	
+	public static String getPluginsDirProperty() {
+		if (pluginsDirProperty==null) {
+			String ijDir = System.getProperty("plugins.dir");
+			if (ijDir!=null) {
+				if (ijDir.endsWith("/")||ijDir.endsWith("\\"))
+					ijDir = ijDir.substring(0, ijDir.length()-1);
+				if (ijDir.endsWith("/plugins")||ijDir.endsWith("\\plugins"))
+					ijDir = ijDir.substring(0, ijDir.length()-8);
+				pluginsDirProperty = ijDir;
+			} else
+				pluginsDirProperty = "";
+		}
+		return pluginsDirProperty.length()>0?pluginsDirProperty:null;
 	}
 
 	/** Returns the path to the directory where the 
 		preferences file (IJPrefs.txt) is saved. */
 	public static String getPrefsDir() {
+		// look in current directory
 		if (prefsDir==null) {
-			if (ImageJDir==null)
-				ImageJDir = System.getProperty("user.dir");
-			File f = new File(ImageJDir+File.separator+PREFS_NAME);
+			String cwd = System.getProperty("user.dir");
+			File f = new File(cwd+File.separator+PREFS_NAME);
 			if (f.exists()) {
-				prefsDir = ImageJDir;
-				preferencesPath = ImageJDir+"/"+PREFS_NAME;
+				prefsDir = cwd;
+				preferencesPath = cwd+"/"+PREFS_NAME;
 			}
-			//System.out.println("getPrefsDir: "+f+"  "+prefsDir);
+			// look in ImageJ directory
+			if (prefsDir==null) {
+				String ijDir = getImageJDir();
+				ijDir = ijDir.substring(0, ijDir.length()-1);
+				f = new File(ijDir+File.separator+PREFS_NAME);
+				if (f.exists()) {
+					prefsDir = ijDir;
+					preferencesPath = ijDir+"/"+PREFS_NAME;
+				}
+			}
+			// use home directory
 			if (prefsDir==null) {
 				String dir = System.getProperty("user.home");
 				if (IJ.isMacOSX())
@@ -393,7 +424,7 @@ public class Prefs {
 					dir += File.separator+".imagej";
 				prefsDir = dir;
 			}
-		}
+		}		
 		return prefsDir;
 	}
 

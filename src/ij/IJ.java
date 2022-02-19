@@ -1448,8 +1448,17 @@ public class IJ {
 		setRawThreshold(img, lowerThreshold, upperThreshold, displayMode);
 	}
 
+	/** This is a version of setThreshold() that uses raw (uncalibrated)
+	 * values in the range 0-255 for 8-bit images and 0-65535 for 16-bit
+	 * images and the "Red" LUT display mode.
+	*/
+	public static void setRawThreshold(ImagePlus img, double lowerThreshold, double upperThreshold) {
+		setRawThreshold(img, lowerThreshold, upperThreshold, null);
+	}
+
 	/** This is a version of setThreshold() that always uses raw (uncalibrated) values
-		 in the range 0-255 for 8-bit images and 0-65535 for 16-bit images. */
+	 * in the range 0-255 for 8-bit images and 0-65535 for 16-bit images.
+	*/
 	public static void setRawThreshold(ImagePlus img, double lowerThreshold, double upperThreshold, String displayMode) {
 		int mode = ImageProcessor.RED_LUT;
 		if (displayMode!=null) {
@@ -1823,8 +1832,9 @@ public class IJ {
 		"home" ("user.home"), "downloads", "startup",  "imagej" (ImageJ directory),
 		"plugins", "macros", "luts", "temp", "current", "default",
 		"image" (directory active image was loaded from), "file" 
-		(directory most recently used to open or save a file) or "cwd"
-		(current working directory), otherwise displays a dialog and
+		(directory most recently used to open or save a file), "cwd"
+		(current working directory) or "preferences" (location of
+		"IJ_Prefs.txt" file), otherwise displays a dialog and
 		returns the path to the directory selected by the user. Returns
 		null if the specified directory is not found or the user cancels the
 		dialog box. Also aborts the macro if the user cancels the
@@ -1852,6 +1862,8 @@ public class IJ {
 			dir = Prefs.getImageJDir();
 		else if (title2.equals("current") || title2.equals("default"))
 			dir = OpenDialog.getDefaultDirectory();
+		else if (title2.equals("preferences"))
+			dir = Prefs.getPrefsDir();
 		else if (title2.equals("temp")) {
 			dir = System.getProperty("java.io.tmpdir");
 			if (isMacintosh()) dir = "/tmp/";
@@ -2500,10 +2512,14 @@ public class IJ {
 		PrintWriter pw = new PrintWriter(caw);
 		e.printStackTrace(pw);
 		String s = caw.toString();
+		String lineNumber = "";
 		if (s!=null && s.contains("ThreadDeath"))
 			return;
+		Interpreter interpreter = Thread.currentThread().getName().endsWith("Macro$") ? Interpreter.getInstance() : null;
+		if (interpreter!=null)
+			lineNumber = "\nMacro line number: " + interpreter.getLineNumber();
 		if (getInstance()!=null) {
-			s = IJ.getInstance().getInfo()+"\n \n"+s;
+			s = IJ.getInstance().getInfo()+lineNumber+"\n \n"+s;
 			new TextWindow("Exception", s, 500, 340);
 		} else
 			log(s);
