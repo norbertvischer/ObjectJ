@@ -864,7 +864,7 @@ public class FunctionsOJ implements MacroExtension {
 
 	public String handleExtension(String name, Object[] args) {
 		if (name.equals("getColumnData")) {//test, 13.5.2013
-			((Double[]) args[0])[0] = new Double(3.3);
+			((Double[]) args[0])[0] = Double.valueOf(3.3);
 		}
 		return "hoi;";
 	}

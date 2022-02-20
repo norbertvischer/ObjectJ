@@ -854,7 +854,7 @@ public class ColumnOJ extends BaseAdapterOJ {
 	 */
 	public void addDoubleResult(double value) {
 //		if (isUnlinkedColumn()) {
-//			rows.add(new Float(value));//17.4.2010-float
+//			rows.add(Float.valueOf(value));//17.4.2010-float
 //		}
 //		statistics.setStatisticsDirty();
 	}

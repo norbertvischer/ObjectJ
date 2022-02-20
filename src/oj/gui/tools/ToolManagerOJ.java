@@ -284,8 +284,8 @@ public class ToolManagerOJ {
             if ("current".equals(fields[i].getName())) {
                 fields[i].setAccessible(true);
                 try {
-                    //fields[i].set(Toolbar.getInstance(), new Integer(23));
-                    fields[i].set(Toolbar.getInstance(), new Integer(77));
+                    //fields[i].set(Toolbar.getInstance(), Integer.valueOf(23));
+                    fields[i].set(Toolbar.getInstance(), Integer.valueOf(77));
                 } catch (IllegalArgumentException ex) {
                     ex.printStackTrace();
                 } catch (IllegalAccessException ex) {

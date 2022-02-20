@@ -171,7 +171,7 @@ public class MacroSetOJ //extends MacroBaseOJ
 						item.setShortcut(shortcutIndex);
 
 						Hashtable macroShortcuts = Menus.getMacroShortcuts();
-						macroShortcuts.put(new Integer(shortcutIndex), "^" + macro_ext_name); //user shortcut overrides ImageJ shortcut 13.7.2012
+						macroShortcuts.put(Integer.valueOf(shortcutIndex), "^" + macro_ext_name); //user shortcut overrides ImageJ shortcut 13.7.2012
 
 						macroItems.add(item);
 					}

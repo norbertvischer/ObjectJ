@@ -434,7 +434,7 @@ public class ColumnSettingsOJ extends javax.swing.JPanel implements TableColumnM
 						updateOperandsView(0, false, false);
 				}
 
-				spinDigits.setValue(new Integer(column.getColumnDef().getColumnDigits()));
+				spinDigits.setValue(Integer.valueOf(column.getColumnDef().getColumnDigits()));
 
 				int colorIndex = getColorIndex(column.getColumnDef().getColumnColor());
 				if (colorIndex < 13) {

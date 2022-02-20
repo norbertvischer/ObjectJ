@@ -796,17 +796,17 @@ private void btnRebuildActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
 			if (index < 6) {
 				switch (index) {
 					case 0:
-						return new Integer(YtemDefOJ.YTEM_TYPE_ANGLE);
+						return Integer.valueOf(YtemDefOJ.YTEM_TYPE_ANGLE);
 					case 1:
-						return new Integer(YtemDefOJ.YTEM_TYPE_LINE);
+						return Integer.valueOf(YtemDefOJ.YTEM_TYPE_LINE);
 					case 2:
-						return new Integer(YtemDefOJ.YTEM_TYPE_POINT);
+						return Integer.valueOf(YtemDefOJ.YTEM_TYPE_POINT);
 					case 3:
-						return new Integer(YtemDefOJ.YTEM_TYPE_POLYGON);
+						return Integer.valueOf(YtemDefOJ.YTEM_TYPE_POLYGON);
 					case 4:
-						return new Integer(YtemDefOJ.YTEM_TYPE_ROI);
+						return Integer.valueOf(YtemDefOJ.YTEM_TYPE_ROI);
 					case 5:
-						return new Integer(YtemDefOJ.YTEM_TYPE_SEGLINE);
+						return Integer.valueOf(YtemDefOJ.YTEM_TYPE_SEGLINE);
 				}
 				return null;
 			} else {
@@ -877,17 +877,17 @@ private void btnRebuildActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
 			if (index < 6) {
 				switch (index) {
 					case 0:
-						return new Integer(YtemDefOJ.MARKER_TYPE_CROSS);
+						return Integer.valueOf(YtemDefOJ.MARKER_TYPE_CROSS);
 					case 1:
-						return new Integer(YtemDefOJ.MARKER_TYPE_DIAMOND);
+						return Integer.valueOf(YtemDefOJ.MARKER_TYPE_DIAMOND);
 					case 2:
-						return new Integer(YtemDefOJ.MARKER_TYPE_DOT);
+						return Integer.valueOf(YtemDefOJ.MARKER_TYPE_DOT);
 					case 3:
-						return new Integer(YtemDefOJ.MARKER_TYPE_PIXEL);
+						return Integer.valueOf(YtemDefOJ.MARKER_TYPE_PIXEL);
 					case 4:
-						return new Integer(YtemDefOJ.MARKER_TYPE_PLUS);
+						return Integer.valueOf(YtemDefOJ.MARKER_TYPE_PLUS);
 					case 5:
-						return new Integer(YtemDefOJ.MARKER_TYPE_SQUARE);
+						return Integer.valueOf(YtemDefOJ.MARKER_TYPE_SQUARE);
 				}
 				return null;
 			} else {
@@ -994,17 +994,17 @@ private void btnRebuildActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
 			if (index < 6) {
 				switch (index) {
 					case 0:
-						return new Integer(YtemDefOJ.LINE_TYPE_ONEPT);
+						return Integer.valueOf(YtemDefOJ.LINE_TYPE_ONEPT);
 					case 1:
-						return new Integer(YtemDefOJ.LINE_TYPE_TWOPT);
+						return Integer.valueOf(YtemDefOJ.LINE_TYPE_TWOPT);
 					case 2:
-						return new Integer(YtemDefOJ.LINE_TYPE_THREEPT);
+						return Integer.valueOf(YtemDefOJ.LINE_TYPE_THREEPT);
 					case 3:
-						return new Integer(YtemDefOJ.LINE_TYPE_LIGHT_DOTTED);
+						return Integer.valueOf(YtemDefOJ.LINE_TYPE_LIGHT_DOTTED);
 					case 4:
-						return new Integer(YtemDefOJ.LINE_TYPE_DOTTED);
+						return Integer.valueOf(YtemDefOJ.LINE_TYPE_DOTTED);
 					case 5:
-						return new Integer(YtemDefOJ.LINE_TYPE_ZEROPT);
+						return Integer.valueOf(YtemDefOJ.LINE_TYPE_ZEROPT);
 				}
 				return null;
 			} else {

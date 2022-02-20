@@ -116,10 +116,10 @@ public class ResultsOJ extends BaseAdapterOJ {
                         for (int i = 0; i < result.length; i++) {
                             if (column.isValidResult(i)) {
                                 sind.add(0, column.getStringResult(i));
-                                rind.add(0, new Integer(i));
+                                rind.add(0, Integer.valueOf(i));
                             } else {
                                 sind.add(new String());
-                                rind.add(new Integer(i));
+                                rind.add(Integer.valueOf(i));
                             }
                         }
                         Object[] ind = rind.toArray(new Object[result.length]);
@@ -133,11 +133,11 @@ public class ResultsOJ extends BaseAdapterOJ {
                         ArrayList sind = new ArrayList();//arrange numbers so that valid ones are at the top
                         for (int i = 0; i < result.length; i++) {
                             if (column.isValidResult(i)) {
-                                sind.add(0, new Double(column.getDoubleResult(i)));
-                                rind.add(0, new Integer(i));
+                                sind.add(0, Double.valueOf(column.getDoubleResult(i)));
+                                rind.add(0, Integer.valueOf(i));
                             } else {
-                                sind.add(new Double(Double.NaN));
-                                rind.add(new Integer(i));
+                                sind.add(Double.valueOf(Double.NaN));
+                                rind.add(Integer.valueOf(i));
                             }
                         }
                         Object[] ind = rind.toArray(new Object[result.length]);
