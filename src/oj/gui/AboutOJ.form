@@ -71,7 +71,7 @@
               <Properties>
                 <Property name="columns" type="int" value="20"/>
                 <Property name="rows" type="int" value="5"/>
-                <Property name="text" type="java.lang.String" value="Version:&#x9;&#x9;0.98i6&#xa;Date:&#x9;&#x9;15-sep-2010   15:36&#xa;&#xa;project file:&#x9;&#x9;&#xa;#linked images:&#x9;&#xa;#objects&#x9;&#x9;22&#xa;#points&#x9;&#x9;8765&#xa;#macros&#x9;&#x9;12"/>
+                <Property name="text" type="java.lang.String" value="Version:&#x9;&#x9;xx&#xa;Date:&#x9;&#x9;15-sep-2010   15:36&#xa;&#xa;project file:&#x9;&#x9;&#xa;#linked images:&#x9;&#xa;#objects&#x9;&#x9;22&#xa;#points&#x9;&#x9;8765&#xa;#macros&#x9;&#x9;12"/>
               </Properties>
             </Component>
           </SubComponents>

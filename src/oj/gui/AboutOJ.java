@@ -90,13 +90,14 @@ public class AboutOJ extends javax.swing.JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setModal(true);
         setResizable(false);
+        getContentPane().setLayout(new java.awt.BorderLayout());
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
         jPanel1.setBorder(javax.swing.BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
         textAreaAbout.setColumns(20);
         textAreaAbout.setRows(5);
-        textAreaAbout.setText("Version:\t\t0.98i6\nDate:\t\t15-sep-2010   15:36\n\nproject file:\t\t\n#linked images:\t\n#objects\t\t22\n#points\t\t8765\n#macros\t\t12");
+        textAreaAbout.setText("Version:\t\txx\nDate:\t\t15-sep-2010   15:36\n\nproject file:\t\t\n#linked images:\t\n#objects\t\t22\n#points\t\t8765\n#macros\t\t12");
         jScrollPane1.setViewportView(textAreaAbout);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
